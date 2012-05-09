@@ -40,7 +40,6 @@ public class JsonMessageConverter extends AbstractHttpMessageConverter<Object> {
         return ExtendedReqRespBodyMethodProcessor.getCurrentMethodParameter() != null;
     }
 
-	@SuppressWarnings("unchecked")
 	@Override
     protected void writeInternal(Object t, 
                                  HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException {

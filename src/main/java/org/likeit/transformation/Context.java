@@ -36,7 +36,7 @@ public class Context {
 	 */
 	public <T> void serialize(T obj, Type type, ObjectWriter writer) throws TransformationException {
 		try {
-    		if ( obj != null ) serializerProvider.resolveSerializer(type).serialize(obj, type, writer, this);
+    		if ( obj != null ) serializerProvider.resolveObject(type).serialize(obj, type, writer, this);
     		else writer.valueNull();
 		} catch (IOException e) {
 			throw new TransformationException("Serialization error for type " + type, e);
@@ -46,7 +46,7 @@ public class Context {
 	@SuppressWarnings("unchecked") // normalement c'est garanti par le provider que le type matche bien
 	public <T> T deserialize(Type type, ObjectReader reader) throws TransformationException {
 		try {
-			if ( reader.value() != null ) return (T) deserializerProvider.resolveDeserializer(type).deserialize(type, reader, this);
+			if ( reader.value() != null ) return (T) deserializerProvider.resolveObject(type).deserialize(type, reader, this);
 			else return null;
 		} catch (IOException ioe) {
 			throw new TransformationException("Deserialization error for type " + type, ioe);

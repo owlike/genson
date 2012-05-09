@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.codehaus.jackson.map.ObjectMapper;
 import org.likeit.transformation.Context;
 import org.likeit.transformation.TransformationException;
 import org.likeit.transformation.ObjectTransformer;
@@ -18,6 +19,8 @@ import org.likeit.transformation.annotation.JsonBeanView;
 import org.likeit.transformation.serialization.BeanView;
 import org.likeit.transformation.serialization.Serializer;
 import org.likeit.transformation.stream.ObjectWriter;
+
+import com.google.gson.Gson;
 
 
 public class JSONSerializerTest {
@@ -28,7 +31,7 @@ public class JSONSerializerTest {
 	@SuppressWarnings("unchecked")
 	public @JsonBeanView(views={MyBeanView.class, InfoView.class}) void serialize() throws TransformationException, IOException {
 		ObjectTransformer json = new ObjectTransformer();
-//		ObjectMapper om = new ObjectMapper();
+		ObjectMapper om = new ObjectMapper();
 		
 		List<MyBean> beans = new ArrayList<JSONSerializerTest.MyBean>();
 		
@@ -56,6 +59,12 @@ public class JSONSerializerTest {
 //		}
 //		System.out.println((System.currentTimeMillis()-s)/1000 + " s");
 //
+//		s = System.currentTimeMillis();
+//		for ( int i = 0; i < 1000000; i++ ) {
+//			String st = json.serialize(map);
+//		}
+//		System.out.println((System.currentTimeMillis()-s)/1000 + " s");
+////		
 //		Gson gson = new Gson();
 //		s = System.currentTimeMillis();
 //		for ( int i = 0; i < 1000000; i++ ) {
@@ -63,18 +72,14 @@ public class JSONSerializerTest {
 //		}
 //		System.out.println((System.currentTimeMillis()-s)/1000 + " s");
 //		
-//		s = System.currentTimeMillis();
-//		for ( int i = 0; i < 1000000; i++ ) {
-//			String st = json.serialize(map);
-//		}
-//		System.out.println((System.currentTimeMillis()-s)/1000 + " s");
 //		
-		
 		System.out.println(json.serialize(map));
 		
 		ObjectTransformer ot = new ObjectTransformer.Builder().withSerializers(new MySerializer()).create();
 		System.out.println(ot.serialize(map));
 		
+		
+		System.out.println(ot.serialize(new Object[]{"ab", "tt", "io", 1, 2, 3, "4", "5"}));
 		
 //		System.out.println(om.writeValueAsString(map));
 		

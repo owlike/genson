@@ -36,7 +36,7 @@ public class ObjectTransformer {
 				DefaultSerializers.createDefaultSerializerFactories(), 
 				DefaultSerializers.createDefaultDynamicSerializer());
 		
-		deserializerProvider = new DeserializerProvider();
+		deserializerProvider = null;
 	}
 	
 	public ObjectTransformer(SerializerProvider serializerProvider, DeserializerProvider deserializerProvider, boolean skipNull, boolean htmlSafe) {
@@ -154,7 +154,7 @@ public class ObjectTransformer {
 				else dynaSerializer = DefaultSerializers.createDefaultDynamicSerializer();
 			}
 			
-			return new ObjectTransformer(new SerializerProvider(serializers, serializerFactories, dynaSerializer), new DeserializerProvider(), skipNull, htmlSafe);
+			return new ObjectTransformer(new SerializerProvider(serializers, serializerFactories, dynaSerializer), null, skipNull, htmlSafe);
 		}
 	}
 }

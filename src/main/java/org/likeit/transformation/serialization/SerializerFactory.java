@@ -1,7 +1,6 @@
 package org.likeit.transformation.serialization;
 
-import java.lang.reflect.Type;
+import org.likeit.transformation.Factory;
 
-public interface SerializerFactory<S extends Serializer<?>> {
-	public S create(Type forType);
+public interface SerializerFactory<S extends Serializer<?>> extends Factory<S> {
 }

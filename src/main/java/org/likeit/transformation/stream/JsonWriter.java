@@ -7,13 +7,25 @@ import java.util.Stack;
 public class JsonWriter implements ObjectWriter {
 	private final Writer writer;
 	private final boolean htmlSafe;
+	
+	protected static final char BEGIN_ARRAY = '[';
+	protected static final char END_ARRAY = ']';
+	protected static final char BEGIN_OBJECT = '{';
+	protected static final char END_OBJECT = '}';
+	protected static final char NAME_BEGIN = '"';
+	protected static final char NAME_END = '"';
+	protected static final char VALUE_BEGIN = '\"';
+	protected static final char VALUE_END = '\"';
+
+	protected static final char VALUE_SEPARATOR = ',';
+	protected static final char NAME_SEPARATOR = ':';
+	protected final static String NULL_VALUE = "null";
 
 	private final Stack<JsonType> _ctx;
 	private boolean _hasPrevious;
 	private String _name;
 	
 	private final boolean skipNull;
-	private final static String nullValue = "null";
 	
 	private static final String[] REPLACEMENT_CHARS;
 	private static final String[] HTML_SAFE_REPLACEMENT_CHARS;
@@ -37,8 +49,6 @@ public class JsonWriter implements ObjectWriter {
 		HTML_SAFE_REPLACEMENT_CHARS['&'] = "&amp;";//"\\u0026";
 		HTML_SAFE_REPLACEMENT_CHARS['='] = "\\u003d";
 	}
-
-	private final static char SEPARATOR = ':';
 
 	public JsonWriter(Writer writer) {
 		this.writer = writer;
@@ -71,7 +81,7 @@ public class JsonWriter implements ObjectWriter {
 		if ( _ctx.peek() == JsonType.ARRAY ) separate();
 		_ctx.push(JsonType.ARRAY);
 		deferredName();
-		writer.write('[');
+		writer.write(BEGIN_ARRAY);
 		_hasPrevious = false;
 		return this;
 	}
@@ -80,7 +90,7 @@ public class JsonWriter implements ObjectWriter {
 		JsonType jt = _ctx.pop();
 		
 		if ( jt != JsonType.ARRAY ) throw new IllegalStateException("No beginArray!");
-		writer.write(']');
+		writer.write(END_ARRAY);
 		_hasPrevious = true;
     	return this;
 	}
@@ -89,20 +99,20 @@ public class JsonWriter implements ObjectWriter {
 		if ( _ctx.peek() == JsonType.ARRAY ) separate();
 		_ctx.push(JsonType.OBJECT);
 		deferredName();
-		writer.write('{');
+		writer.write(BEGIN_OBJECT);
 		_hasPrevious = false;
 		return this;
 	}
 	
 	protected JsonWriter separate() throws IOException {
-		if ( _hasPrevious ) writer.write(',');
+		if ( _hasPrevious ) writer.write(VALUE_SEPARATOR);
 		return this;
 	}
 	
 	public JsonWriter endObject() throws IOException {
 		JsonType jt = _ctx.pop();
 		if ( jt != JsonType.OBJECT ) throw new IllegalStateException("No beginObject!");
-		writer.write('}');
+		writer.write(END_OBJECT);
 		_hasPrevious = true;
 		return this;
 	}
@@ -115,10 +125,10 @@ public class JsonWriter implements ObjectWriter {
 	protected JsonWriter deferredName() throws IOException {
 		if ( _name != null && _ctx.peek() != JsonType.ARRAY ) {
     		separate();
-    		writer.write('"');
+    		writer.write(NAME_BEGIN);
     		writer.write(_name);	
-    		writer.write('"');
-    		writer.write(SEPARATOR);
+    		writer.write(NAME_END);
+    		writer.write(NAME_SEPARATOR);
     		_name = null;
 		}
 		return this;
@@ -172,7 +182,7 @@ public class JsonWriter implements ObjectWriter {
 		String[] replacements = htmlSafe ? HTML_SAFE_REPLACEMENT_CHARS
 				: REPLACEMENT_CHARS;
 	
-		writer.write('\"');
+		writer.write(VALUE_BEGIN);
 		int last = 0;
 		int length = value.length();
 		for (int i = 0; i < length; i++) {
@@ -199,7 +209,7 @@ public class JsonWriter implements ObjectWriter {
 		if (last < length) {
 			writer.write(value, last, length - last);
 		}
-		writer.write('\"');
+		writer.write(VALUE_END);
 	
 		_hasPrevious = true;
 		
@@ -213,7 +223,7 @@ public class JsonWriter implements ObjectWriter {
 		} else {
 			if ( _ctx.peek() == JsonType.ARRAY ) separate();
 			deferredName();
-			writer.write(nullValue);
+			writer.write(NULL_VALUE);
 			_hasPrevious = true;
 		}
 		return null;
