@@ -6,6 +6,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
@@ -16,7 +17,9 @@ import org.likeit.transformation.Context;
 import org.likeit.transformation.TransformationException;
 import org.likeit.transformation.ObjectTransformer;
 import org.likeit.transformation.annotation.JsonBeanView;
+import org.likeit.transformation.serialization.BeanSerializer;
 import org.likeit.transformation.serialization.BeanView;
+import org.likeit.transformation.serialization.BeanViewSerializer;
 import org.likeit.transformation.serialization.Serializer;
 import org.likeit.transformation.stream.ObjectWriter;
 
@@ -28,8 +31,31 @@ public class JSONSerializerTest {
 		new JSONSerializerTest().serialize();
 	}
 	
+	public static class TotoDate {
+		Date date;
+
+		public Date getDate() {
+			return date;
+		}
+
+		public void setDate(Date date) {
+			this.date = date;
+		}
+	}
+	
 	@SuppressWarnings("unchecked")
 	public @JsonBeanView(views={MyBeanView.class, InfoView.class}) void serialize() throws TransformationException, IOException {
+//		TotoDate td = new TotoDate();
+//		td.setDate(null);
+//		String out = new ObjectTransformer.Builder().withSerializers(new Serializer<Date>() {
+//			@Override
+//			public void serialize(Date obj, Type type, ObjectWriter writer,
+//					Context ctx) throws TransformationException, IOException {
+//				writer.value("aujourd'hui");
+//			}
+//		}).setSkipNull(true).create().serialize(td);
+		
+//		System.out.println(out);
 		ObjectTransformer json = new ObjectTransformer();
 		ObjectMapper om = new ObjectMapper();
 		
@@ -53,24 +79,24 @@ public class JSONSerializerTest {
 		map.put("root", rb);
 		
 
-//		long s = System.currentTimeMillis();
-//		for ( int i = 0; i < 1000000; i++ ) {
-//			String st = om.writeValueAsString(map);
-//		}
-//		System.out.println((System.currentTimeMillis()-s)/1000 + " s");
-//
-//		s = System.currentTimeMillis();
-//		for ( int i = 0; i < 1000000; i++ ) {
-//			String st = json.serialize(map);
-//		}
-//		System.out.println((System.currentTimeMillis()-s)/1000 + " s");
-////		
-//		Gson gson = new Gson();
-//		s = System.currentTimeMillis();
-//		for ( int i = 0; i < 1000000; i++ ) {
-//			String st = gson.toJson(map);
-//		}
-//		System.out.println((System.currentTimeMillis()-s)/1000 + " s");
+		long s = System.currentTimeMillis();
+		for ( int i = 0; i < 1000000; i++ ) {
+			String st = om.writeValueAsString(map);
+		}
+		System.out.println((System.currentTimeMillis()-s)/1000 + " s");
+
+		s = System.currentTimeMillis();
+		for ( int i = 0; i < 1000000; i++ ) {
+			String st = json.serialize(map);
+		}
+		System.out.println((System.currentTimeMillis()-s)/1000 + " s");
+//		
+		Gson gson = new Gson();
+		s = System.currentTimeMillis();
+		for ( int i = 0; i < 1000000; i++ ) {
+			String st = gson.toJson(map);
+		}
+		System.out.println((System.currentTimeMillis()-s)/1000 + " s");
 //		
 //		
 		System.out.println(json.serialize(map));

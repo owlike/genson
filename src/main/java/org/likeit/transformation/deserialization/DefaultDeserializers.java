@@ -31,19 +31,19 @@ public class DefaultDeserializers {
 	
 	public static class IntegerDeserializer implements Deserializer<Integer> {
 		@Override
-		public Integer deserialize(Type type, ObjectReader reader, Context ctx) {
+		public Integer deserialize(Type type, ObjectReader reader, Context ctx) throws NumberFormatException, IOException {
 			return Integer.parseInt(reader.value());
 		}
 	}
 	public static class DoubleDeserializer implements Deserializer<Double> {
 		@Override
-		public Double deserialize(Type type, ObjectReader reader, Context ctx) {
+		public Double deserialize(Type type, ObjectReader reader, Context ctx) throws NumberFormatException, IOException {
 			return Double.parseDouble(reader.value());
 		}
 	}
 	public static class CollectionDeserializer implements Deserializer<Collection<?>> {
 		@Override
-		public Collection<? super Object> deserialize(Type type, ObjectReader reader, Context ctx) throws TransformationException {
+		public Collection<? super Object> deserialize(Type type, ObjectReader reader, Context ctx) throws TransformationException, IOException {
 			reader.beginArray();
 			
 			Collection<? super Object> col = new ArrayList<Object>();
@@ -59,7 +59,7 @@ public class DefaultDeserializers {
 	}
 	public static class ArrayDeserializer implements Deserializer<Object[]> {
 		@Override
-		public Object[] deserialize(Type type, ObjectReader reader, Context ctx) throws TransformationException {
+		public Object[] deserialize(Type type, ObjectReader reader, Context ctx) throws TransformationException, IOException {
 			reader.beginArray();
 			
 			List<Object> arr = new ArrayList<Object>();

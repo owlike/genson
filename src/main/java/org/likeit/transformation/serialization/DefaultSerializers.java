@@ -5,6 +5,7 @@ import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -125,6 +126,16 @@ public class DefaultSerializers {
 		public void serialize(Number num, Type type, ObjectWriter writer, Context ctx)
 				throws TransformationException, IOException {
 			writer.value(num);
+		}
+		
+	}
+	
+	public static class DateSerializer implements Serializer<Date> {
+
+		@Override
+		public void serialize(Date obj, Type type, ObjectWriter writer,
+				Context ctx) throws TransformationException, IOException {
+			
 		}
 		
 	}

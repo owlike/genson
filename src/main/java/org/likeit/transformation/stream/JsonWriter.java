@@ -2,7 +2,8 @@ package org.likeit.transformation.stream;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Stack;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 public class JsonWriter implements ObjectWriter {
 	private final Writer writer;
@@ -12,16 +13,15 @@ public class JsonWriter implements ObjectWriter {
 	protected static final char END_ARRAY = ']';
 	protected static final char BEGIN_OBJECT = '{';
 	protected static final char END_OBJECT = '}';
-	protected static final char NAME_BEGIN = '"';
-	protected static final char NAME_END = '"';
+	protected static final char QUOTE = '"';
 	protected static final char VALUE_BEGIN = '\"';
 	protected static final char VALUE_END = '\"';
 
 	protected static final char VALUE_SEPARATOR = ',';
 	protected static final char NAME_SEPARATOR = ':';
-	protected final static String NULL_VALUE = "null";
+	protected static final String NULL_VALUE = "null";
 
-	private final Stack<JsonType> _ctx;
+	private final Deque<JsonType> _ctx;
 	private boolean _hasPrevious;
 	private String _name;
 	
@@ -52,7 +52,7 @@ public class JsonWriter implements ObjectWriter {
 
 	public JsonWriter(Writer writer) {
 		this.writer = writer;
-		this._ctx = new Stack<JsonType>();
+		this._ctx = new ArrayDeque<JsonType>();
 		_ctx.push(JsonType.EMPTY);
 		this._hasPrevious = false;
 		this.skipNull = false;
@@ -61,7 +61,7 @@ public class JsonWriter implements ObjectWriter {
 	
 	public JsonWriter(Writer writer, boolean skipNull, boolean htmlSafe) {
 		this.writer = writer;
-		this._ctx = new Stack<JsonType>();
+		this._ctx = new ArrayDeque<JsonType>();
 		_ctx.push(JsonType.EMPTY);
 		this._hasPrevious = false;
 		this.skipNull = skipNull;
@@ -125,9 +125,9 @@ public class JsonWriter implements ObjectWriter {
 	protected JsonWriter deferredName() throws IOException {
 		if ( _name != null && _ctx.peek() != JsonType.ARRAY ) {
     		separate();
-    		writer.write(NAME_BEGIN);
+    		writer.write(QUOTE);
     		writer.write(_name);	
-    		writer.write(NAME_END);
+    		writer.write(QUOTE);
     		writer.write(NAME_SEPARATOR);
     		_name = null;
 		}
