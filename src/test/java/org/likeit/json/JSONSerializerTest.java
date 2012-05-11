@@ -79,24 +79,24 @@ public class JSONSerializerTest {
 		map.put("root", rb);
 		
 
-		long s = System.currentTimeMillis();
-		for ( int i = 0; i < 1000000; i++ ) {
-			String st = om.writeValueAsString(map);
-		}
-		System.out.println((System.currentTimeMillis()-s)/1000 + " s");
-
-		s = System.currentTimeMillis();
-		for ( int i = 0; i < 1000000; i++ ) {
-			String st = json.serialize(map);
-		}
-		System.out.println((System.currentTimeMillis()-s)/1000 + " s");
-//		
-		Gson gson = new Gson();
-		s = System.currentTimeMillis();
-		for ( int i = 0; i < 1000000; i++ ) {
-			String st = gson.toJson(map);
-		}
-		System.out.println((System.currentTimeMillis()-s)/1000 + " s");
+//		long s = System.currentTimeMillis();
+//		for ( int i = 0; i < 1000000; i++ ) {
+//			String st = om.writeValueAsString(map);
+//		}
+//		System.out.println((System.currentTimeMillis()-s)/1000 + " s");
+//
+//		s = System.currentTimeMillis();
+//		for ( int i = 0; i < 1000000; i++ ) {
+//			String st = json.serialize(map);
+//		}
+//		System.out.println((System.currentTimeMillis()-s)/1000 + " s");
+////		
+//		Gson gson = new Gson();
+//		s = System.currentTimeMillis();
+//		for ( int i = 0; i < 1000000; i++ ) {
+//			String st = gson.toJson(map);
+//		}
+//		System.out.println((System.currentTimeMillis()-s)/1000 + " s");
 //		
 //		
 		System.out.println(json.serialize(map));

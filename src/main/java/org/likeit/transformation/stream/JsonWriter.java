@@ -21,11 +21,15 @@ public class JsonWriter implements ObjectWriter {
 	protected static final char NAME_SEPARATOR = ':';
 	protected static final String NULL_VALUE = "null";
 
-	private final Deque<JsonType> _ctx;
+	private final Deque<JsonType> _ctx = new ArrayDeque<JsonType>(16);
 	private boolean _hasPrevious;
 	private String _name;
-	
 	private final boolean skipNull;
+	
+	{
+		_ctx.push(JsonType.EMPTY);
+	}
+	
 	
 	private static final String[] REPLACEMENT_CHARS;
 	private static final String[] HTML_SAFE_REPLACEMENT_CHARS;
@@ -51,19 +55,11 @@ public class JsonWriter implements ObjectWriter {
 	}
 
 	public JsonWriter(Writer writer) {
-		this.writer = writer;
-		this._ctx = new ArrayDeque<JsonType>();
-		_ctx.push(JsonType.EMPTY);
-		this._hasPrevious = false;
-		this.skipNull = false;
-		this.htmlSafe = false;
+		this(writer, false, false);
 	}
 	
 	public JsonWriter(Writer writer, boolean skipNull, boolean htmlSafe) {
 		this.writer = writer;
-		this._ctx = new ArrayDeque<JsonType>();
-		_ctx.push(JsonType.EMPTY);
-		this._hasPrevious = false;
 		this.skipNull = skipNull;
 		this.htmlSafe = htmlSafe;
 	}

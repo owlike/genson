@@ -130,16 +130,6 @@ public class DefaultSerializers {
 		
 	}
 	
-	public static class DateSerializer implements Serializer<Date> {
-
-		@Override
-		public void serialize(Date obj, Type type, ObjectWriter writer,
-				Context ctx) throws TransformationException, IOException {
-			
-		}
-		
-	}
-	
 	public static class CollectionSerializer implements Serializer<Collection<Object>> {
 
 		@Override

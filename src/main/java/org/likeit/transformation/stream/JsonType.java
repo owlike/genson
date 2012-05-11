@@ -6,5 +6,6 @@ public enum JsonType {
 	ARRAY,
 	NAME,
 	LITERAL,
-	NUMBER
+	NUMBER,
+	LAST // ne pas deplacer dans l'ordre!
 }
