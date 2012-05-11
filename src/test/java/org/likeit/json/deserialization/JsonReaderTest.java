@@ -12,6 +12,7 @@ public class JsonReaderTest {
 		JsonReader reader = new JsonReader(new StringReader(src));
 		reader.beginObject();
 		String name = reader.name();
+		System.out.println(reader.value());
 		System.out.println(name);
 	}
 }

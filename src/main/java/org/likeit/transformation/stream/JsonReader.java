@@ -38,6 +38,7 @@ public class JsonReader implements ObjectReader {
 		SKIPPED_TOKENS['\n'] = 1;
 		SKIPPED_TOKENS['\r'] = 1;
 		SKIPPED_TOKENS['\f'] = 1;
+		SKIPPED_TOKENS[' '] = 1;
 	}
 	
 	private final Reader reader;
@@ -48,6 +49,8 @@ public class JsonReader implements ObjectReader {
 	private StringBuilder sb = new StringBuilder();
 	private String currentName;
 	private String currentValue;
+	private boolean checkedNext = false;
+	private boolean hasNext = false;
 	private Deque<JsonType> _ctx = new ArrayDeque<JsonType>(16);
 	{
 		_ctx.push(JsonType.EMPTY);
@@ -63,7 +66,7 @@ public class JsonReader implements ObjectReader {
 	
 	@Override
 	public void beginArray() throws IOException {
-		int token = readNextToken();
+		int token = readNextToken(true);
 		checkIllegalEnd(token);
 		if ( BEGIN_ARRAY == token ) {
 			_ctx.push(JsonType.ARRAY);
@@ -73,8 +76,7 @@ public class JsonReader implements ObjectReader {
 
 	@Override
 	public void beginObject() throws IOException {
-		int token = readNextToken();
-		cursor++;
+		int token = readNextToken(true);
 		checkIllegalEnd(token);
 		if ( BEGIN_OBJECT == token ) {
 			_ctx.push(JsonType.OBJECT);
@@ -84,8 +86,7 @@ public class JsonReader implements ObjectReader {
 
 	@Override
 	public void endArray() throws IOException {
-		readNextToken();
-		int token = readNextToken();
+		int token = readNextToken(true);
 		checkIllegalEnd(token);
 		if ( END_ARRAY == token && JsonType.ARRAY == _ctx.peek() ) {
 			_ctx.pop();
@@ -94,8 +95,7 @@ public class JsonReader implements ObjectReader {
 
 	@Override
 	public void endObject() throws IOException {
-		readNextToken();
-		int token = readNextToken();
+		int token = readNextToken(true);
 		checkIllegalEnd(token);
 		if ( END_OBJECT == token && JsonType.OBJECT == _ctx.peek() ) {
 			_ctx.pop();
@@ -104,11 +104,12 @@ public class JsonReader implements ObjectReader {
 
 	@Override
 	public boolean hasNext() throws IOException {
-		int token = readNextToken();
-		
-		checkIllegalEnd(token);
-		
-		return token == VALUE_SEPARATOR;
+		if ( checkedNext ) return hasNext;
+		else {
+			int token = readNextToken(true);
+			checkIllegalEnd(token);
+			return token == VALUE_SEPARATOR;
+		}
 	}
 
 	@Override
@@ -123,20 +124,23 @@ public class JsonReader implements ObjectReader {
 
 	@Override
 	public ObjectReader next() throws IOException {
+		checkedNext = false;
+		hasNext = false;
+		
 		if ( JsonType.OBJECT == _ctx.peek() ) {
-			if ( readNextToken() == VALUE_SEPARATOR ) cursor++;
+			if ( readNextToken(false) == VALUE_SEPARATOR ) increment();
 			consumeString();
 			
 			currentName = sb.toString();
 			sb.setLength(0);
 			
-			if ( readNextToken() != NAME_SEPARATOR ) throw newMisplacedTokenException();
-			cursor++;
+			if ( readNextToken(true) != NAME_SEPARATOR ) throw newMisplacedTokenException(cursor-1, position-1);
 		}
 		
-		int token = readNextToken();
-		if ( token == QUOTE ) consumeString();
-		else if ( token > 47 && token < 58 ) consumeNumber();
+		int token = readNextToken(false);
+		if ( token == QUOTE ) {
+			consumeString();
+		} else if ( token > 47 && token < 58 ) consumeNumber();
 		else consumeNull();
 		
 		currentValue = sb.toString();
@@ -147,8 +151,7 @@ public class JsonReader implements ObjectReader {
 
 	// ne doit pas etre appele si c'est un tableau
 	private void consumeString() throws IOException {
-		if ( readNextToken() != QUOTE ) throw newMisplacedTokenException();
-		cursor++;
+		if ( readNextToken(true) != QUOTE ) throw newMisplacedTokenException(cursor-1, position-1);
 		
 		while (cursor > -1 ) {
 			if ( cursor == buflen ) {
@@ -162,9 +165,9 @@ public class JsonReader implements ObjectReader {
 				else if ( buffer[i] == QUOTE ) break;
 			}
 			
-			sb.append(buffer, cursor, i);
+			sb.append(buffer, cursor, i-cursor);
+			position += i - cursor + 1;
 			cursor = i + 1;
-			position += cursor;
 			if ( buffer[i] == QUOTE ) return;
 		}
 	}
@@ -208,7 +211,10 @@ public class JsonReader implements ObjectReader {
 		}
 	}
 	
-	protected int readNextToken() throws IOException {
+	// TODO consume boolean
+	protected int readNextToken(boolean consume) throws IOException {
+		boolean stop = false;
+		int oldCursor = cursor;
 		
 		while ( cursor > -1 ) {
 			if ( cursor == buflen ) {
@@ -218,17 +224,33 @@ public class JsonReader implements ObjectReader {
 			
 			for ( ; cursor < buflen; cursor++ ) {
 				if ( buffer[cursor] < 128 && SKIPPED_TOKENS[buffer[cursor]] == 0 ) {
-					position += cursor;
-					return buffer[cursor];
+					stop = true;
+					break;
 				}
 			}
-			position += buflen;
+			
+			// TODO attention c'est faux
+			position += cursor - oldCursor;
+			oldCursor = cursor - 1;
+			
+			if ( stop ) {
+				if ( consume ) {
+					cursor++;
+					position++;
+				}
+				return buffer[cursor-1];
+			}
 		}
 		
 		return cursor;
 	}
 	
-	private IllegalStateException newMisplacedTokenException() {
+	protected void increment() {
+		cursor++;
+		position++;
+	}
+	
+	private IllegalStateException newMisplacedTokenException(int cursor, int position) {
 		return new IllegalStateException("Encountred misplaced character '" + buffer[cursor] + "' at position " + position);
 	}
 	
