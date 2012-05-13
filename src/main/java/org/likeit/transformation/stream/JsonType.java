@@ -5,7 +5,6 @@ public enum JsonType {
 	OBJECT,
 	ARRAY,
 	NAME,
-	LITERAL,
-	NUMBER,
-	LAST // ne pas deplacer dans l'ordre!
+	STRING,
+	LITERAL
 }

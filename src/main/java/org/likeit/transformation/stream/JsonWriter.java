@@ -75,8 +75,8 @@ public class JsonWriter implements ObjectWriter {
 	
 	public JsonWriter beginArray() throws IOException {
 		if ( _ctx.peek() == JsonType.ARRAY ) separate();
-		_ctx.push(JsonType.ARRAY);
 		deferredName();
+		_ctx.push(JsonType.ARRAY);
 		writer.write(BEGIN_ARRAY);
 		_hasPrevious = false;
 		return this;
@@ -93,8 +93,8 @@ public class JsonWriter implements ObjectWriter {
 	
 	public JsonWriter beginObject() throws IOException {
 		if ( _ctx.peek() == JsonType.ARRAY ) separate();
-		_ctx.push(JsonType.OBJECT);
 		deferredName();
+		_ctx.push(JsonType.OBJECT);
 		writer.write(BEGIN_OBJECT);
 		_hasPrevious = false;
 		return this;
@@ -222,7 +222,7 @@ public class JsonWriter implements ObjectWriter {
 			writer.write(NULL_VALUE);
 			_hasPrevious = true;
 		}
-		return null;
+		return this;
 	}
 }
 

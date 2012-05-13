@@ -3,10 +3,10 @@ package org.likeit.transformation.stream;
 import java.io.IOException;
 
 public interface ObjectReader {
-	public void beginObject() throws IOException;
-	public void endObject() throws IOException;
-	public void beginArray() throws IOException;
-	public void endArray() throws IOException;
+	public ObjectReader beginObject() throws IOException;
+	public ObjectReader endObject() throws IOException;
+	public ObjectReader beginArray() throws IOException;
+	public ObjectReader endArray() throws IOException;
 	
 	/**
 	 * 
