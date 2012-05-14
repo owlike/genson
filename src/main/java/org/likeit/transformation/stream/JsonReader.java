@@ -3,10 +3,15 @@ package org.likeit.transformation.stream;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
-import java.nio.channels.IllegalSelectorException;
 import java.util.ArrayDeque;
+import java.util.Arrays;
 import java.util.Deque;
 
+/*
+ * TODO utiliser une methode fillBuffer pour remplire le buffer et a cet endroit 
+ * mettre a jour la position si necessaire, faire un truc plus propre pour calculer
+ * la ligne/colonne de l'erreur (mieux que la position...)
+ */
 public class JsonReader implements ObjectReader {
 	protected static final int BEGIN_ARRAY = '[';
 	protected static final int END_ARRAY = ']';
@@ -29,6 +34,24 @@ public class JsonReader implements ObjectReader {
 		SKIPPED_TOKENS[' '] = 1;
 	}
 	
+	 /**
+	 * Recupere dans Jackson
+     * Lookup table for the first 128 Unicode characters (7-bit ASCII)
+     * range. For actual hex digits, contains corresponding value;
+     * for others -1.
+     */
+   private final static int[] sHexValues = new int[128];
+    static {
+        Arrays.fill(sHexValues, -1);
+        for (int i = 0; i < 10; ++i) {
+            sHexValues['0' + i] = i;
+        }
+        for (int i = 0; i < 6; ++i) {
+            sHexValues['a' + i] = 10 + i;
+            sHexValues['A' + i] = 10 + i;
+        }
+    }
+	
 	private final Reader reader;
 	// buffer size doit etre > 5 (pour pouvoir contenir FALSE, TRUE et NULL en entier)
 	private char[] buffer = new char[1024];
@@ -38,6 +61,7 @@ public class JsonReader implements ObjectReader {
 	private StringBuilder sb = new StringBuilder();
 	private String currentName;
 	private String currentValue;
+	private TokenType tokenType;
 	private boolean checkedNext = false;
 	private boolean hasNext = false;
 	private boolean _first = false;
@@ -57,57 +81,64 @@ public class JsonReader implements ObjectReader {
 	
 	@Override
 	public ObjectReader beginArray() throws IOException {
-		int token = readNextToken(true);
-		checkIllegalEnd(token);
-		if ( BEGIN_ARRAY == token ) {
-			_ctx.push(JsonType.ARRAY);
-		} else throw newWrongTokenException(BEGIN_ARRAY, token, position-1);
-		_first = true;
+		begin(BEGIN_ARRAY, JsonType.ARRAY);
 		return this;
 	}
 
 	@Override
 	public ObjectReader beginObject() throws IOException {
+		begin(BEGIN_OBJECT, JsonType.OBJECT);
+		return this;
+	}
+	
+	private void begin(int character, JsonType type) throws IOException {
 		int token = readNextToken(true);
 		checkIllegalEnd(token);
-		if ( BEGIN_OBJECT == token ) {
-			_ctx.push(JsonType.OBJECT);
-		} else throw newWrongTokenException(BEGIN_OBJECT, token, position-1);
+		if ( character == token ) {
+			_ctx.push(type);
+		} else throw newWrongTokenException(character, token, position-1);
 		_first = true;
-		return this;
+		checkedNext = false;
+		hasNext = false;
 	}
 
 	@Override
 	public ObjectReader endArray() throws IOException {
-		int token = readNextToken(true);
-		checkIllegalEnd(token);
-		if ( END_ARRAY == token && JsonType.ARRAY == _ctx.peek() ) {
-			_ctx.pop();
-		} else throw newWrongTokenException(END_ARRAY, token, position-1);
-		_first = false;
+		end(END_ARRAY, JsonType.ARRAY);
 		return this;
 	}
 
 	@Override
 	public ObjectReader endObject() throws IOException {
-		int token = readNextToken(true);
-		checkIllegalEnd(token);
-		if ( END_OBJECT == token && JsonType.OBJECT == _ctx.peek() ) {
-			_ctx.pop();
-		} else throw newWrongTokenException(END_OBJECT, token, position-1);
-		_first = false;
+		end(END_OBJECT, JsonType.OBJECT);
 		return this;
 	}
 
+	private void end(int character, JsonType type) throws IOException {
+		int token = readNextToken(true);
+		checkIllegalEnd(token);
+		if ( character == token && type == _ctx.peek() ) {
+			_ctx.pop();
+		} else throw newWrongTokenException(character, token, position-1);
+		_first = false;
+		checkedNext = false;
+		hasNext = false;
+	}
+	
 	@Override
 	public boolean hasNext() throws IOException {
 		if ( checkedNext ) return hasNext;
 		else {
 			int token = readNextToken(false);
 			checkIllegalEnd(token);
-			hasNext = (_first && (QUOTE == token || (token > 47 && token < 58) || token == 45 || token == 110 || token == 116 || token == 102 ))
+			hasNext = (_first && (QUOTE == token || token == BEGIN_OBJECT || token == BEGIN_ARRAY || (token > 47 && token < 58) || token == 45 || token == 110 || token == 116 || token == 102 ))
 					|| token == VALUE_SEPARATOR;
 			checkedNext = true;
+			
+			if ( !_first && hasNext ) {
+				increment();
+			}
+			
 			return hasNext;
 		}
 	}
@@ -121,14 +152,27 @@ public class JsonReader implements ObjectReader {
 	public String value() {
 		return currentValue;
 	}
+	
+	@Override
+	public TokenType getTokenType() {
+		return tokenType;
+	}
 
 	@Override
-	public ObjectReader next() throws IOException {
+	public TokenType next() throws IOException {
 		checkedNext = false;
 		hasNext = false;
 		_first = false;
-
-		if ( readNextToken(false) == VALUE_SEPARATOR ) increment();
+		currentName = null;
+		currentValue = null;
+		
+		int token = readNextToken(false);
+		
+		if ( token == VALUE_SEPARATOR ) increment();
+		else if ( JsonType.ARRAY == _ctx.peek() ) {
+			if ( token == BEGIN_ARRAY ) return setTokenType(TokenType.ARRAY);
+			if ( token == BEGIN_OBJECT ) return setTokenType(TokenType.OBJECT);
+		}
 		
 		if ( JsonType.OBJECT == _ctx.peek() ) {
 			consumeString();
@@ -139,14 +183,24 @@ public class JsonReader implements ObjectReader {
 			if ( readNextToken(true) != NAME_SEPARATOR ) throw newMisplacedTokenException(cursor-1, position-1);
 		}
 		
-		int token = readNextToken(false);
-		if ( token == QUOTE ) consumeString();
-		else consumeLiteral();
+		token = readNextToken(false);
+		TokenType tokenType = null;
+		if ( token == QUOTE ) {
+			consumeString();
+			tokenType = TokenType.STRING;
+		} else if ( token == BEGIN_ARRAY ) return setTokenType(TokenType.ARRAY);
+		else if ( token == BEGIN_OBJECT ) return setTokenType(TokenType.OBJECT); 
+		else tokenType = consumeLiteral();
 		
 		currentValue = sb.toString();
 		sb.setLength(0);
 		
-		return this;
+		return setTokenType(tokenType);
+	}
+	
+	private TokenType setTokenType(TokenType tokenType) {
+		this.tokenType = tokenType;
+		return tokenType;
 	}
 
 	private void consumeString() throws IOException {
@@ -160,15 +214,17 @@ public class JsonReader implements ObjectReader {
 			}
 
 			int i = cursor;
-			for ( ; i < buflen; i++ ) {
+			for ( ; i < buflen; ) {
 				if ( buffer[i] == '\\' ) {
 					// TODO calc position
 					sb.append(buffer, cursor, i-cursor);
 					cursor = i;
-					readEscaped();
+					increment();
+					sb.append(readEscaped());
 					i = cursor;
 				}
 				else if ( buffer[i] == QUOTE ) break;
+				else  i++;
 			}
 			
 			sb.append(buffer, cursor, i-cursor);
@@ -178,7 +234,7 @@ public class JsonReader implements ObjectReader {
 		}
 	}
 
-	private void consumeLiteral() throws IOException {
+	private TokenType consumeLiteral() throws IOException {
 		if ( cursor >= buflen ) {
 			buflen = reader.read(buffer);
 			cursor = 0;
@@ -187,6 +243,7 @@ public class JsonReader implements ObjectReader {
 		int token = buffer[cursor];
 		
 		if ( (token > 47 && token < 58) || token == 45 ) {
+			TokenType tokenType = null;
 			if ( token == 45 ) {
 				sb.append('-');
 				increment();
@@ -194,9 +251,29 @@ public class JsonReader implements ObjectReader {
 			consumeInt();
 			if ( buffer[cursor] == 46 ) {
 				sb.append('.');
-				cursor++;
+				increment();
 				consumeInt();
+				tokenType = TokenType.DOUBLE;
+			} else tokenType = TokenType.INTEGER;
+			
+			if ( (buflen-cursor) < 2 ) {
+				System.arraycopy(buffer, cursor, buffer, 0, buflen-cursor);
+				buflen = cursor + reader.read(buffer, cursor, cursor);
+				cursor = 0;
 			}
+			
+			char ctoken = buffer[cursor];
+			if (ctoken == 'e' || ctoken == 'E') {
+				increment();
+				ctoken = buffer[cursor];
+			     if (ctoken == '+' || ctoken == '-') {
+			    	 sb.append(buffer, cursor-1, 2);
+			    	 increment();
+			    	 consumeInt();
+			      }
+			}
+			
+			return tokenType;
 		} else {
 			if ( (buflen-cursor) < 5 ) {
 				System.arraycopy(buffer, cursor, buffer, 0, buflen-cursor);
@@ -211,6 +288,7 @@ public class JsonReader implements ObjectReader {
 				sb.append(NULL_VALUE);
 				cursor += 4;
 				position +=  4;
+				return TokenType.NULL;
 			} else if ( (buffer[cursor] == 'T' || buffer[cursor] == 't')
 						&& (buffer[cursor+1] == 'R' || buffer[cursor+1] == 'r')
 						&& (buffer[cursor+2] == 'U' || buffer[cursor+2] == 'u')
@@ -218,6 +296,7 @@ public class JsonReader implements ObjectReader {
 				sb.append("true");
 				cursor += 4;
 				position +=  4;
+				return TokenType.BOOLEAN;
 			} else if ( (buffer[cursor] == 'F' || buffer[cursor] == 'f')
 						&& (buffer[cursor+1] == 'A' || buffer[cursor+1] == 'a')
 						&& (buffer[cursor+2] == 'L' || buffer[cursor+2] == 'l')
@@ -226,6 +305,7 @@ public class JsonReader implements ObjectReader {
 				sb.append("false");
 				cursor += 5;
 				position +=  5;
+				return TokenType.BOOLEAN;
 			} else {
 				throw new IllegalStateException("Illegal character around position " + position + " awaited for literal (number, boolean or null)");
 			}
@@ -255,7 +335,6 @@ public class JsonReader implements ObjectReader {
 		}
 	}
 	
-	// TODO consume boolean
 	private int readNextToken(boolean consume) throws IOException {
 		boolean stop = false;
 		int oldCursor = cursor;
@@ -290,57 +369,54 @@ public class JsonReader implements ObjectReader {
 	}
 	
 	 private char readEscaped() throws IOException {
-		increment();
-        while ( buflen > -1 ) {
-        	if ( cursor >= buflen ) {
-				buflen = reader.read(buffer);
-				cursor = 0;
-				checkIllegalEnd(buflen);
-			}
-        	
-        	int token = buffer[cursor];
+		
+    	if ( cursor >= buflen ) {
+			buflen = reader.read(buffer);
+			cursor = 0;
+			checkIllegalEnd(buflen);
+		}
+    	
+    	char token = buffer[cursor];
+    	increment();
+        switch (token) {
+            case 'b':
+                return '\b';
+            case 't':
+                return '\t';
+            case 'n':
+                return '\n';
+            case 'f':
+                return '\f';
+            case 'r':
+                return '\r';
+            case QUOTE:
+            case '/':
+            case '\\':
+                return (char) token;
     
-            switch (token) {
-                case 'b':
-                    return '\b';
-                case 't':
-                    return '\t';
-                case 'n':
-                    return '\n';
-                case 'f':
-                    return '\f';
-                case 'r':
-                    return '\r';
-                case QUOTE:
-                case '/':
-                case '\\':
-                    return (char) token;
-        
-                case 'u':
-                    break;
-        
-                default:
-                    throw newMisplacedTokenException(cursor, position);
-            }
+            case 'u':
+                break;
     
-            int value = 0;
-//            for (int i = 0; i < 4; ++i) {
-//                if (_inputPtr >= _inputEnd) {
-//                    if (!loadMore()) {
-//                        _reportInvalidEOF(" in character escape sequence");
-//                    }
-//                }
-//                int ch = (int) _inputBuffer[_inputPtr++];
-//                int digit = CharTypes.charToHex(ch);
-//                if (digit < 0) {
-//                    _reportUnexpectedChar(ch, "expected a hex-digit for character escape sequence");
-//                }
-//                value = (value << 4) | digit;
-//            }
-
-            return (char) value;
+            default:
+                throw newMisplacedTokenException(cursor-1, position-1);
         }
-        return 0;
+
+        int value = 0;
+        if ( (buflen-cursor) < 4 ) {
+			System.arraycopy(buffer, cursor, buffer, 0, buflen-cursor);
+			buflen = cursor + reader.read(buffer, cursor, cursor);
+			cursor = 0;
+		}
+        for (int i = 0; i < 4; ++i) {
+            int ch = buffer[cursor++];
+            int digit = (ch > 127) ? -1 : sHexValues[ch];
+            if (digit < 0) {
+                throw new IllegalStateException("Wrong character '"+ch+"' expected a hex-digit for character escape sequence");
+            }
+            value = (value << 4) | digit;
+        }
+
+        return (char)value;
     }
 	
 	private void increment() {
@@ -349,7 +425,7 @@ public class JsonReader implements ObjectReader {
 	}
 	
 	private IllegalStateException newWrongTokenException(int awaitedChar, int token, int position) {
-		return new IllegalStateException("Illegal character at position " + position + " awaited " + (char)awaitedChar + " but read '" + (char)token + "' !");
+		return new IllegalStateException("Illegal character at position " + position + " expected " + (char)awaitedChar + " but read '" + (char)token + "' !");
 	}
 	
 	private IllegalStateException newMisplacedTokenException(int cursor, int position) {

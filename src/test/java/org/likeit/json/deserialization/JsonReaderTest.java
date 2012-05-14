@@ -11,8 +11,8 @@ public class JsonReaderTest {
 		String src = "{\"nom\" : \"toto titi, tu\"}";
 		JsonReader reader = new JsonReader(new StringReader(src));
 		reader.beginObject();
-		String name = reader.name();
+		reader.next();
+		System.out.println(reader.name());
 		System.out.println(reader.value());
-		System.out.println(name);
 	}
 }

@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,6 +67,9 @@ public final class IntrospectionUtils {
 		} else if ( type instanceof GenericArrayType ) {
 			GenericArrayType gaType = (GenericArrayType) type;
 			return gaType.getGenericComponentType();
+		} else if ( type instanceof Class<?> ) {
+			Class<?> clazz = (Class<?>) type;
+			if ( clazz.isArray() ) return clazz.getComponentType();
 		}
 		
 		throw new IllegalArgumentException("Could not extract argument type of " + type);
@@ -83,14 +87,21 @@ public final class IntrospectionUtils {
 	public static boolean match(Type type, Type oType, boolean strictMatch) {
 		boolean match = false;
 		
-		//if ( type.getClass().equals(oType.getClass()) ) { // on check qu'on compare le meme type (parametrized, class, etc)
+//		if ( type.getClass().equals(oType.getClass()) ) { // on check qu'on compare le meme type (parametrized, class, etc)
 			if ( type instanceof Class ) {
 				Class<?> oClass = null;
-				if ( oType instanceof ParameterizedType ) 
+				if ( oType instanceof ParameterizedType ) {
 					oClass = (Class<?>) ((ParameterizedType) oType).getRawType();
-				else oClass = (Class<?>) oType;
+					match = strictMatch ? oClass.equals((Class<?>) type) : oClass.isAssignableFrom((Class<?>) type);
+				} else if ( oType instanceof WildcardType ) {
+					WildcardType wOType = (WildcardType) oType;
+					if ( wOType.getUpperBounds().length > 0 ) match = match(type, wOType.getUpperBounds()[0], false);
+					else if ( wOType.getLowerBounds().length > 0 ) match = match(wOType.getLowerBounds()[0], type, false);
+				} else {
+					oClass = (Class<?>) oType;
+					match = strictMatch ? oClass.equals((Class<?>) type) : oClass.isAssignableFrom((Class<?>) type);
+				}
 				
-				match = strictMatch ? oClass.equals((Class<?>) type) : oClass.isAssignableFrom((Class<?>) type);
 			} else if ( type.getClass().equals(oType.getClass()) && type instanceof ParameterizedType ) {
 				ParameterizedType t1 = (ParameterizedType) type;
 				ParameterizedType t2 = (ParameterizedType) oType;
@@ -104,7 +115,7 @@ public final class IntrospectionUtils {
 						match = match(t1s[i], t2s[i], strictMatch);
 				}
 			}
-	//	}		
+//		} 
 		
 		return match;
 	}

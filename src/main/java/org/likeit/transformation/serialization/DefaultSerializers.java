@@ -87,12 +87,12 @@ public class DefaultSerializers {
 	}
 	
 	public static class ArraySerializerFactory implements SerializerFactory<ArraySerializer> {
-
+		private final ArraySerializer arrSer = new ArraySerializer();
 		@Override
 		public ArraySerializer create(Type forType) {
 			if ( forType instanceof GenericArrayType 
     				|| (forType instanceof Class<?> && ((Class<?>) forType).isArray()) )
-				return new ArraySerializer();
+				return arrSer;
 				
 			return null;
 		}

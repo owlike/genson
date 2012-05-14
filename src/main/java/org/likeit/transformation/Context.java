@@ -10,6 +10,7 @@ import org.likeit.transformation.serialization.BeanView;
 import org.likeit.transformation.serialization.SerializerProvider;
 import org.likeit.transformation.stream.ObjectReader;
 import org.likeit.transformation.stream.ObjectWriter;
+import org.likeit.transformation.stream.TokenType;
 
 public class Context {
 	private final List<Class<? extends BeanView<?>>> views;
@@ -46,7 +47,8 @@ public class Context {
 	@SuppressWarnings("unchecked") // normalement c'est garanti par le provider que le type matche bien
 	public <T> T deserialize(Type type, ObjectReader reader) throws TransformationException {
 		try {
-			if ( reader.value() != null ) return (T) deserializerProvider.resolveObject(type).deserialize(type, reader, this);
+			if ( reader.getTokenType() != TokenType.NULL ) 
+				return (T) deserializerProvider.resolveObject(type).deserialize(type, reader, this);
 			else return null;
 		} catch (IOException ioe) {
 			throw new TransformationException("Deserialization error for type " + type, ioe);

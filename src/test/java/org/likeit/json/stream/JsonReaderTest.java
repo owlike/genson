@@ -3,13 +3,13 @@ package org.likeit.json.stream;
 import java.io.IOException;
 import java.io.StringReader;
 
-import org.codehaus.jackson.map.MappingIterator;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.likeit.transformation.stream.JsonReader;
+import org.likeit.transformation.stream.TokenType;
 
 public class JsonReaderTest {
+
 	@Test
 	public void testReader() throws IOException {
 		String src = "{\"nom\" : \"toto titi, tu\", \"pre \\\"n'om\" : \"albert  \", \"entier\" : 1322.6}";
@@ -17,15 +17,15 @@ public class JsonReaderTest {
 		reader.beginObject();
 
 		assertTrue(reader.hasNext());
-		reader.next();
+		assertEquals(reader.next(), TokenType.STRING);
 		assertEquals(reader.name(), "nom");
 		assertEquals(reader.value(), "toto titi, tu");
 		assertTrue(reader.hasNext());
-		reader.next();
+		assertEquals(reader.next(), TokenType.STRING);
 		assertEquals(reader.name(), "pre \"n'om");
 		assertEquals(reader.value(), "albert  ");
 		assertTrue(reader.hasNext());
-		reader.next();
+		assertEquals(reader.next(), TokenType.DOUBLE);
 		assertEquals(reader.name(), "entier");
 		assertEquals(reader.value(), "1322.6");
 		assertFalse(reader.hasNext());
@@ -34,19 +34,75 @@ public class JsonReaderTest {
 	}
 
 	@Test
-	public void testPrimitivesArray() throws IOException {
-		String src = "[1.0,\"abcde ..u\",null,12222.0101,true,false,-0.9]";
+	public void testTokenTypesAndHasNext() throws IOException {
+		String src = "[{\"a\": 1, \"b\": \"a\", \"c\":1.1,\"d\":null,\"e\":false, \"f\":[]},[1, 1.1], null, false, true, \"tt\"]";
 		JsonReader reader = new JsonReader(new StringReader(src));
 
 		reader.beginArray();
 
-		assertEquals(reader.next().value(), "1.0");
-		assertEquals(reader.next().value(), "abcde ..u");
-		assertEquals(reader.next().value(), "null");
-		assertEquals(reader.next().value(), "12222.0101");
-		assertEquals(reader.next().value(), "true");
-		assertEquals(reader.next().value(), "false");
-		assertEquals(reader.next().value(), "-0.9");
+		assertTrue(reader.hasNext());
+		assertEquals(reader.next(), TokenType.OBJECT);
+		assertEquals(reader.beginObject().next(), TokenType.INTEGER);
+
+		assertTrue(reader.hasNext());
+		assertEquals(reader.next(), TokenType.STRING);
+
+		assertTrue(reader.hasNext());
+		assertEquals(reader.next(), TokenType.DOUBLE);
+
+		assertTrue(reader.hasNext());
+		assertEquals(reader.next(), TokenType.NULL);
+
+		assertTrue(reader.hasNext());
+		assertEquals(reader.next(), TokenType.BOOLEAN);
+
+		assertTrue(reader.hasNext());
+		assertEquals(reader.next(), TokenType.ARRAY);
+		assertFalse(reader.beginArray().hasNext());
+		assertTrue(reader.endArray().endObject().hasNext());
+
+		assertEquals(reader.next(), TokenType.ARRAY);
+		assertTrue(reader.beginArray().hasNext());
+		assertEquals(reader.next(), TokenType.INTEGER);
+		assertEquals(reader.next(), TokenType.DOUBLE);
+		assertFalse(reader.hasNext());
+
+		assertTrue(reader.endArray().hasNext());
+		assertEquals(reader.next(), TokenType.NULL);
+		assertTrue(reader.hasNext());
+		assertEquals(reader.next(), TokenType.BOOLEAN);
+		assertTrue(reader.hasNext());
+		assertEquals(reader.next(), TokenType.BOOLEAN);
+		assertTrue(reader.hasNext());
+		assertEquals(reader.next(), TokenType.STRING);
+		assertFalse(reader.hasNext());
+
+		reader.endArray();
+	}
+
+	@Test
+	public void testPrimitivesArray() throws IOException {
+		String src = "[\"\\u0019\",\"abcde ..u\",null,12222.0101,true,false,9.0E-7]";
+		JsonReader reader = new JsonReader(new StringReader(src));
+		
+		reader.beginArray();
+
+		reader.next();
+		assertEquals(reader.value(), "\u0019");
+		reader.next();
+		assertEquals(reader.value(), "abcde ..u");
+		reader.next();
+		assertEquals(reader.value(), "null");
+		reader.next();
+		assertEquals(reader.value(), "12222.0101");
+		reader.next();
+		assertEquals(reader.value(), "true");
+		reader.next();
+		assertEquals(reader.value(), "false");
+		reader.next();
+		assertEquals(reader.value(), "9.0E-7");
+
+		assertFalse(reader.hasNext());
 
 		reader.endArray();
 	}
@@ -58,67 +114,109 @@ public class JsonReaderTest {
 
 		reader.beginObject();
 
-		assertEquals(reader.next().name(), "a");
+		reader.next();
+		assertEquals(reader.name(), "a");
 		assertEquals(reader.value(), "1.0");
-		assertEquals(reader.next().name(), "b");
+		reader.next();
+		assertEquals(reader.name(), "b");
 		assertEquals(reader.value(), "abcde ..u");
-		assertEquals(reader.next().name(), "c");
+		reader.next();
+		assertEquals(reader.name(), "c");
 		assertEquals(reader.value(), "null");
-		assertEquals(reader.next().name(), "d");
+		reader.next();
+		assertEquals(reader.name(), "d");
 		assertEquals(reader.value(), "12222.0101");
-		assertEquals(reader.next().name(), "e");
+		reader.next();
+		assertEquals(reader.name(), "e");
 		assertEquals(reader.value(), "true");
-		assertEquals(reader.next().name(), "f");
+		reader.next();
+		assertEquals(reader.name(), "f");
 		assertEquals(reader.value(), "false");
-		assertEquals(reader.next().name(), "h");
+		reader.next();
+		assertEquals(reader.name(), "h");
 		assertEquals(reader.value(), "-0.9");
 
 		reader.endObject();
 	}
 
 	@Test
-	public void testRootArrayAndNestedObjects() throws IOException {
-		String src = "[{},      " +
-						"	[]," +
-						"	[\"a a\", -9.9909], " +
-						"false, " +
-						"{" +
-							"	\"nom\": \"toto\", " +
-							"\"tab\":[5,6,7], " +
-							"\"nestedObj\":	   	 {\"prenom\":\"titi\"}" +
-						"}" +
-					  "]";
+	public void testEmptyArrayAndObjects() throws IOException {
+		String src = "[{},[]]";
 		JsonReader reader = new JsonReader(new StringReader(src));
 
 		assertTrue(reader.beginArray().hasNext());
-		
-		assertTrue(!reader.beginObject().hasNext());
-		reader.endObject();
-		
-		assertTrue(!reader.beginArray().hasNext());
+		assertEquals(reader.next(), TokenType.OBJECT);
+		assertFalse(reader.beginObject().hasNext());
+		assertTrue(reader.endObject().hasNext());
+		assertEquals(reader.next(), TokenType.ARRAY);
+		assertFalse(reader.beginArray().hasNext());
+		assertFalse(reader.endArray().hasNext());
+		reader.endArray();
+	}
+
+	@Test
+	public void testRootArrayAndNestedObjects() throws IOException {
+		String src = "[{},      " + "	[]," + "	[\"a a\", -9.9909], "
+				+ "false, " + "{" + "	\"nom\": \"toto\", "
+				+ "\"tab\":[5,6,7], "
+				+ "\"nestedObj\":	   	 {\"prenom\":\"titi\"}" + "}" + "]";
+		JsonReader reader = new JsonReader(new StringReader(src));
+
+		assertTrue(reader.beginArray().hasNext());
+
+		reader.next();
+		assertFalse(reader.beginObject().hasNext());
+		assertTrue(reader.endObject().hasNext());
+
+		reader.next();
+		assertFalse(reader.beginArray().hasNext());
+		assertTrue(reader.endArray().hasNext());
+
+		reader.next();
+		assertTrue(reader.beginArray().hasNext());
+		reader.next();
+		assertEquals(reader.value(), "a a");
+		assertTrue(reader.hasNext());
+		reader.next();
+		assertEquals(reader.value(), "-9.9909");
+		assertFalse(reader.hasNext());
+		reader.endArray();
+
+		reader.next();
+		assertEquals(reader.value(), "false");
+		assertTrue(reader.hasNext());
+
+		reader.next();
+		assertTrue(reader.beginObject().hasNext());
+		reader.next();
+		assertEquals(reader.name(), "nom");
+		assertEquals(reader.value(), "toto");
+
+		assertTrue(reader.hasNext());
+		reader.next();
+		assertEquals(reader.name(), "tab");
+		assertTrue(reader.beginArray().hasNext());
+		reader.next();
+		assertEquals(reader.value(), "5");
+		assertTrue(reader.hasNext());
+		reader.next();
+		assertEquals(reader.value(), "6");
+		assertTrue(reader.hasNext());
+		reader.next();
+		assertEquals(reader.value(), "7");
+		assertFalse(reader.hasNext());
 		reader.endArray();
 		
-		assertTrue(reader.beginArray().hasNext());
-		assertEquals(reader.next().name(), null);
-		assertEquals(reader.next().value(), "\"a a\"");
-		assertTrue(reader.hasNext());
-		assertEquals(reader.next().value(), "-9.9909");
-		assertTrue(!reader.hasNext());
-		assertEquals(reader.next().name(), "nom");
-		assertTrue(reader.beginArray().hasNext());
-		assertEquals(reader.next().value(), "5");
-		assertTrue(reader.hasNext());
-		assertEquals(reader.next().value(), "6");
-		assertTrue(reader.hasNext());
-		assertEquals(reader.next().value(), "7");
-		assertTrue(reader.hasNext());
-		assertEquals(reader.next().value(), "false");
-		
-		assertTrue(reader.hasNext());
+		reader.next();
+		assertEquals(reader.name(), "nestedObj");
 		assertTrue(reader.beginObject().hasNext());
-		
+		reader.next();
+		assertEquals(reader.name(), "prenom");
+		assertEquals(reader.value(), "titi");
 		reader.endObject();
-		
+
+		reader.endObject();
+
 		reader.endArray();
 	}
 }

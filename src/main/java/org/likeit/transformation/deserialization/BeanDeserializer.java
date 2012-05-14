@@ -48,20 +48,22 @@ public class BeanDeserializer extends ChainedDeserializer {
 			try {
 				value = rawType.newInstance();
 				
-				for ( ; reader.hasNext(); reader.next() ) {
+				for ( ; reader.hasNext(); ) { 
+					reader.next();
 					String propName = reader.name();
 					DataAccessor da = setters.get(propName);
-					Object param = ctx.deserialize(da.getParameterType(), reader);
-					da.access(value, param);
+					if ( da != null ) {
+						Object param = ctx.deserialize(da.getParameterType(), reader);
+						da.access(value, param);
+					}
 				}
 				
 			} catch (InstantiationException e) {
 				throw new TransformationException("Could not instantiate type " + rawType, e);
 			} catch (IllegalAccessException e) {
 				throw new TransformationException("Could not instantiate type " + rawType, e);
-			} finally {
-				reader.endObject();
 			}
+			reader.endObject();
 		}
 		
 		return value;

@@ -1,12 +1,17 @@
 package org.likeit.transformation;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.likeit.transformation.deserialization.ChainedDeserializer;
+import org.likeit.transformation.deserialization.DefaultDeserializers;
+import org.likeit.transformation.deserialization.Deserializer;
+import org.likeit.transformation.deserialization.DeserializerFactory;
 import org.likeit.transformation.deserialization.DeserializerProvider;
 import org.likeit.transformation.serialization.BeanView;
 import org.likeit.transformation.serialization.ChainedSerializer;
@@ -14,7 +19,9 @@ import org.likeit.transformation.serialization.DefaultSerializers;
 import org.likeit.transformation.serialization.Serializer;
 import org.likeit.transformation.serialization.SerializerFactory;
 import org.likeit.transformation.serialization.SerializerProvider;
+import org.likeit.transformation.stream.JsonReader;
 import org.likeit.transformation.stream.JsonWriter;
+import org.likeit.transformation.stream.ObjectReader;
 import org.likeit.transformation.stream.ObjectWriter;
 
 /**
@@ -36,7 +43,9 @@ public class ObjectTransformer {
 				DefaultSerializers.createDefaultSerializerFactories(), 
 				DefaultSerializers.createDefaultDynamicSerializer());
 		
-		deserializerProvider = null;
+		deserializerProvider = new DeserializerProvider(DefaultDeserializers.createDefaultDeserializers(),
+				DefaultDeserializers.createDefaultDeserializerFactories(),
+				DefaultDeserializers.createDefaultDynamicDeserializer());
 	}
 	
 	public ObjectTransformer(SerializerProvider serializerProvider, DeserializerProvider deserializerProvider, boolean skipNull, boolean htmlSafe) {
@@ -71,8 +80,13 @@ public class ObjectTransformer {
 	}
 	
 	public <T> T deserialize(Class<T> clazz, String source) throws TransformationException {
+		StringReader reader = new StringReader(source);
+		return deserialize(clazz, new JsonReader(reader), new Context(serializerProvider, deserializerProvider, null));
+	}
+	
+	public <T> T deserialize(Class<T> clazz, ObjectReader reader, Context ctx) throws TransformationException {
 		
-		return null;
+		return ctx.deserialize(clazz, reader);
 	}
 	
 	public boolean isSkipNull() {
@@ -85,23 +99,33 @@ public class ObjectTransformer {
 
 	public static class Builder {
 		private final List<Serializer<?>> serializers;
+		private final List<SerializerFactory<? extends Serializer<?>>> serializerFactories;
+		private ChainedSerializer dynaSerializer;
 		private boolean withDefaultSerializers;
 		private boolean withDefaultSerializerFactories;
 		private boolean withDefaultDynamicSerializer;
 		private boolean skipNull;
 		private boolean htmlSafe;
 		
-		private final List<SerializerFactory<? extends Serializer<?>>> serializerFactories;
-		
-		private ChainedSerializer dynaSerializer;
+		private final List<Deserializer<?>> deserializers;
+		private final List<DeserializerFactory<? extends Deserializer<?>>> deserializerFactories;
+		private ChainedDeserializer dynaDeserializer;
+		private boolean withDefaultDeserializers;
+		private boolean withDefaultDeserializerFactories;
+		private boolean withDefaultDynamicDeserializer;
 		
 		public Builder() {
 			serializers = new ArrayList<Serializer<?>>(); 
 			serializerFactories = new ArrayList<SerializerFactory<? extends Serializer<?>>>();
-			
 			withDefaultSerializers = true;
 			withDefaultSerializerFactories = true;
 			withDefaultDynamicSerializer = true;
+			
+			deserializers = new ArrayList<Deserializer<?>>();
+			deserializerFactories = new ArrayList<DeserializerFactory<? extends Deserializer<?>>>();
+			withDefaultDeserializers = true;
+			withDefaultDeserializerFactories = true;
+			withDefaultDynamicDeserializer = true;
 		}
 		
 		public Builder withSerializers(Serializer<?>...serializer) {
@@ -139,6 +163,33 @@ public class ObjectTransformer {
 			this.htmlSafe = htmlSafe; return this;
 		}
 		
+		public Builder withDeserializers(Deserializer<?>...deserializer) {
+			deserializers.addAll(Arrays.asList(deserializer));
+			return this;
+		}
+		
+		public Builder withDeserializerFactory(DeserializerFactory<? extends Deserializer<?>>...factory) {
+			deserializerFactories.addAll(Arrays.asList(factory));
+			return this;
+		}
+		
+		public Builder withDynaDeserializer(ChainedDeserializer deserializer) {
+			dynaDeserializer = deserializer;
+			return this;
+		}
+		
+		public Builder withoutDefaultDeserializers() {
+			withDefaultDeserializers = false; return this;
+		}
+		
+		public Builder withoutDefaultDeserializerFactories() {
+			withDefaultDeserializerFactories = false; return this;
+		}
+		
+		public Builder withoutDefaultDynamicDeserializer() {
+			withDefaultDynamicDeserializer = false; return this;
+		}
+		
 		public ObjectTransformer create() {
 			if ( withDefaultSerializers ) {
 				serializers.addAll(DefaultSerializers.createDefaultSerializers());
@@ -154,7 +205,22 @@ public class ObjectTransformer {
 				else dynaSerializer = DefaultSerializers.createDefaultDynamicSerializer();
 			}
 			
-			return new ObjectTransformer(new SerializerProvider(serializers, serializerFactories, dynaSerializer), null, skipNull, htmlSafe);
+			if ( withDefaultDeserializers ) {
+				deserializers.addAll(DefaultDeserializers.createDefaultDeserializers());
+			}
+			
+			if ( withDefaultDeserializerFactories ) {
+				deserializerFactories.addAll(DefaultDeserializers.createDefaultDeserializerFactories());
+			}
+			
+			if ( withDefaultDynamicDeserializer ) {
+				if ( dynaDeserializer != null )
+					dynaDeserializer.withNext(DefaultDeserializers.createDefaultDynamicDeserializer());
+				else dynaDeserializer = DefaultDeserializers.createDefaultDynamicDeserializer();
+			}
+			
+			return new ObjectTransformer(new SerializerProvider(serializers, serializerFactories, dynaSerializer), 
+					new DeserializerProvider(deserializers, deserializerFactories, dynaDeserializer), skipNull, htmlSafe);
 		}
 	}
 }

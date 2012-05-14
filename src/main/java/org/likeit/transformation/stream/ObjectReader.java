@@ -14,9 +14,10 @@ public interface ObjectReader {
 	 * ou d'un objet ça renvoie null. Il faut alors appeler endArray ou endObject pour passer a la suite au niveau
 	 * d'au dessus.
 	 */
-	public ObjectReader next() throws IOException;
+	public TokenType next() throws IOException;
 	public boolean hasNext() throws IOException;
 	
+	public TokenType getTokenType();
 	public String name() throws IOException;
 	public String value() throws IOException;
 }
