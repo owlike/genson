@@ -80,7 +80,8 @@ public class DefaultSerializers {
 			
 			writer.beginArray();
 			for ( Object o : array ) {
-				ctx.serialize(o, o.getClass(), writer);
+				if ( o != null ) ctx.serialize(o, o.getClass(), writer);
+				else writer.valueNull();
 			}
 			writer.endArray();
 		}
@@ -136,7 +137,8 @@ public class DefaultSerializers {
 				throws TransformationException, IOException {
 			writer.beginArray();
 			for ( Object o : obj ) {
-				ctx.serialize(o, o.getClass(), writer);
+				if ( o != null ) ctx.serialize(o, o.getClass(), writer);
+				else writer.valueNull();
 			}
 			writer.endArray();
 		}
