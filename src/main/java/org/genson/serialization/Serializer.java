@@ -1,0 +1,21 @@
+package org.genson.serialization;
+
+import java.io.IOException;
+import java.lang.reflect.Type;
+
+import org.genson.Context;
+import org.genson.TransformationException;
+import org.genson.stream.ObjectWriter;
+
+/**
+ * Genson Serializers work like classic serializers from other libraries.
+ * Here is an example of a custom serializer that handles BigIntegers
+ * 
+ * 
+ * @author eugen
+ *
+ * @param <T> the type of objects this Serializer can serialize.
+ */
+public interface Serializer<T> {
+	public void serialize(T obj, Type type, ObjectWriter writer, Context ctx) throws TransformationException, IOException;
+}

@@ -2,48 +2,22 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.likeit</groupId>
-	<artifactId>obj-transfo</artifactId>
-	<version>0.1-SNAPSHOT</version>
+	<groupId>org.genson</groupId>
+	<artifactId>genson</artifactId>
+	<version>0.8-SNAPSHOT</version>
 	<packaging>jar</packaging>
-	<name>Object Transformations</name>
+	<name>Genson</name>
 
 	<properties>
 		<org.springframework.version>3.1.0.RELEASE</org.springframework.version>
 	</properties>
 
-	<repositories>
-		<repository>
-			<id>sonatype-jetty</id>
-			<name>Sonatype jetty repo</name>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<url>https://oss.sonatype.org/content/groups/jetty</url>
-		</repository>
-
-		<repository>
-			<id>mybatis</id>
-			<name>MyBatis Repository</name>
-			<url>https://oss.sonatype.org/content/repositories/releases/</url>
-		</repository>
-
-		<repository>
-			<id>repo-sd-31445.dedibox.fr</id>
-			<name>repo sd-31445.dedibox.fr</name>
-			<url>http://sd-31445.dedibox.fr:8082/repository/</url>
-		</repository>
-	</repositories>
-
-
-
 	<dependencies>
-	
 		<dependency>
-			<groupId>org.codehaus.jackson</groupId>
-			<artifactId>jackson-mapper-asl</artifactId>
-			<version>[1.6.4,2.0.0]</version>
-			<scope>test</scope>
+			<groupId>asm</groupId>
+			<artifactId>asm-commons</artifactId>
+			<version>3.3.1</version>
+			<optional>true</optional>
 		</dependency>
 
 		<dependency>
@@ -91,6 +65,25 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<version>${org.springframework.version}</version>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-mapper-asl</artifactId>
+			<version>[1.6.4,2.0.0]</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.2.1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.10</version>
@@ -98,5 +91,92 @@
 		</dependency>
 	</dependencies>
 
+
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.7</version>
+			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>cobertura-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</reporting>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<configuration>
+					<downloadSources>true</downloadSources>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>jarjar-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>jarjar</goal>
+						</goals>
+						<configuration>
+							<skipManifest>false</skipManifest>
+							<includes>
+								<include>asm:asm</include>
+							</includes>
+							<rules>
+								<rule>
+									<pattern>org.objectweb.asm.**</pattern>
+									<result>org.genson.internal.asm.@1</result>
+								</rule>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>2.1.1</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>cobertura-maven-plugin</artifactId>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+				<version>3.0-beta-3</version>
+			</plugin>
+		</plugins>
+	</build>
 
 </project>
