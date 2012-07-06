@@ -10,3 +10,5 @@ logs/
 work/
 target/
 !.gitignore
+.classpath
+.project
