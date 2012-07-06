@@ -270,9 +270,10 @@ public final class TypeUtil {
 
 		Type type = lookupGenericType(clazz, oClazz);
 		if (type != null) {
+			type = expandType(type, oClazz);
 			if (type instanceof ParameterizedType) {
 				ParameterizedType pType = (ParameterizedType) type;
-				return match(parameter, pType.getActualTypeArguments()[0], strictMatch) ? type
+				return match(parameter, pType.getActualTypeArguments()[0], strictMatch)? type
 						: null;
 			}
 		}
@@ -298,7 +299,7 @@ public final class TypeUtil {
 	public final static boolean match(Type type, Class<?> typeCtx, Type oType, Class<?> oTypeCtx,
 			boolean strictMatch) {
 		if (type == null || oType == null)
-			return false;
+			return type == null && oType == null;
 		Class<?> clazz = getRawClass(type, typeCtx);
 		Class<?> oClazz = getRawClass(oType, oTypeCtx);
 		boolean match = strictMatch ? oClazz.equals(clazz) : oClazz.isAssignableFrom(clazz);

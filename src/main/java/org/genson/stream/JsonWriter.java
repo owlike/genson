@@ -6,9 +6,6 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 
 public class JsonWriter implements ObjectWriter {
-	private final Writer writer;
-	private final boolean htmlSafe;
-
 	protected final static char BEGIN_ARRAY = '[';
 	protected final static char END_ARRAY = ']';
 	protected final static char BEGIN_OBJECT = '{';
@@ -55,12 +52,16 @@ public class JsonWriter implements ObjectWriter {
 	private final static char[] TRUE_VALUE = { 't', 'r', 'u', 'e' };
 	private final static char[] FALSE_VALUE = { 'f', 'a', 'l', 's', 'e' };
 	// seems to work well, but maybe a smaller value would be better?
-	private final int _LIMIT_WRITE_TO_BUFFER = 64;
+	private final static int _LIMIT_WRITE_TO_BUFFER = 64;
 
+	private final boolean htmlSafe;
+	private final boolean skipNull;
+
+	private final Writer writer;
 	private final Deque<JsonType> _ctx = new ArrayDeque<JsonType>();
 	private boolean _hasPrevious;
 	private String _name;
-	private final boolean skipNull;
+	private boolean _metadataWritten = false;
 
 	// TODO recyclebuffer increases a bit performances
 	private final char[] _buffer = new char[1024];
@@ -93,6 +94,10 @@ public class JsonWriter implements ObjectWriter {
 	}
 
 	public JsonWriter beginObject() throws IOException {
+		if (_metadataWritten) {
+			_metadataWritten = false;
+			return this;
+		}
 		return begin(JsonType.OBJECT, BEGIN_OBJECT);
 	}
 
@@ -151,6 +156,11 @@ public class JsonWriter implements ObjectWriter {
 	}
 
 	private final JsonWriter lazyName() throws IOException {
+		if (_metadataWritten)
+			throw new IllegalStateException(
+					"You have written metadata to the writer but did not call beginObject after it." +
+					"Metadata is not allowed in array or for literal values.");
+
 		if (_name != null && _ctx.peek() != JsonType.ARRAY) {
 			final int l = _name.length();
 			// hum I dont think there may be names with a length near to 1024... we flush only once
@@ -311,26 +321,17 @@ public class JsonWriter implements ObjectWriter {
 	}
 
 	@Override
-	public ObjectWriter metadata(String name, String value) throws IOException {
-		if (_ctx.peek() != JsonType.OBJECT)
-			throw new IllegalStateException(
-					"Metadata is allowed in objects only and must be written first!");
-
-		// again I dont think a name will reach 1024 so its not worth to handle that case
-		if ((_len + 5 + name.length()) >= _bufferSize)
-			flushBuffer();
-		separate();
-		_buffer[_len++] = QUOTE;
-		_buffer[_len++] = '@';
-		writeToBuffer(name, 0, name.length());
-		_buffer[_len++] = QUOTE;
-		_buffer[_len++] = NAME_SEPARATOR;
-
+	public JsonWriter metadata(String name, String value) throws IOException {
+		if (!_metadataWritten)
+			begin(JsonType.OBJECT, BEGIN_OBJECT);
+		writeName('@' + name);
 		writeValue(value);
+		_metadataWritten = true;
 		return this;
 	}
 
-	private final void writeToBuffer(final char[] data, final int offset, final int length) throws IOException {
+	private final void writeToBuffer(final char[] data, final int offset, final int length)
+			throws IOException {
 		if (length < _LIMIT_WRITE_TO_BUFFER && length < (_bufferSize - _len)) {
 			System.arraycopy(data, offset, _buffer, _len, length);
 			_len += length;
@@ -344,7 +345,8 @@ public class JsonWriter implements ObjectWriter {
 		writeToBuffer(data, offset, data.length());
 	}
 
-	private final void writeToBuffer(final String data, final int offset, final int length) throws IOException {
+	private final void writeToBuffer(final String data, final int offset, final int length)
+			throws IOException {
 		if (length < _LIMIT_WRITE_TO_BUFFER && length < (_bufferSize - _len)) {
 			data.getChars(offset, length, _buffer, _len);
 			_len += length;

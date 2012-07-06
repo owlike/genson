@@ -28,5 +28,5 @@ import java.lang.annotation.Target;
 @Inherited
 @Documented
 public @interface JsonProperty {
-	String name();
+	String value();
 }

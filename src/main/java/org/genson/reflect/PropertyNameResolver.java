@@ -159,7 +159,7 @@ public interface PropertyNameResolver {
 			String name = null;
 			for (int j = 0; j < paramAnns.length; j++) {
 				if (paramAnns[j] instanceof JsonProperty) {
-					name = ((JsonProperty) paramAnns[j]).name();
+					name = ((JsonProperty) paramAnns[j]).value();
 					break;
 				}
 			}
@@ -172,7 +172,7 @@ public interface PropertyNameResolver {
 			String name = null;
 			for (Annotation ann : anns) {
 				if (ann instanceof JsonProperty) {
-					name = ((JsonProperty) ann).name();
+					name = ((JsonProperty) ann).value();
 					break;
 				}
 			}
@@ -191,7 +191,7 @@ public interface PropertyNameResolver {
 		
 		protected String getName(AnnotatedElement annElement) {
 			JsonProperty name = annElement.getAnnotation(JsonProperty.class);
-			return name != null && name.name() != null && !name.name().isEmpty() ? name.name()
+			return name != null && name.value() != null && !name.value().isEmpty() ? name.value()
 					: null;
 		}
 	}

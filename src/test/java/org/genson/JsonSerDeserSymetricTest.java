@@ -17,6 +17,7 @@ import org.genson.annotation.Creator;
 import org.genson.annotation.JsonProperty;
 import org.genson.bean.ComplexObject;
 import org.genson.bean.Primitives;
+import org.genson.convert.Converter;
 import org.genson.stream.ObjectReader;
 import org.genson.stream.ObjectWriter;
 import org.junit.Test;
@@ -66,7 +67,9 @@ public class JsonSerDeserSymetricTest {
 		Person p = new Person("Mr");
 		p.birthYear = 1986;
 		p.name = "eugen";
-
+		
+		Genson genson = new Genson.Builder().setWithBeanViewConverter(true).create();
+		
 		String json = genson.serialize(p, ViewOfPerson.class);
 		assertEquals("{\"age\":" + new ViewOfPerson().getAge(p) + ",\"gender\":\"M\",\"name\":\""
 				+ p.name + "\"}", json);
@@ -168,7 +171,7 @@ public class JsonSerDeserSymetricTest {
 					: "Mrs".equalsIgnoreCase(p.civility) ? "F" : "UNKNOWN";
 		}
 
-		public @JsonProperty(name = "name")
+		public @JsonProperty(value = "name")
 		String getNameOf(Person p) {
 			return p.name;
 		}
@@ -181,7 +184,7 @@ public class JsonSerDeserSymetricTest {
 			p.name = name;
 		}
 
-		@JsonProperty(name = "age")
+		@JsonProperty(value = "age")
 		public void setBirthYear(int personBirthYear, Person p) {
 			p.birthYear = GregorianCalendar.getInstance().get(Calendar.YEAR) - personBirthYear;
 		}

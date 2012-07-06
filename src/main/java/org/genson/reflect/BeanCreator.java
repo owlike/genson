@@ -11,19 +11,21 @@ import java.util.List;
 import java.util.Map;
 
 import org.genson.TransformationException;
+import org.genson.convert.Deserializer;
 
-
-public abstract class BeanCreator implements Comparable<BeanCreator> {
+public abstract class BeanCreator<T> implements Comparable<BeanCreator<T>> {
 	// The type of object it can create
-	protected final Class<?> ofClass;
-	protected final Map<String, BeanCreatorProperty> parameters;
+	protected final Class<T> ofClass;
+	protected final Map<String, BeanCreatorProperty<T, ?>> parameters;
 
-	public BeanCreator(Class<?> ofClass, String[] parameterNames, Type[] types, Annotation[][] anns) {
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public BeanCreator(Class<T> ofClass, String[] parameterNames, Type[] types,
+			Annotation[][] anns, Deserializer<?>[] propertiesDeserializers) {
 		this.ofClass = ofClass;
-		this.parameters = new HashMap<String, BeanCreatorProperty>(parameterNames.length);
+		this.parameters = new HashMap<String, BeanCreatorProperty<T, ?>>(parameterNames.length);
 		for (int i = 0; i < parameterNames.length; i++) {
 			this.parameters.put(parameterNames[i], new BeanCreatorProperty(parameterNames[i],
-					types[i], i, anns[i], ofClass, this));
+					types[i], i, anns[i], ofClass, this, propertiesDeserializers[i]));
 		}
 	}
 
@@ -36,36 +38,36 @@ public abstract class BeanCreator implements Comparable<BeanCreator> {
 	}
 
 	@Override
-	public int compareTo(BeanCreator o) {
+	public int compareTo(BeanCreator<T> o) {
 		int comp = o.priority() - priority();
 		return comp != 0 ? comp : parameters.size() - o.parameters.size();
 	}
-	
-	public abstract Object create(Object... args) throws TransformationException;
+
+	public abstract T create(Object... args) throws TransformationException;
 
 	protected abstract String signature();
-	
+
 	public abstract int priority();
-	
+
 	protected TransformationException couldNotCreate(Exception e) {
-		return new TransformationException("Could not create bean of type "
-				+ ofClass.getName() + " using creator " + signature(),
-				e);
+		return new TransformationException("Could not create bean of type " + ofClass.getName()
+				+ " using creator " + signature(), e);
 	}
-	
-	public static class ConstructorBeanCreator extends BeanCreator {
-		protected final Constructor<?> constructor;
-		
-		public ConstructorBeanCreator(Class<?> ofClass, Constructor<?> constructor,
-				String[] parameterNames) {
-			super(ofClass, parameterNames, constructor.getGenericParameterTypes(), constructor.getParameterAnnotations());
+
+	public static class ConstructorBeanCreator<T> extends BeanCreator<T> {
+		protected final Constructor<T> constructor;
+
+		public ConstructorBeanCreator(Class<T> ofClass, Constructor<T> constructor,
+				String[] parameterNames, Deserializer<?>[] propertiesDeserializers) {
+			super(ofClass, parameterNames, constructor.getGenericParameterTypes(), constructor
+					.getParameterAnnotations(), propertiesDeserializers);
 			this.constructor = constructor;
 			if (!constructor.isAccessible()) {
 				constructor.setAccessible(true);
 			}
 		}
-		
-		public Object create(Object... args) throws TransformationException {
+
+		public T create(Object... args) throws TransformationException {
 			try {
 				return constructor.newInstance(args);
 			} catch (IllegalArgumentException e) {
@@ -89,25 +91,28 @@ public abstract class BeanCreator implements Comparable<BeanCreator> {
 			return 50;
 		}
 	}
-	
-	public static class MethodBeanCreator extends BeanCreator {
+
+	public static class MethodBeanCreator<T> extends BeanCreator<T> {
 		protected final Method _creator;
-		
-		public MethodBeanCreator(Class<?> ofClass, Method method,
-				String[] parameterNames) {
-			super(method.getReturnType(), parameterNames, method.getGenericParameterTypes(), method.getParameterAnnotations());
+
+		@SuppressWarnings("unchecked")
+		public MethodBeanCreator(Method method, String[] parameterNames,
+				Deserializer<?>[] propertiesDeserializers) {
+			super((Class<T>) method.getReturnType(), parameterNames, method
+					.getGenericParameterTypes(), method.getParameterAnnotations(),
+					propertiesDeserializers);
 			if (!Modifier.isStatic(method.getModifiers()))
-					throw new IllegalStateException("Only static methods can be used as creators!");
+				throw new IllegalStateException("Only static methods can be used as creators!");
 			this._creator = method;
 			if (!_creator.isAccessible()) {
 				_creator.setAccessible(true);
 			}
 		}
-		
-		public Object create(Object... args) throws TransformationException {
+
+		public T create(Object... args) throws TransformationException {
 			try {
 				// we will handle only static method creators
-				return _creator.invoke(null, args);
+				return ofClass.cast(_creator.invoke(null, args));
 			} catch (IllegalArgumentException e) {
 				throw couldNotCreate(e);
 			} catch (IllegalAccessException e) {
@@ -128,14 +133,15 @@ public abstract class BeanCreator implements Comparable<BeanCreator> {
 		}
 	}
 
-	public static class BeanCreatorProperty extends PropertyMutator {
+	public static class BeanCreatorProperty<T, P> extends PropertyMutator<T, P> {
 		protected final int index;
 		protected final Annotation[] annotations;
-		protected final BeanCreator creator;
+		protected final BeanCreator<T> creator;
 
 		protected BeanCreatorProperty(String name, Type type, int index, Annotation[] annotations,
-				Class<?> declaringClass, BeanCreator creator) {
-			super(name, type, declaringClass);
+				Class<T> declaringClass, BeanCreator<T> creator,
+				Deserializer<P> propertyDeserializer) {
+			super(name, type, declaringClass, propertyDeserializer);
 			this.index = index;
 			this.annotations = annotations;
 			this.creator = creator;
@@ -161,7 +167,7 @@ public abstract class BeanCreator implements Comparable<BeanCreator> {
 		}
 
 		@Override
-		public void mutate(Object target, Object value) {
+		public void mutate(T target, P value) {
 			throw new IllegalStateException(
 					"Method mutate should not be called on a mutator of type "
 							+ getClass().getName()

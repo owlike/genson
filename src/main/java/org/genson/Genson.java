@@ -15,38 +15,30 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-import org.genson.deserialization.BeanDeserializer;
-import org.genson.deserialization.BeanViewDeserializer;
-import org.genson.deserialization.ChainedDeserializer;
-import org.genson.deserialization.DefaultDeserializers;
-import org.genson.deserialization.Deserializer;
-import org.genson.deserialization.DeserializerProvider;
-import org.genson.deserialization.DefaultDeserializers.ArrayDeserializerFactory;
-import org.genson.deserialization.DefaultDeserializers.BooleanDeserializerFactory;
-import org.genson.deserialization.DefaultDeserializers.CollectionDeserializer;
-import org.genson.deserialization.DefaultDeserializers.MapDeserializer;
-import org.genson.deserialization.DefaultDeserializers.NumberDeserializerFactory;
-import org.genson.deserialization.DefaultDeserializers.UntypedDeserializerFactory;
+import org.genson.convert.BasicConvertersFactory;
+import org.genson.convert.BeanViewConverter;
+import org.genson.convert.CircularClassReferenceConverterFactory;
+import org.genson.convert.ClassMetadataConverter;
+import org.genson.convert.Converter;
+import org.genson.convert.NullConverter;
+import org.genson.convert.DefaultConverters;
+import org.genson.convert.Deserializer;
+import org.genson.convert.RuntimeTypeConverter;
+import org.genson.convert.Serializer;
 import org.genson.reflect.ASMCreatorParameterNameResolver;
 import org.genson.reflect.BaseBeanDescriptorProvider;
 import org.genson.reflect.BeanDescriptorProvider;
 import org.genson.reflect.BeanMutatorAccessorResolver;
 import org.genson.reflect.BeanViewDescriptorProvider;
+import org.genson.reflect.ChainedFactory;
 import org.genson.reflect.PropertyNameResolver;
 import org.genson.reflect.PropertyNameResolver.CompositePropertyNameResolver;
-import org.genson.serialization.BeanSerializer;
-import org.genson.serialization.BeanViewSerializer;
-import org.genson.serialization.ChainedSerializer;
-import org.genson.serialization.DefaultSerializers;
-import org.genson.serialization.Serializer;
-import org.genson.serialization.SerializerProvider;
 import org.genson.stream.JsonReader;
 import org.genson.stream.JsonWriter;
 import org.genson.stream.ObjectReader;
 import org.genson.stream.ObjectWriter;
-import org.genson.stream.ValueType;
-
 
 /**
  * <p>
@@ -58,54 +50,60 @@ import org.genson.stream.ValueType;
  * To create a new instance you can use the default constructor {@link #Genson} or the
  * {@link Builder} class to have control over its configuration. <br>
  * For example, if you want to register a custom Serializer : <br>
- * <pre>Genson genson = new Genson.Builder().with(mySerializer, anotherSerializer).create();
+ * 
+ * <pre>
+ * Genson genson = new Genson.Builder().with(mySerializer, anotherSerializer).create();
  * </pre>
+ * 
  * Use the {@link #serialize} and {@link #deserialize} methods to convert java to json and json to
  * java. The Serializers and Deserializers take as an argument an instance of {@link Context} class,
  * this object will be passed through all the chain and is statefull, so you can store inside some
  */
 public final class Genson {
 	/**
-	 * Default genson configuration, the default configuration (sers, desers, etc)
-	 * will be shared accros all default Genson instances.
+	 * Default genson configuration, the default configuration (sers, desers, etc) will be shared
+	 * accros all default Genson instances.
 	 */
 	private final static Genson _default = new Builder().create();
 
-	private final SerializerProvider serializerProvider;
-	private final DeserializerProvider deserializerProvider;
-	private final BeanDescriptorProvider beanDescriptorProvider;
+	private final ConcurrentHashMap<Type, Converter<?>> converterCache = new ConcurrentHashMap<Type, Converter<?>>();
+	private final Factory<Converter<?>> converterFactory;
+	private final BeanDescriptorProvider beanDescriptorFactory;
+
 	private final Map<Class<?>, String> classAliasMap;
 	private final Map<String, Class<?>> aliasClassMap;
 
-	private boolean skipNull;
-	private boolean htmlSafe;
-	private boolean withClassMetadata;
+	private final boolean skipNull;
+	private final boolean htmlSafe;
+	private final boolean withClassMetadata;
 
 	/**
 	 * The default constructor will use the default configuration provided by the {@link Builder}.
 	 * In most cases using this default constructor will suffice.
 	 */
 	public Genson() {
-		this(_default.serializerProvider, _default.deserializerProvider, _default.beanDescriptorProvider, _default.skipNull,
+		this(_default.converterFactory, _default.beanDescriptorFactory, _default.skipNull,
 				_default.htmlSafe, _default.aliasClassMap, _default.withClassMetadata);
 	}
 
 	/**
-	 * The configurable constructor, the {@link Builder} should be used instead of this constructor directly.
+	 * The configurable constructor, the {@link Builder} should be used instead of this constructor
+	 * directly.
+	 * 
 	 * @param serializerProvider
 	 * @param deserializerProvider
 	 * @param skipNull
 	 * @param htmlSafe
 	 * @param classAliases
-	 * @param withClassMetadata indicates wether class information should be written/readen to/from json.
-	 * If true the deserializers will try to use it to determine the type of the object being deserialized.
+	 * @param withClassMetadata indicates wether class information should be written/readen to/from
+	 *        json. If true the deserializers will try to use it to determine the type of the object
+	 *        being deserialized.
 	 */
-	public Genson(SerializerProvider serializerProvider,
-			DeserializerProvider deserializerProvider, BeanDescriptorProvider beanDescriptorProvider, boolean skipNull, boolean htmlSafe,
-			Map<String, Class<?>> classAliases, boolean withClassMetadata) {
-		this.serializerProvider = serializerProvider;
-		this.deserializerProvider = deserializerProvider;
-		this.beanDescriptorProvider = beanDescriptorProvider;
+	public Genson(Factory<Converter<?>> converterFactory, BeanDescriptorProvider beanDescProvider,
+			boolean skipNull, boolean htmlSafe, Map<String, Class<?>> classAliases,
+			boolean withClassMetadata) {
+		this.converterFactory = converterFactory;
+		this.beanDescriptorFactory = beanDescProvider;
 		this.skipNull = skipNull;
 		this.htmlSafe = htmlSafe;
 		this.aliasClassMap = classAliases;
@@ -114,6 +112,18 @@ public final class Genson {
 		for (Map.Entry<String, Class<?>> entry : classAliases.entrySet()) {
 			classAliasMap.put(entry.getValue(), entry.getKey());
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> Converter<T> provideConverter(Type forType) {
+		Converter<T> converter = (Converter<T>) converterCache.get(forType);
+		if (converter == null) {
+			converter = (Converter<T>) converterFactory.create(forType, this);
+			if (converter == null)
+				throw new TransformationRuntimeException("No converter found for type " + forType);
+			converterCache.put(forType, converter);
+		}
+		return converter;
 	}
 
 	public <T> String serialize(T o) throws TransformationException, IOException {
@@ -127,8 +137,7 @@ public final class Genson {
 	public <T> String serialize(T o, Class<? extends BeanView<?>>... withViews)
 			throws TransformationException, IOException {
 		JsonWriter writer = new JsonWriter(new StringWriter(), skipNull, htmlSafe);
-		serialize(o, o.getClass(), writer,
-				new Context(this, Arrays.asList(withViews)));
+		serialize(o, o.getClass(), writer, new Context(this, Arrays.asList(withViews)));
 		writer.flush();
 		return writer.unwrap().toString();
 	}
@@ -141,83 +150,51 @@ public final class Genson {
 
 	public <T> void serialize(T obj, Type type, ObjectWriter writer, Context ctx)
 			throws TransformationException, IOException {
-		if (obj != null) {
-			if (String.class.equals(type) )
-				writer.writeValue((String) obj);
-			else {
-				Serializer<T> ser = serializerProvider.provide(type);
-				ser.serialize(obj, type, writer, ctx);
-			}
-		} else
-			writer.writeNull();
+		Serializer<T> ser = provideConverter(type);
+		ser.serialize(obj, type, writer, ctx);
 	}
 
-	public <T> T deserialize(String fromSource, Class<T> toClass) throws TransformationException, IOException {
+	public <T> T deserialize(String fromSource, Class<T> toClass) throws TransformationException,
+			IOException {
 		return deserialize(toClass, new JsonReader(new StringReader(fromSource)), new Context(this));
 	}
 
-	public <T> T deserialize(String fromSource, GenericType<T> toType) throws TransformationException, IOException {
-		return deserialize(toType.getType(), new JsonReader(new StringReader(fromSource)), new Context(this));
+	public <T> T deserialize(String fromSource, GenericType<T> toType)
+			throws TransformationException, IOException {
+		return deserialize(toType.getType(), new JsonReader(new StringReader(fromSource)),
+				new Context(this));
 	}
-	
-	public <T> T deserialize(Reader reader, Type toType) throws TransformationException, IOException {
+
+	public <T> T deserialize(Reader reader, Type toType) throws TransformationException,
+			IOException {
 		return deserialize(toType, new JsonReader(reader), new Context(this));
 	}
-	
-	public <T> T deserialize(String fromSource, Type toType) throws TransformationException, IOException {
+
+	public <T> T deserialize(String fromSource, Type toType) throws TransformationException,
+			IOException {
 		StringReader reader = new StringReader(fromSource);
-		return deserialize(toType, new JsonReader(reader),  new Context(this, null));
+		return deserialize(toType, new JsonReader(reader), new Context(this, null));
 	}
 
-	public <T> T deserialize(String fromSource, Type toType, Class<? extends BeanView<?>>... withViews) throws TransformationException, IOException {
+	public <T> T deserialize(String fromSource, Type toType,
+			Class<? extends BeanView<?>>... withViews) throws TransformationException, IOException {
 		StringReader reader = new StringReader(fromSource);
-		return deserialize(toType, new JsonReader(reader),  new Context(this, Arrays.asList(withViews)));
-	}
-	
-	public <T> T deserialize(Type type, Reader reader, Class<? extends BeanView<?>>... withViews) throws TransformationException, IOException {
-		return deserialize(type, new JsonReader(reader), new Context(this, Arrays.asList(withViews)));
+		return deserialize(toType, new JsonReader(reader),
+				new Context(this, Arrays.asList(withViews)));
 	}
 
-	@SuppressWarnings("unchecked")
+	public <T> T deserialize(Type type, Reader reader, Class<? extends BeanView<?>>... withViews)
+			throws TransformationException, IOException {
+		return deserialize(type, new JsonReader(reader),
+				new Context(this, Arrays.asList(withViews)));
+	}
+
 	public <T> T deserialize(Type type, ObjectReader reader, Context ctx)
 			throws TransformationException, IOException {
-		if (!ValueType.NULL.equals(reader.getValueType())) {
-			if ( String.class.equals(type) ) 
-				return (T) reader.valueAsString();
-			else {
-				if (isWithClassMetadata() && ValueType.OBJECT.equals(reader.getValueType())) {
-    				String className = reader.nextObjectMetadata().metadata("class");
-    				if (className != null) {
-    					try {
-        					type = classFor(className);
-    					} catch (ClassNotFoundException e) {
-    						throw new TransformationException("Could not use @class metadata, no such class: "
-    								+ className);
-    					}
-    				}
-				}
-    			Deserializer<T> deser = deserializerProvider.provide(type);
-    			return deser.deserialize(type, reader, ctx);
-			}
-		} else return (T) handleNull(type);
+		Deserializer<T> deser = provideConverter(type);
+		return deser.deserialize(type, reader, ctx);
 	}
 
-	protected Object handleNull(Type type) {
-		if (!(type instanceof Class))
-			return null;
-		Class<?> clazz = (Class<?>) type;
-		if(clazz.isPrimitive()) {
-			if (clazz == int.class) return 0;
-			if (clazz == double.class) return 0d;
-			if (clazz == boolean.class) return false;
-			if (clazz == long.class) return 0l;
-			if (clazz == float.class) return 0f;
-			if (clazz == short.class) return 0;
-		}
-		// its an object
-		return null;
-	}
-	
 	public <T> String aliasFor(Class<T> clazz) {
 		String alias = classAliasMap.get(clazz);
 		if (alias == null) {
@@ -239,23 +216,11 @@ public final class Genson {
 	public ObjectWriter createWriter(OutputStream os) {
 		return new JsonWriter(new OutputStreamWriter(os), skipNull, htmlSafe);
 	}
-	
+
 	public ObjectReader createReader(InputStream is) {
 		return new JsonReader(new InputStreamReader(is));
 	}
-	
-	public SerializerProvider getSerializerProvider() {
-		return serializerProvider;
-	}
 
-	public DeserializerProvider getDeserializerProvider() {
-		return deserializerProvider;
-	}
-
-	public BeanDescriptorProvider getBeanDescriptorProvider() {
-		return beanDescriptorProvider;
-	}
-	
 	public boolean isSkipNull() {
 		return skipNull;
 	}
@@ -267,14 +232,15 @@ public final class Genson {
 	public boolean isWithClassMetadata() {
 		return withClassMetadata;
 	}
-	
-	/**
-	 * Builder en interface Builder<T extends Builder<T>> pour pouvoir etre sous classe
-	 */
+
+	public BeanDescriptorProvider getBeanDescriptorFactory() {
+		return beanDescriptorFactory;
+	}
+
 	public static class Builder {
-		private final List<Serializer<?>> serializers = new ArrayList<Serializer<?>>();
-		private final List<Factory<? extends Serializer<?>>> serializerFactories = new ArrayList<Factory<? extends Serializer<?>>>();;
-		private ChainedSerializer dynaSerializer;
+		private final List<Object> converters = new ArrayList<Object>();
+		private final List<Factory<?>> converterFactories = new ArrayList<Factory<?>>();
+
 		private boolean skipNull = false;
 		private boolean htmlSafe = false;
 		private boolean withClassMetadata = false;
@@ -282,10 +248,8 @@ public final class Genson {
 		private boolean throwExcOnNoDebugInfo = true;
 		private boolean useGettersAndSetters = true;
 		private boolean useFields = true;
-
-		private final List<Deserializer<?>> deserializers = new ArrayList<Deserializer<?>>();
-		private final List<Factory<? extends Deserializer<?>>> deserializerFactories = new ArrayList<Factory<? extends Deserializer<?>>>();
-		private ChainedDeserializer dynaDeserializer;
+		private boolean withBeanViewConverter = false;
+		private boolean useRuntimeTypeForSerialization = false;
 
 		private PropertyNameResolver propertyNameResolver;
 		private BeanMutatorAccessorResolver mutatorAccessorResolver;
@@ -293,38 +257,45 @@ public final class Genson {
 
 		// for the moment we don't allow to override
 		private BeanViewDescriptorProvider beanViewDescriptorProvider;
-		
+
 		private final Map<String, Class<?>> withClassAliases = new HashMap<String, Class<?>>();
 
 		public Builder() {
-
 		}
 
 		public Builder addAlias(String alias, Class<?> forClass) {
-			 withClassMetadata = true;
-    		 withClassAliases.put(alias, forClass);
-    		 return this;
-		 }
-
-		public Builder with(Converter<?>... converter) {
-			List<Converter<?>> converters =  Arrays.asList(converter);
-			serializers.addAll(converters);
-			deserializers.addAll(converters);
+			withClassMetadata = true;
+			withClassAliases.put(alias, forClass);
 			return this;
 		}
-		
+
+		public Builder with(Converter<?>... converter) {
+			converters.addAll(Arrays.asList(converter));
+			return this;
+		}
+
 		public Builder with(Serializer<?>... serializer) {
-			serializers.addAll(Arrays.asList(serializer));
+			converters.addAll(Arrays.asList(serializer));
+			return this;
+		}
+
+		public Builder with(Deserializer<?>... deserializer) {
+			converters.addAll(Arrays.asList(deserializer));
+			return this;
+		}
+
+		public Builder withConverterFactory(Factory<? extends Converter<?>>... factory) {
+			converterFactories.addAll(Arrays.asList(factory));
 			return this;
 		}
 
 		public Builder withSerializerFactory(Factory<? extends Serializer<?>>... factory) {
-			serializerFactories.addAll(Arrays.asList(factory));
+			converterFactories.addAll(Arrays.asList(factory));
 			return this;
 		}
 
-		public Builder set(ChainedSerializer serializer) {
-			dynaSerializer = serializer;
+		public Builder withDeserializerFactory(Factory<? extends Deserializer<?>>... factory) {
+			converterFactories.addAll(Arrays.asList(factory));
 			return this;
 		}
 
@@ -333,29 +304,17 @@ public final class Genson {
 			return this;
 		}
 
+		public boolean isSkipNull() {
+			return skipNull;
+		}
+
 		public Builder setHtmlSafe(boolean htmlSafe) {
 			this.htmlSafe = htmlSafe;
 			return this;
 		}
 
-		public Builder with(Deserializer<?>... deserializer) {
-			deserializers.addAll(Arrays.asList(deserializer));
-			return this;
-		}
-
-		public Builder withDeserializerFactory(Factory<? extends Deserializer<?>>... factory) {
-			deserializerFactories.addAll(Arrays.asList(factory));
-			return this;
-		}
-
-		public Builder set(ChainedDeserializer deserializer) {
-			dynaDeserializer = deserializer;
-			return this;
-		}
-
-		public Builder set(BeanDescriptorProvider provider) {
-			this.beanDescriptorProvider = provider;
-			return this;
+		public boolean isHtmlSafe() {
+			return htmlSafe;
 		}
 
 		public Builder set(BeanMutatorAccessorResolver resolver) {
@@ -368,7 +327,7 @@ public final class Genson {
 			return this;
 		}
 
-		public Builder with(PropertyNameResolver[] resolvers) {
+		public Builder with(PropertyNameResolver... resolvers) {
 			if (propertyNameResolver == null)
 				propertyNameResolver = createPropertyNameResolver();
 			if (propertyNameResolver instanceof CompositePropertyNameResolver)
@@ -379,7 +338,7 @@ public final class Genson {
 								+ CompositePropertyNameResolver.class.getName());
 			return this;
 		}
-		
+
 		public boolean isWithClassMetadata() {
 			return withClassMetadata;
 		}
@@ -398,11 +357,11 @@ public final class Genson {
 			return this;
 		}
 
-		public boolean isThrowExcOnNoDebugInfo() {
+		public boolean isThrowExceptionOnNoDebugInfo() {
 			return throwExcOnNoDebugInfo;
 		}
 
-		public Builder setThrowExcOnNoDebugInfo(boolean throwExcOnNoDebugInfo) {
+		public Builder setThrowExceptionIfNoDebugInfo(boolean throwExcOnNoDebugInfo) {
 			this.throwExcOnNoDebugInfo = throwExcOnNoDebugInfo;
 			return this;
 		}
@@ -425,43 +384,86 @@ public final class Genson {
 			return this;
 		}
 
+		public boolean isWithBeanViewConverter() {
+			return withBeanViewConverter;
+		}
+
+		public Builder setWithBeanViewConverter(boolean withBeanViewConverter) {
+			this.withBeanViewConverter = withBeanViewConverter;
+			return this;
+		}
+
+		public boolean isUseRuntimeTypeForSerialization() {
+			return useRuntimeTypeForSerialization;
+		}
+
+		public Builder setUseRuntimeTypeForSerialization(boolean useRuntimeTypeForSerialization) {
+			this.useRuntimeTypeForSerialization = useRuntimeTypeForSerialization;
+			return this;
+		}
+
 		public Genson create() {
 			if (propertyNameResolver == null)
 				propertyNameResolver = createPropertyNameResolver();
 			if (mutatorAccessorResolver == null)
 				mutatorAccessorResolver = createBeanMutatorAccessorResolver();
 
-			if (beanDescriptorProvider == null)
-				beanDescriptorProvider = createBeanDescriptorProvider();
+			beanDescriptorProvider = createBeanDescriptorProvider();
 
-			beanViewDescriptorProvider = new BeanViewDescriptorProvider(new BeanViewDescriptorProvider.BeanViewMutatorAccessorResolver(), getPropertyNameResolver());
-			
+			if (withBeanViewConverter) {
+				beanViewDescriptorProvider = new BeanViewDescriptorProvider(
+						new BeanViewDescriptorProvider.BeanViewMutatorAccessorResolver(),
+						getPropertyNameResolver());
+			}
+
+			List<Converter<?>> convs = new ArrayList<Converter<?>>();
+			addDefaultConverters(convs);
+			converters.addAll(convs);
+
+			List<Serializer<?>> serializers = new ArrayList<Serializer<?>>();
 			addDefaultSerializers(serializers);
-			addDefaultSerializerFactories(serializerFactories);
-			if (dynaSerializer != null)
-				dynaSerializer.withNext(createDefaultDynamicSerializer());
-			else
-				dynaSerializer = createDefaultDynamicSerializer();
+			converters.addAll(serializers);
 
+			List<Deserializer<?>> deserializers = new ArrayList<Deserializer<?>>();
 			addDefaultDeserializers(deserializers);
+			converters.addAll(deserializers);
+
+			List<Factory<? extends Converter<?>>> convFactories = new ArrayList<Factory<? extends Converter<?>>>();
+			addDefaultConverterFactories(convFactories);
+			converterFactories.addAll(convFactories);
+
+			List<Factory<? extends Serializer<?>>> serializerFactories = new ArrayList<Factory<? extends Serializer<?>>>();
+			addDefaultSerializerFactories(serializerFactories);
+			converterFactories.addAll(serializerFactories);
+
+			List<Factory<? extends Deserializer<?>>> deserializerFactories = new ArrayList<Factory<? extends Deserializer<?>>>();
 			addDefaultDeserializerFactories(deserializerFactories);
+			converterFactories.addAll(deserializerFactories);
 
-			if (dynaDeserializer != null)
-				dynaDeserializer.withNext(createDefaultDynamicDeserializer());
-			else
-				dynaDeserializer = createDefaultDynamicDeserializer();
-
-			return create(
-					createSerializerProvider(serializers, serializerFactories, dynaSerializer),
-					createDeserializerProvider(deserializers, deserializerFactories,
-							dynaDeserializer), skipNull, htmlSafe, withClassAliases, withClassMetadata);
+			return create(createConverterFactory(), withClassAliases);
 		}
 
-		protected Genson create(SerializerProvider serializerProvider,
-				DeserializerProvider deserializerProvider, boolean skipNull, boolean htmlSafe,
-				Map<String, Class<?>> classAliases, boolean withClassMetadata) {
-			return new Genson(serializerProvider, deserializerProvider, beanDescriptorProvider, skipNull, htmlSafe,
-					classAliases, withClassMetadata);
+		protected Genson create(Factory<Converter<?>> converterFactory,
+				Map<String, Class<?>> classAliases) {
+			return new Genson(converterFactory, getBeanDescriptorProvider(), isSkipNull(),
+					isHtmlSafe(), classAliases, isWithClassMetadata());
+		}
+
+		protected Factory<Converter<?>> createConverterFactory() {
+			ChainedFactory chainHead = new CircularClassReferenceConverterFactory();
+			ChainedFactory chainTail = chainHead;
+			chainTail = chainTail.withNext(new NullConverter.NullConverterFactory()).withNext(
+					new ClassMetadataConverter.ClassMetadataConverterFactory());
+			if (isUseRuntimeTypeForSerialization())
+				chainTail = chainTail.withNext(RuntimeTypeConverter.runtimeTypeConverterFactory);
+			if (isWithBeanViewConverter())
+				chainTail = chainTail.withNext(new BeanViewConverter.BeanViewConverterFactory(
+						getBeanViewDescriptorProvider()));
+
+			chainTail.withNext(new BasicConvertersFactory(getConverters(), getStandardFactories(),
+					getBeanDescriptorProvider()));
+
+			return chainHead;
 		}
 
 		protected BeanMutatorAccessorResolver createBeanMutatorAccessorResolver() {
@@ -472,65 +474,46 @@ public final class Genson {
 			List<PropertyNameResolver> resolvers = new ArrayList<PropertyNameResolver>();
 			resolvers.add(new PropertyNameResolver.AnnotationPropertyNameResolver());
 			resolvers.add(new PropertyNameResolver.ConventionalBeanPropertyNameResolver());
-			resolvers.add(new ASMCreatorParameterNameResolver(isThrowExcOnNoDebugInfo()));
+			resolvers.add(new ASMCreatorParameterNameResolver(isThrowExceptionOnNoDebugInfo()));
 
 			return new PropertyNameResolver.CompositePropertyNameResolver(resolvers);
 		}
 
+		protected void addDefaultConverters(List<Converter<?>> converters) {
+			converters.add(DefaultConverters.StringConverter.instance);
+			converters.add(DefaultConverters.BooleanConverter.instance);
+			converters.add(DefaultConverters.IntegerConverter.instance);
+			converters.add(DefaultConverters.DoubleConverter.instance);
+			converters.add(DefaultConverters.LongConverter.instance);
+			converters.add(DefaultConverters.NumberConverter.instance);
+			converters.add(new DefaultConverters.DateConverter(getDateFormat()));
+		}
+
+		protected void addDefaultConverterFactories(List<Factory<? extends Converter<?>>> factories) {
+			factories.add(DefaultConverters.ArrayConverterFactory.instance);
+			factories.add(DefaultConverters.CollectionConverterFactory.instance);
+			factories.add(DefaultConverters.MapConverterFactory.instance);
+			factories.add(DefaultConverters.PrimitiveConverterFactory.instance);
+			factories.add(DefaultConverters.UntypedConverterFactory.instance);
+		}
+
 		protected void addDefaultSerializers(List<Serializer<?>> serializers) {
-			serializers.add(new DefaultSerializers.CollectionSerializer());
-			serializers.add(new DefaultSerializers.MapSerializer());
-			if (getDateFormat() != null) serializers.add(new DefaultSerializers.DateSerializer(getDateFormat()));
-			else serializers.add(new DefaultSerializers.DateSerializer());
 		}
 
 		protected void addDefaultSerializerFactories(
 				List<Factory<? extends Serializer<?>>> serializerFactories) {
-			serializerFactories.add(new DefaultSerializers.ArraySerializerFactory());
-			serializerFactories.add(new DefaultSerializers.NumberSerializerFactory());
-			serializerFactories.add(new DefaultSerializers.BooleanSerializerFactory());
-		}
-
-		protected ChainedSerializer createDefaultDynamicSerializer() {
-			return new BeanViewSerializer(getBeanViewDescriptorProvider(), new BeanSerializer(getBeanDescriptorProvider()));
-		}
-
-		protected SerializerProvider createSerializerProvider(List<Serializer<?>> serializers,
-				List<Factory<? extends Serializer<?>>> serializerFactories,
-				Serializer<?> dynamicSerializer) {
-			return new SerializerProvider.BaseSerializerProvider(serializers, serializerFactories, dynamicSerializer);
 		}
 
 		protected void addDefaultDeserializers(List<Deserializer<?>> deserializers) {
-			deserializers.add(new CollectionDeserializer());
-			deserializers.add(new MapDeserializer());
-			if(getDateFormat() != null) deserializers.add(new DefaultDeserializers.DateDeserializer(getDateFormat()));
-			else deserializers.add(new DefaultDeserializers.DateDeserializer());
 		}
 
 		protected void addDefaultDeserializerFactories(
 				List<Factory<? extends Deserializer<?>>> deserializerFactories) {
-			deserializerFactories.add(new NumberDeserializerFactory());
-			deserializerFactories.add(new BooleanDeserializerFactory());
-			deserializerFactories.add(new ArrayDeserializerFactory());
-			deserializerFactories.add(new UntypedDeserializerFactory());
-		}
-
-		protected ChainedDeserializer createDefaultDynamicDeserializer() {
-			return new BeanViewDeserializer(getBeanViewDescriptorProvider(), new BeanDeserializer(getBeanDescriptorProvider()));
-		}
-
-		protected DeserializerProvider createDeserializerProvider(
-				List<Deserializer<?>> deserializers,
-				List<Factory<? extends Deserializer<?>>> deserializerFactories,
-				Deserializer<?> dynamicDeserializer) {
-			return new DeserializerProvider.BaseDeserializerProvider(deserializers, deserializerFactories,
-					dynamicDeserializer);
 		}
 
 		protected BeanDescriptorProvider createBeanDescriptorProvider() {
-			return new BeanDescriptorProvider.CompositeBeanDescriptorProvider(Arrays.asList(new BaseBeanDescriptorProvider(
-					getMutatorAccessorResolver(), getPropertyNameResolver(), isUseGettersAndSetters(), isUseFields())));
+			return new BaseBeanDescriptorProvider(getMutatorAccessorResolver(),
+					getPropertyNameResolver(), isUseGettersAndSetters(), isUseFields());
 		}
 
 		protected PropertyNameResolver getPropertyNameResolver() {
@@ -544,9 +527,17 @@ public final class Genson {
 		protected BeanDescriptorProvider getBeanDescriptorProvider() {
 			return beanDescriptorProvider;
 		}
-		
+
 		protected BeanViewDescriptorProvider getBeanViewDescriptorProvider() {
 			return beanViewDescriptorProvider;
+		}
+
+		public List<Object> getConverters() {
+			return converters;
+		}
+
+		public List<Factory<?>> getStandardFactories() {
+			return converterFactories;
 		}
 	}
 }

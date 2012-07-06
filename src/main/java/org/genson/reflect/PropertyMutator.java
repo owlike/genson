@@ -1,36 +1,63 @@
 package org.genson.reflect;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
+import org.genson.Context;
+import org.genson.TransformationException;
 import org.genson.TransformationRuntimeException;
+import org.genson.convert.Deserializer;
+import org.genson.stream.ObjectReader;
 
+public abstract class PropertyMutator<T, P> extends BeanProperty<T> implements
+		Comparable<PropertyMutator<T, ?>> {
+	// package visibility for testing
+	final Deserializer<P> propertyDeserializer;
 
-public abstract class PropertyMutator extends BeanProperty implements Comparable<PropertyMutator> {
-	
-	protected PropertyMutator(String name, Type type, Class<?> declaringClass) {
+	protected PropertyMutator(String name, Type type, Class<T> declaringClass,
+			Deserializer<P> propertyDeserializer) {
 		super(name, type, declaringClass);
+		this.propertyDeserializer = propertyDeserializer;
 	}
-	
-	public abstract void mutate(Object target, Object value);
+
+	public P deserialize(ObjectReader reader, Context ctx) throws TransformationException,
+			IOException {
+		return propertyDeserializer.deserialize(type, reader, ctx);
+	}
+
+	public void deserialize(T into, ObjectReader reader, Context ctx)
+			throws TransformationException, IOException {
+		P propValue = propertyDeserializer.deserialize(type, reader, ctx);
+		mutate(into, propValue);
+	}
+
+	public abstract void mutate(T target, P value);
 
 	@Override
-	public int compareTo(PropertyMutator o) {
+	public int compareTo(PropertyMutator<T, ?> o) {
 		return o.priority() - priority();
 	}
-	
+
 	protected TransformationRuntimeException couldNotMutate(Exception e) {
 		return new TransformationRuntimeException("Could not mutate value of property named '"
 				+ name + "' using mutator " + signature(), e);
 	}
-	
-	public static class MethodMutator extends PropertyMutator {
+
+	public static class MethodMutator<T, P> extends PropertyMutator<T, P> {
 		protected final Method _setter;
 
-		public MethodMutator(String name, Method setter, Class<?> declaringClass) {
-			super(name, TypeUtil.expandType(setter.getGenericParameterTypes()[0], declaringClass), declaringClass);
+		public MethodMutator(String name, Method setter, Class<T> declaringClass,
+				Deserializer<P> propertyDeserializer) {
+			this(name, setter, TypeUtil.expandType(setter.getGenericParameterTypes()[0],
+					declaringClass), declaringClass, propertyDeserializer);
+		}
+
+		public MethodMutator(String name, Method setter, Type type, Class<T> declaringClass,
+				Deserializer<P> propertyDeserializer) {
+			super(name, type, declaringClass, propertyDeserializer);
 			this._setter = setter;
 			if (!_setter.isAccessible()) {
 				_setter.setAccessible(true);
@@ -38,7 +65,7 @@ public abstract class PropertyMutator extends BeanProperty implements Comparable
 		}
 
 		@Override
-		public void mutate(Object target, Object value) {
+		public void mutate(T target, P value) {
 			try {
 				_setter.invoke(target, value);
 			} catch (IllegalArgumentException e) {
@@ -61,11 +88,13 @@ public abstract class PropertyMutator extends BeanProperty implements Comparable
 		}
 	}
 
-	public static class FieldMutator extends PropertyMutator {
+	public static class FieldMutator<T, P> extends PropertyMutator<T, P> {
 		protected final Field _field;
 
-		public FieldMutator(String name, Field field, Class<?> declaringClass) {
-			super(name, TypeUtil.expandType(field.getGenericType(), declaringClass), declaringClass);
+		public FieldMutator(String name, Field field, Class<T> declaringClass,
+				Deserializer<P> propertyDeserializer) {
+			super(name, TypeUtil.expandType(field.getGenericType(), declaringClass),
+					declaringClass, propertyDeserializer);
 			this._field = field;
 			if (!_field.isAccessible()) {
 				_field.setAccessible(true);
@@ -73,7 +102,7 @@ public abstract class PropertyMutator extends BeanProperty implements Comparable
 		}
 
 		@Override
-		public void mutate(Object target, Object value) {
+		public void mutate(T target, P value) {
 			try {
 				_field.set(target, value);
 			} catch (IllegalArgumentException e) {

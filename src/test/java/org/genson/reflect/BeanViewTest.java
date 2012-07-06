@@ -12,7 +12,7 @@ import static org.junit.Assert.*;
 
 
 public class BeanViewTest {
-	Genson genson = new Genson.Builder().create();
+	Genson genson = new Genson.Builder().setWithBeanViewConverter(true).create();
 
 	@Test
 	public void testSerializeWithInheritedView() throws TransformationException, IOException {
@@ -49,7 +49,7 @@ public class BeanViewTest {
 		static int val;
 		
 		@Creator
-		public static MyClass create(String forName, @JsonProperty(name = "value") Integer theValue) {
+		public static MyClass create(String forName, @JsonProperty(value = "value") Integer theValue) {
 			usedCtr = true;
 			MyClass mc = new MyClass();
 			mc.name = forName;
@@ -62,7 +62,7 @@ public class BeanViewTest {
 			usedForNameMethod = true;
 		}
 
-		@JsonProperty(name = "forName")
+		@JsonProperty(value = "forName")
 		public String getHisName(MyClass b) {
 			return "his name is : " + b.name;
 		}

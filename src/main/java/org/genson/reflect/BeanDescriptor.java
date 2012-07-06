@@ -11,25 +11,24 @@ import java.util.Map;
 
 import org.genson.Context;
 import org.genson.TransformationException;
-import org.genson.deserialization.Deserializer;
+import org.genson.convert.Converter;
 import org.genson.reflect.BeanCreator.BeanCreatorProperty;
-import org.genson.serialization.Serializer;
 import org.genson.stream.ObjectReader;
 import org.genson.stream.ObjectWriter;
 
-public class BeanDescriptor implements Serializer<Object>, Deserializer<Object> {
+public class BeanDescriptor<T> implements Converter<T> {
 
-	final Class<?> ofClass;
-	final List<BeanCreator> _creators;
-	final Map<String, PropertyMutator> mutableProperties;
-	final List<PropertyAccessor> accessibleProperties;
+	final Class<T> ofClass;
+	final List<BeanCreator<T>> _creators;
+	final Map<String, PropertyMutator<T, ?>> mutableProperties;
+	final List<PropertyAccessor<T, ?>> accessibleProperties;
 
-	private final Map<List<String>, BeanCreator> namesCreatorCache;
-	private final BeanCreator _emptyCtr;
+	private final Map<List<String>, BeanCreator<T>> namesCreatorCache;
+	private final BeanCreator<T> _emptyCtr;
 
-	private final static Comparator<BeanProperty> _readablePropsComparator = new Comparator<BeanProperty>() {
+	private final static Comparator<BeanProperty<?>> _readablePropsComparator = new Comparator<BeanProperty<?>>() {
 		@Override
-		public int compare(BeanProperty o1, BeanProperty o2) {
+		public int compare(BeanProperty<?> o1, BeanProperty<?> o2) {
 			return o1.name.compareToIgnoreCase(o2.name);
 		}
 	};
@@ -42,11 +41,11 @@ public class BeanDescriptor implements Serializer<Object>, Deserializer<Object> 
 	// }
 	// };
 
-	public BeanDescriptor(Class<?> forClass, List<PropertyAccessor> readableBps,
-			Map<String, PropertyMutator> writableBps, List<BeanCreator> creators) {
+	public BeanDescriptor(Class<T> forClass, List<PropertyAccessor<T, ?>> readableBps,
+			Map<String, PropertyMutator<T, ?>> writableBps, List<BeanCreator<T>> creators) {
 		this.ofClass = forClass;
 		this._creators = creators;
-		namesCreatorCache = new HashMap<List<String>, BeanCreator>();
+		namesCreatorCache = new HashMap<List<String>, BeanCreator<T>>();
 		mutableProperties = writableBps;
 
 		Collections.sort(creators);
@@ -58,7 +57,7 @@ public class BeanDescriptor implements Serializer<Object>, Deserializer<Object> 
 			// use the no arg beancreator (constructor or method) and still set all the properties
 			boolean ok = true;
 			// we look if there exists property that is only present as ctr arg, if so we will have
-			for (PropertyMutator muta : mutableProperties.values())
+			for (PropertyMutator<T, ?> muta : mutableProperties.values())
 				if (muta instanceof BeanCreatorProperty) {
 					ok = false;
 					break;
@@ -80,18 +79,19 @@ public class BeanDescriptor implements Serializer<Object>, Deserializer<Object> 
 	}
 
 	@Override
-	public void serialize(Object obj, Type type, ObjectWriter writer, Context ctx)
+	public void serialize(T obj, Type type, ObjectWriter writer, Context ctx)
 			throws TransformationException, IOException {
-		for (PropertyAccessor accessor : accessibleProperties) {
-			writer.writeName(accessor.getName());
-			ctx.genson.serialize(accessor.access(obj), accessor.getType(), writer, ctx);
+		writer.beginObject();
+		for (PropertyAccessor<T, ?> accessor : accessibleProperties) {
+			accessor.serialize(obj, writer, ctx);
 		}
+		writer.endObject();
 	}
 
 	@Override
-	public Object deserialize(Type type, ObjectReader reader, Context ctx)
+	public T deserialize(Type type, ObjectReader reader, Context ctx)
 			throws TransformationException, IOException {
-		Object bean = null;
+		T bean = null;
 		// optimization for default ctr
 		if (_emptyCtr != null) {
 			bean = _emptyCtr.create();
@@ -101,15 +101,14 @@ public class BeanDescriptor implements Serializer<Object>, Deserializer<Object> 
 		return bean;
 	}
 
-	public void deserialize(Object into, ObjectReader reader, Context ctx) throws IOException, TransformationException {
+	public void deserialize(T into, ObjectReader reader, Context ctx) throws IOException, TransformationException {
 		reader.beginObject();
 		for (; reader.hasNext();) {
 			reader.next();
 			String propName = reader.name();
-			PropertyMutator mutator = mutableProperties.get(propName);
+			PropertyMutator<T, ?> mutator = mutableProperties.get(propName);
 			if (mutator != null) {
-				Object param = ctx.genson.deserialize(mutator.getType(), reader, ctx);
-				mutator.mutate(into, param);
+				mutator.deserialize(into, reader, ctx);
 			} else {
 				// TODO make it configurable
 				reader.skipValue();
@@ -118,7 +117,7 @@ public class BeanDescriptor implements Serializer<Object>, Deserializer<Object> 
 		reader.endObject();
 	}
 	
-	protected Object _deserWithCtrArgs(Type type, ObjectReader reader, Context ctx)
+	protected T _deserWithCtrArgs(Type type, ObjectReader reader, Context ctx)
 			throws TransformationException, IOException {
 		List<String> names = new ArrayList<String>();
 		List<Object> values = new ArrayList<Object>();
@@ -127,10 +126,10 @@ public class BeanDescriptor implements Serializer<Object>, Deserializer<Object> 
 		for (; reader.hasNext();) {
 			reader.next();
 			String propName = reader.name();
-			BeanProperty bp = mutableProperties.get(propName);
+			PropertyMutator<T, ?> muta = mutableProperties.get(propName);
 
-			if (bp != null) {
-				Object param = ctx.genson.deserialize(bp.getType(), reader, ctx);
+			if (muta != null) {
+				Object param = muta.deserialize(reader, ctx);
 				names.add(propName);
 				values.add(param);
 			} else {
@@ -139,11 +138,10 @@ public class BeanDescriptor implements Serializer<Object>, Deserializer<Object> 
 			}
 		}
 
-		Object bean = null;
-		BeanCreator creator = namesCreatorCache.get(names);
+		BeanCreator<T> creator = namesCreatorCache.get(names);
 		if (creator == null) {
 			int bestMatch = -1;
-			for (BeanCreator c : _creators) {
+			for (BeanCreator<T> c : _creators) {
 				int cnt = c.contains(names);
 				if (cnt > bestMatch) {
 					creator = c;
@@ -162,7 +160,7 @@ public class BeanDescriptor implements Serializer<Object>, Deserializer<Object> 
 		Object[] newValues = new Object[size];
 		// TODO if field for ctr is missing what to do?
 		for (int i = 0, j = 0; i < size; i++) {
-			BeanCreatorProperty mp = creator.parameters.get(names.get(i));
+			BeanCreatorProperty<T, ?> mp = creator.parameters.get(names.get(i));
 			if (mp != null) {
 				creatorArgs[mp.index] = values.get(i);
 			} else {
@@ -172,9 +170,10 @@ public class BeanDescriptor implements Serializer<Object>, Deserializer<Object> 
 			}
 		}
 
-		bean = creator.create(creatorArgs);
+		T bean = creator.create(creatorArgs);
 		for (int i = 0; i < size; i++) {
-			PropertyMutator property = mutableProperties.get(newNames[i]);
+			@SuppressWarnings("unchecked")
+			PropertyMutator<T, Object> property = (PropertyMutator<T, Object>) mutableProperties.get(newNames[i]);
 			if (property != null)
 				property.mutate(bean, newValues[i]);
 		}
