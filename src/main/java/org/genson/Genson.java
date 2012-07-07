@@ -40,6 +40,7 @@ import org.genson.stream.JsonWriter;
 import org.genson.stream.ObjectReader;
 import org.genson.stream.ObjectWriter;
 
+// TODO ajouter le unwrap pour gerer les annotations et plus?
 /**
  * <p>
  * Main class of the library. Instances of this class are intended to be reused. You can instantiate
@@ -250,7 +251,8 @@ public final class Genson {
 		private boolean useFields = true;
 		private boolean withBeanViewConverter = false;
 		private boolean useRuntimeTypeForSerialization = false;
-
+		private boolean withDebugInfoPropertyNameResolver = false;
+		
 		private PropertyNameResolver propertyNameResolver;
 		private BeanMutatorAccessorResolver mutatorAccessorResolver;
 		private BeanDescriptorProvider beanDescriptorProvider;
@@ -402,6 +404,15 @@ public final class Genson {
 			return this;
 		}
 
+		public boolean isWithDebugInfoPropertyNameResolver() {
+			return withDebugInfoPropertyNameResolver;
+		}
+
+		public Builder setWithDebugInfoPropertyNameResolver(boolean withDebugInfoPropertyNameResolver) {
+			this.withDebugInfoPropertyNameResolver = withDebugInfoPropertyNameResolver;
+			return this;
+		}
+
 		public Genson create() {
 			if (propertyNameResolver == null)
 				propertyNameResolver = createPropertyNameResolver();
@@ -474,7 +485,7 @@ public final class Genson {
 			List<PropertyNameResolver> resolvers = new ArrayList<PropertyNameResolver>();
 			resolvers.add(new PropertyNameResolver.AnnotationPropertyNameResolver());
 			resolvers.add(new PropertyNameResolver.ConventionalBeanPropertyNameResolver());
-			resolvers.add(new ASMCreatorParameterNameResolver(isThrowExceptionOnNoDebugInfo()));
+			if (isWithDebugInfoPropertyNameResolver()) resolvers.add(new ASMCreatorParameterNameResolver(isThrowExceptionOnNoDebugInfo()));
 
 			return new PropertyNameResolver.CompositePropertyNameResolver(resolvers);
 		}

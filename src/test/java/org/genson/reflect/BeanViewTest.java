@@ -10,25 +10,25 @@ import org.genson.annotation.JsonProperty;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-
 public class BeanViewTest {
-	Genson genson = new Genson.Builder().setWithBeanViewConverter(true).create();
+	Genson genson = new Genson.Builder().setWithBeanViewConverter(true)
+			.setWithDebugInfoPropertyNameResolver(true).create();
 
 	@Test
 	public void testSerializeWithInheritedView() throws TransformationException, IOException {
 		MyClass c = new MyClass();
 		c.name = "toto";
-		
+
 		String json = genson.serialize(c, ExtendedView.class);
-		assertEquals("{\"forName\":\"his name is : "+c.name+"\",\"value\":1}", json);
-		
+		assertEquals("{\"forName\":\"his name is : " + c.name + "\",\"value\":1}", json);
+
 		json = genson.serialize(c, ExtendedBeanView2Class.class);
 		assertEquals(json, "{\"value\":2}");
-		
+
 		json = genson.serialize(c, ConcreteView.class);
 		assertEquals(json, "{\"value\":3}");
 	}
-	
+
 	@Test
 	public void testDeserializeWithInheritedView() throws TransformationException, IOException {
 		String json = "{\"forName\": \"titi\", \"value\": 123}";
@@ -47,7 +47,7 @@ public class BeanViewTest {
 		static boolean usedCtr = false;
 		static boolean usedForNameMethod = false;
 		static int val;
-		
+
 		@Creator
 		public static MyClass create(String forName, @JsonProperty(value = "value") Integer theValue) {
 			usedCtr = true;
@@ -82,14 +82,14 @@ public class BeanViewTest {
 			return 2;
 		}
 	}
-	
+
 	public static class AbstractView<T> implements BeanView<T> {
 		public int getValue(T t) {
 			return 3;
 		}
 	}
-	
+
 	public static class ConcreteView extends AbstractView<MyClass> {
-		
+
 	}
 }

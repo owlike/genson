@@ -6,18 +6,9 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 
 public class JsonWriter implements ObjectWriter {
-	protected final static char BEGIN_ARRAY = '[';
-	protected final static char END_ARRAY = ']';
-	protected final static char BEGIN_OBJECT = '{';
-	protected final static char END_OBJECT = '}';
-	protected final static char QUOTE = '"';
-	protected final static char VALUE_BEGIN = '\"';
-	protected final static char VALUE_END = '\"';
-
-	protected final static char VALUE_SEPARATOR = ',';
-	protected final static char NAME_SEPARATOR = ':';
 	/*
 	 * Recupere dans gson
+	 * TODO try to do something different and faster, optimize writeValue(String)
 	 */
 	private final static String[] REPLACEMENT_CHARS;
 	private final static String[] HTML_SAFE_REPLACEMENT_CHARS;
@@ -90,7 +81,7 @@ public class JsonWriter implements ObjectWriter {
 	}
 
 	public JsonWriter beginArray() throws IOException {
-		return begin(JsonType.ARRAY, BEGIN_ARRAY);
+		return begin(JsonType.ARRAY, '[');
 	}
 
 	public JsonWriter beginObject() throws IOException {
@@ -98,12 +89,11 @@ public class JsonWriter implements ObjectWriter {
 			_metadataWritten = false;
 			return this;
 		}
-		return begin(JsonType.OBJECT, BEGIN_OBJECT);
+		return begin(JsonType.OBJECT, '{');
 	}
 
 	protected final JsonWriter begin(final JsonType jsonType, final char token) throws IOException {
-		separateAndFlush();
-		lazyName();
+		beforeValue();
 		_ctx.push(jsonType);
 		if ((_len + 1) >= _bufferSize)
 			flushBuffer();
@@ -113,11 +103,11 @@ public class JsonWriter implements ObjectWriter {
 	}
 
 	public JsonWriter endArray() throws IOException {
-		return end(JsonType.ARRAY, END_ARRAY);
+		return end(JsonType.ARRAY, ']');
 	}
 
 	public JsonWriter endObject() throws IOException {
-		return end(JsonType.OBJECT, END_OBJECT);
+		return end(JsonType.OBJECT, '}');
 	}
 
 	private final JsonWriter end(final JsonType jsonType, final char token) throws IOException {
@@ -131,21 +121,30 @@ public class JsonWriter implements ObjectWriter {
 		return this;
 	}
 
-	/**
-	 * As a small optimization lets take into account the character ',' in the others methods
-	 * calling this one, so we avoid a lot of microscopic flush...
-	 */
-	private final JsonWriter separate() throws IOException {
-		if (_hasPrevious)
-			_buffer[_len++] = VALUE_SEPARATOR;
-		return this;
-	}
+	private final JsonWriter beforeValue() throws IOException {
+		if (_metadataWritten)
+			throw new IllegalStateException(
+					"You have written metadata to the writer but did not call beginObject after it."
+							+ "Metadata is not allowed in array or for literal values.");
 
-	private final JsonWriter separateAndFlush() throws IOException {
 		if (_ctx.peek() == JsonType.ARRAY && _hasPrevious) {
 			if ((_len + 1) >= _bufferSize)
 				flushBuffer();
-			_buffer[_len++] = VALUE_SEPARATOR;
+			_buffer[_len++] = ',';
+		}
+
+		if (_name != null && _ctx.peek() != JsonType.ARRAY) {
+			final int l = _name.length();
+			// hum I dont think there may be names with a length near to 1024... we flush only once
+			if ((_len + 4 + l) >= _bufferSize)
+				flushBuffer();
+			if (_hasPrevious)
+				_buffer[_len++] = ',';
+			_buffer[_len++] = '"';
+			writeToBuffer(_name, 0, l);
+			_buffer[_len++] = '"';
+			_buffer[_len++] = ':';
+			_name = null;
 		}
 		return this;
 	}
@@ -155,30 +154,8 @@ public class JsonWriter implements ObjectWriter {
 		return this;
 	}
 
-	private final JsonWriter lazyName() throws IOException {
-		if (_metadataWritten)
-			throw new IllegalStateException(
-					"You have written metadata to the writer but did not call beginObject after it." +
-					"Metadata is not allowed in array or for literal values.");
-
-		if (_name != null && _ctx.peek() != JsonType.ARRAY) {
-			final int l = _name.length();
-			// hum I dont think there may be names with a length near to 1024... we flush only once
-			if ((_len + 4 + l) >= _bufferSize)
-				flushBuffer();
-			separate();
-			_buffer[_len++] = QUOTE;
-			writeToBuffer(_name, 0, l);
-			_buffer[_len++] = QUOTE;
-			_buffer[_len++] = NAME_SEPARATOR;
-			_name = null;
-		}
-		return this;
-	}
-
 	public JsonWriter writeValue(int value) throws IOException {
-		separateAndFlush();
-		lazyName();
+		beforeValue();
 		// ok so the buffer must always be bigger than the max length of a long
 		if ((_len + 11) >= _bufferSize)
 			flushBuffer();
@@ -192,16 +169,14 @@ public class JsonWriter implements ObjectWriter {
 	}
 
 	public JsonWriter writeValue(final double value) throws IOException {
-		separateAndFlush();
-		lazyName();
+		beforeValue();
 		writeToBuffer(Double.toString(value), 0);
 		_hasPrevious = true;
 		return this;
 	}
 
 	public JsonWriter writeValue(long value) throws IOException {
-		separateAndFlush();
-		lazyName();
+		beforeValue();
 		// ok so the buffer must always be bigger than the max length of a long
 		if ((_len + 21) >= _bufferSize)
 			flushBuffer();
@@ -215,8 +190,7 @@ public class JsonWriter implements ObjectWriter {
 	}
 
 	public JsonWriter writeValue(final boolean value) throws IOException {
-		separateAndFlush();
-		lazyName();
+		beforeValue();
 		if (value)
 			writeToBuffer(TRUE_VALUE, 0, 4);
 		else
@@ -245,30 +219,31 @@ public class JsonWriter implements ObjectWriter {
 	}
 
 	public JsonWriter writeValue(final Number value) throws IOException {
-		separateAndFlush();
-		lazyName();
+		beforeValue();
 		writeToBuffer(value.toString(), 0);
 		_hasPrevious = true;
 		return this;
 	}
 
 	public JsonWriter writeUnsafeValue(final String value) throws IOException {
-		separateAndFlush();
-		lazyName();
+		beforeValue();
+		if ((_len + 1) >= _bufferSize)
+			flushBuffer();
+		_buffer[_len++] = '"';
 		writeToBuffer(value.toCharArray(), 0, value.length());
+		if ((_len + 1) >= _bufferSize)
+			flushBuffer();
+		_buffer[_len++] = '"';
 		_hasPrevious = true;
 		return this;
 	}
 
 	public JsonWriter writeValue(final String value) throws IOException {
-		separateAndFlush();
-
-		lazyName();
-
+		beforeValue();
 		final String[] replacements = htmlSafe ? HTML_SAFE_REPLACEMENT_CHARS : REPLACEMENT_CHARS;
 		if ((_len + 1) >= _bufferSize)
 			flushBuffer();
-		_buffer[_len++] = VALUE_BEGIN;
+		_buffer[_len++] = '"';
 		int last = 0;
 		final int length = value.length();
 		final char[] carray = value.toCharArray();
@@ -300,7 +275,7 @@ public class JsonWriter implements ObjectWriter {
 		if ((_len + 1) >= _bufferSize)
 			flushBuffer();
 
-		_buffer[_len++] = VALUE_END;
+		_buffer[_len++] = '"';
 
 		_hasPrevious = true;
 
@@ -312,8 +287,7 @@ public class JsonWriter implements ObjectWriter {
 		if (skipNull) {
 			_name = null;
 		} else {
-			separateAndFlush();
-			lazyName();
+			beforeValue();
 			writeToBuffer(NULL_VALUE, 0, 4);
 			_hasPrevious = true;
 		}
@@ -323,7 +297,7 @@ public class JsonWriter implements ObjectWriter {
 	@Override
 	public JsonWriter metadata(String name, String value) throws IOException {
 		if (!_metadataWritten)
-			begin(JsonType.OBJECT, BEGIN_OBJECT);
+			begin(JsonType.OBJECT, '{');
 		writeName('@' + name);
 		writeValue(value);
 		_metadataWritten = true;

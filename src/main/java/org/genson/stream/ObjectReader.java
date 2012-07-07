@@ -20,7 +20,5 @@ public interface ObjectReader {
 	public int valueAsInt() throws IOException;
 	public long valueAsLong() throws IOException;
 	public double valueAsDouble() throws IOException;
-	// TODO long short float
-	public Number valueAsNumber() throws IOException;
 	public boolean valueAsBoolean() throws IOException;
 }

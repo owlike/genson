@@ -10,6 +10,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.genson.Operations;
+
 /*
  * TODO restructure and clean
  * TODO ExpandedType do we need a reference to an original type?=> Not nice to provide 2 implementations for ParameterizedType...
@@ -329,7 +331,7 @@ public final class TypeUtil {
 		} else if (type instanceof GenericArrayType) {
 			return new Type[] { ((GenericArrayType) type).getGenericComponentType() };
 		} else if (type instanceof WildcardType) {
-			return union(Type[].class, ((WildcardType) type).getUpperBounds(),
+			return Operations.union(Type[].class, ((WildcardType) type).getUpperBounds(),
 					((WildcardType) type).getLowerBounds());
 		} else if (type instanceof TypeVariable<?>) {
 			@SuppressWarnings("unchecked")
@@ -338,16 +340,6 @@ public final class TypeUtil {
 			return tvType.equals(resolvedType) ? new Type[] { resolvedType } : tvType.getBounds();
 		} else
 			return new Type[0];
-	}
-
-	public final static <T> T[] union(Class<T[]> tClass, T[]... values) {
-		int size = 0;
-		for (T[] value : values)
-			size += value.length;
-		T[] arr = tClass.cast(Array.newInstance(tClass.getComponentType(), size));
-		for (int i = 0, len = 0; i < values.length; len += values[i].length, i++)
-			System.arraycopy(values[i], 0, arr, len, values[i].length);
-		return arr;
 	}
 
 	/**

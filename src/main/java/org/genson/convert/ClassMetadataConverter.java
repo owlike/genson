@@ -12,7 +12,7 @@ import org.genson.stream.ObjectReader;
 import org.genson.stream.ObjectWriter;
 import org.genson.stream.ValueType;
 
-public class ClassMetadataConverter<T> implements Converter<T> {
+public class ClassMetadataConverter<T> extends Wrapper<Converter<T>> implements Converter<T> {
 	public static class ClassMetadataConverterFactory extends ChainedFactory {
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
@@ -24,7 +24,7 @@ public class ClassMetadataConverter<T> implements Converter<T> {
 								+ "as ClassMetadataConverter can not be the last converter in the chain!");
 
 			if (genson.isWithClassMetadata()
-					&& !nextObject.getClass().isAnnotationPresent(HandleClassMetadata.class))
+					&& !Wrapper.toAnnotatedElement(nextObject).isAnnotationPresent(HandleClassMetadata.class))
 				return new ClassMetadataConverter(nextObject);
 			else
 				return nextObject;
@@ -34,6 +34,7 @@ public class ClassMetadataConverter<T> implements Converter<T> {
 	private final Converter<T> converter;
 
 	public ClassMetadataConverter(Converter<T> delegate) {
+		super(delegate);
 		this.converter = delegate;
 	}
 

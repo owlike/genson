@@ -10,7 +10,7 @@ import org.genson.reflect.ChainedFactory;
 import org.genson.stream.ObjectReader;
 import org.genson.stream.ObjectWriter;
 
-public class RuntimeTypeConverter<T> implements Converter<T> {
+public class RuntimeTypeConverter<T> extends Wrapper<Converter<T>> implements Converter<T> {
 	public final static ChainedFactory runtimeTypeConverterFactory = new ChainedFactory() {
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
@@ -23,6 +23,7 @@ public class RuntimeTypeConverter<T> implements Converter<T> {
 	private final Converter<T> next;
 	
 	public RuntimeTypeConverter(Converter<T> next) {
+		super(next);
 		this.next = next;
 	}
 	

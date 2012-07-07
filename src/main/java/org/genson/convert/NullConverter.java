@@ -13,7 +13,7 @@ import org.genson.stream.ObjectWriter;
 import org.genson.stream.ValueType;
 
 //TODO handle exceptions in addition!! would be nice
-public class NullConverter<T> implements Converter<T> {
+public class NullConverter<T> extends Wrapper<Converter<T>> implements Converter<T> {
 	public static class NullConverterFactory extends ChainedFactory {
 
 		@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -25,7 +25,7 @@ public class NullConverter<T> implements Converter<T> {
 						"nextObject must be not null for NullConverter! " +
 						"NullConverter can not be the last converter in the chain!");
 
-			if (!nextObject.getClass().isAnnotationPresent(HandleNull.class))
+			if (!Wrapper.toAnnotatedElement(nextObject).isAnnotationPresent(HandleNull.class))
 				return new NullConverter(nextObject);
 			else
 				return nextObject;
@@ -35,6 +35,7 @@ public class NullConverter<T> implements Converter<T> {
 	private final Converter<T> converter;
 
 	private NullConverter(Converter<T> converter) {
+		super(converter);
 		this.converter = converter;
 	}
 

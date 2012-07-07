@@ -2,28 +2,36 @@ package org.genson;
 
 import java.awt.Point;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.Locale;
 
-import static junit.framework.Assert.*;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.DeserializationConfig;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.genson.Genson;
 import org.genson.TransformationException;
 import org.genson.annotation.Creator;
 import org.genson.annotation.JsonProperty;
 import org.genson.bean.ComplexObject;
+import org.genson.bean.Feed;
 import org.genson.bean.Primitives;
+import org.genson.bean.Tweet;
 import org.genson.convert.Converter;
 import org.genson.stream.ObjectReader;
 import org.genson.stream.ObjectWriter;
 import org.junit.Test;
 
 public class JsonSerDeserSymetricTest {
-	Genson genson = new Genson();
+	Genson genson = new Genson.Builder().setWithDebugInfoPropertyNameResolver(true).create();
 
 	@Test
 	public void testJsonComplexObjectSerDeser() throws TransformationException, IOException {
@@ -67,9 +75,10 @@ public class JsonSerDeserSymetricTest {
 		Person p = new Person("Mr");
 		p.birthYear = 1986;
 		p.name = "eugen";
-		
-		Genson genson = new Genson.Builder().setWithBeanViewConverter(true).create();
-		
+
+		Genson genson = new Genson.Builder().setWithBeanViewConverter(true)
+				.setWithDebugInfoPropertyNameResolver(true).create();
+
 		String json = genson.serialize(p, ViewOfPerson.class);
 		assertEquals("{\"age\":" + new ViewOfPerson().getAge(p) + ",\"gender\":\"M\",\"name\":\""
 				+ p.name + "\"}", json);
@@ -104,6 +113,57 @@ public class JsonSerDeserSymetricTest {
 	}
 
 	@Test
+	public void testDeserializeSerializeTweets() throws JsonParseException, JsonMappingException,
+			IOException, TransformationException {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		mapper.configure(DeserializationConfig.Feature.AUTO_DETECT_FIELDS, true);
+		mapper.setDateFormat(new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", Locale.US));
+
+		Genson genson = new Genson.Builder().setDateFormat(
+				new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", Locale.US)).create();
+
+		// we first deserialize the original data and ensure that genson deserialized it exactly as
+		// jackson
+		Tweet[] jacksonTweets = mapper.readValue(
+				ClassLoader.class.getResourceAsStream("/TWEETS.json"), Tweet[].class);
+		Tweet[] gensonTweets = genson.deserialize(
+				new InputStreamReader(ClassLoader.class.getResourceAsStream("/TWEETS.json")),
+				Tweet[].class);
+		assertArrayEquals(jacksonTweets, gensonTweets);
+
+		// and then we serialize it and try to deserialize again and match again what was
+		// deserialized by jackson
+		// this proves that genson serializes and deserializes correctly (except if there is a same
+		// error in genson and jackson lol!)
+		String tweetsString = genson.serialize(gensonTweets);
+		gensonTweets = genson.deserialize(tweetsString, Tweet[].class);
+		assertArrayEquals(jacksonTweets, gensonTweets);
+
+		// same test as before...
+		Feed jacksonShortFeed = mapper.readValue(
+				ClassLoader.class.getResourceAsStream("/READER_SHORT.json"), Feed.class);
+		Feed gensonShortFeed = genson.deserialize(
+				new InputStreamReader(ClassLoader.class.getResourceAsStream("/READER_SHORT.json")),
+				Feed.class);
+		assertEquals(jacksonShortFeed, gensonShortFeed);
+		String shortFeedString = genson.serialize(gensonShortFeed);
+		gensonShortFeed = genson.deserialize(shortFeedString, Feed.class);
+		assertEquals(jacksonShortFeed, gensonShortFeed);
+
+		// and again for the long reader data...
+		Feed jacksonLongFeed = mapper.readValue(
+				ClassLoader.class.getResourceAsStream("/READER_LONG.json"), Feed.class);
+		Feed gensonLongFeed = genson.deserialize(
+				new InputStreamReader(ClassLoader.class.getResourceAsStream("/READER_LONG.json")),
+				Feed.class);
+		assertEquals(jacksonLongFeed, gensonLongFeed);
+		String longFeedString = genson.serialize(gensonLongFeed);
+		gensonLongFeed = genson.deserialize(longFeedString, Feed.class);
+		assertEquals(jacksonLongFeed, gensonLongFeed);
+	}
+
+	@Test
 	public void testWithCustomObjectConverter() throws TransformationException, IOException {
 		Genson genson = new Genson.Builder().with(new Converter<Point>() {
 
@@ -119,23 +179,25 @@ public class JsonSerDeserSymetricTest {
 					throws TransformationException, IOException {
 				Point p = new Point();
 				reader.beginObject();
-				for(; reader.hasNext();) {
+				for (; reader.hasNext();) {
 					reader.next();
 					String name = reader.name();
-    				if ("x".equals(name)) p.x = reader.valueAsInt();
-    				else if ("y".equals(name)) p.y = reader.valueAsInt();
-    				else {
-    					// lets skip it
-    					reader.skipValue();
-    				}
+					if ("x".equals(name))
+						p.x = reader.valueAsInt();
+					else if ("y".equals(name))
+						p.y = reader.valueAsInt();
+					else {
+						// lets skip it
+						reader.skipValue();
+					}
 				}
 				reader.endObject();
 				return p;
 			}
 
 		}).create();
-		
-		Point p = new Point(1,2);
+
+		Point p = new Point(1, 2);
 		String serializedPoint = genson.serialize(p);
 		Point q = genson.deserialize(serializedPoint, Point.class);
 		assertEquals(p.x, q.x);

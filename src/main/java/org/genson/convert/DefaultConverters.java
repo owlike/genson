@@ -19,6 +19,7 @@ import org.genson.Genson;
 import org.genson.TransformationException;
 import org.genson.TransformationRuntimeException;
 import org.genson.annotation.HandleClassMetadata;
+import org.genson.annotation.WithoutBeanView;
 import org.genson.reflect.TypeUtil;
 import org.genson.stream.ObjectReader;
 import org.genson.stream.ObjectWriter;
@@ -120,9 +121,6 @@ public class DefaultConverters {
 				Array.set(array, idx++, elementConverter.deserialize(eClass, reader, ctx));
 			}
 			reader.endArray();
-			// int size = list.size();
-			// Object array = Array.newInstance(eClass, size);
-			// for (int i = 0; i < size; i++) Array.set(array, i, list.get(i));
 			if (idx < size) {
 				array = expandArray(array, idx, idx);
 			}
@@ -157,6 +155,7 @@ public class DefaultConverters {
 	};
 
 	@HandleClassMetadata
+	@WithoutBeanView
 	public final static class StringConverter implements Converter<String> {
 		public final static StringConverter instance = new StringConverter();
 
@@ -177,6 +176,7 @@ public class DefaultConverters {
 	};
 
 	@HandleClassMetadata
+	@WithoutBeanView
 	public final static class BooleanConverter implements Converter<Boolean> {
 		public final static BooleanConverter instance = new BooleanConverter();
 
@@ -201,6 +201,7 @@ public class DefaultConverters {
 	};
 
 	@HandleClassMetadata
+	@WithoutBeanView
 	public final static class IntegerConverter implements Converter<Integer> {
 		public final static IntegerConverter instance = new IntegerConverter();
 
@@ -225,6 +226,7 @@ public class DefaultConverters {
 	};
 
 	@HandleClassMetadata
+	@WithoutBeanView
 	public final static class LongConverter implements Converter<Long> {
 		public final static LongConverter instance = new LongConverter();
 
@@ -249,6 +251,7 @@ public class DefaultConverters {
 	};
 
 	@HandleClassMetadata
+	@WithoutBeanView
 	public final static class DoubleConverter implements Converter<Double> {
 		public final static DoubleConverter instance = new DoubleConverter();
 
@@ -273,6 +276,7 @@ public class DefaultConverters {
 	};
 
 	@HandleClassMetadata
+	@WithoutBeanView
 	public final static class NumberConverter implements Converter<Number> {
 		public final static NumberConverter instance = new NumberConverter();
 
@@ -340,6 +344,7 @@ public class DefaultConverters {
 		}
 		
 		@HandleClassMetadata
+		@WithoutBeanView
 		public final static class booleanConverter implements Converter<Boolean> {
 			public final static booleanConverter instance = new booleanConverter();
 			private booleanConverter() {}
@@ -357,6 +362,7 @@ public class DefaultConverters {
 		};
 		
 		@HandleClassMetadata
+		@WithoutBeanView
 		public final static class intConverter implements Converter<Integer> {
 			public final static intConverter instance = new intConverter();
 			private intConverter() {}
@@ -374,6 +380,7 @@ public class DefaultConverters {
 		};
 		
 		@HandleClassMetadata
+		@WithoutBeanView
 		public final static class doubleConverter implements Converter<Double> {
 			public final static doubleConverter instance = new doubleConverter();
 			private doubleConverter() {}
@@ -391,6 +398,7 @@ public class DefaultConverters {
 		};
 		
 		@HandleClassMetadata
+		@WithoutBeanView
 		public final static class longConverter implements Converter<Long> {
 			public final static longConverter instance = new longConverter();
 			private longConverter() {}
@@ -467,6 +475,7 @@ public class DefaultConverters {
 	};
 
 	@HandleClassMetadata
+	@WithoutBeanView
 	public static class DateConverter implements Converter<Date> {
 		private DateFormat dateFormat;
 
@@ -506,14 +515,17 @@ public class DefaultConverters {
 		}
 	}
 
-	@HandleClassMetadata
 	public final static class UntypedConverterFactory implements Factory<Converter<Object>> {
 		public final static UntypedConverterFactory instance = new UntypedConverterFactory();
 
 		private UntypedConverterFactory() {
 		}
 
-		private final Converter<Object> deser = new Converter<Object>() {
+		@HandleClassMetadata
+		private final static class UntypedConverter implements Converter<Object> {
+			final static UntypedConverter instance = new UntypedConverter();
+			private UntypedConverter() {}
+			
 			@Override
 			public Object deserialize(Type type, ObjectReader reader, Context ctx)
 					throws TransformationException, IOException {
@@ -533,7 +545,7 @@ public class DefaultConverters {
 		@Override
 		public Converter<Object> create(Type type, Genson genson) {
 			if (TypeUtil.match(type, Object.class, true)) {
-				return deser;
+				return UntypedConverter.instance;
 			}
 			return null;
 		}

@@ -41,7 +41,7 @@ public class BeanDescriptorTest {
 			protected Factory<Converter<?>> createConverterFactory() {
 				return new BasicConvertersFactory(getConverters(), getStandardFactories(), getBeanDescriptorProvider());
 			}
-		}.create();
+		}.setWithDebugInfoPropertyNameResolver(true).create();
 		
 		@SuppressWarnings("rawtypes")
 		BeanDescriptor<ThatObject> pDesc = (BeanDescriptor) genson.provideConverter(ThatObject.class);

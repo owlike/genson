@@ -13,7 +13,11 @@ import org.genson.stream.ObjectReader;
 import org.genson.stream.ObjectWriter;
 
 public class CircularClassReferenceConverterFactory extends ChainedFactory {
-	private final static class CircularConverter<T> implements Converter<T> {
+	private final static class CircularConverter<T> extends Wrapper<Converter<T>> implements Converter<T> {
+		protected CircularConverter() {
+			super();
+		}
+
 		private Converter<T> delegate;
 		@Override
 		public void serialize(T obj, Type type, ObjectWriter writer, Context ctx)
@@ -29,6 +33,7 @@ public class CircularClassReferenceConverterFactory extends ChainedFactory {
 		
 		void setDelegateConverter(Converter<T> delegate) {
 			this.delegate = delegate;
+			wrap(delegate);
 		}
 	}
 	

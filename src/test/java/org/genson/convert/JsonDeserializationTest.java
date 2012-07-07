@@ -27,7 +27,7 @@ public class JsonDeserializationTest {
 
 	@Before
 	public void init() throws TransformationException, IOException {
-		genson = new Genson();
+		genson = new Genson.Builder().setWithDebugInfoPropertyNameResolver(true).create();
 	}
 
 	@Test
