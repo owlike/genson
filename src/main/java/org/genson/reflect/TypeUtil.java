@@ -311,8 +311,8 @@ public final class TypeUtil {
 		Type[] types = getTypes(expand(type, typeCtx));
 		Type[] oTypes = getTypes(expand(oType, oTypeCtx));
 
-		match = match && (types.length == oTypes.length);
-
+		match = match && (types.length == oTypes.length || types.length == 0);
+		
 		for (int i = 0; i < types.length && match; i++)
 			match = match(types[i], typeCtx, oTypes[i], oTypeCtx, strictMatch);
 

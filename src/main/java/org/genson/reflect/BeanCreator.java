@@ -137,14 +137,22 @@ public abstract class BeanCreator<T> implements Comparable<BeanCreator<T>> {
 		protected final int index;
 		protected final Annotation[] annotations;
 		protected final BeanCreator<T> creator;
+		protected final boolean doThrowMutateException;
 
 		protected BeanCreatorProperty(String name, Type type, int index, Annotation[] annotations,
 				Class<T> declaringClass, BeanCreator<T> creator,
 				Deserializer<P> propertyDeserializer) {
+			this(name, type, index, annotations, declaringClass, creator, propertyDeserializer, false);
+		}
+		
+		protected BeanCreatorProperty(String name, Type type, int index, Annotation[] annotations,
+				Class<T> declaringClass, BeanCreator<T> creator,
+				Deserializer<P> propertyDeserializer, boolean doThrowMutateException) {
 			super(name, type, declaringClass, propertyDeserializer);
 			this.index = index;
 			this.annotations = annotations;
 			this.creator = creator;
+			this.doThrowMutateException = doThrowMutateException;
 		}
 
 		public int getIndex() {
@@ -168,10 +176,12 @@ public abstract class BeanCreator<T> implements Comparable<BeanCreator<T>> {
 
 		@Override
 		public void mutate(T target, P value) {
-			throw new IllegalStateException(
-					"Method mutate should not be called on a mutator of type "
-							+ getClass().getName()
-							+ ", this property exists only as constructor parameter!");
+			if (doThrowMutateException) {
+    			throw new IllegalStateException(
+    					"Method mutate should not be called on a mutator of type "
+    							+ getClass().getName()
+    							+ ", this property exists only as constructor parameter!");
+			}
 		}
 
 	}

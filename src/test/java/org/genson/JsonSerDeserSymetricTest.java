@@ -23,6 +23,7 @@ import org.genson.annotation.Creator;
 import org.genson.annotation.JsonProperty;
 import org.genson.bean.ComplexObject;
 import org.genson.bean.Feed;
+import org.genson.bean.MediaContent;
 import org.genson.bean.Primitives;
 import org.genson.bean.Tweet;
 import org.genson.convert.Converter;
@@ -202,6 +203,18 @@ public class JsonSerDeserSymetricTest {
 		Point q = genson.deserialize(serializedPoint, Point.class);
 		assertEquals(p.x, q.x);
 		assertEquals(p.y, q.y);
+	}
+	
+	@Test public void testSerializeDeserializeMediaContent() throws JsonParseException, JsonMappingException, IOException, TransformationException {
+		ObjectMapper mapper = new ObjectMapper();
+		Genson genson = new Genson();
+		MediaContent jacksonContent = mapper.readValue(ClassLoader.class.getResourceAsStream("/MEDIA_CONTENT.json"), MediaContent.class);
+		MediaContent gensonContent = genson.deserialize(new InputStreamReader(ClassLoader.class.getResourceAsStream("/MEDIA_CONTENT.json")), MediaContent.class);
+		assertEquals(jacksonContent, gensonContent);
+		String json = genson.serialize(gensonContent);
+		System.out.println(json);
+		gensonContent = genson.deserialize(json, MediaContent.class);
+		assertEquals(jacksonContent, gensonContent);
 	}
 
 	public static class Person {

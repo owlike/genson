@@ -14,6 +14,7 @@ import org.genson.Genson;
 import org.genson.TransformationException;
 import org.genson.annotation.JsonProperty;
 import org.genson.bean.ComplexObject;
+import org.genson.bean.Media.Player;
 import org.genson.bean.Primitives;
 import org.genson.convert.DefaultConverters;
 import org.genson.reflect.BeanDescriptor;
@@ -249,7 +250,7 @@ public class JsonDeserializationTest {
 		assertTrue(p instanceof Rectangle);
 	}
 
-	public void testDeserealizeIntoExistingBean() throws IOException, TransformationException {
+	@Test public void testDeserealizeIntoExistingBean() throws IOException, TransformationException {
 		@SuppressWarnings("unchecked")
 		BeanDescriptor<ClassWithConstructorFieldsAndGetters> desc = (BeanDescriptor<ClassWithConstructorFieldsAndGetters>) genson.getBeanDescriptorFactory().create(ClassWithConstructorFieldsAndGetters.class, genson);
 		ClassWithConstructorFieldsAndGetters c = new ClassWithConstructorFieldsAndGetters(1) {
@@ -266,6 +267,9 @@ public class JsonDeserializationTest {
 		assertEquals(c.p2, new Integer(2));
 	}
 	
+	@Test public void testDeserializeEnum() throws TransformationException, IOException {
+		assertEquals(Player.JAVA, genson.deserialize("\"JAVA\"", Player.class));
+	}
 	
 	@SuppressWarnings("unused")
 	private static class ClassWithConstructorFieldsAndGetters {

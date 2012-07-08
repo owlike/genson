@@ -8,7 +8,9 @@ import org.genson.Genson;
 import org.genson.TransformationException;
 import org.genson.annotation.JsonIgnore;
 import org.genson.bean.ComplexObject;
+import org.genson.bean.Media.Player;
 import org.genson.bean.Primitives;
+
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -73,6 +75,10 @@ public class JsonSerializationTest {
 		json = genson.serialize(new ClassWithFieldsAndGetter("a", 0));
 		assertTrue(json
 				.startsWith("{\"@class\":\"org.genson.convert.JsonSerializationTest$ClassWithFieldsAndGetter\""));
+	}
+	
+	@Test public void testSerializeEnum() throws TransformationException, IOException {
+		assertEquals("\"JAVA\"", genson.serialize(Player.JAVA));
 	}
 
 	private Primitives createPrimitives() {

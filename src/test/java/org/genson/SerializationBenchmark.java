@@ -12,6 +12,9 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.genson.bean.Feed;
 import org.genson.bean.Tweet;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 /**
  * Serialization bench, based on same data as DeserializeBenchmark.
  * Jackson is slightly faster.
@@ -24,6 +27,7 @@ public class SerializationBenchmark {
 	private final int WARMUP_ITER = 50;
 	private ObjectMapper mapper;
 	private Genson genson;
+	private Gson gson;
 	private Tweet[] tweets;
 	private Feed shortFeed;
 	private Feed longFeed;
@@ -35,7 +39,7 @@ public class SerializationBenchmark {
 	private void setUp() throws TransformationException, IOException {
 		genson = new Genson.Builder().setDateFormat(
 				new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", Locale.US)).create();
-		
+		gson = new GsonBuilder().setDateFormat("EEE MMM dd HH:mm:ss Z yyyy").create();
 		mapper = new ObjectMapper();
 		mapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		mapper.configure(DeserializationConfig.Feature.AUTO_DETECT_FIELDS, true);
@@ -51,6 +55,7 @@ public class SerializationBenchmark {
 		// warmup
 		jacksonWrite(WARMUP_ITER, tweets);
 		gensonWrite(WARMUP_ITER, tweets);
+		gsonWrite(WARMUP_ITER, tweets);
 		// clean
 		freeMem();
 		// bench
@@ -60,12 +65,16 @@ public class SerializationBenchmark {
 		freeMem();
 		timer.start();
 		gensonWrite(ITER, tweets);
-		System.out.println("Genson tweets:" + timer.stop().printS());
+		System.out.println("Genson tweets:" + timer.stop().printS());	freeMem();
+		timer.start();
+		gsonWrite(ITER, tweets);
+		System.out.println("Gson tweets:" + timer.stop().printS());
 		System.out.println("**************************");
 		
 		// warmup
 		jacksonWrite(WARMUP_ITER, shortFeed);
 		gensonWrite(WARMUP_ITER, shortFeed);
+		gsonWrite(WARMUP_ITER, shortFeed);
 		// clean
 		freeMem();
 		// bench
@@ -75,12 +84,17 @@ public class SerializationBenchmark {
 		freeMem();
 		timer.start();
 		gensonWrite(ITER, shortFeed);
-		System.out.println("Genson shortFeed:" + timer.stop().printS());
+		System.out.println("Genson shortFeed:" + timer.stop().printS());	
+		freeMem();
+		timer.start();
+		gsonWrite(ITER, shortFeed);
+		System.out.println("Gson shortFeed:" + timer.stop().printS());
 		System.out.println("**************************");
 		
 		// warmup
 		jacksonWrite(WARMUP_ITER, longFeed);
 		gensonWrite(WARMUP_ITER, longFeed);
+		gsonWrite(WARMUP_ITER, longFeed);
 		// clean
 		freeMem();
 		// bench
@@ -90,8 +104,10 @@ public class SerializationBenchmark {
 		freeMem();
 		timer.start();
 		gensonWrite(ITER, longFeed);
-		System.out.println("Genson longFeed:" + timer.stop().printS());
-		
+		System.out.println("Genson longFeed:" + timer.stop().printS());freeMem();
+		timer.start();
+		gsonWrite(ITER, longFeed);
+		System.out.println("Gson longFeed:" + timer.stop().printS());
 	}
 	
 	public <T> void jacksonWrite(int iter, T object) throws JsonGenerationException, JsonMappingException, IOException {
@@ -103,6 +119,12 @@ public class SerializationBenchmark {
 	public <T> void gensonWrite(int iter, T object) throws TransformationException, IOException {
 		for(int i = 0; i < iter; i++) {
 			genson.serialize(object);
+		}
+	}
+	
+	public <T> void gsonWrite(int iter, T object) throws TransformationException, IOException {
+		for(int i = 0; i < iter; i++) {
+			gson.toJson(object);
 		}
 	}
 	

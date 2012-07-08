@@ -18,28 +18,27 @@ import org.genson.bean.Primitives;
 import com.google.gson.Gson;
 
 /*
- *======= Serialization Bench ======
- Genson global serialization time=11.96 s
- Genson avg serialization time=23.92 ms
+ ======= Serialization Bench ======
+ Genson global serialization time=17.677 s
+ Genson avg serialization time=0.35354 ms
 
- Jackson global serialization time=7.307 s
- Jackson avg serialization time=14.614 ms
+ Jackson global serialization time=15.817 s
+ Jackson avg serialization time=0.31634 ms
 
- Gson global serialization time=17.231 s
- Gson avg serialization time=34.462 ms
+ Gson global serialization time=30.958 s
+ Gson avg serialization time=0.61916 ms
 
  ======= Deserialization Bench ======
- Genson global deserialization time=11.519 s
- Genson avg deserialization time=23.038 ms
+ Genson global deserialization time=23.663 s
+ Genson avg deserialization time=0.47326 ms
 
- Jackson global deserialization time=9.024 s
- Jackson avg deserialization time=18.048 ms
+ Jackson global deserialization time=27.131 s
+ Jackson avg deserialization time=0.54262 ms
 
- Gson global deserialization time=14.407 s
- Gson avg deserialization time=28.814 ms
+ Gson global deserialization time=39.17 s
+ Gson avg deserialization time=0.7834 ms
 
  =================================
-
  */
 public class GensonBenchmark {
 	final int ITERATION_CNT = 50000;
@@ -54,14 +53,6 @@ public class GensonBenchmark {
 		GensonBenchmark bench = new GensonBenchmark();
 		bench.setUp();
 		bench.benchSerialization();
-		System.gc();
-		synchronized (bench) {
-			try {
-				bench.wait(1000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
 		bench.benchDeserialization();
 	}
 
@@ -108,7 +99,7 @@ public class GensonBenchmark {
 				.append(coSmall.jsonString()).append(',').append(coEmpty.jsonString()).append(']');
 		json = sb.toString();
 	}
-	
+
 	public void benchSerialization() throws JsonGenerationException, JsonMappingException,
 			IOException, TransformationException {
 		// warm up
@@ -117,7 +108,7 @@ public class GensonBenchmark {
 			genson.serialize(map);
 			gson.toJson(map);
 		}
-
+		freeMem();
 		System.out.println("======= Serialization Bench ======");
 
 		@SuppressWarnings("unused")
@@ -133,7 +124,8 @@ public class GensonBenchmark {
 		}
 		System.out.println("Genson global serialization time=" + globalTimer.stop().printS());
 		System.out.println("Genson avg serialization time=" + moyTimer.stop().printMS() + "\n");
-		//
+		freeMem();
+
 		globalTimer.start();
 		moyTimer.start();
 		for (int i = 0; i < ITERATION_CNT; i++) {
@@ -142,15 +134,16 @@ public class GensonBenchmark {
 		}
 		System.out.println("Jackson global serialization time=" + globalTimer.stop().printS());
 		System.out.println("Jackson avg serialization time=" + moyTimer.stop().printMS() + "\n");
+		freeMem();
 
-		 globalTimer.start();
-		 moyTimer.start();
-		 for ( int i = 0; i < ITERATION_CNT; i++ ) {
-		 dummyJson = gson.toJson(map);
-		 moyTimer.cumulate();
-		 }
-		 System.out.println("Gson global serialization time="+globalTimer.stop().printS());
-		 System.out.println("Gson avg serialization time="+moyTimer.stop().printMS()+"\n");
+		globalTimer.start();
+		moyTimer.start();
+		for (int i = 0; i < ITERATION_CNT; i++) {
+			dummyJson = gson.toJson(map);
+			moyTimer.cumulate();
+		}
+		System.out.println("Gson global serialization time=" + globalTimer.stop().printS());
+		System.out.println("Gson avg serialization time=" + moyTimer.stop().printMS() + "\n");
 	}
 
 	public void benchDeserialization() throws JsonGenerationException, JsonMappingException,
@@ -161,6 +154,7 @@ public class GensonBenchmark {
 			gson.fromJson(json, ComplexObject[].class);
 			genson.deserialize(json, ComplexObject[].class);
 		}
+		freeMem();
 
 		System.out.println("======= Deserialization Bench ======");
 		@SuppressWarnings("unused")
@@ -176,6 +170,7 @@ public class GensonBenchmark {
 		}
 		System.out.println("Genson global deserialization time=" + globalTimer.stop().printS());
 		System.out.println("Genson avg deserialization time=" + moyTimer.stop().printMS() + "\n");
+		freeMem();
 
 		globalTimer.start();
 		moyTimer.start();
@@ -185,6 +180,7 @@ public class GensonBenchmark {
 		}
 		System.out.println("Jackson global deserialization time=" + globalTimer.stop().printS());
 		System.out.println("Jackson avg deserialization time=" + moyTimer.stop().printMS() + "\n");
+		freeMem();
 
 		globalTimer.start();
 		moyTimer.start();
@@ -196,5 +192,16 @@ public class GensonBenchmark {
 		System.out.println("Gson avg deserialization time=" + moyTimer.stop().printMS() + "\n");
 
 		System.out.println("=================================");
+	}
+
+	public void freeMem() {
+		System.gc();
+		synchronized (this) {
+			try {
+				this.wait(2000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 }

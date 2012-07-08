@@ -17,6 +17,9 @@ import org.codehaus.jackson.type.TypeReference;
 import org.genson.bean.Feed;
 import org.genson.bean.Tweet;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 
 /**
  * Deserialization benchmark based on performance benchmark from gson (metrics project ParseBenchmark class).
@@ -37,6 +40,7 @@ public class DeserializeBenchmark {
 	private String longReader;
 	private Genson genson = new Genson.Builder().setDateFormat(
 			new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", Locale.US)).create();
+	private Gson gson = new GsonBuilder().setDateFormat("EEE MMM dd HH:mm:ss Z yyyy").create();
 	private ObjectMapper mapper = new ObjectMapper();
 
 	TypeReference<List<Tweet>> tweetsType = new TypeReference<List<Tweet>>() {};
@@ -62,6 +66,7 @@ public class DeserializeBenchmark {
 		// warmup
 		jacksonParse(WARMUP_ITER, tweets, tweetsType);
 		gensonParse(WARMUP_ITER, tweets, tweetsType);
+		gsonParse(WARMUP_ITER, tweets, tweetsType);
 		freeMem();
 		Timer timer = new Timer().start();
 		// genson
@@ -71,11 +76,17 @@ public class DeserializeBenchmark {
 		freeMem();
 		timer.start();
 		jacksonParse(ITER, tweets, tweetsType);
-		System.out.println("Jackson tweets:" + timer.stop().printS());
+		System.out.println("Jackson tweets:" + timer.stop().printS());freeMem();
+		// gson
+		freeMem();
+		timer.start();
+		gsonParse(ITER, tweets, tweetsType);
+		System.out.println("Gson tweets:" + timer.stop().printS());
 		System.out.println("*****************");
 
 		jacksonParse(WARMUP_ITER, shortReader, feedType);
 		gensonParse(WARMUP_ITER, shortReader, feedType);
+		gsonParse(WARMUP_ITER, shortReader, feedType);
 		freeMem();
 		timer.start();
 		gensonParse(ITER, shortReader, feedType);
@@ -84,10 +95,15 @@ public class DeserializeBenchmark {
 		timer.start();
 		jacksonParse(ITER, shortReader, feedType);
 		System.out.println("Jackson shortReader:" + timer.stop().printS());
+		freeMem();
+		timer.start();
+		gsonParse(ITER, shortReader, feedType);
+		System.out.println("Gson shortReader:" + timer.stop().printS());
 		System.out.println("*****************");
 
 		jacksonParse(WARMUP_ITER, longReader, feedType);
 		gensonParse(WARMUP_ITER, longReader, feedType);
+		gsonParse(WARMUP_ITER, longReader, feedType);
 		freeMem();
 		timer.start();
 		gensonParse(ITER, longReader, feedType);
@@ -96,6 +112,10 @@ public class DeserializeBenchmark {
 		timer.start();
 		jacksonParse(ITER, longReader, feedType);
 		System.out.println("Jackson longReader:" + timer.stop().printS());
+		freeMem();
+		timer.start();
+		gsonParse(ITER, longReader, feedType);
+		System.out.println("Gson longReader:" + timer.stop().printS());
 	}
 
 	public void freeMem() {
@@ -112,16 +132,21 @@ public class DeserializeBenchmark {
 	public <T> void jacksonParse(int iter, String source, TypeReference<T> type)
 			throws JsonParseException, JsonMappingException, IOException {
 		for (int i = 0; i < iter; i++) {
-			@SuppressWarnings("unused")
-			T object = mapper.readValue(source, type);
+			mapper.readValue(source, type);
 		}
 	}
 
 	public <T> void gensonParse(int iter, String source, TypeReference<T> type)
 			throws TransformationException, IOException {
 		for (int i = 0; i < iter; i++) {
-			@SuppressWarnings("unused")
-			T object = genson.deserialize(source, type.getType());
+			genson.deserialize(source, type.getType());
+		}
+	}
+	
+	public <T> void gsonParse(int iter, String source, TypeReference<T> type)
+			throws TransformationException, IOException {
+		for (int i = 0; i < iter; i++) {
+			gson.fromJson(source, type.getType());
 		}
 	}
 

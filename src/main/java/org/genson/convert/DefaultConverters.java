@@ -550,4 +550,34 @@ public class DefaultConverters {
 			return null;
 		}
 	};
+	
+	public static class EnumConverter<T extends Enum<T>> implements Converter<T> {
+		private final Class<T> eClass;
+		public EnumConverter(Class<T> eClass) {
+			this.eClass = eClass;
+		}
+		
+		@Override
+		public void serialize(T obj, Type type, ObjectWriter writer, Context ctx)
+				throws TransformationException, IOException {
+			writer.writeUnsafeValue(obj.name());
+		}
+
+		@Override
+		public T deserialize(Type type, ObjectReader reader, Context ctx)
+				throws TransformationException, IOException {
+			return Enum.valueOf(eClass, reader.valueAsString());
+		}
+	}
+	
+	public final static class EnumConverterFactory implements Factory<Converter<? extends Enum<?>>> {
+		public final static EnumConverterFactory instance = new EnumConverterFactory();
+		private EnumConverterFactory() {}
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		@Override
+		public Converter<Enum<?>> create(Type type, Genson genson) {
+			Class<?> rawClass = TypeUtil.getRawClass(type);
+			return rawClass.isEnum() || Enum.class.isAssignableFrom(rawClass) ? new EnumConverter(rawClass) : null;
+		}
+	};
 }

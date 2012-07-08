@@ -165,7 +165,7 @@ public final class Genson {
 		return deserialize(toType.getType(), new JsonReader(new StringReader(fromSource)),
 				new Context(this));
 	}
-
+	
 	public <T> T deserialize(Reader reader, Type toType) throws TransformationException,
 			IOException {
 		return deserialize(toType, new JsonReader(reader), new Context(this));
@@ -504,6 +504,7 @@ public final class Genson {
 			factories.add(DefaultConverters.ArrayConverterFactory.instance);
 			factories.add(DefaultConverters.CollectionConverterFactory.instance);
 			factories.add(DefaultConverters.MapConverterFactory.instance);
+			factories.add(DefaultConverters.EnumConverterFactory.instance);
 			factories.add(DefaultConverters.PrimitiveConverterFactory.instance);
 			factories.add(DefaultConverters.UntypedConverterFactory.instance);
 		}
