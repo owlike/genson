@@ -316,7 +316,7 @@ public class JsonReader implements ObjectReader {
 			_stringBufferTail = 0;
 
 			if (readNextToken(true) != ':')
-				newMisplacedTokenException(_cursor - 1);
+				newWrongTokenException(":", _cursor - 1);
 		}
 		
 		return consumeValue();
@@ -355,7 +355,7 @@ public class JsonReader implements ObjectReader {
     			_stringBufferTail = 0;
     
     			if (readNextToken(true) != ':')
-    				newMisplacedTokenException(_cursor - 1);
+    				newWrongTokenException(":", _cursor - 1);
     			
     			consumeString((char) readNextToken(false));
     			_metadata.put(key, new String(_stringBuffer, 0, _stringBufferTail));
@@ -372,7 +372,7 @@ public class JsonReader implements ObjectReader {
 		checkIllegalEnd(token);
 		if (character == token) {
 			_ctx.push(type);
-		} else newWrongTokenException(character);
+		} else newWrongTokenException("" + (char) character, _cursor - 1);
 		_first = true;
 		_checkedNext = false;
 		_hasNext = false;
@@ -383,7 +383,7 @@ public class JsonReader implements ObjectReader {
 		checkIllegalEnd(token);
 		if (character == token && type == _ctx.peek()) {
 			_ctx.pop();
-		} else newWrongTokenException(character);
+		} else newWrongTokenException("" + (char) character, _cursor - 1);
 		_first = false;
 		_checkedNext = false;
 		_hasNext = false;
@@ -680,15 +680,18 @@ public class JsonReader implements ObjectReader {
 	}
 
 	private final void newWrongTokenException(String awaited) {
-		throw new IllegalStateException("Illegal character at position " + (_position - valueAsString().length() - _buflen + _cursor) + " expected "
-				+ awaited + " but read '" + _buffer[_cursor] + "' !");
+		newWrongTokenException(awaited, _cursor);
 	}
 	
 	private final void newWrongTokenException(int awaitedChar) {
-		throw new IllegalStateException("Illegal character at position " + (_position - valueAsString().length() - _buflen + _cursor) + " expected "
-				+ (char) awaitedChar + " but read '" + _buffer[_cursor] + "' !");
+		newWrongTokenException(""+awaitedChar, _cursor);
 	}
 
+	private final void newWrongTokenException(String awaited, int cursor) {
+		throw new IllegalStateException("Illegal character at position " + (_position - valueAsString().length() - _buflen + cursor) + " expected "
+				+ awaited + " but read '" + _buffer[cursor] + "' !");
+	}
+	
 	private final void newMisplacedTokenException(int cursor) {
 		throw new IllegalStateException("Encountred misplaced character '" + _buffer[cursor] + "' around position "
 				+ (_position - valueAsString().length() - _buflen + cursor));

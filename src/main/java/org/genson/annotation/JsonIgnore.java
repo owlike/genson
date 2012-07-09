@@ -7,10 +7,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target({ ElementType.CONSTRUCTOR, ElementType.METHOD, ElementType.PARAMETER, ElementType.FIELD })
+@Target({ ElementType.CONSTRUCTOR, ElementType.METHOD, ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
 public @interface JsonIgnore {
-
+	boolean serialize() default false;
+	boolean deserialize() default false;
 }

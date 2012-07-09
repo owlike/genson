@@ -27,17 +27,32 @@ public interface BeanMutatorAccessorResolver {
 
 	public boolean isMutator(Method method, Class<?> fromClass);
 
-	public static class ConventionalBeanResolver implements BeanMutatorAccessorResolver {
+	public static class StandardMutaAccessorResolver implements BeanMutatorAccessorResolver {
+		private final VisibilityFilter filedVisibilityFilter;
+		private final VisibilityFilter methodVisibilityFilter;
+		private final VisibilityFilter creatorVisibilityFilter;
+		
+		public StandardMutaAccessorResolver() {
+			this(VisibilityFilter.DEFAULT, VisibilityFilter.PACKAGE_PUBLIC, VisibilityFilter.PACKAGE_PUBLIC);
+		}
+		
+		public StandardMutaAccessorResolver(VisibilityFilter filedVisibilityFilter,
+				VisibilityFilter methodVisibilityFilter, VisibilityFilter creatorVisibilityFilter) {
+			super();
+			this.filedVisibilityFilter = filedVisibilityFilter;
+			this.methodVisibilityFilter = methodVisibilityFilter;
+			this.creatorVisibilityFilter = creatorVisibilityFilter;
+		}
 
 		/**
 		 * Will resolve all public/package and non transient/static fields as accesssors.
 		 */
 		@Override
 		public boolean isAccessor(Field field, Class<?> fromClass) {
-			if (mustIgnore(field)) return false;
-			if (mustInclude(field)) return true;
-			int modifier = field.getModifiers();
-			return !Modifier.isTransient(modifier) && !Modifier.isStatic(modifier);
+			// ok to look for this$ is ugly but it will do the job for the moment
+			if (mustIgnore(field, true) || field.getName().startsWith("this$")) return false;
+			if (mustInclude(field, true)) return true;
+			return filedVisibilityFilter.isVisible(field);
 		}
 
 		/**
@@ -46,14 +61,14 @@ public interface BeanMutatorAccessorResolver {
 		 */
 		@Override
 		public boolean isAccessor(Method method, Class<?> fromClass) {
-			if (mustIgnore(method)) return false;
-			if (mustInclude(method)) return true;
+			if (mustIgnore(method, true)) return false;
+			if (mustInclude(method, true)) return true;
 			
 			String name = method.getName();
 			int len = name.length();			
-			if (checkVisibility(method)
+			if (methodVisibilityFilter.isVisible(method)
 					&& ((len > 3 && name.startsWith("get")) || (len > 2 && name.startsWith("is") && (TypeUtil
-							.match(method.getGenericReturnType(), Boolean.class, false) || TypeUtil
+							.match(TypeUtil.expandType(method.getGenericReturnType(), fromClass), Boolean.class, false) || TypeUtil
 							.match(method.getGenericReturnType(), boolean.class, false))))
 					&& method.getParameterTypes().length == 0)
 				return true;
@@ -68,16 +83,14 @@ public interface BeanMutatorAccessorResolver {
 			 * but we are not supposed to handle it here... lets only check visibility and handle
 			 * it in the provider implementations
 			 */
-			if (mustIgnore(constructor)) return false;
-			int modifier = constructor.getModifiers();
-			return Modifier.isPublic(modifier) || 
-					!(Modifier.isPrivate(modifier) || Modifier.isProtected(modifier));
+			if (mustIgnore(constructor, false)) return false;
+			return creatorVisibilityFilter.isVisible(constructor);
 		}
 
 		@Override
 		public boolean isCreator(Method method, Class<?> fromClass) {
 			if (method.getAnnotation(Creator.class) != null) {
-				if (Modifier.isStatic(method.getModifiers())) return true;
+				if (Modifier.isPublic(method.getModifiers()) && Modifier.isStatic(method.getModifiers())) return true;
 				throw new TransformationRuntimeException("Method " + method.toGenericString() + " annotated with @Creator must be static!");
 			}
 			return false;
@@ -85,16 +98,18 @@ public interface BeanMutatorAccessorResolver {
 
 		@Override
 		public boolean isMutator(Field field, Class<?> fromClass) {
-			// default implementation will try to be symetric
-			return isAccessor(field, fromClass);
+			if (mustIgnore(field, false) || field.getName().startsWith("this$")) return false;
+			if (mustInclude(field, false)) return true;
+			int modifier = field.getModifiers();
+			return !Modifier.isTransient(modifier) && !Modifier.isStatic(modifier);
 		}
 
 		@Override
 		public boolean isMutator(Method method, Class<?> fromClass) {
-			if (mustIgnore(method)) return false;
-			if (mustInclude(method)) return true;
+			if (mustIgnore(method, false)) return false;
+			if (mustInclude(method, false)) return true;
 			
-			if (checkVisibility(method) && method.getName().length() > 3
+			if (methodVisibilityFilter.isVisible(method) && method.getName().length() > 3
 					&& method.getName().startsWith("set") && method.getParameterTypes().length == 1
 					&& method.getReturnType() == void.class)
 				return true;
@@ -102,18 +117,22 @@ public interface BeanMutatorAccessorResolver {
 			return false;
 		}
 		
-		protected boolean mustIgnore(AccessibleObject property) {
-			return property.isAnnotationPresent(JsonIgnore.class);
+		protected boolean mustIgnore(AccessibleObject property, boolean forSerialization) {
+			JsonIgnore ignore = property.getAnnotation(JsonIgnore.class);
+			if (ignore != null) {
+				if (forSerialization) return !ignore.serialize();
+				else return !ignore.deserialize();
+			}
+			return false;
 		}
 
-		protected boolean mustInclude(AccessibleObject property) {
-			return property.isAnnotationPresent(JsonProperty.class);
-		}
-		
-		protected boolean checkVisibility(Method method) {
-			int modifier = method.getModifiers();
-			return Modifier.isPublic(modifier) && !Modifier.isNative(modifier)
-					&& !Modifier.isAbstract(modifier) && !Modifier.isStatic(modifier);
+		protected boolean mustInclude(AccessibleObject property, boolean forSerialization) {
+			JsonProperty prop = property.getAnnotation(JsonProperty.class);
+			if (prop != null) {
+				if (forSerialization) return prop.serialize();
+				else return prop.deserialize();
+			}
+			return false;
 		}
 	}
 

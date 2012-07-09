@@ -305,18 +305,17 @@ public class DefaultConverters {
 
 		private Number parse(String value, ValueType valueType) {
 			try {
-    			if (value.indexOf('.') >= 0) {
-    				return Double.parseDouble(value);
-    			}
-    			long longValue = Long.parseLong(value);
-    			if (longValue <= Integer.MAX_VALUE && longValue >= Integer.MIN_VALUE) {
-    				return Integer.valueOf((int) longValue);
-    			}
-    			return Long.valueOf(value);
+				if (value.indexOf('.') >= 0) {
+					return Double.parseDouble(value);
+				}
+				long longValue = Long.parseLong(value);
+				if (longValue <= Integer.MAX_VALUE && longValue >= Integer.MIN_VALUE) {
+					return Integer.valueOf((int) longValue);
+				}
+				return Long.valueOf(value);
 			} catch (NumberFormatException nfe) {
-				throw new TransformationRuntimeException("Could not convert input value "
-						+ value + " of type " + valueType.toClass()
-						+ " to a Number type.", nfe);
+				throw new TransformationRuntimeException("Could not convert input value " + value
+						+ " of type " + valueType.toClass() + " to a Number type.", nfe);
 			}
 		}
 	};
@@ -342,12 +341,15 @@ public class DefaultConverters {
 			}
 			return null;
 		}
-		
+
 		@HandleClassMetadata
 		@WithoutBeanView
 		public final static class booleanConverter implements Converter<Boolean> {
 			public final static booleanConverter instance = new booleanConverter();
-			private booleanConverter() {}
+
+			private booleanConverter() {
+			}
+
 			@Override
 			public void serialize(Boolean obj, Type type, ObjectWriter writer, Context ctx)
 					throws TransformationException, IOException {
@@ -360,12 +362,15 @@ public class DefaultConverters {
 				return reader.valueAsBoolean();
 			}
 		};
-		
+
 		@HandleClassMetadata
 		@WithoutBeanView
 		public final static class intConverter implements Converter<Integer> {
 			public final static intConverter instance = new intConverter();
-			private intConverter() {}
+
+			private intConverter() {
+			}
+
 			@Override
 			public void serialize(Integer obj, Type type, ObjectWriter writer, Context ctx)
 					throws TransformationException, IOException {
@@ -378,12 +383,15 @@ public class DefaultConverters {
 				return reader.valueAsInt();
 			}
 		};
-		
+
 		@HandleClassMetadata
 		@WithoutBeanView
 		public final static class doubleConverter implements Converter<Double> {
 			public final static doubleConverter instance = new doubleConverter();
-			private doubleConverter() {}
+
+			private doubleConverter() {
+			}
+
 			@Override
 			public void serialize(Double obj, Type type, ObjectWriter writer, Context ctx)
 					throws TransformationException, IOException {
@@ -396,12 +404,15 @@ public class DefaultConverters {
 				return reader.valueAsDouble();
 			}
 		};
-		
+
 		@HandleClassMetadata
 		@WithoutBeanView
 		public final static class longConverter implements Converter<Long> {
 			public final static longConverter instance = new longConverter();
-			private longConverter() {}
+
+			private longConverter() {
+			}
+
 			@Override
 			public void serialize(Long obj, Type type, ObjectWriter writer, Context ctx)
 					throws TransformationException, IOException {
@@ -415,7 +426,7 @@ public class DefaultConverters {
 			}
 		};
 	};
-	
+
 	@HandleClassMetadata
 	public static class MapConverter<V> implements Converter<Map<String, V>> {
 		private final Class<V> vClass;
@@ -524,11 +535,15 @@ public class DefaultConverters {
 		@HandleClassMetadata
 		private final static class UntypedConverter implements Converter<Object> {
 			final static UntypedConverter instance = new UntypedConverter();
-			private UntypedConverter() {}
-			
+
+			private UntypedConverter() {
+			}
+
 			@Override
 			public Object deserialize(Type type, ObjectReader reader, Context ctx)
 					throws TransformationException, IOException {
+				if (ValueType.OBJECT.equals(reader.getValueType()))
+					return ctx.genson.deserialize(Map.class, reader, ctx);
 				return ctx.genson.deserialize(reader.getValueType().toClass(), reader, ctx);
 			}
 
@@ -550,13 +565,14 @@ public class DefaultConverters {
 			return null;
 		}
 	};
-	
+
 	public static class EnumConverter<T extends Enum<T>> implements Converter<T> {
 		private final Class<T> eClass;
+
 		public EnumConverter(Class<T> eClass) {
 			this.eClass = eClass;
 		}
-		
+
 		@Override
 		public void serialize(T obj, Type type, ObjectWriter writer, Context ctx)
 				throws TransformationException, IOException {
@@ -569,15 +585,19 @@ public class DefaultConverters {
 			return Enum.valueOf(eClass, reader.valueAsString());
 		}
 	}
-	
+
 	public final static class EnumConverterFactory implements Factory<Converter<? extends Enum<?>>> {
 		public final static EnumConverterFactory instance = new EnumConverterFactory();
-		private EnumConverterFactory() {}
+
+		private EnumConverterFactory() {
+		}
+
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		@Override
 		public Converter<Enum<?>> create(Type type, Genson genson) {
 			Class<?> rawClass = TypeUtil.getRawClass(type);
-			return rawClass.isEnum() || Enum.class.isAssignableFrom(rawClass) ? new EnumConverter(rawClass) : null;
+			return rawClass.isEnum() || Enum.class.isAssignableFrom(rawClass) ? new EnumConverter(
+					rawClass) : null;
 		}
 	};
 }

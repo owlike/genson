@@ -70,6 +70,7 @@ public final class Genson {
 	private final ConcurrentHashMap<Type, Converter<?>> converterCache = new ConcurrentHashMap<Type, Converter<?>>();
 	private final Factory<Converter<?>> converterFactory;
 	private final BeanDescriptorProvider beanDescriptorFactory;
+	private final Converter<Object> nullConverter;
 
 	private final Map<Class<?>, String> classAliasMap;
 	private final Map<String, Class<?>> aliasClassMap;
@@ -83,8 +84,9 @@ public final class Genson {
 	 * In most cases using this default constructor will suffice.
 	 */
 	public Genson() {
-		this(_default.converterFactory, _default.beanDescriptorFactory, _default.skipNull,
-				_default.htmlSafe, _default.aliasClassMap, _default.withClassMetadata);
+		this(_default.converterFactory, _default.beanDescriptorFactory, _default.nullConverter,
+				_default.skipNull, _default.htmlSafe, _default.aliasClassMap,
+				_default.withClassMetadata);
 	}
 
 	/**
@@ -101,10 +103,11 @@ public final class Genson {
 	 *        being deserialized.
 	 */
 	public Genson(Factory<Converter<?>> converterFactory, BeanDescriptorProvider beanDescProvider,
-			boolean skipNull, boolean htmlSafe, Map<String, Class<?>> classAliases,
-			boolean withClassMetadata) {
+			Converter<Object> nullConverter, boolean skipNull, boolean htmlSafe,
+			Map<String, Class<?>> classAliases, boolean withClassMetadata) {
 		this.converterFactory = converterFactory;
 		this.beanDescriptorFactory = beanDescProvider;
+		this.nullConverter = nullConverter;
 		this.skipNull = skipNull;
 		this.htmlSafe = htmlSafe;
 		this.aliasClassMap = classAliases;
@@ -129,8 +132,10 @@ public final class Genson {
 
 	public <T> String serialize(T o) throws TransformationException, IOException {
 		JsonWriter writer = new JsonWriter(new StringWriter(), skipNull, htmlSafe);
-
-		serialize(o, o.getClass(), writer, new Context(this));
+		if (o == null)
+			nullConverter.serialize(null, null, writer, null);
+		else
+			serialize(o, o.getClass(), writer, new Context(this));
 		writer.flush();
 		return writer.unwrap().toString();
 	}
@@ -138,15 +143,20 @@ public final class Genson {
 	public <T> String serialize(T o, Class<? extends BeanView<?>>... withViews)
 			throws TransformationException, IOException {
 		JsonWriter writer = new JsonWriter(new StringWriter(), skipNull, htmlSafe);
-		serialize(o, o.getClass(), writer, new Context(this, Arrays.asList(withViews)));
+		if (o == null)
+			nullConverter.serialize(null, null, writer, null);
+		else
+			serialize(o, o.getClass(), writer, new Context(this, Arrays.asList(withViews)));
 		writer.flush();
 		return writer.unwrap().toString();
 	}
 
 	public <T> void serialize(T o, ObjectWriter writer, Class<? extends BeanView<?>>... withViews)
 			throws TransformationException, IOException {
+		if (o == null)
+			nullConverter.serialize(null, null, writer, null);
+		else serialize(o, o.getClass(), writer, new Context(this, Arrays.asList(withViews)));
 		writer.flush();
-		serialize(o, o.getClass(), writer, new Context(this, Arrays.asList(withViews)));
 	}
 
 	public <T> void serialize(T obj, Type type, ObjectWriter writer, Context ctx)
@@ -165,7 +175,7 @@ public final class Genson {
 		return deserialize(toType.getType(), new JsonReader(new StringReader(fromSource)),
 				new Context(this));
 	}
-	
+
 	public <T> T deserialize(Reader reader, Type toType) throws TransformationException,
 			IOException {
 		return deserialize(toType, new JsonReader(reader), new Context(this));
@@ -238,6 +248,10 @@ public final class Genson {
 		return beanDescriptorFactory;
 	}
 
+	public Converter<Object> getNullConverter() {
+		return nullConverter;
+	}
+
 	public static class Builder {
 		private final List<Object> converters = new ArrayList<Object>();
 		private final List<Factory<?>> converterFactories = new ArrayList<Factory<?>>();
@@ -252,10 +266,11 @@ public final class Genson {
 		private boolean withBeanViewConverter = false;
 		private boolean useRuntimeTypeForSerialization = false;
 		private boolean withDebugInfoPropertyNameResolver = false;
-		
+
 		private PropertyNameResolver propertyNameResolver;
 		private BeanMutatorAccessorResolver mutatorAccessorResolver;
 		private BeanDescriptorProvider beanDescriptorProvider;
+		private Converter<Object> nullConverter;
 
 		// for the moment we don't allow to override
 		private BeanViewDescriptorProvider beanViewDescriptorProvider;
@@ -408,12 +423,24 @@ public final class Genson {
 			return withDebugInfoPropertyNameResolver;
 		}
 
-		public Builder setWithDebugInfoPropertyNameResolver(boolean withDebugInfoPropertyNameResolver) {
+		public Builder setWithDebugInfoPropertyNameResolver(
+				boolean withDebugInfoPropertyNameResolver) {
 			this.withDebugInfoPropertyNameResolver = withDebugInfoPropertyNameResolver;
 			return this;
 		}
 
+		public Converter<Object> getNullConverter() {
+			return nullConverter;
+		}
+
+		public Builder setNullConverter(Converter<Object> nullConverter) {
+			this.nullConverter = nullConverter;
+			return this;
+		}
+
 		public Genson create() {
+			if (nullConverter == null)
+				nullConverter = new NullConverter();
 			if (propertyNameResolver == null)
 				propertyNameResolver = createPropertyNameResolver();
 			if (mutatorAccessorResolver == null)
@@ -456,8 +483,8 @@ public final class Genson {
 
 		protected Genson create(Factory<Converter<?>> converterFactory,
 				Map<String, Class<?>> classAliases) {
-			return new Genson(converterFactory, getBeanDescriptorProvider(), isSkipNull(),
-					isHtmlSafe(), classAliases, isWithClassMetadata());
+			return new Genson(converterFactory, getBeanDescriptorProvider(), getNullConverter(),
+					isSkipNull(), isHtmlSafe(), classAliases, isWithClassMetadata());
 		}
 
 		protected Factory<Converter<?>> createConverterFactory() {
@@ -478,14 +505,15 @@ public final class Genson {
 		}
 
 		protected BeanMutatorAccessorResolver createBeanMutatorAccessorResolver() {
-			return new BeanMutatorAccessorResolver.ConventionalBeanResolver();
+			return new BeanMutatorAccessorResolver.StandardMutaAccessorResolver();
 		}
 
 		protected PropertyNameResolver createPropertyNameResolver() {
 			List<PropertyNameResolver> resolvers = new ArrayList<PropertyNameResolver>();
 			resolvers.add(new PropertyNameResolver.AnnotationPropertyNameResolver());
 			resolvers.add(new PropertyNameResolver.ConventionalBeanPropertyNameResolver());
-			if (isWithDebugInfoPropertyNameResolver()) resolvers.add(new ASMCreatorParameterNameResolver(isThrowExceptionOnNoDebugInfo()));
+			if (isWithDebugInfoPropertyNameResolver())
+				resolvers.add(new ASMCreatorParameterNameResolver(isThrowExceptionOnNoDebugInfo()));
 
 			return new PropertyNameResolver.CompositePropertyNameResolver(resolvers);
 		}

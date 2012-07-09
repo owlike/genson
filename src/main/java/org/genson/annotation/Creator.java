@@ -18,7 +18,7 @@ import java.lang.annotation.Target;
  * if the instance can't be created using the factory method).
  * 
  * {@see org.genson.annotation.JsonProperty JsonProperty}
- * {@see org.genson.reflect.BeanMutatorAccessorResolver.ConventionalBeanResolver ConventionalBeanResolver}
+ * {@see org.genson.reflect.BeanMutatorAccessorResolver.StandardMutaAccessorResolver StandardMutaAccessorResolver}
  * 
  * @author eugen
  *

@@ -1,9 +1,7 @@
 package org.genson.stream;
 
-import java.util.List;
-
 public enum ValueType {
-	ARRAY(List.class),
+	ARRAY(Object[].class),
 	OBJECT(Object.class),
 	STRING(String.class),
 	INTEGER(Integer.class),

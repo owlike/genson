@@ -8,6 +8,8 @@ import java.util.List;
 import org.genson.Factory;
 import org.genson.Genson;
 import org.genson.TransformationException;
+import org.genson.annotation.JsonIgnore;
+import org.genson.annotation.JsonProperty;
 import org.genson.convert.BasicConvertersFactory;
 import org.genson.convert.Converter;
 import org.genson.convert.DefaultConverters;
@@ -57,7 +59,7 @@ public class BeanDescriptorTest {
 	@Test
 	public void genericTypeTest() throws TransformationException, IOException {
 		BaseBeanDescriptorProvider provider = new BaseBeanDescriptorProvider(
-				new BeanMutatorAccessorResolver.ConventionalBeanResolver(),
+				new BeanMutatorAccessorResolver.StandardMutaAccessorResolver(),
 				new PropertyNameResolver.ConventionalBeanPropertyNameResolver(), true, true);
 
 		BeanDescriptor<SpecilizedClass> bd = provider.provideBeanDescriptor(SpecilizedClass.class, new Genson());
@@ -65,6 +67,26 @@ public class BeanDescriptorTest {
 		assertEquals(B.class,
 				((GenericArrayType) getAccessor("tArray", bd).type).getGenericComponentType());
 		assertEquals(Double.class, getAccessor("value", bd).type);
+	}
+	
+	@Test public void jsonWithJsonIgnore() throws SecurityException, NoSuchFieldException {
+		BeanMutatorAccessorResolver strategy = new BeanMutatorAccessorResolver.StandardMutaAccessorResolver();
+		assertFalse(strategy.isAccessor(ClassWithIgnoredProperties.class.getDeclaredField("ignore"), ClassWithIgnoredProperties.class));
+		assertFalse(strategy.isMutator(ClassWithIgnoredProperties.class.getDeclaredField("ignore"), ClassWithIgnoredProperties.class));
+		assertTrue(strategy.isAccessor(ClassWithIgnoredProperties.class.getDeclaredField("a"), ClassWithIgnoredProperties.class));
+		assertFalse(strategy.isMutator(ClassWithIgnoredProperties.class.getDeclaredField("a"), ClassWithIgnoredProperties.class));
+		assertTrue(strategy.isMutator(ClassWithIgnoredProperties.class.getDeclaredField("b"), ClassWithIgnoredProperties.class));
+		assertFalse(strategy.isAccessor(ClassWithIgnoredProperties.class.getDeclaredField("b"), ClassWithIgnoredProperties.class));
+	}
+	
+	@Test public void jsonInclusionWithJsonProperty() throws SecurityException, NoSuchFieldException {
+		BeanMutatorAccessorResolver strategy = new BeanMutatorAccessorResolver.StandardMutaAccessorResolver();
+		assertTrue(strategy.isAccessor(ClassWithIgnoredProperties.class.getDeclaredField("p"), ClassWithIgnoredProperties.class));
+		assertTrue(strategy.isMutator(ClassWithIgnoredProperties.class.getDeclaredField("p"), ClassWithIgnoredProperties.class));
+		assertFalse(strategy.isAccessor(ClassWithIgnoredProperties.class.getDeclaredField("q"), ClassWithIgnoredProperties.class));
+		assertTrue(strategy.isMutator(ClassWithIgnoredProperties.class.getDeclaredField("q"), ClassWithIgnoredProperties.class));
+		assertFalse(strategy.isMutator(ClassWithIgnoredProperties.class.getDeclaredField("r"), ClassWithIgnoredProperties.class));
+		assertTrue(strategy.isAccessor(ClassWithIgnoredProperties.class.getDeclaredField("r"), ClassWithIgnoredProperties.class));
 	}
 
 	PropertyAccessor<?, ?> getAccessor(String name, BeanDescriptor<?> bd) {
@@ -90,5 +112,15 @@ public class BeanDescriptorTest {
 
 	public static class SpecilizedClass extends ClassWithGenerics<B, Double> {
 
+	}
+	
+	public class ClassWithIgnoredProperties {
+		@JsonIgnore public String ignore;
+		@JsonIgnore(serialize=true) String a;
+		@JsonIgnore(deserialize=true) public String b;
+		
+		@JsonProperty transient int p;
+		@JsonProperty(serialize=false) private transient int q;
+		@JsonProperty(deserialize=false) public transient int r;
 	}
 }

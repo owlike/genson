@@ -12,55 +12,62 @@ import org.genson.stream.ObjectReader;
 import org.genson.stream.ObjectWriter;
 import org.genson.stream.ValueType;
 
-//TODO handle exceptions in addition!! would be nice
-public class NullConverter<T> extends Wrapper<Converter<T>> implements Converter<T> {
+public class NullConverter implements Converter<Object> {
 	public static class NullConverterFactory extends ChainedFactory {
-
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
 		public Converter<?> create(Type type, Genson genson) {
 			Converter<?> nextObject = next().create(type, genson);
-			if (nextObject == null)
-				throw new IllegalArgumentException(
-						"nextObject must be not null for NullConverter! " +
-						"NullConverter can not be the last converter in the chain!");
-
 			if (!Wrapper.toAnnotatedElement(nextObject).isAnnotationPresent(HandleNull.class))
-				return new NullConverter(nextObject);
+				return new NullConverterWrapper(genson.getNullConverter(), nextObject);
 			else
 				return nextObject;
 		}
 	}
+	
+	public static class NullConverterWrapper<T> extends Wrapper<Converter<T>> implements Converter<T> {
+		private final Converter<Object> nullConverter;
+		private final Converter<T> converter;
 
-	private final Converter<T> converter;
+		public NullConverterWrapper(Converter<Object> nullConverter, Converter<T> converter) {
+			super(converter);
+			this.nullConverter = nullConverter;
+			this.converter = converter;
+		}
 
-	private NullConverter(Converter<T> converter) {
-		super(converter);
-		this.converter = converter;
-	}
+		@Override
+		public void serialize(T obj, Type type, ObjectWriter writer, Context ctx)
+				throws TransformationException, IOException {
+			if (obj == null) {
+				nullConverter.serialize(obj, type, writer, ctx);
+			} else {
+				converter.serialize(obj, type, writer, ctx);
+			}
+		}
 
-	@Override
-	// TODO class metadata will not work!
-	public void serialize(T obj, Type type, ObjectWriter writer, Context ctx)
-			throws TransformationException, IOException {
-		if (obj == null) {
-			writer.writeNull();
-		} else {
-			converter.serialize(obj, type, writer, ctx);
+		@SuppressWarnings("unchecked")
+		@Override
+		public T deserialize(Type type, ObjectReader reader, Context ctx)
+				throws TransformationException, IOException {
+			if (ValueType.NULL.equals(reader.getValueType()))
+				return (T) nullConverter.deserialize(type, reader, ctx);
+
+			return converter.deserialize(type, reader, ctx);
 		}
 	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public T deserialize(Type type, ObjectReader reader, Context ctx)
-			throws TransformationException, IOException {
-		if (ValueType.NULL.equals(reader.getValueType()))
-			return (T) handleNull(type);
-
-		return converter.deserialize(type, reader, ctx);
+	
+	public NullConverter() {
 	}
 
-	protected Object handleNull(Type type) {
+	@Override
+	public void serialize(Object obj, Type type, ObjectWriter writer, Context ctx)
+			throws TransformationException, IOException {
+		writer.writeNull();
+	}
+
+	@Override
+	public Object deserialize(Type type, ObjectReader reader, Context ctx)
+			throws TransformationException, IOException {
 		if (!(type instanceof Class))
 			return null;
 		Class<?> clazz = (Class<?>) type;

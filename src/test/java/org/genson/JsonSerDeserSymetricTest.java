@@ -212,7 +212,6 @@ public class JsonSerDeserSymetricTest {
 		MediaContent gensonContent = genson.deserialize(new InputStreamReader(ClassLoader.class.getResourceAsStream("/MEDIA_CONTENT.json")), MediaContent.class);
 		assertEquals(jacksonContent, gensonContent);
 		String json = genson.serialize(gensonContent);
-		System.out.println(json);
 		gensonContent = genson.deserialize(json, MediaContent.class);
 		assertEquals(jacksonContent, gensonContent);
 	}

@@ -43,6 +43,7 @@ public abstract class Wrapper<T> implements AnnotatedElement {
 	}
 	
 	public static AnnotatedElement toAnnotatedElement(Object object) {
+		if (object  == null) return null;
 		if (isWrapped(object)) return (AnnotatedElement) object;
 		else return object.getClass();
 	}

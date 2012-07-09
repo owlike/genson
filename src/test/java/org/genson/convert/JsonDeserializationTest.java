@@ -6,6 +6,8 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -175,6 +177,18 @@ public class JsonDeserializationTest {
 		assertArrayEquals(new Object[] { 1, 1.1, "aa", true, false },
 				l.toArray(new Object[l.size()]));
 	}
+	
+	@Test public void testMultidimensionalArray() throws TransformationException, IOException {
+		String json = "[[\"abc\",[42,24]],[\"def\",[43,34]]]";
+		Object[][] array = genson.deserialize(json, Object[][].class);
+		assertEquals("abc", array[0][0]);
+		assertArrayEquals(new Object[]{42,24}, (Object[]) array[0][1]);
+		assertEquals("def", array[1][0]);
+		assertArrayEquals(new Object[]{43,34}, (Object[]) array[1][1]);
+		
+		String json3 = "[[[\"abc\"],[42,24],[\"def\"],[43,34]]]";
+		genson.deserialize(json3, Object[][][].class);
+	}
 
 	@SuppressWarnings("unchecked")
 	@Test
@@ -183,6 +197,13 @@ public class JsonDeserializationTest {
 		TypeVariableList<Number> tvl = genson.deserialize(src, TypeVariableList.class);
 		assertArrayEquals(tvl.list.toArray(new Number[tvl.list.size()]), new Number[] { 1, 2.3, 5,
 				null });
+		
+		String json =   
+				"[\"hello\",5,{\"name\":\"GREETINGS\",\"source\":\"guest\"}]";
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("name", "GREETINGS");
+		map.put("source", "guest");
+		assertEquals(Arrays.asList("hello", 5, map), genson.deserialize(json, Collection.class));
 
 		// doit echouer du a la chaine et que list est de type <E extends Number>
 		src = "{\"list\":[1, 2.3, 5, \"a\"]}";
@@ -203,8 +224,8 @@ public class JsonDeserializationTest {
 		assertEquals(map.get("key3"), true);
 		assertEquals(map.get("key4"), "string");
 		assertNull(map.get("key5"));
-		List<Number> list = (List<Number>) map.get("list");
-		assertArrayEquals(list.toArray(new Number[list.size()]), new Number[] { 1, 2.0005, 3 });
+		Object[] list = (Object[]) map.get("list");
+		assertArrayEquals(new Number[] { 1, 2.0005, 3 }, list);
 	}
 
 	@Test

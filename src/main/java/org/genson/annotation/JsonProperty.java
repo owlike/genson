@@ -28,5 +28,7 @@ import java.lang.annotation.Target;
 @Inherited
 @Documented
 public @interface JsonProperty {
-	String value();
+	String value() default "";
+	boolean serialize() default true;
+	boolean deserialize() default true;
 }
