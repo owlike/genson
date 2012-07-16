@@ -3,29 +3,34 @@ package org.genson.convert;
 import java.io.IOException;
 import java.lang.reflect.Type;
 
+import org.genson.ChainedFactory;
 import org.genson.Context;
 import org.genson.Genson;
 import org.genson.TransformationException;
-import org.genson.annotation.HandleNull;
-import org.genson.reflect.ChainedFactory;
+import org.genson.reflect.TypeUtil;
 import org.genson.stream.ObjectReader;
 import org.genson.stream.ObjectWriter;
 import org.genson.stream.ValueType;
 
+/**
+ * You can also change the way null values are handled by registering your own Converter
+ * {@link org.genson.Genson.Builder#setNullConverter(org.genson.convert.Converter)
+ * Genson.Builder.setNullConverter(org.genson.convert.Converter)}.
+ * 
+ * @author eugen
+ * 
+ */
 public class NullConverter implements Converter<Object> {
 	public static class NullConverterFactory extends ChainedFactory {
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
-		public Converter<?> create(Type type, Genson genson) {
-			Converter<?> nextObject = next().create(type, genson);
-			if (!Wrapper.toAnnotatedElement(nextObject).isAnnotationPresent(HandleNull.class))
-				return new NullConverterWrapper(genson.getNullConverter(), nextObject);
-			else
-				return nextObject;
+		protected Converter<?> create(Type type, Genson genson, Converter<?> nextConverter) {
+			return new NullConverterWrapper(genson.getNullConverter(), nextConverter);
 		}
 	}
-	
-	public static class NullConverterWrapper<T> extends Wrapper<Converter<T>> implements Converter<T> {
+
+	public static class NullConverterWrapper<T> extends Wrapper<Converter<T>> implements
+			Converter<T> {
 		private final Converter<Object> nullConverter;
 		private final Converter<T> converter;
 
@@ -55,7 +60,7 @@ public class NullConverter implements Converter<Object> {
 			return converter.deserialize(type, reader, ctx);
 		}
 	}
-	
+
 	public NullConverter() {
 	}
 
@@ -68,9 +73,7 @@ public class NullConverter implements Converter<Object> {
 	@Override
 	public Object deserialize(Type type, ObjectReader reader, Context ctx)
 			throws TransformationException, IOException {
-		if (!(type instanceof Class))
-			return null;
-		Class<?> clazz = (Class<?>) type;
+		Class<?> clazz = TypeUtil.getRawClass(type);
 		if (clazz.isPrimitive()) {
 			if (clazz == int.class)
 				return 0;

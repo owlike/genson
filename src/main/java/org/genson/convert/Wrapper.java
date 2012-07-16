@@ -7,6 +7,7 @@ import org.genson.Operations;
 
 public abstract class Wrapper<T> implements AnnotatedElement {
 	private AnnotatedElement wrappedElement;
+	private T wrapped;
 	
 	protected Wrapper() {}
 	
@@ -40,6 +41,11 @@ public abstract class Wrapper<T> implements AnnotatedElement {
 		if (object instanceof AnnotatedElement)
 			this.wrappedElement = (AnnotatedElement) object;
 		else this.wrappedElement = object.getClass();
+		this.wrapped = object;
+	}
+	
+	public T unwrap() {
+		return wrapped;
 	}
 	
 	public static AnnotatedElement toAnnotatedElement(Object object) {

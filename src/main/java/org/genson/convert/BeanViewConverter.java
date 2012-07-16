@@ -5,17 +5,27 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 import org.genson.BeanView;
+import org.genson.ChainedFactory;
 import org.genson.Context;
 import org.genson.Genson;
 import org.genson.TransformationException;
 import org.genson.annotation.WithoutBeanView;
 import org.genson.reflect.BeanDescriptor;
 import org.genson.reflect.BeanViewDescriptorProvider;
-import org.genson.reflect.ChainedFactory;
 import org.genson.reflect.TypeUtil;
 import org.genson.stream.ObjectReader;
 import org.genson.stream.ObjectWriter;
 
+/**
+ * Converter responsible of applying the BeanView mechanism.
+ * 
+ * @see org.genson.reflect.BeanViewDescriptorProvider BeanViewDescriptorProvider
+ * @see org.genson.BeanView BeanView
+ * 
+ * @author eugen
+ * 
+ * @param <T> type of objects this BeanViewConverter can handle.
+ */
 public class BeanViewConverter<T> extends Wrapper<Converter<T>> implements Converter<T> {
 
 	public static class BeanViewConverterFactory extends ChainedFactory {
@@ -27,11 +37,11 @@ public class BeanViewConverter<T> extends Wrapper<Converter<T>> implements Conve
 
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		@Override
-		public Converter<?> create(Type type, Genson genson) {
-			Converter<?> next = next().create(type, genson);
-			if (!Wrapper.toAnnotatedElement(next).isAnnotationPresent(WithoutBeanView.class))
-				return new BeanViewConverter(provider, next);
-			return next;
+		protected Converter<?> create(Type type, Genson genson, Converter<?> nextConverter) {
+			if (!Wrapper.toAnnotatedElement(nextConverter).isAnnotationPresent(
+					WithoutBeanView.class))
+				return new BeanViewConverter(provider, nextConverter);
+			return nextConverter;
 		}
 	}
 
@@ -77,9 +87,8 @@ public class BeanViewConverter<T> extends Wrapper<Converter<T>> implements Conve
 	@Override
 	public T deserialize(Type type, ObjectReader reader, Context ctx)
 			throws TransformationException, IOException {
-		List<Class<? extends BeanView<?>>> views = ctx.views();
-		if (views != null && views.size() > 0) {
-			Class<? extends BeanView<T>> viewClass = findViewFor(type, views);
+		if (ctx.hasViews()) {
+			Class<? extends BeanView<T>> viewClass = findViewFor(type, ctx.views());
 			if (viewClass != null) {
 				@SuppressWarnings("unchecked")
 				BeanDescriptor<T> descriptor = (BeanDescriptor<T>) provider.provideBeanDescriptor(

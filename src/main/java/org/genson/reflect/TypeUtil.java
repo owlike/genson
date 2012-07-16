@@ -54,7 +54,7 @@ public final class TypeUtil {
 				}
 				expandedType = new ExpandedParameterizedType(pType, rootClass, expandedArgs);
 			} else if (type instanceof TypeVariable) {
-				TypeVariable<Class<?>> tvType = (TypeVariable<Class<?>>) type; // TODO
+				TypeVariable<Class<?>> tvType = (TypeVariable<Class<?>>) type;
 				expandedType = resolveTypeVariable(tvType, rootClass);
 				if (type == expandedType)
 					expandedType = expandType(tvType.getBounds()[0], rootClass);
@@ -236,7 +236,7 @@ public final class TypeUtil {
 				for (; positionInClass < parameters.length
 						&& !type.equals(parameters[positionInClass]); positionInClass++) {
 				}
-				// TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! test with same class
+
 				// we located the position of the typevariable in the superclass
 				if (positionInClass < parameters.length) {
 					// let's look if we have type specialization information in the current class

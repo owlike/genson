@@ -9,7 +9,15 @@ import java.lang.annotation.Target;
 
 import org.genson.BeanView;
 
-
+/**
+ * Annotation used actually only in spring web integration
+ * {@link org.genson.spring.GensonMessageConverter GensonMessageConverter} to indicate
+ * at runtime what BeanView must be used. Its intended to be used in conjuction
+ * with springs @ResponseBody/@RequestBody and @RequestMapping annotations.
+ * 
+ * @author eugen
+ * 
+ */
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited

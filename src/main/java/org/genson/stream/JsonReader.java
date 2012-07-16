@@ -13,7 +13,7 @@ import org.genson.TransformationRuntimeException;
 
 
 /*
- * TODO handle rows/cols for more precise exceptions 
+ * TODO handle rows/cols for more precise exceptions (pretty printing)
  * TODO add checks for number reading, handle overflows : configurable => throw exception or return to the begin of the value (actual behavior)
  */
 public class JsonReader implements ObjectReader {
@@ -118,6 +118,11 @@ public class JsonReader implements ObjectReader {
 	}
 
 	@Override
+	public void close() throws IOException {
+		reader.close();
+	}
+	
+	@Override
 	public ObjectReader beginArray() throws IOException {
 		begin('[', JsonType.ARRAY);
 		valueType = ValueType.ARRAY;
@@ -188,7 +193,6 @@ public class JsonReader implements ObjectReader {
 		if (ValueType.STRING.equals(valueType))
 			return "".equals(_stringValue) ? null : Integer.valueOf(_stringValue);
 		throw new IllegalStateException("Readen value is not of type int");
-		// TODO NULL? OR STRING?
 	}
 	
 	public long valueAsLong() throws IOException {
@@ -681,10 +685,6 @@ public class JsonReader implements ObjectReader {
 
 	private final void newWrongTokenException(String awaited) {
 		newWrongTokenException(awaited, _cursor);
-	}
-	
-	private final void newWrongTokenException(int awaitedChar) {
-		newWrongTokenException(""+awaitedChar, _cursor);
 	}
 
 	private final void newWrongTokenException(String awaited, int cursor) {

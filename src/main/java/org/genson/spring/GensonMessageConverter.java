@@ -36,7 +36,7 @@ public class GensonMessageConverter extends AbstractHttpMessageConverter<Object>
 	@Override
 	protected Object readInternal(Class<?> clazz, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
-		MethodParameter mp = ThreadLocalHolder.get("method_param");
+		MethodParameter mp = ThreadLocalHolder.get("__GENSON$method_param");
 		try {
 			WithBeanView ann = mp != null ? mp.getMethodAnnotation(WithBeanView.class) : null;
 			if (ann != null)
@@ -62,7 +62,7 @@ public class GensonMessageConverter extends AbstractHttpMessageConverter<Object>
 			HttpMessageNotWritableException {
 		try {
 			ObjectWriter writer = genson.createWriter(outputMessage.getBody());
-			MethodParameter mp = ThreadLocalHolder.get("return_param");
+			MethodParameter mp = ThreadLocalHolder.get("__GENSON$return_param");
 			WithBeanView ann = mp != null ? mp.getMethodAnnotation(WithBeanView.class) : null;
 			if (ann != null)
 				genson.serialize(t, writer, ann.views());

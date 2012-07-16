@@ -5,13 +5,19 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.genson.ChainedFactory;
 import org.genson.Context;
 import org.genson.Genson;
 import org.genson.TransformationException;
-import org.genson.reflect.ChainedFactory;
 import org.genson.stream.ObjectReader;
 import org.genson.stream.ObjectWriter;
 
+/**
+ * ChainedFactory that handles circular class references.
+ * 
+ * @author eugen
+ *
+ */
 public class CircularClassReferenceConverterFactory extends ChainedFactory {
 	private final static class CircularConverter<T> extends Wrapper<Converter<T>> implements Converter<T> {
 		protected CircularConverter() {
@@ -59,5 +65,10 @@ public class CircularClassReferenceConverterFactory extends ChainedFactory {
     			_circularConverters.get().remove(type);
     		}
     	}
+	}
+
+	@Override
+	protected Converter<?> create(Type type, Genson genson, Converter<?> nextConverter) {
+		throw new UnsupportedOperationException();
 	}
 }

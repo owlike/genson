@@ -6,6 +6,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -116,14 +117,13 @@ public final class ASMCreatorParameterNameResolver implements PropertyNameResolv
 		public MethodVisitor visitMethod(int access, String name, String desc, String signature,
 				String[] exceptions) {
 			boolean ztatic = (access & Opcodes.ACC_STATIC) > 0;
-			if (Opcodes.ACC_PRIVATE != access && Opcodes.ACC_PROTECTED != access
-					&& Opcodes.ACC_ABSTRACT != access) {
+			if ((access & Opcodes.ACC_ABSTRACT) == 0) {
 				if (CONSTRUCTOR_METHOD_NAME.equals(name))
 					return new ConstructorVisitor(forClass, ztatic, desc, ctrParameterNames);
 				
 				if ( !"<clinit>".equals(name) )
 					return new NameMethodVisitor(name, forClass, ztatic, desc, methodParameterNames);
-			} 
+			}
 			return null;
 		}
 
@@ -149,7 +149,8 @@ public final class ASMCreatorParameterNameResolver implements PropertyNameResolv
 			if (!ztatic) {
 				index--;
 			}
-			if (index >= 0 && paramNames.size() < paramTypes.length) {
+			
+			if ((index >= 0 || (forClass.isMemberClass() && (forClass.getModifiers() & Modifier.STATIC) == 0) ) && paramNames.size() < paramTypes.length) {
 				paramNames.add(variableName);
 			}
 		}
@@ -260,7 +261,7 @@ public final class ASMCreatorParameterNameResolver implements PropertyNameResolv
 			if (paramNames.size() == paramTypes.length) {
 				Constructor<?> constructor = null;
 				Class<?>[] javaTypes = new Class<?>[paramTypes.length];
-
+				
 				for (int i = 0; i < paramTypes.length; i++)
 					javaTypes[i] = resolveClass(paramTypes[i]);
 

@@ -11,9 +11,6 @@ import org.genson.annotation.Creator;
 import org.genson.annotation.JsonIgnore;
 import org.genson.annotation.JsonProperty;
 
-/*
- * TODO configure by visibility
- */
 public interface BeanMutatorAccessorResolver {
 	public boolean isCreator(Constructor<?> constructor, Class<?> fromClass);
 	

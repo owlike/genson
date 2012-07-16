@@ -6,14 +6,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.genson.ChainedFactory;
 import org.genson.Context;
 import org.genson.Factory;
 import org.genson.GenericType;
 import org.genson.Genson;
 import org.genson.TransformationException;
-import org.genson.annotation.Creator;
-import org.genson.annotation.HandleNull;
-import org.genson.reflect.ChainedFactory;
+import org.genson.annotation.HandleClassMetadata;
 import org.genson.stream.ObjectReader;
 import org.genson.stream.ObjectWriter;
 import org.junit.Before;
@@ -92,16 +91,18 @@ public class FactoryTest {
 
 	@Test
 	public void testUnwrapAnnotations() throws TransformationException, IOException {
-		Genson genson = new Genson.Builder().with(new NullAConverter()).create();
-		Converter<A> converter = genson.provideConverter(A.class);
-		assertTrue(converter instanceof NullAConverter);
-		assertFalse(NullAConverter.used);
+		Genson genson = new Genson.Builder().with(new ClassMetadataConverter()).create();
+		@SuppressWarnings("unchecked")
+		Wrapper<Converter<A>> wrapper = (Wrapper<Converter<A>>) genson.provideConverter(A.class);
+		Converter<A> converter = wrapper.unwrap();
+		assertTrue(converter instanceof ClassMetadataConverter);
+		assertFalse(ClassMetadataConverter.used);
 		converter.serialize(null, A.class, null, null);
-		assertTrue(NullAConverter.used);
+		assertTrue(ClassMetadataConverter.used);
 	}
 
-	@HandleNull
-	static class NullAConverter implements Converter<A> {
+	@HandleClassMetadata
+	static class ClassMetadataConverter implements Converter<A> {
 		static boolean used = false;
 		
 		@Override

@@ -8,22 +8,31 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Static methods annotated with @Creator annotation will act as method factories.
- * These methods can take arguments matching properties from the json stream.
- * You can annotate them with {@link org.genson.annotation.JsonProperty JsonProperty} if you want to match a property
- * with another name than the one of your argument.
+ * Static methods annotated with @Creator annotation will act as method factories. These methods can
+ * take arguments that match properties from the json stream. If you use default configuration you
+ * must annotate each argument with {@link org.genson.annotation.JsonProperty JsonProperty} and
+ * define a name. However Genson is also able to use the names from the method signature, but by
+ * default it is disabled. To enable this feature use
  * 
- * By default if a object contains constructors and methods annotated with @Creator the
- * factory methods will be privileged (however that does not mean that the constructor will not be used
- * if the instance can't be created using the factory method).
+ * <pre>
+ * new Genson.Builder().setWithDebugInfoPropertyNameResolver(true).create();
+ * </pre>
  * 
- * {@see org.genson.annotation.JsonProperty JsonProperty}
- * {@see org.genson.reflect.BeanMutatorAccessorResolver.StandardMutaAccessorResolver StandardMutaAccessorResolver}
+ * It will register {@link org.genson.reflect.ASMCreatorParameterNameResolver
+ * ASMCreatorParameterNameResolver} name resolver, that will use the debug symbols generated during
+ * compilation to resolve the names.
+ * 
+ * By default if a object contains constructors and methods annotated with @Creator the factory
+ * methods will be privileged.
+ * 
+ * @see org.genson.annotation.JsonProperty JsonProperty
+ * @see org.genson.reflect.BeanMutatorAccessorResolver.StandardMutaAccessorResolver
+ *      StandardMutaAccessorResolver
  * 
  * @author eugen
- *
+ * 
  */
-@Target({ElementType.METHOD, ElementType.PARAMETER, ElementType.FIELD})
+@Target({ ElementType.METHOD, ElementType.PARAMETER, ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented

@@ -32,7 +32,6 @@ import org.genson.reflect.BaseBeanDescriptorProvider;
 import org.genson.reflect.BeanDescriptorProvider;
 import org.genson.reflect.BeanMutatorAccessorResolver;
 import org.genson.reflect.BeanViewDescriptorProvider;
-import org.genson.reflect.ChainedFactory;
 import org.genson.reflect.PropertyNameResolver;
 import org.genson.reflect.PropertyNameResolver.CompositePropertyNameResolver;
 import org.genson.stream.JsonReader;
@@ -40,12 +39,11 @@ import org.genson.stream.JsonWriter;
 import org.genson.stream.ObjectReader;
 import org.genson.stream.ObjectWriter;
 
-// TODO ajouter le unwrap pour gerer les annotations et plus?
 /**
  * <p>
  * Main class of the library. Instances of this class are intended to be reused. You can instantiate
  * it multiple times but it is better to have an instance per configuration so you can benefit of
- * better performances. This class is immutable and thread safe.
+ * the cache. This class is immutable and thread safe.
  * 
  * <p>
  * To create a new instance you can use the default constructor {@link #Genson} or the

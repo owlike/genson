@@ -23,10 +23,10 @@ public class ExtendedReqRespBodyMethodProcessor extends RequestResponseBodyMetho
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
 		Object object = null;
 		try {
-			ThreadLocalHolder.store("method_param", parameter);
+			ThreadLocalHolder.store("__GENSON$method_param", parameter);
 			object = super.resolveArgument(parameter, mavContainer, webRequest, binderFactory);
 		} finally {
-			ThreadLocalHolder.remove("method_param");
+			ThreadLocalHolder.remove("__GENSON$method_param");
 		}
 
 		return object;
@@ -38,10 +38,10 @@ public class ExtendedReqRespBodyMethodProcessor extends RequestResponseBodyMetho
 			HttpMediaTypeNotAcceptableException {
 
 		try {
-			ThreadLocalHolder.store("return_param", returnType);
+			ThreadLocalHolder.store("__GENSON$return_param", returnType);
 			super.handleReturnValue(returnValue, returnType, mavContainer, webRequest);
 		} finally {
-			ThreadLocalHolder.remove("return_param");
+			ThreadLocalHolder.remove("__GENSON$return_param");
 		}
 	}
 }

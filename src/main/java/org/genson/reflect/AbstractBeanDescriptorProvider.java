@@ -48,7 +48,6 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 				mutators.put(mutator.name, mutator);
 		}
 
-		// TODO
 		mergeMutatorsWithCreatorProperties(mutators, creators);
 
 		return create(ofClass, creators, accessors, mutators);

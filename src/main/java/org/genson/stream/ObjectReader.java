@@ -1,8 +1,9 @@
 package org.genson.stream;
 
+import java.io.Closeable;
 import java.io.IOException;
 
-public interface ObjectReader {
+public interface ObjectReader extends Closeable {
 	public ObjectReader beginObject() throws IOException;
 	public ObjectReader endObject() throws IOException;
 	public ObjectReader beginArray() throws IOException;

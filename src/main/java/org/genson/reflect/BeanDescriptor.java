@@ -11,6 +11,7 @@ import java.util.Map;
 
 import org.genson.Context;
 import org.genson.TransformationException;
+import org.genson.TransformationRuntimeException;
 import org.genson.convert.Converter;
 import org.genson.reflect.BeanCreator.BeanCreatorProperty;
 import org.genson.stream.ObjectReader;
@@ -25,6 +26,7 @@ public class BeanDescriptor<T> implements Converter<T> {
 
 	private final Map<List<String>, BeanCreator<T>> namesCreatorCache;
 	private final BeanCreator<T> _emptyCtr;
+	private final boolean _noCtr;
 
 	private final static Comparator<BeanProperty<?>> _readablePropsComparator = new Comparator<BeanProperty<?>>() {
 		@Override
@@ -45,6 +47,7 @@ public class BeanDescriptor<T> implements Converter<T> {
 			Map<String, PropertyMutator<T, ?>> writableBps, List<BeanCreator<T>> creators) {
 		this.ofClass = forClass;
 		this._creators = creators;
+		this._noCtr = _creators.isEmpty();
 		namesCreatorCache = new HashMap<List<String>, BeanCreator<T>>();
 		mutableProperties = writableBps;
 
@@ -101,7 +104,12 @@ public class BeanDescriptor<T> implements Converter<T> {
 		return bean;
 	}
 
-	public void deserialize(T into, ObjectReader reader, Context ctx) throws IOException, TransformationException {
+	public void deserialize(T into, ObjectReader reader, Context ctx) throws IOException,
+			TransformationException {
+		if (_noCtr)
+			throw new TransformationRuntimeException("Can not create BeanDescriptor for " + ofClass
+					+ ", the creators list is empty!");
+
 		reader.beginObject();
 		for (; reader.hasNext();) {
 			reader.next();
@@ -116,9 +124,13 @@ public class BeanDescriptor<T> implements Converter<T> {
 		}
 		reader.endObject();
 	}
-	
+
 	protected T _deserWithCtrArgs(Type type, ObjectReader reader, Context ctx)
 			throws TransformationException, IOException {
+		if (_noCtr)
+			throw new TransformationRuntimeException("Can not create BeanDescriptor for " + ofClass
+					+ ", the creators list is empty!");
+
 		List<String> names = new ArrayList<String>();
 		List<Object> values = new ArrayList<Object>();
 
@@ -158,7 +170,7 @@ public class BeanDescriptor<T> implements Converter<T> {
 		Object[] creatorArgs = new Object[creator.parameters.size()];
 		String[] newNames = new String[size];
 		Object[] newValues = new Object[size];
-		// TODO if field for ctr is missing what to do?
+		// TODO if field for ctr is missing what to do? make it also configurable...?
 		for (int i = 0, j = 0; i < size; i++) {
 			BeanCreatorProperty<T, ?> mp = creator.parameters.get(names.get(i));
 			if (mp != null) {
@@ -173,7 +185,8 @@ public class BeanDescriptor<T> implements Converter<T> {
 		T bean = creator.create(creatorArgs);
 		for (int i = 0; i < size; i++) {
 			@SuppressWarnings("unchecked")
-			PropertyMutator<T, Object> property = (PropertyMutator<T, Object>) mutableProperties.get(newNames[i]);
+			PropertyMutator<T, Object> property = (PropertyMutator<T, Object>) mutableProperties
+					.get(newNames[i]);
 			if (property != null)
 				property.mutate(bean, newValues[i]);
 		}

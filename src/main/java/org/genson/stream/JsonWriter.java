@@ -70,7 +70,8 @@ public class JsonWriter implements ObjectWriter {
 		_ctx.push(JsonType.EMPTY);
 	}
 
-	void close() throws IOException {
+	public void close() throws IOException {
+		flush();
 		writer.close();
 	}
 

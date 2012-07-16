@@ -17,5 +17,5 @@ import org.genson.stream.ObjectWriter;
  * @param <T> the type of objects this Serializer can serialize.
  */
 public interface Serializer<T> {
-	public void serialize(T obj, Type type, ObjectWriter writer, Context ctx) throws TransformationException, IOException;
+	public void serialize(T object, Type type, ObjectWriter writer, Context ctx) throws TransformationException, IOException;
 }

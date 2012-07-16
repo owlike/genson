@@ -3,6 +3,7 @@ package org.genson.reflect;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -39,6 +40,8 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 	@Override
 	public <T> List<BeanCreator<T>> provideBeanCreators(Class<?> ofClass, Genson genson) {
 		List<BeanCreator<T>> creators = new ArrayList<BeanCreator<T>>();
+		if (ofClass.isMemberClass() && (ofClass.getModifiers() & Modifier.STATIC) == 0) return creators;
+		
 		provideConstructorCreators(ofClass, creators, genson);
 		for (Class<?> clazz = ofClass; clazz != null && !Object.class.equals(clazz); clazz = clazz
 				.getSuperclass()) {
@@ -82,12 +85,6 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 				int idx = 0;
 				for (; idx < paramCnt; idx++) {
 					String name = nameResolver.resolve(idx, ctr);
-					/*
-					 * TODO must names be resolved? Or could we use types to inject if the name is
-					 * missing... in this case add some method to beanCreator to check if a property
-					 * is one of its methodparameters? For the moment just don't accept creators
-					 * with missing names...
-					 */
 					if (name == null)
 						break;
 					parameterNames[idx] = name;
@@ -125,12 +122,6 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 				int idx = 0;
 				for (; idx < paramCnt; idx++) {
 					String name = nameResolver.resolve(idx, ctr);
-					/*
-					 * TODO must names be resolved? Or could we use types to inject if the name is
-					 * missing... in this case add some method to beanCreator to check if a property
-					 * is one of its methodparameters? For the moment just don't accept creators
-					 * with missing names...
-					 */
 					if (name == null)
 						break;
 					parameterNames[idx] = name;
@@ -282,8 +273,6 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 		for (; it.hasNext();) {
 			T next = it.next();
 			// 1 we search the most specialized class containing this property
-			// 3 TODO should we use types in case of generics?
-
 			// with highest priority
 			if (property.declaringClass.equals(next.declaringClass)
 					&& property.priority() < next.priority()) {
@@ -302,7 +291,9 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 		return property;
 	}
 
-	// TODO must be rethinked?
+	/* TODO must be rethinked? maybe not, but a solution could be to separate ctr properties from the others,
+	 * and while deserializing to check first in normal mutator map and if null check for property in the ctr props...
+	 */
 	@Override
 	protected <T> void mergeMutatorsWithCreatorProperties(Map<String, PropertyMutator<T, ?>> mutators,
 			List<BeanCreator<T>> creators) {

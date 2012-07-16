@@ -16,6 +16,40 @@ import org.genson.reflect.TypeUtil;
 import org.genson.stream.ObjectReader;
 import org.genson.stream.ObjectWriter;
 
+/**
+ * This is the base factory that will create converters based on the default ones and on custom
+ * Serializer, Deserializer and Converter. But it also uses factories (default and custom) and
+ * {@link org.genson.reflect.BeanDescriptorProvider BeanDescriptorProvider} that is responsible of
+ * creating bean converters.
+ * <p>
+ * When you ask for a Converter it will
+ * <ul>
+ * <li>Search for a Serializer {@link BasicConvertersFactory#provide(Class, Type, Genson)
+ * provide(Serializer.class, type, genson)}.
+ * <ol>
+ * <li>Lookup in the registered Serializers for one that is parameterized with the current type or
+ * one of its supertypes, if found we finished (it takes the first one, so the order is very
+ * important).</li>
+ * <li>Else we will try the factories by searching the ones that can create and instance of
+ * Serializer&lt;CurrentType&gt; (again the order is very important). We continue while they return
+ * null.</li>
+ * <li>If no factory could create an instance we will use BeanDescriptorProvider.</li>
+ * </ol>
+ * </li>
+ * <li>If the returned serializer is an instance of Converter we finished.</li>
+ * <li>Else it will search for a Deserializer (same mechanism as for Serializer). If the
+ * deserializer is a converter we finished.</li>
+ * <li>Else we will wrap both into a {@link DelegatedConverter} instance.</li>
+ * </ul>
+ * 
+ * Note that the create method from the registered factories will only be called if the type with
+ * which they are parameterized is assignable from the current type. For example, if we look for a
+ * serializer of Integer then Factory<Converter<Integer>> and Factory<Serializer<Object>> match
+ * both, the first registered will be used.
+ * 
+ * @author eugen
+ * 
+ */
 public class BasicConvertersFactory implements Factory<Converter<?>> {
 	private final List<? super Converter<?>> converters;
 	private final List<Factory<?>> factories;
@@ -48,6 +82,13 @@ public class BasicConvertersFactory implements Factory<Converter<?>> {
 		return converter;
 	}
 
+	/**
+	 * Will provide an instance of forClass parameterized with withParameterType.
+	 * @param forClass is meant to be Serializer, Deserializer or Converter.
+	 * @param withParameterType the parameterized of forClass
+	 * @param genson
+	 * @return should never return null
+	 */
 	@SuppressWarnings("unchecked")
 	protected <T> T provide(Class<T> forClass, Type withParameterType, Genson genson) {
 		for (Object s : converters) {
@@ -127,7 +168,8 @@ public class BasicConvertersFactory implements Factory<Converter<?>> {
 		public Annotation[] getDeclaredAnnotations() {
 			if (serializer != null && deserializer != null)
 				return Operations.union(Annotation[].class, toAnnotatedElement(serializer)
-						.getDeclaredAnnotations(), toAnnotatedElement(deserializer).getDeclaredAnnotations());
+						.getDeclaredAnnotations(), toAnnotatedElement(deserializer)
+						.getDeclaredAnnotations());
 			if (serializer != null)
 				return toAnnotatedElement(serializer).getDeclaredAnnotations();
 			if (deserializer != null)
@@ -135,7 +177,7 @@ public class BasicConvertersFactory implements Factory<Converter<?>> {
 
 			return new Annotation[0];
 		}
-		
+
 		@Override
 		public boolean isAnnotationPresent(Class<? extends Annotation> annotationClass) {
 			if (serializer != null)

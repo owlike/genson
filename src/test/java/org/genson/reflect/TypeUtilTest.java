@@ -71,7 +71,6 @@ public class TypeUtilTest {
 		assertEquals(Object.class, expand(typeOf(0, List.class), ParametrizedClass.class));
 	}
 	
-	// TODO a faire plus de tests
 	@Test public void testTypeMatch() throws SecurityException, NoSuchFieldException {
 		assertTrue(match(Integer.class, Number.class, false));
 		assertTrue(match(Number.class, Number.class, false));

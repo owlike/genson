@@ -2,7 +2,6 @@ package org.genson;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,9 +15,8 @@ import org.genson.stream.ObjectWriter;
  * serialization/deserialization chain.
  * <p>
  * For example if you have computed in a first serializer a value and you need it later in another
- * one (or maybe in this one so you don't do it twice) you can put it in the context by using
- * {@link Context#store(String, Object)} method and later retrieve it with {@link #get(String)} or
- * remove it with {@link #remove(String)}.
+ * one, you can put it in the context by using {@link Context#store(String, Object)} method and
+ * later retrieve it with {@link #get(String)} or remove it with {@link #remove(String)}.
  * <p>
  * You can achieve the same thing with {@link ThreadLocalHolder} that stores the data in a thread
  * local map but it is cleaner to use this Context class as you wont have to worry about removing
@@ -29,10 +27,11 @@ import org.genson.stream.ObjectWriter;
  * 
  * <p>
  * This class stores also the views present in the current context, those views will be applied to
- * the matching objects during serialization/deserialization.
+ * the matching objects during serialization and deserialization.
  * 
- * @see BeanView
- * @see ThreadLocalHolder
+ * @see org.genson.BeanView BeanView
+ * @see org.genson.convert.BeanViewConverter BeanViewConverter
+ * @see org.genson.ThreadLocalHolder ThreadLocalHolder
  * 
  * @author eugen
  * 
@@ -43,12 +42,16 @@ public class Context {
 	private Map<String, Object> _ctxData = new HashMap<String, Object>();
 
 	public Context(Genson genson) {
-		this(genson, new ArrayList<Class<? extends BeanView<?>>>());
+		this(genson, null);
 	}
 
 	public Context(Genson genson, List<Class<? extends BeanView<?>>> views) {
 		this.genson = genson;
 		this.views = views;
+	}
+
+	public boolean hasViews() {
+		return views != null && !views.isEmpty();
 	}
 
 	public List<Class<? extends BeanView<?>>> views() {
