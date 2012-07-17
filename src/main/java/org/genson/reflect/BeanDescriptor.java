@@ -1,7 +1,6 @@
 package org.genson.reflect;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -82,7 +81,7 @@ public class BeanDescriptor<T> implements Converter<T> {
 	}
 
 	@Override
-	public void serialize(T obj, Type type, ObjectWriter writer, Context ctx)
+	public void serialize(T obj, ObjectWriter writer, Context ctx)
 			throws TransformationException, IOException {
 		writer.beginObject();
 		for (PropertyAccessor<T, ?> accessor : accessibleProperties) {
@@ -92,7 +91,7 @@ public class BeanDescriptor<T> implements Converter<T> {
 	}
 
 	@Override
-	public T deserialize(Type type, ObjectReader reader, Context ctx)
+	public T deserialize(ObjectReader reader, Context ctx)
 			throws TransformationException, IOException {
 		T bean = null;
 		// optimization for default ctr
@@ -100,7 +99,7 @@ public class BeanDescriptor<T> implements Converter<T> {
 			bean = _emptyCtr.create();
 			deserialize(bean, reader, ctx);
 		} else
-			bean = _deserWithCtrArgs(type, reader, ctx);
+			bean = _deserWithCtrArgs(reader, ctx);
 		return bean;
 	}
 
@@ -125,7 +124,7 @@ public class BeanDescriptor<T> implements Converter<T> {
 		reader.endObject();
 	}
 
-	protected T _deserWithCtrArgs(Type type, ObjectReader reader, Context ctx)
+	protected T _deserWithCtrArgs(ObjectReader reader, Context ctx)
 			throws TransformationException, IOException {
 		if (_noCtr)
 			throw new TransformationRuntimeException("Can not create BeanDescriptor for " + ofClass

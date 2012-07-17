@@ -1,13 +1,8 @@
 package org.genson;
 
-import java.io.IOException;
-import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.genson.stream.ObjectReader;
-import org.genson.stream.ObjectWriter;
 
 /**
  * The context class is intended to be a statefull class shared across a single execution. Its main
@@ -100,36 +95,5 @@ public class Context {
 		if (key == null)
 			throw new IllegalArgumentException();
 		return (T) _ctxData.remove(key);
-	}
-
-	/**
-	 * It's only a shorthand for ctx.genson.deserialize, however actually cyclic references are not
-	 * handled so if you want to handle it you can extend this class and override this method to
-	 * check if the argument obj is not present in the parent calls. You can do that very easily
-	 * with a LinkedList like that
-	 * 
-	 * <pre>
-	 * 1) traverse it and check if the obj is present
-	 * 2) if not put obj in the list (otherwise you can for example ignore the current object and just do nothing) 
-	 * 3) call genson.serialize(obj, type, writer, this);
-	 * 4) pop obj from the LinkedList.
-	 * </pre>
-	 * 
-	 * @param obj the object that must be serialized
-	 * @param type is the generic type of the object for example List&lt;Integer&gt;, obj.getClass
-	 *        will only return you the runtime erased type List
-	 * @param writer use it to output the data.
-	 * @throws TransformationException
-	 * @throws IOException
-	 */
-	public <T> void serialize(T obj, Type type, ObjectWriter writer)
-			throws TransformationException, IOException {
-		genson.serialize(obj, type, writer, this);
-	}
-
-	@SuppressWarnings("unchecked")
-	public <T> T deserialize(Type type, ObjectReader reader) throws TransformationException,
-			IOException {
-		return (T) genson.deserialize(type, reader, this);
 	}
 }

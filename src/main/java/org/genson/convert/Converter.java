@@ -10,14 +10,14 @@ package org.genson.convert;
  * Genson genson = new Genson.Builder().with(new Converter&lt;URL&gt;() {
  * 
  * 	&#064;Override
- * 	public void serialize(URL url, Type type, ObjectWriter writer, Context ctx)
+ * 	public void serialize(URL url, ObjectWriter writer, Context ctx)
  * 			throws TransformationException, IOException {
  * 		// you don't have to worry about null objects, as the library will handle them.
  * 		writer.writeValue(obj.toExternalForm());
  * 	}
  * 
  * 	&#064;Override
- * 	public URL deserialize(Type type, ObjectReader reader, Context ctx)
+ * 	public URL deserialize(ObjectReader reader, Context ctx)
  * 			throws TransformationException, IOException {
  * 		return new URL(reader.valueAsString());
  * 	}

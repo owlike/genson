@@ -20,7 +20,6 @@ import org.genson.bean.Tweet;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-
 /**
  * Deserialization benchmark based on performance benchmark from gson (metrics project ParseBenchmark class).
  * According to this benchmark, Genson performances are very close to Jacksons,

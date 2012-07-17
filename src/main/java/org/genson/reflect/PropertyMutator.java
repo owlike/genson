@@ -25,12 +25,12 @@ public abstract class PropertyMutator<T, P> extends BeanProperty<T> implements
 
 	public P deserialize(ObjectReader reader, Context ctx) throws TransformationException,
 			IOException {
-		return propertyDeserializer.deserialize(type, reader, ctx);
+		return propertyDeserializer.deserialize(reader, ctx);
 	}
 
 	public void deserialize(T into, ObjectReader reader, Context ctx)
 			throws TransformationException, IOException {
-		P propValue = propertyDeserializer.deserialize(type, reader, ctx);
+		P propValue = propertyDeserializer.deserialize(reader, ctx);
 		mutate(into, propValue);
 	}
 

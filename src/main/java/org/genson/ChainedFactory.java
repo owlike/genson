@@ -25,36 +25,20 @@ import org.genson.convert.Converter;
  * 		this.converter = converter;
  * 	}
  * 
- * 	public void serialize(Object obj, Type type, ObjectWriter writer, Context ctx)
+ * 	public void serialize(Object obj, ObjectWriter writer, Context ctx)
  * 			throws TransformationException, IOException {
  * 		if (obj == null)
  * 			writer.writeNull();
  * 		else
- * 			converter.serialize(obj, type, writer, ctx);
+ * 			converter.serialize(obj, writer, ctx);
  * 	}
  * 
- * 	public Object deserialize(Type type, ObjectReader reader, Context ctx)
+ * 	public Object deserialize(ObjectReader reader, Context ctx)
  * 			throws TransformationException, IOException {
  * 		if (TypeValue.NULL == reader.getTypeValue()) {
- * 			Class&lt;?&gt; clazz = TypeUtil.getRawClass(type);
- * 			if (clazz.isPrimitive()) {
- * 				if (clazz == int.class)
- * 					return 0;
- * 				if (clazz == double.class)
- * 					return 0d;
- * 				if (clazz == boolean.class)
- * 					return false;
- * 				if (clazz == long.class)
- * 					return 0l;
- * 				if (clazz == float.class)
- * 					return 0f;
- * 				if (clazz == short.class)
- * 					return 0;
- * 			}
- * 			// it's an object
  * 			return null;
  * 		} else
- * 			return converter.deserialize(type, reader, ctx);
+ * 			return converter.deserialize(reader, ctx);
  * 
  * 	}
  * }

@@ -27,7 +27,7 @@ public abstract class PropertyAccessor<T, P> extends BeanProperty<T> implements
 			throws TransformationException, IOException {
 		P propertyValue = access(propertySource);
 		writer.writeName(name);
-		propertySerializer.serialize(propertyValue, type, writer, ctx);
+		propertySerializer.serialize(propertyValue, writer, ctx);
 	}
 
 	public abstract P access(final T target);

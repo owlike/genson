@@ -40,18 +40,20 @@ public class BeanViewConverter<T> extends Wrapper<Converter<T>> implements Conve
 		protected Converter<?> create(Type type, Genson genson, Converter<?> nextConverter) {
 			if (!Wrapper.toAnnotatedElement(nextConverter).isAnnotationPresent(
 					WithoutBeanView.class))
-				return new BeanViewConverter(provider, nextConverter);
+				return new BeanViewConverter(type, provider, nextConverter);
 			return nextConverter;
 		}
 	}
 
 	private final BeanViewDescriptorProvider provider;
 	private final Converter<T> next;
+	private final Type type;
 
-	public BeanViewConverter(BeanViewDescriptorProvider provider, Converter<T> next) {
+	public BeanViewConverter(Type type, BeanViewDescriptorProvider provider, Converter<T> next) {
 		super(next);
 		this.provider = provider;
 		this.next = next;
+		this.type = type;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -66,7 +68,7 @@ public class BeanViewConverter<T> extends Wrapper<Converter<T>> implements Conve
 	}
 
 	@Override
-	public void serialize(T obj, Type type, ObjectWriter writer, Context ctx)
+	public void serialize(T obj, ObjectWriter writer, Context ctx)
 			throws TransformationException, IOException {
 		boolean handled = false;
 		List<Class<? extends BeanView<?>>> views = ctx.views();
@@ -76,16 +78,16 @@ public class BeanViewConverter<T> extends Wrapper<Converter<T>> implements Conve
 				@SuppressWarnings("unchecked")
 				BeanDescriptor<T> descriptor = (BeanDescriptor<T>) provider.provideBeanDescriptor(
 						viewClass, ctx.genson);
-				descriptor.serialize(obj, type, writer, ctx);
+				descriptor.serialize(obj, writer, ctx);
 				handled = true;
 			}
 		}
 		if (!handled)
-			next.serialize(obj, type, writer, ctx);
+			next.serialize(obj, writer, ctx);
 	}
 
 	@Override
-	public T deserialize(Type type, ObjectReader reader, Context ctx)
+	public T deserialize(ObjectReader reader, Context ctx)
 			throws TransformationException, IOException {
 		if (ctx.hasViews()) {
 			Class<? extends BeanView<T>> viewClass = findViewFor(type, ctx.views());
@@ -93,9 +95,9 @@ public class BeanViewConverter<T> extends Wrapper<Converter<T>> implements Conve
 				@SuppressWarnings("unchecked")
 				BeanDescriptor<T> descriptor = (BeanDescriptor<T>) provider.provideBeanDescriptor(
 						viewClass, ctx.genson);
-				return descriptor.deserialize(type, reader, ctx);
+				return descriptor.deserialize(reader, ctx);
 			}
 		}
-		return next.deserialize(type, reader, ctx);
+		return next.deserialize(reader, ctx);
 	}
 }

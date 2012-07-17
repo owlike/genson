@@ -5,6 +5,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.genson.Context;
 import org.genson.Factory;
@@ -27,9 +28,8 @@ import org.genson.stream.ObjectWriter;
  * <li>Search for a Serializer {@link BasicConvertersFactory#provide(Class, Type, Genson)
  * provide(Serializer.class, type, genson)}.
  * <ol>
- * <li>Lookup in the registered Serializers for one that is parameterized with the current type or
- * one of its supertypes, if found we finished (it takes the first one, so the order is very
- * important).</li>
+ * <li>Lookup in the registered Serializers for one that is parameterized with the current type, if
+ * found we finished (it takes the first one, so the order is very important).</li>
  * <li>Else we will try the factories by searching the ones that can create and instance of
  * Serializer&lt;CurrentType&gt; (again the order is very important). We continue while they return
  * null.</li>
@@ -51,13 +51,15 @@ import org.genson.stream.ObjectWriter;
  * 
  */
 public class BasicConvertersFactory implements Factory<Converter<?>> {
-	private final List<? super Converter<?>> converters;
+	private final Map<Type, Serializer<?>> serializersMap;
+	private final Map<Type, Deserializer<?>> deserializersMap;
 	private final List<Factory<?>> factories;
 	private final BeanDescriptorProvider beanDescriptorProvider;
 
-	public BasicConvertersFactory(List<? super Converter<?>> converters,
+	public BasicConvertersFactory(Map<Type, Serializer<?>> serializersMap, Map<Type, Deserializer<?>> deserializersMap,
 			List<Factory<?>> factories, BeanDescriptorProvider beanDescriptorProvider) {
-		this.converters = converters;
+		this.serializersMap = serializersMap;
+		this.deserializersMap = deserializersMap;
 		this.factories = factories;
 		this.beanDescriptorProvider = beanDescriptorProvider;
 	}
@@ -66,11 +68,11 @@ public class BasicConvertersFactory implements Factory<Converter<?>> {
 	@Override
 	public Converter<?> create(Type type, Genson genson) {
 		Converter<?> converter = null;
-		Serializer<?> serializer = provide(Serializer.class, type, genson);
+		Serializer<?> serializer = provide(Serializer.class, type, serializersMap, genson);
 		if (serializer instanceof Converter)
 			converter = (Converter<?>) serializer;
 		else {
-			Deserializer<?> deserializer = provide(Deserializer.class, type, genson);
+			Deserializer<?> deserializer = provide(Deserializer.class, type, deserializersMap, genson);
 			if (deserializer instanceof Converter)
 				converter = (Converter<?>) deserializer;
 			else {
@@ -82,20 +84,9 @@ public class BasicConvertersFactory implements Factory<Converter<?>> {
 		return converter;
 	}
 
-	/**
-	 * Will provide an instance of forClass parameterized with withParameterType.
-	 * @param forClass is meant to be Serializer, Deserializer or Converter.
-	 * @param withParameterType the parameterized of forClass
-	 * @param genson
-	 * @return should never return null
-	 */
 	@SuppressWarnings("unchecked")
-	protected <T> T provide(Class<T> forClass, Type withParameterType, Genson genson) {
-		for (Object s : converters) {
-			if (TypeUtil.lookupWithGenerics(forClass, withParameterType, s.getClass(), false) != null) {
-				return forClass.cast(s);
-			}
-		}
+	protected <T> T provide(Class<T> forClass, Type withParameterType, Map<Type, ? extends T> fromTypeMap, Genson genson) {
+		if (fromTypeMap.containsKey(withParameterType)) return fromTypeMap.get(withParameterType);
 
 		Type wrappedParameterType = withParameterType;
 		if (withParameterType instanceof Class<?> && ((Class<?>) withParameterType).isPrimitive())
@@ -130,15 +121,15 @@ public class BasicConvertersFactory implements Factory<Converter<?>> {
 		}
 
 		@Override
-		public void serialize(T obj, Type type, ObjectWriter writer, Context ctx)
+		public void serialize(T obj, ObjectWriter writer, Context ctx)
 				throws TransformationException, IOException {
-			serializer.serialize(obj, type, writer, ctx);
+			serializer.serialize(obj, writer, ctx);
 		}
 
 		@Override
-		public T deserialize(Type type, ObjectReader reader, Context ctx)
-				throws TransformationException, IOException {
-			return deserializer.deserialize(type, reader, ctx);
+		public T deserialize(ObjectReader reader, Context ctx) throws TransformationException,
+				IOException {
+			return deserializer.deserialize(reader, ctx);
 		}
 
 		@Override

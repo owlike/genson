@@ -45,7 +45,7 @@ public class BeanDescriptorTest {
 		Genson genson = new Genson.Builder() {
 			@Override
 			protected Factory<Converter<?>> createConverterFactory() {
-				return new BasicConvertersFactory(getConverters(), getStandardFactories(),
+				return new BasicConvertersFactory(getSerializersMap(), getDeserializersMap(), getFactories(),
 						getBeanDescriptorProvider());
 			}
 		}.setWithDebugInfoPropertyNameResolver(true).create();

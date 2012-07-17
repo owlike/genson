@@ -12,6 +12,7 @@ import java.lang.reflect.Type;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +35,7 @@ import org.genson.reflect.BeanMutatorAccessorResolver;
 import org.genson.reflect.BeanViewDescriptorProvider;
 import org.genson.reflect.PropertyNameResolver;
 import org.genson.reflect.PropertyNameResolver.CompositePropertyNameResolver;
+import org.genson.reflect.TypeUtil;
 import org.genson.stream.JsonReader;
 import org.genson.stream.JsonWriter;
 import org.genson.stream.ObjectReader;
@@ -131,7 +133,7 @@ public final class Genson {
 	public <T> String serialize(T o) throws TransformationException, IOException {
 		JsonWriter writer = new JsonWriter(new StringWriter(), skipNull, htmlSafe);
 		if (o == null)
-			nullConverter.serialize(null, null, writer, null);
+			nullConverter.serialize(null, writer, null);
 		else
 			serialize(o, o.getClass(), writer, new Context(this));
 		writer.flush();
@@ -142,7 +144,7 @@ public final class Genson {
 			throws TransformationException, IOException {
 		JsonWriter writer = new JsonWriter(new StringWriter(), skipNull, htmlSafe);
 		if (o == null)
-			nullConverter.serialize(null, null, writer, null);
+			nullConverter.serialize(null, writer, null);
 		else
 			serialize(o, o.getClass(), writer, new Context(this, Arrays.asList(withViews)));
 		writer.flush();
@@ -152,15 +154,16 @@ public final class Genson {
 	public <T> void serialize(T o, ObjectWriter writer, Class<? extends BeanView<?>>... withViews)
 			throws TransformationException, IOException {
 		if (o == null)
-			nullConverter.serialize(null, null, writer, null);
-		else serialize(o, o.getClass(), writer, new Context(this, Arrays.asList(withViews)));
+			nullConverter.serialize(null, writer, null);
+		else
+			serialize(o, o.getClass(), writer, new Context(this, Arrays.asList(withViews)));
 		writer.flush();
 	}
 
 	public <T> void serialize(T obj, Type type, ObjectWriter writer, Context ctx)
 			throws TransformationException, IOException {
 		Serializer<T> ser = provideConverter(type);
-		ser.serialize(obj, type, writer, ctx);
+		ser.serialize(obj, writer, ctx);
 	}
 
 	public <T> T deserialize(String fromSource, Class<T> toClass) throws TransformationException,
@@ -201,7 +204,7 @@ public final class Genson {
 	public <T> T deserialize(Type type, ObjectReader reader, Context ctx)
 			throws TransformationException, IOException {
 		Deserializer<T> deser = provideConverter(type);
-		return deser.deserialize(type, reader, ctx);
+		return deser.deserialize(reader, ctx);
 	}
 
 	public <T> String aliasFor(Class<T> clazz) {
@@ -251,7 +254,8 @@ public final class Genson {
 	}
 
 	public static class Builder {
-		private final List<Object> converters = new ArrayList<Object>();
+		private final Map<Type, Serializer<?>> serializersMap = new HashMap<Type, Serializer<?>>();
+		private final Map<Type, Deserializer<?>> deserializersMap = new HashMap<Type, Deserializer<?>>();
 		private final List<Factory<?>> converterFactories = new ArrayList<Factory<?>>();
 
 		private boolean skipNull = false;
@@ -283,20 +287,94 @@ public final class Genson {
 			withClassAliases.put(alias, forClass);
 			return this;
 		}
-
-		public Builder with(Converter<?>... converter) {
-			converters.addAll(Arrays.asList(converter));
+		
+		public Builder withConverters(Converter<?>... converter) {
+			for (Converter<?> c : converter) {
+				Type typeOfConverter = TypeUtil.typeOf(0,
+						TypeUtil.lookupGenericType(Converter.class, c.getClass()));
+				typeOfConverter = TypeUtil.expandType(typeOfConverter, c.getClass());
+				registerConverter(c, typeOfConverter);
+			}
 			return this;
 		}
 
-		public Builder with(Serializer<?>... serializer) {
-			converters.addAll(Arrays.asList(serializer));
+		public <T> Builder withConverter(Converter<T> converter, Class<? extends T> type) {
+			registerConverter(converter, type);
 			return this;
 		}
-
-		public Builder with(Deserializer<?>... deserializer) {
-			converters.addAll(Arrays.asList(deserializer));
+		
+		public <T> Builder withConverter(Converter<T> converter, GenericType<? extends T> type) {
+			registerConverter(converter, type.getType());
 			return this;
+		}
+		
+		private <T> void registerConverter(Converter<T> converter, Type type) {
+			if (serializersMap.containsKey(type))
+				throw new IllegalStateException("Can not register converter " + converter.getClass()
+						+ ". A custom serializer is already registered for type "
+						+ type);
+			if (deserializersMap.containsKey(type))
+				throw new IllegalStateException("Can not register converter " + converter.getClass()
+						+ ". A custom deserializer is already registered for type "
+						+ type);
+			serializersMap.put(type, converter);
+			deserializersMap.put(type, converter);
+		}
+
+		public Builder withSerializers(Serializer<?>... serializer) {
+			for (Serializer<?> s : serializer) {
+				Type typeOfConverter = TypeUtil.typeOf(0,
+						TypeUtil.lookupGenericType(Serializer.class, s.getClass()));
+				typeOfConverter = TypeUtil.expandType(typeOfConverter, s.getClass());
+				registerSerializer(s, typeOfConverter);
+			}
+			return this;
+		}
+		
+		public <T> Builder withSerializer(Serializer<T> serializer, Class<? extends T> type) {
+			registerSerializer(serializer, type);
+			return this;
+		}
+		
+		public <T> Builder withSerializer(Serializer<T> serializer, GenericType<? extends T> type) {
+			registerSerializer(serializer, type.getType());
+			return this;
+		}
+		
+		private <T> void registerSerializer(Serializer<T> serializer, Type type) {
+			if (serializersMap.containsKey(type))
+				throw new IllegalStateException("Can not register serializer " + serializer.getClass()
+						+ ". A custom serializer is already registered for type "
+						+ type);
+			serializersMap.put(type, serializer);
+		}
+
+		public Builder withDeserializers(Deserializer<?>... deserializer) {
+			for (Deserializer<?> d : deserializer) {
+				Type typeOfConverter = TypeUtil.typeOf(0,
+						TypeUtil.lookupGenericType(Deserializer.class, d.getClass()));
+				typeOfConverter = TypeUtil.expandType(typeOfConverter, d.getClass());
+				registerDeserializer(d, typeOfConverter);
+			}
+			return this;
+		}
+		
+		public <T> Builder withDeserializer(Deserializer<T> deserializer, Class<? extends T> type) {
+			registerDeserializer(deserializer, type);
+			return this;
+		}
+		
+		public <T> Builder withDeserializer(Deserializer<T> deserializer, GenericType<? extends T> type) {
+			registerDeserializer(deserializer, type.getType());
+			return this;
+		}
+		
+		private <T> void registerDeserializer(Deserializer<T> deserializer, Type type) {
+			if (deserializersMap.containsKey(type))
+				throw new IllegalStateException("Can not register deserializer " + deserializer.getClass()
+						+ ". A custom deserializer is already registered for type "
+						+ type);
+			deserializersMap.put(type, deserializer);
 		}
 
 		public Builder withConverterFactory(Factory<? extends Converter<?>>... factory) {
@@ -436,6 +514,14 @@ public final class Genson {
 			return this;
 		}
 
+		public Map<Type, Serializer<?>> getSerializersMap() {
+			return Collections.unmodifiableMap(serializersMap);
+		}
+
+		public Map<Type, Deserializer<?>> getDeserializersMap() {
+			return Collections.unmodifiableMap(deserializersMap);
+		}
+
 		public Genson create() {
 			if (nullConverter == null)
 				nullConverter = new NullConverter();
@@ -452,17 +538,11 @@ public final class Genson {
 						getPropertyNameResolver());
 			}
 
-			List<Converter<?>> convs = new ArrayList<Converter<?>>();
-			addDefaultConverters(convs);
-			converters.addAll(convs);
-
-			List<Serializer<?>> serializers = new ArrayList<Serializer<?>>();
-			addDefaultSerializers(serializers);
-			converters.addAll(serializers);
-
-			List<Deserializer<?>> deserializers = new ArrayList<Deserializer<?>>();
-			addDefaultDeserializers(deserializers);
-			converters.addAll(deserializers);
+			List<Converter<?>> converters = getDefaultConverters();
+			addDefaultSerializers(converters);
+			addDefaultDeserializers(converters);
+			addDefaultSerializers(getDefaultSerializers());
+			addDefaultDeserializers(getDefaultDeserializers());
 
 			List<Factory<? extends Converter<?>>> convFactories = new ArrayList<Factory<? extends Converter<?>>>();
 			addDefaultConverterFactories(convFactories);
@@ -477,6 +557,28 @@ public final class Genson {
 			converterFactories.addAll(deserializerFactories);
 
 			return create(createConverterFactory(), withClassAliases);
+		}
+		
+		private void addDefaultSerializers(List<? extends Serializer<?>> serializers) {
+			if (serializers != null) {
+    			for (Serializer<?> serializer : serializers) {
+    				Type typeOfConverter = TypeUtil.typeOf(0,
+    						TypeUtil.lookupGenericType(Serializer.class, serializer.getClass()));
+    				typeOfConverter = TypeUtil.expandType(typeOfConverter, serializer.getClass());
+    				if (!serializersMap.containsKey(typeOfConverter)) serializersMap.put(typeOfConverter, serializer);
+    			}
+			}
+		}
+		
+		private void addDefaultDeserializers(List<? extends Deserializer<?>> deserializers) {
+			if (deserializers != null) {
+    			for (Deserializer<?> deserializer : deserializers) {
+    				Type typeOfConverter = TypeUtil.typeOf(0,
+    						TypeUtil.lookupGenericType(Deserializer.class, deserializer.getClass()));
+    				typeOfConverter = TypeUtil.expandType(typeOfConverter, deserializer.getClass());
+    				if (!deserializersMap.containsKey(typeOfConverter)) deserializersMap.put(typeOfConverter, deserializer);
+    			}
+			}
 		}
 
 		protected Genson create(Factory<Converter<?>> converterFactory,
@@ -496,7 +598,7 @@ public final class Genson {
 				chainTail = chainTail.withNext(new BeanViewConverter.BeanViewConverterFactory(
 						getBeanViewDescriptorProvider()));
 
-			chainTail.withNext(new BasicConvertersFactory(getConverters(), getStandardFactories(),
+			chainTail.withNext(new BasicConvertersFactory(getSerializersMap(), getDeserializersMap(), getFactories(),
 					getBeanDescriptorProvider()));
 
 			return chainHead;
@@ -516,7 +618,8 @@ public final class Genson {
 			return new PropertyNameResolver.CompositePropertyNameResolver(resolvers);
 		}
 
-		protected void addDefaultConverters(List<Converter<?>> converters) {
+		protected List<Converter<?>> getDefaultConverters() {
+			List<Converter<?>> converters = new ArrayList<Converter<?>>();
 			converters.add(DefaultConverters.StringConverter.instance);
 			converters.add(DefaultConverters.BooleanConverter.instance);
 			converters.add(DefaultConverters.IntegerConverter.instance);
@@ -524,6 +627,7 @@ public final class Genson {
 			converters.add(DefaultConverters.LongConverter.instance);
 			converters.add(DefaultConverters.NumberConverter.instance);
 			converters.add(new DefaultConverters.DateConverter(getDateFormat()));
+			return converters;
 		}
 
 		protected void addDefaultConverterFactories(List<Factory<? extends Converter<?>>> factories) {
@@ -535,14 +639,16 @@ public final class Genson {
 			factories.add(DefaultConverters.UntypedConverterFactory.instance);
 		}
 
-		protected void addDefaultSerializers(List<Serializer<?>> serializers) {
+		protected List<Serializer<?>> getDefaultSerializers() {
+			return null;
 		}
 
 		protected void addDefaultSerializerFactories(
 				List<Factory<? extends Serializer<?>>> serializerFactories) {
 		}
 
-		protected void addDefaultDeserializers(List<Deserializer<?>> deserializers) {
+		protected List<Deserializer<?>> getDefaultDeserializers() {
+			return null;
 		}
 
 		protected void addDefaultDeserializerFactories(
@@ -570,11 +676,7 @@ public final class Genson {
 			return beanViewDescriptorProvider;
 		}
 
-		public List<Object> getConverters() {
-			return converters;
-		}
-
-		public List<Factory<?>> getStandardFactories() {
+		public List<Factory<?>> getFactories() {
 			return converterFactories;
 		}
 	}

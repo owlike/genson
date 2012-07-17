@@ -3,7 +3,6 @@ package org.genson;
 import java.awt.Point;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.Type;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -91,16 +90,16 @@ public class JsonSerDeserSymetricTest {
 
 	@Test
 	public void testWithUrlConverter() throws TransformationException, IOException {
-		Genson genson = new Genson.Builder().with(new Converter<URL>() {
+		Genson genson = new Genson.Builder().withConverters(new Converter<URL>() {
 
 			@Override
-			public void serialize(URL obj, Type type, ObjectWriter writer, Context ctx)
+			public void serialize(URL obj, ObjectWriter writer, Context ctx)
 					throws TransformationException, IOException {
 				writer.writeValue(obj.toExternalForm());
 			}
 
 			@Override
-			public URL deserialize(Type type, ObjectReader reader, Context ctx)
+			public URL deserialize(ObjectReader reader, Context ctx)
 					throws TransformationException, IOException {
 				return new URL(reader.valueAsString());
 			}
@@ -166,17 +165,17 @@ public class JsonSerDeserSymetricTest {
 
 	@Test
 	public void testWithCustomObjectConverter() throws TransformationException, IOException {
-		Genson genson = new Genson.Builder().with(new Converter<Point>() {
+		Genson genson = new Genson.Builder().withConverters(new Converter<Point>() {
 
 			@Override
-			public void serialize(Point obj, Type type, ObjectWriter writer, Context ctx)
+			public void serialize(Point obj, ObjectWriter writer, Context ctx)
 					throws TransformationException, IOException {
 				writer.beginObject().writeName("x").writeValue(obj.x).writeName("y")
 						.writeValue(obj.y).endObject();
 			}
 
 			@Override
-			public Point deserialize(Type type, ObjectReader reader, Context ctx)
+			public Point deserialize(ObjectReader reader, Context ctx)
 					throws TransformationException, IOException {
 				Point p = new Point();
 				reader.beginObject();

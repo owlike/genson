@@ -1,8 +1,6 @@
 package org.genson.convert;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -25,26 +23,12 @@ public class FactoryTest {
 
 	@Before
 	public void setUp() {
-		final List<? super Converter<?>> converters = new ArrayList<Converter<?>>();
-		converters.add(DefaultConverters.StringConverter.instance);
-		converters.add(DefaultConverters.BooleanConverter.instance);
-		converters.add(DefaultConverters.IntegerConverter.instance);
-		converters.add(DefaultConverters.DoubleConverter.instance);
-		converters.add(DefaultConverters.LongConverter.instance);
-		converters.add(new DefaultConverters.DateConverter());
-
-		final List<Factory<?>> factories = new ArrayList<Factory<?>>();
-		factories.add(DefaultConverters.ArrayConverterFactory.instance);
-		factories.add(DefaultConverters.CollectionConverterFactory.instance);
-		factories.add(DefaultConverters.MapConverterFactory.instance);
-		factories.add(DefaultConverters.PrimitiveConverterFactory.instance);
-		factories.add(DefaultConverters.UntypedConverterFactory.instance);
 
 		genson = new Genson.Builder() {
 			@Override
 			protected Factory<Converter<?>> createConverterFactory() {
-				factory = new BasicConvertersFactory(converters, factories,
-						getBeanDescriptorProvider());
+				factory = new BasicConvertersFactory(getSerializersMap(), getDeserializersMap(),
+						getFactories(), getBeanDescriptorProvider());
 
 				ChainedFactory chain = new NullConverter.NullConverterFactory();
 				chain.withNext(
@@ -91,29 +75,29 @@ public class FactoryTest {
 
 	@Test
 	public void testUnwrapAnnotations() throws TransformationException, IOException {
-		Genson genson = new Genson.Builder().with(new ClassMetadataConverter()).create();
+		Genson genson = new Genson.Builder().withConverters(new ClassMetadataConverter()).create();
 		@SuppressWarnings("unchecked")
 		Wrapper<Converter<A>> wrapper = (Wrapper<Converter<A>>) genson.provideConverter(A.class);
 		Converter<A> converter = wrapper.unwrap();
 		assertTrue(converter instanceof ClassMetadataConverter);
 		assertFalse(ClassMetadataConverter.used);
-		converter.serialize(null, A.class, null, null);
+		converter.serialize(new A(), null, null);
 		assertTrue(ClassMetadataConverter.used);
 	}
 
 	@HandleClassMetadata
 	static class ClassMetadataConverter implements Converter<A> {
 		static boolean used = false;
-		
+
 		@Override
-		public void serialize(A obj, Type type, ObjectWriter writer, Context ctx)
+		public void serialize(A obj, ObjectWriter writer, Context ctx)
 				throws TransformationException, IOException {
 			used = true;
 		}
 
 		@Override
-		public A deserialize(Type type, ObjectReader reader, Context ctx)
-				throws TransformationException, IOException {
+		public A deserialize(ObjectReader reader, Context ctx) throws TransformationException,
+				IOException {
 			return null;
 		}
 	}

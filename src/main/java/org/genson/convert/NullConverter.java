@@ -7,7 +7,7 @@ import org.genson.ChainedFactory;
 import org.genson.Context;
 import org.genson.Genson;
 import org.genson.TransformationException;
-import org.genson.reflect.TypeUtil;
+import org.genson.annotation.HandleNull;
 import org.genson.stream.ObjectReader;
 import org.genson.stream.ObjectWriter;
 import org.genson.stream.ValueType;
@@ -25,7 +25,8 @@ public class NullConverter implements Converter<Object> {
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
 		protected Converter<?> create(Type type, Genson genson, Converter<?> nextConverter) {
-			return new NullConverterWrapper(genson.getNullConverter(), nextConverter);
+			return Wrapper.toAnnotatedElement(nextConverter).isAnnotationPresent(HandleNull.class) ? nextConverter
+					: new NullConverterWrapper(genson.getNullConverter(), nextConverter);
 		}
 	}
 
@@ -41,23 +42,23 @@ public class NullConverter implements Converter<Object> {
 		}
 
 		@Override
-		public void serialize(T obj, Type type, ObjectWriter writer, Context ctx)
+		public void serialize(T obj, ObjectWriter writer, Context ctx)
 				throws TransformationException, IOException {
 			if (obj == null) {
-				nullConverter.serialize(obj, type, writer, ctx);
+				nullConverter.serialize(obj, writer, ctx);
 			} else {
-				converter.serialize(obj, type, writer, ctx);
+				converter.serialize(obj, writer, ctx);
 			}
 		}
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public T deserialize(Type type, ObjectReader reader, Context ctx)
-				throws TransformationException, IOException {
+		public T deserialize(ObjectReader reader, Context ctx) throws TransformationException,
+				IOException {
 			if (ValueType.NULL.equals(reader.getValueType()))
-				return (T) nullConverter.deserialize(type, reader, ctx);
+				return (T) nullConverter.deserialize(reader, ctx);
 
-			return converter.deserialize(type, reader, ctx);
+			return converter.deserialize(reader, ctx);
 		}
 	}
 
@@ -65,30 +66,14 @@ public class NullConverter implements Converter<Object> {
 	}
 
 	@Override
-	public void serialize(Object obj, Type type, ObjectWriter writer, Context ctx)
+	public void serialize(Object obj, ObjectWriter writer, Context ctx)
 			throws TransformationException, IOException {
 		writer.writeNull();
 	}
 
 	@Override
-	public Object deserialize(Type type, ObjectReader reader, Context ctx)
-			throws TransformationException, IOException {
-		Class<?> clazz = TypeUtil.getRawClass(type);
-		if (clazz.isPrimitive()) {
-			if (clazz == int.class)
-				return 0;
-			if (clazz == double.class)
-				return 0d;
-			if (clazz == boolean.class)
-				return false;
-			if (clazz == long.class)
-				return 0l;
-			if (clazz == float.class)
-				return 0f;
-			if (clazz == short.class)
-				return 0;
-		}
-		// its an object
+	public Object deserialize(ObjectReader reader, Context ctx) throws TransformationException,
+			IOException {
 		return null;
 	}
 }

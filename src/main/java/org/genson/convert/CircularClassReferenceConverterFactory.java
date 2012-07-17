@@ -26,15 +26,15 @@ public class CircularClassReferenceConverterFactory extends ChainedFactory {
 
 		private Converter<T> delegate;
 		@Override
-		public void serialize(T obj, Type type, ObjectWriter writer, Context ctx)
+		public void serialize(T obj, ObjectWriter writer, Context ctx)
 				throws TransformationException, IOException {
-			delegate.serialize(obj, type, writer, ctx);
+			delegate.serialize(obj, writer, ctx);
 		}
 
 		@Override
-		public T deserialize(Type type, ObjectReader reader, Context ctx)
+		public T deserialize(ObjectReader reader, Context ctx)
 				throws TransformationException, IOException {
-			return delegate.deserialize(type, reader, ctx);
+			return delegate.deserialize(reader, ctx);
 		}
 		
 		void setDelegateConverter(Converter<T> delegate) {
