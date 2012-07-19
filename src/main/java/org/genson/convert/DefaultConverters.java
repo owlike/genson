@@ -26,10 +26,19 @@ import org.genson.stream.ObjectReader;
 import org.genson.stream.ObjectWriter;
 import org.genson.stream.ValueType;
 
-public class DefaultConverters {
+/**
+ * This class contains all default converters and their factories. You can read the source code <a
+ * href=
+ * "http://code.google.com/p/genson/source/browse/src/main/java/org/genson/convert/DefaultConverters.java"
+ * >here</a> as example on how to implement custom converters and factories.
+ * 
+ * @author eugen
+ * 
+ */
+public final class DefaultConverters {
 	@HandleClassMetadata
 	public static class CollectionConverter<E> implements Converter<Collection<E>> {
-		
+
 		@SuppressWarnings("unused")
 		private final Class<E> eClass;
 		private final Converter<E> elementConverter;
@@ -109,8 +118,8 @@ public class DefaultConverters {
 		}
 
 		@Override
-		public Object deserialize(ObjectReader reader, Context ctx)
-				throws TransformationException, IOException {
+		public Object deserialize(ObjectReader reader, Context ctx) throws TransformationException,
+				IOException {
 			reader.beginArray();
 			int size = 10;
 			Object array = Array.newInstance(eClass, size);
@@ -172,8 +181,8 @@ public class DefaultConverters {
 		}
 
 		@Override
-		public String deserialize(ObjectReader reader, Context ctx)
-				throws TransformationException, IOException {
+		public String deserialize(ObjectReader reader, Context ctx) throws TransformationException,
+				IOException {
 			return reader.valueAsString();
 		}
 	};
@@ -237,8 +246,8 @@ public class DefaultConverters {
 		}
 
 		@Override
-		public Long deserialize(ObjectReader reader, Context ctx)
-				throws NumberFormatException, IOException {
+		public Long deserialize(ObjectReader reader, Context ctx) throws NumberFormatException,
+				IOException {
 			if (ValueType.STRING.equals(reader.getValueType())) {
 				String value = reader.valueAsString();
 				return "".equals(value) ? null : Long.valueOf(value);
@@ -262,8 +271,8 @@ public class DefaultConverters {
 		}
 
 		@Override
-		public Double deserialize(ObjectReader reader, Context ctx)
-				throws NumberFormatException, IOException {
+		public Double deserialize(ObjectReader reader, Context ctx) throws NumberFormatException,
+				IOException {
 			if (ValueType.STRING.equals(reader.getValueType())) {
 				String value = reader.valueAsString();
 				return "".equals(value) ? null : Double.valueOf(value);
@@ -287,8 +296,8 @@ public class DefaultConverters {
 		}
 
 		@Override
-		public Number deserialize(ObjectReader reader, Context ctx)
-				throws TransformationException, IOException {
+		public Number deserialize(ObjectReader reader, Context ctx) throws TransformationException,
+				IOException {
 			ValueType vt = reader.getValueType();
 			if (ValueType.INTEGER.equals(vt))
 				return reader.valueAsInt();
@@ -363,7 +372,8 @@ public class DefaultConverters {
 			@Override
 			public Boolean deserialize(ObjectReader reader, Context ctx)
 					throws TransformationException, IOException {
-				return ValueType.NULL.equals(reader.getValueType()) ? false : reader.valueAsBoolean();
+				return ValueType.NULL.equals(reader.getValueType()) ? false : reader
+						.valueAsBoolean();
 			}
 		};
 
@@ -518,8 +528,8 @@ public class DefaultConverters {
 		}
 
 		@Override
-		public Date deserialize(ObjectReader reader, Context ctx)
-				throws TransformationException, IOException {
+		public Date deserialize(ObjectReader reader, Context ctx) throws TransformationException,
+				IOException {
 			try {
 				return read(reader.valueAsString());
 			} catch (ParseException e) {
@@ -587,8 +597,8 @@ public class DefaultConverters {
 		}
 
 		@Override
-		public T deserialize(ObjectReader reader, Context ctx)
-				throws TransformationException, IOException {
+		public T deserialize(ObjectReader reader, Context ctx) throws TransformationException,
+				IOException {
 			return Enum.valueOf(eClass, reader.valueAsString());
 		}
 	}

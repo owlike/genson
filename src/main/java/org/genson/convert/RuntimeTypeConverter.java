@@ -11,6 +11,13 @@ import org.genson.reflect.TypeUtil;
 import org.genson.stream.ObjectReader;
 import org.genson.stream.ObjectWriter;
 
+/**
+ * This converter will use the runtime type of objects during serialization.
+ * 
+ * @author eugen
+ * 
+ * @param <T> the type this converter is handling.
+ */
 public class RuntimeTypeConverter<T> extends Wrapper<Converter<T>> implements Converter<T> {
 	public final static ChainedFactory runtimeTypeConverterFactory = new ChainedFactory() {
 		@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -19,7 +26,8 @@ public class RuntimeTypeConverter<T> extends Wrapper<Converter<T>> implements Co
 			if (nextConverter == null)
 				throw new IllegalArgumentException(
 						"RuntimeTypeConverter can not be last Converter in the chain.");
-			return (Converter<?>) new RuntimeTypeConverter(TypeUtil.getRawClass(type), nextConverter);
+			return (Converter<?>) new RuntimeTypeConverter(TypeUtil.getRawClass(type),
+					nextConverter);
 		}
 	};
 	private final Converter<T> next;
@@ -32,8 +40,8 @@ public class RuntimeTypeConverter<T> extends Wrapper<Converter<T>> implements Co
 	}
 
 	@Override
-	public void serialize(T obj, ObjectWriter writer, Context ctx)
-			throws TransformationException, IOException {
+	public void serialize(T obj, ObjectWriter writer, Context ctx) throws TransformationException,
+			IOException {
 		if (!tClass.equals(obj.getClass()))
 			ctx.genson.serialize(obj, obj.getClass(), writer, ctx);
 		else
@@ -41,8 +49,8 @@ public class RuntimeTypeConverter<T> extends Wrapper<Converter<T>> implements Co
 	}
 
 	@Override
-	public T deserialize(ObjectReader reader, Context ctx)
-			throws TransformationException, IOException {
+	public T deserialize(ObjectReader reader, Context ctx) throws TransformationException,
+			IOException {
 		return next.deserialize(reader, ctx);
 	}
 

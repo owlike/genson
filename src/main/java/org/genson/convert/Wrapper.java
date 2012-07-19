@@ -5,6 +5,12 @@ import java.lang.reflect.AnnotatedElement;
 
 import org.genson.Operations;
 
+/**
+ * 
+ * @author eugen
+ *
+ * @param <T>
+ */
 public abstract class Wrapper<T> implements AnnotatedElement {
 	private AnnotatedElement wrappedElement;
 	private T wrapped;

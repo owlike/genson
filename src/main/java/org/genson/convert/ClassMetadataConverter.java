@@ -16,11 +16,11 @@ import org.genson.stream.ValueType;
 /**
  * Converter responsible of writing and reading @class metadata. This is useful if you want to be
  * able to deserialize all serialized objects without knowing their real type. Metadata is written
- * only in json objects (never in arrays or literals) and is always the first element in the object.
+ * only in objects (never in arrays or literals) and is always the first element in the object.
  * Most default converters are annotated with @HandleClassMetada indicating that they will not have
  * class metadata written nor use it during deserialization.
  * 
- * @see org.genson.stream.ObjectWriter#metadata(String, String) ObjectWriter.metadata(key, value)
+ * @see org.genson.stream.ObjectWriter#writeMetadata(String, String) ObjectWriter.metadata(key, value)
  * @see org.genson.stream.ObjectReader#metadata(String) ObjectReader.metadata("class")
  * @see org.genson.Genson#aliasFor(Class) Genson.aliasFor(Class)
  * 
@@ -59,7 +59,7 @@ public class ClassMetadataConverter<T> extends Wrapper<Converter<T>> implements 
 	@Override
 	public void serialize(T obj, ObjectWriter writer, Context ctx)
 			throws TransformationException, IOException {
-		writer.metadata("class", ctx.genson.aliasFor(obj.getClass()));
+		writer.beginNextObjectMetadata().writeMetadata("class", ctx.genson.aliasFor(obj.getClass()));
 		converter.serialize(obj, writer, ctx);
 	}
 

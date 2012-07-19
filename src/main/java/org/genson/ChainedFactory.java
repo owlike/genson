@@ -33,8 +33,8 @@ import org.genson.convert.Converter;
  * 			converter.serialize(obj, writer, ctx);
  * 	}
  * 
- * 	public Object deserialize(ObjectReader reader, Context ctx)
- * 			throws TransformationException, IOException {
+ * 	public Object deserialize(ObjectReader reader, Context ctx) throws TransformationException,
+ * 			IOException {
  * 		if (TypeValue.NULL == reader.getTypeValue()) {
  * 			return null;
  * 		} else
@@ -59,9 +59,9 @@ import org.genson.convert.Converter;
  * As you can see it is pretty simple but also powerful. Note that our NullConverter extends Wrapper
  * class. When you encapsulate converters you should extend Wrapper class this way Genson can access
  * the class information of wrapped converters. Imagine for example that you put some annotation on
- * converter A and wrap it in converter B, now if you wrap B in C you wont be able to get class of A
- * and its annotations. Wrapper class allows to merge class information of current implementation
- * and the wrapped one.
+ * converter A and wrap it in converter B, now if you wrap B in C you wont be able to get class
+ * information of A (ex: its annotations). Wrapper class allows to merge class information of
+ * current implementation and the wrapped one.
  * 
  * 
  * @see org.genson.convert.NullConverter NullConverter
@@ -93,7 +93,8 @@ public abstract class ChainedFactory implements Factory<Converter<?>> {
 
 	/**
 	 * This method will be called by {@link #create(Type, Genson)} with nextConverter being the
-	 * converter created for current type by the next factory.
+	 * converter created for current type by the next factory. This means that ChainedFactory will first
+	 * create a converter with the next factory and then use it's own create method.
 	 * 
 	 * @param type for which this factory must provide a converter
 	 * @param genson instance that you can use when you need a converter for some other type (for
@@ -108,10 +109,10 @@ public abstract class ChainedFactory implements Factory<Converter<?>> {
 	 * chain1.withNext(new chain2).withNext(new chain3); the resulting chain is
 	 * chain1=>chain2=>chain3. Don't forget to keep a reference to the head (chain1).
 	 * 
-	 * @param next
-	 * @return the next element passed as argument
+	 * @param next factory
+	 * @return the next factory passed as argument
 	 */
-	public <T extends Factory<? extends Converter<?>>> T withNext(T next) {
+	public final <T extends Factory<? extends Converter<?>>> T withNext(T next) {
 		if (this.next != null)
 			throw new IllegalStateException("next factory has already been set for " + getClass()
 					+ " you can not override it!");
@@ -122,7 +123,7 @@ public abstract class ChainedFactory implements Factory<Converter<?>> {
 	/**
 	 * @return a reference to the next factory, may be null.
 	 */
-	public Factory<? extends Converter<?>> next() {
+	public final Factory<? extends Converter<?>> next() {
 		return next;
 	}
 }

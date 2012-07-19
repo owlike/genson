@@ -1,8 +1,8 @@
 package org.genson;
 
 /**
- * Interface to be implemented by classes who want to act as a kind of view on object of type T
- * during serialization and deserializaiton.
+ * Interface to be implemented by classes who want to act as a view on objects of type T during
+ * serialization and deserializaiton.
  * 
  * To understand what a BeanView is we must first understand one of the problems it is intended to
  * solve. Imagine you store some business objects in a cache and you have internal and external
@@ -11,11 +11,12 @@ package org.genson;
  * as the internal ones as the object may contain some confidential data.
  * <ul>
  * Usually you have two choices :
- * <li>Use a different instance of the json library in each webservice and configure them with
- * custom Serializers/Deserializers.</li>
- * <li>Or use DTOs that will act as a "View of your Model". You will have to copy the data from the
- * cached objects to the DTOs and serialize them. As result your cache has lost some of its
- * interest.</li>
+ * <li>Use a different instance of the json library for each different json representation and
+ * configure it with custom Serializers/Deserializers (you can use annotations to filter properties
+ * but not to change its name if you have multiple names and nor to transform the data).</li>
+ * <li>Use data transfer objects that will act as a "View of your Model". You will have to copy the
+ * data from the cached objects to the DTOs and serialize them. As a result your cache has lost some
+ * of its interest (you will create new instances of DTOs).</li>
  * </ul>
  * <p>
  * The BeanView tries to solve this kind of problem by taking the second approach. Indeed
@@ -27,8 +28,12 @@ package org.genson;
  * annotated with {@link org.genson.annotation.Creator Creator} as factory methods). Except that the
  * getters will take an argument of type T (from which to extract the data), and the setter two
  * arguments, the value (can be a complex object, in that case Genson will try to deserialize the
- * current value into that type) and T object in which to set the data. Lets have a look at this
- * example to better understand how it works.
+ * current value into that type) and T object in which to set the data. Parameters order matters,
+ * for setters the first parameter is the value to deserialize and the second is the object that you
+ * are building (of type T). By default the beanview functionality is disabled, to enable it use
+ * method {@link org.genson.Genson.Builder#setWithBeanViewConverter(boolean)
+ * setWithBeanViewConverter(true)} from Genson.Builder. Lets have a look at this example to better
+ * understand how it works.
  * 
  * <pre>
  * public static class Person {
@@ -84,15 +89,22 @@ package org.genson;
  * 		p.birthYear = GregorianCalendar.getInstance().get(Calendar.YEAR) - personBirthYear;
  * 	}
  * }
+ * 
+ * public static void main(String[] args) {
+ * 	Genson genson = new Genson.Builder().setWithBeanViewConverter(true).create();
+ * 	genson.serialize(new Person("eugen"), ViewOfPerson.class);
+ * }
  * </pre>
  * 
  * <p>
  * Implementations of BeanView must be stateless, thread safe and have a default no arg constructor.
  * BeanViews will be applied at <u>runtime before the standard Converter</u>. If a view for the
  * current type is present in the context it will be used instead of the corresponding Converter. If
- * you want to understand how it works behind the scene you can have a look at
- * {@link org.genson.convert.BeanViewConverter BeanViewConverter} and
- * {@link org.genson.reflect.BeanViewDescriptorProvider BeanViewDescriptorProvider}.
+ * you want to understand how it works behind the scene you can have a look at <a href=
+ * "http://code.google.com/p/genson/source/browse/src/main/java/org/genson/convert/BeanViewConverter.java"
+ * >BeanViewConverter</a> and <a href=
+ * "http://code.google.com/p/genson/source/browse/src/main/java/org/genson/reflect/BeanViewDescriptorProvider.java"
+ * >BeanViewDescriptorProvider</a>.
  * 
  * @see org.genson.convert.BeanViewConverter BeanViewConverter
  * @see org.genson.reflect.BeanViewDescriptorProvider BeanViewDescriptorProvider

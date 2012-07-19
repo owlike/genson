@@ -206,7 +206,7 @@ public class JsonReader implements ObjectReader {
 			return 0;
 		if (ValueType.STRING.equals(valueType))
 			return "".equals(_stringValue) ? null : Long.valueOf(_stringValue);
-		throw new IllegalStateException("Readen value is not of type int");
+		throw new IllegalStateException("Readen value is not of type long");
 	}
 	
 	public double valueAsDouble() throws IOException {
@@ -220,7 +220,35 @@ public class JsonReader implements ObjectReader {
 			return 0;
 		if (ValueType.STRING.equals(valueType))
 			return "".equals(_stringValue) ? null : Double.valueOf(_stringValue);
-		throw new IllegalStateException("Readen value is not of type int");
+		throw new IllegalStateException("Readen value is not of type double");
+	}
+	
+	public short valueAsShort() throws IOException {
+		if (ValueType.INTEGER.equals(valueType)) {
+			return (short) _intValue;
+		}
+		if (ValueType.DOUBLE.equals(valueType)) {
+			return (short) _doubleValue;
+		}
+		if (ValueType.NULL.equals(valueType))
+			return 0;
+		if (ValueType.STRING.equals(valueType))
+			return "".equals(_stringValue) ? null : Short.valueOf(_stringValue);
+		throw new IllegalStateException("Readen value is not of type short");
+	}
+	
+	public float valueAsFloat() throws IOException {
+		if (ValueType.DOUBLE.equals(valueType)) {
+			return (float) _doubleValue;
+		}
+		if (ValueType.INTEGER.equals(valueType)) {
+			return _intValue;
+		}
+		if (ValueType.NULL.equals(valueType))
+			return 0f;
+		if (ValueType.STRING.equals(valueType))
+			return "".equals(_stringValue) ? null : Float.valueOf(_stringValue);
+		throw new IllegalStateException("Readen value is not of type float");
 	}
 	
 	public boolean valueAsBoolean() throws IOException {
@@ -230,7 +258,7 @@ public class JsonReader implements ObjectReader {
 		if (ValueType.STRING.equals(valueType))
 			return "".equals(_stringValue) ? null : Boolean.valueOf(_stringValue);
 		if (ValueType.NULL.equals(valueType)) return false;
-		throw new IllegalStateException("Readen value is not of type Boolean");
+		throw new IllegalStateException("Readen value is not of type boolean");
 	}
 	
 	@Override

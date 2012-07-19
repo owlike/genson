@@ -7,7 +7,6 @@ import java.util.Deque;
 
 public class JsonWriter implements ObjectWriter {
 	/*
-	 * Recupere dans gson
 	 * TODO try to do something different and faster, optimize writeValue(String)
 	 */
 	private final static String[] REPLACEMENT_CHARS;
@@ -52,7 +51,6 @@ public class JsonWriter implements ObjectWriter {
 	private final Deque<JsonType> _ctx = new ArrayDeque<JsonType>();
 	private boolean _hasPrevious;
 	private String _name;
-	private boolean _metadataWritten = false;
 
 	// TODO recyclebuffer increases a bit performances
 	private final char[] _buffer = new char[1024];
@@ -86,8 +84,8 @@ public class JsonWriter implements ObjectWriter {
 	}
 
 	public JsonWriter beginObject() throws IOException {
-		if (_metadataWritten) {
-			_metadataWritten = false;
+		if (_ctx.peek() == JsonType.METADATA) {
+			_ctx.pop();
 			return this;
 		}
 		return begin(JsonType.OBJECT, '{');
@@ -114,7 +112,8 @@ public class JsonWriter implements ObjectWriter {
 	private final JsonWriter end(final JsonType jsonType, final char token) throws IOException {
 		JsonType jt = _ctx.pop();
 		if (jt != jsonType)
-			throw new IllegalStateException("No " + jsonType.name());
+			throw new IllegalStateException("Expect type " + jsonType.name() + " but was written "
+					+ jt.name() + ", you must call the adequate beginXXX method before endXXX.");
 		if ((_len + 1) >= _bufferSize)
 			flushBuffer();
 		_buffer[_len++] = token;
@@ -123,10 +122,14 @@ public class JsonWriter implements ObjectWriter {
 	}
 
 	private final JsonWriter beforeValue() throws IOException {
-		if (_metadataWritten)
-			throw new IllegalStateException(
-					"You have written metadata to the writer but did not call beginObject after it."
-							+ "Metadata is not allowed in array or for literal values.");
+		/*
+		 * for the moment this does not work, however I should add some "state verifications" for
+		 * metadata feature... otherwise it may be difficult to use and debug it...
+		 */
+		// if (_ctx.peek() == JsonType.METADATA)
+		// throw new IllegalStateException(
+		// "You have written metadata to the writer but did not call beginObject after it."
+		// + "Metadata is not allowed in array or for literal values.");
 
 		if (_ctx.peek() == JsonType.ARRAY && _hasPrevious) {
 			if ((_len + 1) >= _bufferSize)
@@ -186,6 +189,27 @@ public class JsonWriter implements ObjectWriter {
 			value *= -1;
 		}
 		writeInt(value);
+		_hasPrevious = true;
+		return this;
+	}
+	
+	public ObjectWriter writeValue(short value) throws IOException {
+		beforeValue();
+		// ok so the buffer must always be bigger than the max length of a short
+		if ((_len + 5) >= _bufferSize)
+			flushBuffer();
+		if (value < 0) {
+			_buffer[_len++] = '-';
+			value *= -1;
+		}
+		writeInt(value);
+		_hasPrevious = true;
+		return this;
+	}
+
+	public ObjectWriter writeValue(float value) throws IOException {
+		beforeValue();
+		writeToBuffer(Float.toString(value), 0);
 		_hasPrevious = true;
 		return this;
 	}
@@ -296,12 +320,20 @@ public class JsonWriter implements ObjectWriter {
 	}
 
 	@Override
-	public JsonWriter metadata(String name, String value) throws IOException {
-		if (!_metadataWritten)
-			begin(JsonType.OBJECT, '{');
+	public ObjectWriter beginNextObjectMetadata() throws IOException {
+		// this way we can use this method multiple times in different converters before calling
+		// beginObject
+		if (_ctx.peek() != JsonType.METADATA) {
+			beginObject();
+			_ctx.push(JsonType.METADATA);
+		}
+		return this;
+	}
+
+	@Override
+	public ObjectWriter writeMetadata(String name, String value) throws IOException {
 		writeName('@' + name);
 		writeValue(value);
-		_metadataWritten = true;
 		return this;
 	}
 

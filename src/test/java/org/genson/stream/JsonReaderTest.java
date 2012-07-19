@@ -344,4 +344,17 @@ public class JsonReaderTest {
 		assertFalse(reader.hasNext());
 		reader.endObject().endObject();
 	}
+	
+	@Test public void testMultipleCallsTonextObjectMetadata() throws IOException {
+		String src = "{\"@class\"	: \"theclass\"" +
+				",     \"@author\":\"me\"" +
+				", \"@comment\":\"no comment\"}";
+		JsonReader reader = new JsonReader(new StringReader(src));
+		assertEquals("theclass", reader.nextObjectMetadata().nextObjectMetadata().metadata("class"));
+		assertEquals("theclass", reader.nextObjectMetadata().metadata("class"));
+		assertEquals("no comment", reader.metadata("comment"));
+		assertEquals("no comment", reader.nextObjectMetadata().metadata("comment"));
+		assertEquals("me", reader.beginObject().metadata("author"));
+		reader.endObject();
+	}
 }
