@@ -7,9 +7,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 import org.genson.Context;
+import org.genson.Serializer;
 import org.genson.TransformationException;
 import org.genson.TransformationRuntimeException;
-import org.genson.convert.Serializer;
 import org.genson.stream.ObjectWriter;
 
 public abstract class PropertyAccessor<T, P> extends BeanProperty<T> implements

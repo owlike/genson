@@ -9,12 +9,21 @@ import java.lang.reflect.WildcardType;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.genson.Operations;
 
+/**
+ * This class is mainly intended for internal use, however you are free to use it. Be careful as all
+ * methods with the additional argument Class<?> inClass will probably be removed in favor of using
+ * {@link #expandType(Type, Class)} and then the method without the additional inClass argument.
+ * 
+ * @author eugen
+ * 
+ */
 /*
- * TODO restructure and clean
- * TODO ExpandedType do we need a reference to an original type?=> Not nice to provide 2 implementations for ParameterizedType...
+ * TODO restructure and clean TODO ExpandedType do we need a reference to an original type?=> Not
+ * nice to provide 2 implementations for ParameterizedType...
  */
 public final class TypeUtil {
 	private final static Map<Class<?>, Class<?>> _wrappedPrimitives = new HashMap<Class<?>, Class<?>>();
@@ -29,14 +38,14 @@ public final class TypeUtil {
 		_wrappedPrimitives.put(byte.class, Byte.class);
 		_wrappedPrimitives.put(void.class, Void.class);
 	}
-	private final static Map<TypeAndRootClassKey, Type> _cache = new HashMap<TypeUtil.TypeAndRootClassKey, Type>(
+	private final static Map<TypeAndRootClassKey, Type> _cache = new ConcurrentHashMap<TypeUtil.TypeAndRootClassKey, Type>(
 			32);
 
 	public final static Class<?> wrap(Class<?> clazz) {
 		Class<?> wrappedClass = _wrappedPrimitives.get(clazz);
 		return wrappedClass == null ? clazz : wrappedClass;
 	}
-	
+
 	public final static Type expandType(Type type, Class<?> rootClass) {
 		if (type instanceof ExpandedType || type instanceof Class)
 			return type;
@@ -275,7 +284,7 @@ public final class TypeUtil {
 			type = expandType(type, oClazz);
 			if (type instanceof ParameterizedType) {
 				ParameterizedType pType = (ParameterizedType) type;
-				return match(parameter, pType.getActualTypeArguments()[0], strictMatch)? type
+				return match(parameter, pType.getActualTypeArguments()[0], strictMatch) ? type
 						: null;
 			}
 		}
@@ -305,14 +314,15 @@ public final class TypeUtil {
 		Class<?> clazz = getRawClass(type, typeCtx);
 		Class<?> oClazz = getRawClass(oType, oTypeCtx);
 		boolean match = strictMatch ? oClazz.equals(clazz) : oClazz.isAssignableFrom(clazz);
-		
-		if (clazz.isArray() && !oClazz.isArray()) return match;
-		
+
+		if (clazz.isArray() && !oClazz.isArray())
+			return match;
+
 		Type[] types = getTypes(expand(type, typeCtx));
 		Type[] oTypes = getTypes(expand(oType, oTypeCtx));
 
 		match = match && (types.length == oTypes.length || types.length == 0);
-		
+
 		for (int i = 0; i < types.length && match; i++)
 			match = match(types[i], typeCtx, oTypes[i], oTypeCtx, strictMatch);
 
@@ -381,7 +391,6 @@ public final class TypeUtil {
 		return null;
 	}
 
-	
 	/*
 	 * Should subclasses implement equals and hashcode ? its not necessary as the same combinaison
 	 * of rootclass+type should always correspond to the same expanded type...

@@ -7,7 +7,28 @@
 	<version>0.8-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>Genson</name>
-
+	<description>Genson library</description>
+	<url>http://code.google.com/p/genson/</url>
+	<licenses>
+		<license>
+			<name>Apache Software License Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+	<issueManagement>
+		<system>Google Code Issue List</system>
+		<url>http://code.google.com/p/genson/issues/list</url>
+	</issueManagement>
+	<developers>
+		<developer>
+			<name>Eugen Cepoi</name>
+			<email>cepoi.eugen@gmail.com</email>
+			<roles>
+				<role>Project creator</role>
+			</roles>
+		</developer>
+	</developers>
 	<properties>
 		<org.springframework.version>3.1.0.RELEASE</org.springframework.version>
 	</properties>
@@ -91,22 +112,6 @@
 		</dependency>
 	</dependencies>
 
-
-	<reporting>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.7</version>
-			</plugin>
-
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>cobertura-maven-plugin</artifactId>
-			</plugin>
-		</plugins>
-	</reporting>
-
 	<build>
 		<plugins>
 			<plugin>
@@ -157,6 +162,9 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
+				<configuration>
+					<outputDirectory>javadoc</outputDirectory>
+				</configuration>
 				<executions>
 					<execution>
 						<id>attach-javadocs</id>

@@ -11,17 +11,27 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.genson.Converter;
 import org.genson.Genson;
-import org.genson.convert.Converter;
 import org.genson.reflect.BeanCreator.BeanCreatorProperty;
+import static org.genson.Trilean.*;
 
-
+/**
+ * Standard implementation of AbstractBeanDescriptorProvider that uses
+ * {@link BeanMutatorAccessorResolver} and {@link PropertyNameResolver}. If you want to change the
+ * way BeanDescriptors are created you can subclass this class and override the needed methods. If
+ * you only want to create instances of your own PropertyMutators/PropertyAccessors or BeanCreators
+ * just override the corresponding createXXX methods.
+ * 
+ * @author eugen
+ * 
+ */
 public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 	protected final BeanMutatorAccessorResolver mutatorAccessorResolver;
 	protected final PropertyNameResolver nameResolver;
 	protected final boolean useGettersAndSetters;
 	protected final boolean useFields;
-	
+
 	public BaseBeanDescriptorProvider(BeanMutatorAccessorResolver mutatorAccessorResolver,
 			PropertyNameResolver nameResolver, boolean useGettersAndSetters, boolean useFields) {
 		super();
@@ -34,14 +44,17 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 		this.nameResolver = nameResolver;
 		this.useFields = useFields;
 		this.useGettersAndSetters = useGettersAndSetters;
-		if (!useFields && !useGettersAndSetters) throw new IllegalArgumentException("You must allow at least one mode: with fields or methods.");
+		if (!useFields && !useGettersAndSetters)
+			throw new IllegalArgumentException(
+					"You must allow at least one mode: with fields or methods.");
 	}
 
 	@Override
 	public <T> List<BeanCreator<T>> provideBeanCreators(Class<?> ofClass, Genson genson) {
 		List<BeanCreator<T>> creators = new ArrayList<BeanCreator<T>>();
-		if (ofClass.isMemberClass() && (ofClass.getModifiers() & Modifier.STATIC) == 0) return creators;
-		
+		if (ofClass.isMemberClass() && (ofClass.getModifiers() & Modifier.STATIC) == 0)
+			return creators;
+
 		provideConstructorCreators(ofClass, creators, genson);
 		for (Class<?> clazz = ofClass; clazz != null && !Object.class.equals(clazz); clazz = clazz
 				.getSuperclass()) {
@@ -56,9 +69,11 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 		for (Class<?> clazz = ofClass; clazz != null && !Object.class.equals(clazz); clazz = clazz
 				.getSuperclass()) {
 			// first lookup for fields
-			if (useFields) provideFieldAccessors(clazz, accessorsMap, ofClass, genson);
+			if (useFields)
+				provideFieldAccessors(clazz, accessorsMap, ofClass, genson);
 			// and now search methods (getters)
-			if (useGettersAndSetters) provideMethodAccessors(clazz, accessorsMap, ofClass, genson);
+			if (useGettersAndSetters)
+				provideMethodAccessors(clazz, accessorsMap, ofClass, genson);
 		}
 	}
 
@@ -68,17 +83,20 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 		for (Class<?> clazz = ofClass; clazz != null && !Object.class.equals(clazz); clazz = clazz
 				.getSuperclass()) {
 			// first lookup for fields
-			if (useFields) provideFieldMutators(clazz, mutatorsMap, ofClass, genson);
+			if (useFields)
+				provideFieldMutators(clazz, mutatorsMap, ofClass, genson);
 			// and now search methods (getters)
-			if (useGettersAndSetters) provideMethodMutators(clazz, mutatorsMap, ofClass, genson);
+			if (useGettersAndSetters)
+				provideMethodMutators(clazz, mutatorsMap, ofClass, genson);
 		}
 	}
 
-	protected <T> void provideConstructorCreators(Class<?> ofClass, List<BeanCreator<T>> creators, Genson genson) {
+	protected <T> void provideConstructorCreators(Class<?> ofClass, List<BeanCreator<T>> creators,
+			Genson genson) {
 		@SuppressWarnings("unchecked")
 		Constructor<T>[] ctrs = (Constructor<T>[]) ofClass.getDeclaredConstructors();
 		for (Constructor<T> ctr : ctrs) {
-			if (mutatorAccessorResolver.isCreator(ctr, ofClass)) {
+			if (TRUE == mutatorAccessorResolver.isCreator(ctr, ofClass)) {
 				Type[] parameterTypes = ctr.getGenericParameterTypes();
 				int paramCnt = parameterTypes.length;
 				String[] parameterNames = new String[paramCnt];
@@ -92,16 +110,18 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 
 				if (idx == paramCnt) {
 					@SuppressWarnings("unchecked")
-					BeanCreator<T> creator = createCreator((Class<T>) ofClass, ctr, parameterNames, genson);
+					BeanCreator<T> creator = createCreator((Class<T>) ofClass, ctr, parameterNames,
+							genson);
 					creators.add(creator);
 				}
 			}
 		}
 	}
-	
-	protected <T> BeanCreator<T> createCreator(Class<T> ofClass, Constructor<T> ctr, String[] resolvedNames, Genson genson) {
-		return new BeanCreator.ConstructorBeanCreator<T>(ofClass, ctr,
-				resolvedNames, resolveConverters(ctr.getGenericParameterTypes(), genson));
+
+	protected <T> BeanCreator<T> createCreator(Class<T> ofClass, Constructor<T> ctr,
+			String[] resolvedNames, Genson genson) {
+		return new BeanCreator.ConstructorBeanCreator<T>(ofClass, ctr, resolvedNames,
+				resolveConverters(ctr.getGenericParameterTypes(), genson));
 	}
 
 	/**
@@ -112,10 +132,11 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 	 * @param ofClass
 	 * @param creators
 	 */
-	protected <T> void provideMethodCreators(Class<?> ofClass, List<BeanCreator<T>> creators, Class<?> baseClass, Genson genson) {
+	protected <T> void provideMethodCreators(Class<?> ofClass, List<BeanCreator<T>> creators,
+			Class<?> baseClass, Genson genson) {
 		Method[] ctrs = ofClass.getDeclaredMethods();
 		for (Method ctr : ctrs) {
-			if (mutatorAccessorResolver.isCreator(ctr, baseClass)) {
+			if (TRUE == mutatorAccessorResolver.isCreator(ctr, baseClass)) {
 				Type[] parameterTypes = ctr.getGenericParameterTypes();
 				int paramCnt = parameterTypes.length;
 				String[] parameterNames = new String[paramCnt];
@@ -134,26 +155,30 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 			}
 		}
 	}
-	
+
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	// ofClass is not necessarily of same type as method return type, as ofClass corresponds to the declaring class!
-	protected <T> BeanCreator<T> createCreator(Class<?> ofClass, Method method, String[] resolvedNames, Genson genson) {
-		return new BeanCreator.MethodBeanCreator(method, resolvedNames, resolveConverters(method.getGenericParameterTypes(), genson));
+	// ofClass is not necessarily of same type as method return type, as ofClass corresponds to the
+	// declaring class!
+	protected <T> BeanCreator<T> createCreator(Class<?> ofClass, Method method,
+			String[] resolvedNames, Genson genson) {
+		return new BeanCreator.MethodBeanCreator(method, resolvedNames, resolveConverters(
+				method.getGenericParameterTypes(), genson));
 	}
-	
+
 	private Converter<?>[] resolveConverters(Type[] types, Genson genson) {
-		Converter<?>[] converters = new Converter<?>[types.length]; 
-		for(int i = 0; i < types.length; i++) {
+		Converter<?>[] converters = new Converter<?>[types.length];
+		for (int i = 0; i < types.length; i++) {
 			converters[i] = genson.provideConverter(types[i]);
 		}
 		return converters;
 	}
 
 	protected <T> void provideFieldAccessors(Class<?> ofClass,
-			Map<String, LinkedList<PropertyAccessor<T, ?>>> accessorsMap, Class<?> baseClass, Genson genson) {
+			Map<String, LinkedList<PropertyAccessor<T, ?>>> accessorsMap, Class<?> baseClass,
+			Genson genson) {
 		Field[] fields = ofClass.getDeclaredFields();
 		for (Field field : fields) {
-			if (mutatorAccessorResolver.isAccessor(field,  baseClass)) {
+			if (TRUE == mutatorAccessorResolver.isAccessor(field, baseClass)) {
 				String name = nameResolver.resolve(field);
 				if (name == null) {
 					throw new IllegalStateException("Field '" + field.getName() + "' from class "
@@ -161,21 +186,25 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 							+ " has been discovered as accessor but its name couldn't be resolved!");
 				}
 				@SuppressWarnings("unchecked")
-				PropertyAccessor<T, ?> accessor = createAccessor(name, field, (Class<T>) baseClass, genson);
+				PropertyAccessor<T, ?> accessor = createAccessor(name, field, (Class<T>) baseClass,
+						genson);
 				update(accessor, accessorsMap);
 			}
 		}
 	}
-	
-	protected <T> PropertyAccessor<T, ?> createAccessor(String name, Field field, Class<T> baseClass, Genson genson) {
-		return new PropertyAccessor.FieldAccessor<T, Object>(name, field, baseClass, genson.provideConverter(field.getGenericType()));
+
+	protected <T> PropertyAccessor<T, ?> createAccessor(String name, Field field,
+			Class<T> baseClass, Genson genson) {
+		return new PropertyAccessor.FieldAccessor<T, Object>(name, field, baseClass,
+				genson.provideConverter(field.getGenericType()));
 	}
 
 	protected <T> void provideMethodAccessors(Class<?> ofClass,
-			Map<String, LinkedList<PropertyAccessor<T, ?>>> accessorsMap, Class<?> baseClass, Genson genson) {
+			Map<String, LinkedList<PropertyAccessor<T, ?>>> accessorsMap, Class<?> baseClass,
+			Genson genson) {
 		Method[] methods = ofClass.getDeclaredMethods();
 		for (Method method : methods) {
-			if (mutatorAccessorResolver.isAccessor(method, baseClass)) {
+			if (TRUE == mutatorAccessorResolver.isAccessor(method, baseClass)) {
 				String name = nameResolver.resolve(method);
 				if (name == null) {
 					throw new IllegalStateException("Method '" + method.getName() + "' from class "
@@ -187,17 +216,20 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 			}
 		}
 	}
-	
+
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	protected <T> PropertyAccessor<T, ?> createAccessor(String name, Method method, Class<?> baseClass, Genson genson) {
-		return new PropertyAccessor.MethodAccessor(name, method, baseClass, genson.provideConverter(method.getGenericReturnType()));
+	protected <T> PropertyAccessor<T, ?> createAccessor(String name, Method method,
+			Class<?> baseClass, Genson genson) {
+		return new PropertyAccessor.MethodAccessor(name, method, baseClass,
+				genson.provideConverter(method.getGenericReturnType()));
 	}
 
 	protected <T> void provideFieldMutators(Class<?> ofClass,
-			Map<String, LinkedList<PropertyMutator<T, ?>>> mutatorsMap, Class<?> baseClass, Genson genson) {
+			Map<String, LinkedList<PropertyMutator<T, ?>>> mutatorsMap, Class<?> baseClass,
+			Genson genson) {
 		Field[] fields = ofClass.getDeclaredFields();
 		for (Field field : fields) {
-			if (mutatorAccessorResolver.isMutator(field, baseClass)) {
+			if (TRUE == mutatorAccessorResolver.isMutator(field, baseClass)) {
 				String name = nameResolver.resolve(field);
 				if (name == null) {
 					throw new IllegalStateException("Field '" + field.getName() + "' from class "
@@ -205,21 +237,25 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 							+ " has been discovered as mutator but its name couldn't be resolved!");
 				}
 				@SuppressWarnings("unchecked")
-				PropertyMutator<T, ?> mutator = createMutator(name, field, (Class<T>)baseClass, genson);
+				PropertyMutator<T, ?> mutator = createMutator(name, field, (Class<T>) baseClass,
+						genson);
 				update(mutator, mutatorsMap);
 			}
 		}
 	}
-	
-	protected <T> PropertyMutator<T, ?> createMutator(String name, Field field, Class<T> baseClass, Genson genson) {
-		return new PropertyMutator.FieldMutator<T, Object>(name, field, baseClass, genson.provideConverter(field.getGenericType()));
+
+	protected <T> PropertyMutator<T, ?> createMutator(String name, Field field, Class<T> baseClass,
+			Genson genson) {
+		return new PropertyMutator.FieldMutator<T, Object>(name, field, baseClass,
+				genson.provideConverter(field.getGenericType()));
 	}
-	
+
 	protected <T> void provideMethodMutators(Class<?> ofClass,
-			Map<String, LinkedList<PropertyMutator<T, ?>>> mutatorsMap, Class<?> baseClass, Genson genson) {
+			Map<String, LinkedList<PropertyMutator<T, ?>>> mutatorsMap, Class<?> baseClass,
+			Genson genson) {
 		Method[] methods = ofClass.getDeclaredMethods();
 		for (Method method : methods) {
-			if (mutatorAccessorResolver.isMutator(method, baseClass)) {
+			if (TRUE == mutatorAccessorResolver.isMutator(method, baseClass)) {
 				String name = nameResolver.resolve(method);
 				if (name == null) {
 					throw new IllegalStateException("Method '" + method.getName() + "' from class "
@@ -233,8 +269,10 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	protected <T> PropertyMutator<T, ?> createMutator(String name, Method method, Class<?> baseClass, Genson genson) {
-		return new PropertyMutator.MethodMutator(name, method, baseClass, genson.provideConverter(method.getGenericParameterTypes()[0]));
+	protected <T> PropertyMutator<T, ?> createMutator(String name, Method method,
+			Class<?> baseClass, Genson genson) {
+		return new PropertyMutator.MethodMutator(name, method, baseClass,
+				genson.provideConverter(method.getGenericParameterTypes()[0]));
 	}
 
 	protected <T extends BeanProperty<?>> void update(T property, Map<String, LinkedList<T>> map) {
@@ -291,20 +329,24 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 		return property;
 	}
 
-	/* TODO must be rethinked? maybe not, but a solution could be to separate ctr properties from the others,
-	 * and while deserializing to check first in normal mutator map and if null check for property in the ctr props...
+	/*
+	 * TODO must be rethinked? maybe not, but a solution could be to separate ctr properties from
+	 * the others, and while deserializing to check first in normal mutator map and if null check
+	 * for property in the ctr props...
 	 */
 	@Override
-	protected <T> void mergeMutatorsWithCreatorProperties(Map<String, PropertyMutator<T, ?>> mutators,
-			List<BeanCreator<T>> creators) {
+	protected <T> void mergeMutatorsWithCreatorProperties(
+			Map<String, PropertyMutator<T, ?>> mutators, List<BeanCreator<T>> creators) {
 		for (BeanCreator<?> creator : creators) {
-			for (Map.Entry<String, ? extends BeanCreatorProperty<?, ?>> entry : creator.parameters.entrySet()) {
+			for (Map.Entry<String, ? extends BeanCreatorProperty<?, ?>> entry : creator.parameters
+					.entrySet()) {
 				PropertyMutator<T, ?> muta = mutators.get(entry.getKey());
 				if (muta == null) {
 					// add to mutators only creator properties that don't exist as standard
 					// mutator (dont exist as field or method, but only as ctr arg)
 					@SuppressWarnings("unchecked")
-					BeanCreatorProperty<T, ?> ctrProperty = (BeanCreatorProperty<T, ?>) entry.getValue();
+					BeanCreatorProperty<T, ?> ctrProperty = (BeanCreatorProperty<T, ?>) entry
+							.getValue();
 					mutators.put(entry.getKey(), ctrProperty);
 				}
 			}

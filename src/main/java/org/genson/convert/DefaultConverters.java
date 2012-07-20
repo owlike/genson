@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.genson.Context;
+import org.genson.Converter;
 import org.genson.Factory;
 import org.genson.Genson;
 import org.genson.TransformationException;

@@ -5,13 +5,13 @@ import java.lang.reflect.GenericArrayType;
 import java.util.Date;
 import java.util.List;
 
+import org.genson.Converter;
 import org.genson.Factory;
 import org.genson.Genson;
 import org.genson.TransformationException;
 import org.genson.annotation.JsonIgnore;
 import org.genson.annotation.JsonProperty;
 import org.genson.convert.BasicConvertersFactory;
-import org.genson.convert.Converter;
 import org.genson.convert.DefaultConverters;
 import org.genson.convert.DefaultConverters.CollectionConverter;
 import org.junit.Test;
@@ -87,34 +87,34 @@ public class BeanDescriptorTest {
 		BeanMutatorAccessorResolver strategy = new BeanMutatorAccessorResolver.StandardMutaAccessorResolver();
 		assertFalse(strategy.isAccessor(
 				ClassWithIgnoredProperties.class.getDeclaredField("ignore"),
-				ClassWithIgnoredProperties.class));
+				ClassWithIgnoredProperties.class).booleanValue());
 		assertFalse(strategy.isMutator(ClassWithIgnoredProperties.class.getDeclaredField("ignore"),
-				ClassWithIgnoredProperties.class));
+				ClassWithIgnoredProperties.class).booleanValue());
 		assertTrue(strategy.isAccessor(ClassWithIgnoredProperties.class.getDeclaredField("a"),
-				ClassWithIgnoredProperties.class));
+				ClassWithIgnoredProperties.class).booleanValue());
 		assertFalse(strategy.isMutator(ClassWithIgnoredProperties.class.getDeclaredField("a"),
-				ClassWithIgnoredProperties.class));
+				ClassWithIgnoredProperties.class).booleanValue());
 		assertTrue(strategy.isMutator(ClassWithIgnoredProperties.class.getDeclaredField("b"),
-				ClassWithIgnoredProperties.class));
+				ClassWithIgnoredProperties.class).booleanValue());
 		assertFalse(strategy.isAccessor(ClassWithIgnoredProperties.class.getDeclaredField("b"),
-				ClassWithIgnoredProperties.class));
+				ClassWithIgnoredProperties.class).booleanValue());
 	}
 
 	@Test
 	public void jsonInclusionWithJsonProperty() throws SecurityException, NoSuchFieldException {
 		BeanMutatorAccessorResolver strategy = new BeanMutatorAccessorResolver.StandardMutaAccessorResolver();
 		assertTrue(strategy.isAccessor(ClassWithIgnoredProperties.class.getDeclaredField("p"),
-				ClassWithIgnoredProperties.class));
+				ClassWithIgnoredProperties.class).booleanValue());
 		assertTrue(strategy.isMutator(ClassWithIgnoredProperties.class.getDeclaredField("p"),
-				ClassWithIgnoredProperties.class));
+				ClassWithIgnoredProperties.class).booleanValue());
 		assertFalse(strategy.isAccessor(ClassWithIgnoredProperties.class.getDeclaredField("q"),
-				ClassWithIgnoredProperties.class));
+				ClassWithIgnoredProperties.class).booleanValue());
 		assertTrue(strategy.isMutator(ClassWithIgnoredProperties.class.getDeclaredField("q"),
-				ClassWithIgnoredProperties.class));
+				ClassWithIgnoredProperties.class).booleanValue());
 		assertFalse(strategy.isMutator(ClassWithIgnoredProperties.class.getDeclaredField("r"),
-				ClassWithIgnoredProperties.class));
+				ClassWithIgnoredProperties.class).booleanValue());
 		assertTrue(strategy.isAccessor(ClassWithIgnoredProperties.class.getDeclaredField("r"),
-				ClassWithIgnoredProperties.class));
+				ClassWithIgnoredProperties.class).booleanValue());
 	}
 
 	PropertyAccessor<?, ?> getAccessor(String name, BeanDescriptor<?> bd) {

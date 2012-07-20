@@ -7,9 +7,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 import org.genson.Context;
+import org.genson.Deserializer;
 import org.genson.TransformationException;
 import org.genson.TransformationRuntimeException;
-import org.genson.convert.Deserializer;
 import org.genson.stream.ObjectReader;
 
 public abstract class PropertyMutator<T, P> extends BeanProperty<T> implements

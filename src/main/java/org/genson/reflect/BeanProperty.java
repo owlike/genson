@@ -6,7 +6,7 @@ import java.lang.reflect.Type;
  * 
  * @author eugen
  *
- * @param <T> the type from which this BeanProperty is property
+ * @param <T> the type in which this BeanProperty is declared.
  */
 public abstract class BeanProperty<T> {
 	protected final String name;

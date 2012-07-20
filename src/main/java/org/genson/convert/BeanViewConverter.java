@@ -5,8 +5,8 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 import org.genson.BeanView;
-import org.genson.ChainedFactory;
 import org.genson.Context;
+import org.genson.Converter;
 import org.genson.Genson;
 import org.genson.TransformationException;
 import org.genson.annotation.WithoutBeanView;
@@ -26,7 +26,7 @@ import org.genson.stream.ObjectWriter;
  * 
  * @param <T> type of objects this BeanViewConverter can handle.
  */
-public class BeanViewConverter<T> extends Wrapper<Converter<T>> implements Converter<T> {
+public class BeanViewConverter<T> extends ConverterDecorator<T> {
 
 	public static class BeanViewConverterFactory extends ChainedFactory {
 		private final BeanViewDescriptorProvider provider;
@@ -38,7 +38,7 @@ public class BeanViewConverter<T> extends Wrapper<Converter<T>> implements Conve
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		@Override
 		protected Converter<?> create(Type type, Genson genson, Converter<?> nextConverter) {
-			if (!Wrapper.toAnnotatedElement(nextConverter).isAnnotationPresent(
+			if (!ConverterDecorator.toAnnotatedElement(nextConverter).isAnnotationPresent(
 					WithoutBeanView.class))
 				return new BeanViewConverter(type, provider, nextConverter);
 			return nextConverter;
@@ -46,13 +46,11 @@ public class BeanViewConverter<T> extends Wrapper<Converter<T>> implements Conve
 	}
 
 	private final BeanViewDescriptorProvider provider;
-	private final Converter<T> next;
 	private final Type type;
 
 	public BeanViewConverter(Type type, BeanViewDescriptorProvider provider, Converter<T> next) {
 		super(next);
 		this.provider = provider;
-		this.next = next;
 		this.type = type;
 	}
 
@@ -83,7 +81,7 @@ public class BeanViewConverter<T> extends Wrapper<Converter<T>> implements Conve
 			}
 		}
 		if (!handled)
-			next.serialize(obj, writer, ctx);
+			wrapped.serialize(obj, writer, ctx);
 	}
 
 	@Override
@@ -98,6 +96,6 @@ public class BeanViewConverter<T> extends Wrapper<Converter<T>> implements Conve
 				return descriptor.deserialize(reader, ctx);
 			}
 		}
-		return next.deserialize(reader, ctx);
+		return wrapped.deserialize(reader, ctx);
 	}
 }

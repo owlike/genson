@@ -4,7 +4,7 @@ import java.lang.reflect.Type;
 
 /**
  * Factory interface must be implemented by classes who want to act as factories and create
- * instances of objects of type T and its subclasses. Implementations will be used as Converter,
+ * instances of Converter/Serializer/Deserializer. Implementations will be used as Converter,
  * Serializer and Deserializer factories. So the type T will be something like
  * Converter&lt;Integer&gt; but the type argument of method create will correspond to Integer <u>or
  * a subclass of Integer</u>.
@@ -57,11 +57,15 @@ import java.lang.reflect.Type;
  * TypeUtil.getCollectionType(myType, declaredInClass) you should do : myType =
  * TypeUtil.expandType(myType, declaredInClass); TypeUtil.getCollectionType(myType);
  * 
- * @see org.genson.ChainedFactory ChainedFactory
+ * @see org.genson.Converter
+ * @see org.genson.convert.ChainedFactory ChainedFactory
+ * @see org.genson.Serializer
+ * @see org.genson.Deserializer
  * 
  * @author eugen
  * 
- * @param <T> the base type of the objects this factory can create.
+ * @param <T> the base type of the objects this factory can create. T can be of type Converter,
+ *        Serializer or Deserializer.
  */
 public interface Factory<T> {
 	/**

@@ -10,8 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.genson.Deserializer;
 import org.genson.TransformationException;
-import org.genson.convert.Deserializer;
 
 public abstract class BeanCreator<T> implements Comparable<BeanCreator<T>> {
 	// The type of object it can create

@@ -25,7 +25,6 @@ import org.genson.bean.Feed;
 import org.genson.bean.MediaContent;
 import org.genson.bean.Primitives;
 import org.genson.bean.Tweet;
-import org.genson.convert.Converter;
 import org.genson.stream.ObjectReader;
 import org.genson.stream.ObjectWriter;
 import org.junit.Test;

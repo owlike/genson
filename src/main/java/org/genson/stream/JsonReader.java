@@ -14,7 +14,7 @@ import org.genson.TransformationRuntimeException;
 
 /*
  * TODO handle rows/cols for more precise exceptions (pretty printing)
- * TODO add checks for number reading, handle overflows : configurable => throw exception or return to the begin of the value (actual behavior)
+ * TODO - partially done - add checks for number reading, handle overflows : configurable => throw exception or return to the begin of the value (actual behavior)
  */
 public class JsonReader implements ObjectReader {
 	protected final static String NULL_VALUE = "null";
@@ -183,9 +183,13 @@ public class JsonReader implements ObjectReader {
 	
 	public int valueAsInt() throws IOException {
 		if (ValueType.INTEGER.equals(valueType)) {
+			if (_intValue < Integer.MIN_VALUE || _intValue > Integer.MAX_VALUE)
+				throw new TransformationRuntimeException("The numeric value " + _intValue + " is out of int range.");
 			return (int) _intValue;
 		}
 		if (ValueType.DOUBLE.equals(valueType)) {
+			if (_doubleValue < Integer.MIN_VALUE || _doubleValue > Integer.MAX_VALUE)
+				throw new TransformationRuntimeException("The numeric value " + _doubleValue + " is out of int range.");
 			return (int)_doubleValue;
 		}
 		if (ValueType.NULL.equals(valueType))
@@ -225,9 +229,13 @@ public class JsonReader implements ObjectReader {
 	
 	public short valueAsShort() throws IOException {
 		if (ValueType.INTEGER.equals(valueType)) {
+			if (_intValue < Short.MIN_VALUE || _intValue > Short.MAX_VALUE)
+				throw new TransformationRuntimeException("The numeric value " + _intValue + " is out of short range.");
 			return (short) _intValue;
 		}
 		if (ValueType.DOUBLE.equals(valueType)) {
+			if (_doubleValue < Short.MIN_VALUE || _doubleValue > Short.MAX_VALUE)
+				throw new TransformationRuntimeException("The numeric value " + _doubleValue + " is out of short range.");
 			return (short) _doubleValue;
 		}
 		if (ValueType.NULL.equals(valueType))
@@ -239,9 +247,13 @@ public class JsonReader implements ObjectReader {
 	
 	public float valueAsFloat() throws IOException {
 		if (ValueType.DOUBLE.equals(valueType)) {
+			if (_doubleValue < Float.MIN_VALUE || _doubleValue > Float.MAX_VALUE)
+				throw new TransformationRuntimeException("The numeric value " + _doubleValue + " is out of float range.");
 			return (float) _doubleValue;
 		}
 		if (ValueType.INTEGER.equals(valueType)) {
+			if (_intValue < Float.MIN_VALUE || _intValue > Float.MAX_VALUE)
+				throw new TransformationRuntimeException("The numeric value " + _intValue + " is out of float range.");
 			return _intValue;
 		}
 		if (ValueType.NULL.equals(valueType))

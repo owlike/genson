@@ -5,8 +5,8 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.genson.ChainedFactory;
 import org.genson.Context;
+import org.genson.Converter;
 import org.genson.Genson;
 import org.genson.TransformationException;
 import org.genson.stream.ObjectReader;
@@ -19,27 +19,25 @@ import org.genson.stream.ObjectWriter;
  *
  */
 public class CircularClassReferenceConverterFactory extends ChainedFactory {
-	private final static class CircularConverter<T> extends Wrapper<Converter<T>> implements Converter<T> {
+	private final static class CircularConverter<T> extends ConverterDecorator<T> {
 		protected CircularConverter() {
 			super();
 		}
-
-		private Converter<T> delegate;
+		
 		@Override
 		public void serialize(T obj, ObjectWriter writer, Context ctx)
 				throws TransformationException, IOException {
-			delegate.serialize(obj, writer, ctx);
+			wrapped.serialize(obj, writer, ctx);
 		}
 
 		@Override
 		public T deserialize(ObjectReader reader, Context ctx)
 				throws TransformationException, IOException {
-			return delegate.deserialize(reader, ctx);
+			return wrapped.deserialize(reader, ctx);
 		}
 		
 		void setDelegateConverter(Converter<T> delegate) {
-			this.delegate = delegate;
-			wrap(delegate);
+			decorate(delegate);
 		}
 	}
 	

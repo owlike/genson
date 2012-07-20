@@ -19,9 +19,33 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.EmptyVisitor;
 
+/**
+ * This class uses ASM library to resolve method and constructor parameter names from debug symbols
+ * generated during compilation. Most libraries are compiled with debug symbols so in most cases
+ * this class will be able to resolve them. It's pretty cool as you do not need to annotate the
+ * parameters anymore! However be careful if you decide to use this feature, you must ensure that
+ * your software is compiled with debug symbols for production! That's why this feature is disabled
+ * by default. To enable it :
+ * 
+ * <pre>
+ * new Genson.Builder().setWithDebugInfoPropertyNameResolver(true).create();
+ * </pre>
+ * 
+ * If you enabled this feature, when a class with no debug symbols is encountered no exception will
+ * be thrown, if you want you can force exceptions with
+ * 
+ * <pre>
+ * new Genson.Builder().setWithDebugInfoPropertyNameResolver(true)
+ * 		.setThrowExceptionIfNoDebugInfo(true).create();
+ * </pre>
+ * 
+ * @author eugen
+ * 
+ */
 public final class ASMCreatorParameterNameResolver implements PropertyNameResolver {
 	/**
-	 * Wether we must throw an exception when we encounter a class compiled with no debug information.
+	 * Whether we must throw an exception when we encounter a class compiled with no debug
+	 * information.
 	 */
 	private final boolean doThrowException;
 	private final Map<Constructor<?>, String[]> constructorParameterNames = new ConcurrentHashMap<Constructor<?>, String[]>();
@@ -30,7 +54,7 @@ public final class ASMCreatorParameterNameResolver implements PropertyNameResolv
 	public ASMCreatorParameterNameResolver(boolean doThrowException) {
 		this.doThrowException = doThrowException;
 	}
-	
+
 	protected void read(Class<?> ofClass) {
 		String ofClassName = ofClass.getName();
 		ofClassName = ofClassName.replace('.', '/') + ".class";
@@ -62,10 +86,11 @@ public final class ASMCreatorParameterNameResolver implements PropertyNameResolv
 		}
 
 		if (names == null || names.length <= parameterIdx) {
-			if (doThrowException) _throwNoDebugInfo(fromConstructor.getDeclaringClass().getName());
+			if (doThrowException)
+				_throwNoDebugInfo(fromConstructor.getDeclaringClass().getName());
 			return null;
 		}
-		
+
 		return names[parameterIdx];
 	}
 
@@ -88,15 +113,19 @@ public final class ASMCreatorParameterNameResolver implements PropertyNameResolv
 		}
 
 		if (names == null || names.length <= parameterIdx) {
-			if (doThrowException) _throwNoDebugInfo(fromMethod.getDeclaringClass().getName());
+			if (doThrowException)
+				_throwNoDebugInfo(fromMethod.getDeclaringClass().getName());
 			return null;
 		}
-		
+
 		return names[parameterIdx];
 	}
-	
+
 	private void _throwNoDebugInfo(String className) {
-		throw new TransformationRuntimeException("Class " + className + " has been compiled with no debug information, so we can not deduce constructor/method parameter names.");
+		throw new TransformationRuntimeException(
+				"Class "
+						+ className
+						+ " has been compiled with no debug information, so we can not deduce constructor/method parameter names.");
 	}
 
 	private class ClassConstructorsVisitor extends EmptyVisitor {
@@ -120,8 +149,8 @@ public final class ASMCreatorParameterNameResolver implements PropertyNameResolv
 			if ((access & Opcodes.ACC_ABSTRACT) == 0) {
 				if (CONSTRUCTOR_METHOD_NAME.equals(name))
 					return new ConstructorVisitor(forClass, ztatic, desc, ctrParameterNames);
-				
-				if ( !"<clinit>".equals(name) )
+
+				if (!"<clinit>".equals(name))
 					return new NameMethodVisitor(name, forClass, ztatic, desc, methodParameterNames);
 			}
 			return null;
@@ -134,7 +163,7 @@ public final class ASMCreatorParameterNameResolver implements PropertyNameResolv
 		protected ArrayList<String> paramNames;
 		protected final Class<?> forClass;
 		protected boolean ztatic;
-		
+
 		public BaseMethodVisitor(Class<?> forClass, boolean ztatic, String desc,
 				Map<Method, String[]> parameterNamesMap) {
 			this.forClass = forClass;
@@ -149,8 +178,9 @@ public final class ASMCreatorParameterNameResolver implements PropertyNameResolv
 			if (!ztatic) {
 				index--;
 			}
-			
-			if ((index >= 0 || (forClass.isMemberClass() && (forClass.getModifiers() & Modifier.STATIC) == 0) ) && paramNames.size() < paramTypes.length) {
+
+			if ((index >= 0 || (forClass.isMemberClass() && (forClass.getModifiers() & Modifier.STATIC) == 0))
+					&& paramNames.size() < paramTypes.length) {
 				paramNames.add(variableName);
 			}
 		}
@@ -201,7 +231,7 @@ public final class ASMCreatorParameterNameResolver implements PropertyNameResolv
 	private class NameMethodVisitor extends BaseMethodVisitor {
 		private final Map<Method, String[]> parameterNamesMap;
 		private String name;
-		
+
 		public NameMethodVisitor(String name, Class<?> forClass, boolean ztatic, String desc,
 				Map<Method, String[]> parameterNamesMap) {
 			super(forClass, ztatic, desc, parameterNamesMap);
@@ -220,8 +250,7 @@ public final class ASMCreatorParameterNameResolver implements PropertyNameResolv
 				try {
 					method = forClass.getMethod(name, javaTypes);
 					parameterNamesMap
-							.put(method, paramNames
-									.toArray(new String[paramNames.size()]));
+							.put(method, paramNames.toArray(new String[paramNames.size()]));
 				} catch (SecurityException e) {
 					throw new TransformationRuntimeException(
 							"Unable to locate method with signature " + signature(), e);
@@ -230,13 +259,12 @@ public final class ASMCreatorParameterNameResolver implements PropertyNameResolv
 				}
 			}
 		}
-		
+
 		@Override
 		public String signature() {
 			StringBuilder sb = new StringBuilder(name).append("(");
 			for (int i = 0; i < paramTypes.length; i++) {
-				String paramName = paramNames.isEmpty() ? "?"
-						: (String) paramNames.get(i);
+				String paramName = paramNames.isEmpty() ? "?" : (String) paramNames.get(i);
 				sb.append(paramTypes[i].getClassName()).append(" " + paramName);
 				if (i < paramTypes.length - 1) {
 					sb.append(", ");
@@ -261,15 +289,14 @@ public final class ASMCreatorParameterNameResolver implements PropertyNameResolv
 			if (paramNames.size() == paramTypes.length) {
 				Constructor<?> constructor = null;
 				Class<?>[] javaTypes = new Class<?>[paramTypes.length];
-				
+
 				for (int i = 0; i < paramTypes.length; i++)
 					javaTypes[i] = resolveClass(paramTypes[i]);
 
 				try {
 					constructor = forClass.getDeclaredConstructor(javaTypes);
-					parameterNamesMap
-							.put(constructor, paramNames
-									.toArray(new String[paramNames.size()]));
+					parameterNamesMap.put(constructor,
+							paramNames.toArray(new String[paramNames.size()]));
 				} catch (SecurityException e) {
 					throw new TransformationRuntimeException(
 							"Unable to locate constructor with signature " + signature(), e);
@@ -282,8 +309,7 @@ public final class ASMCreatorParameterNameResolver implements PropertyNameResolv
 		public String signature() {
 			StringBuilder sb = new StringBuilder(forClass.getSimpleName()).append("(");
 			for (int i = 0; i < paramTypes.length; i++) {
-				String paramName = paramNames.isEmpty() ? "?"
-						: (String) paramNames.get(i);
+				String paramName = paramNames.isEmpty() ? "?" : (String) paramNames.get(i);
 				sb.append(paramTypes[i].getClassName()).append(" " + paramName);
 				if (i < paramTypes.length - 1) {
 					sb.append(", ");

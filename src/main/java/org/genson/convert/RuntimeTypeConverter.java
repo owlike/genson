@@ -3,8 +3,8 @@ package org.genson.convert;
 import java.io.IOException;
 import java.lang.reflect.Type;
 
-import org.genson.ChainedFactory;
 import org.genson.Context;
+import org.genson.Converter;
 import org.genson.Genson;
 import org.genson.TransformationException;
 import org.genson.reflect.TypeUtil;
@@ -18,7 +18,7 @@ import org.genson.stream.ObjectWriter;
  * 
  * @param <T> the type this converter is handling.
  */
-public class RuntimeTypeConverter<T> extends Wrapper<Converter<T>> implements Converter<T> {
+public class RuntimeTypeConverter<T> extends ConverterDecorator<T> {
 	public final static ChainedFactory runtimeTypeConverterFactory = new ChainedFactory() {
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
@@ -30,13 +30,11 @@ public class RuntimeTypeConverter<T> extends Wrapper<Converter<T>> implements Co
 					nextConverter);
 		}
 	};
-	private final Converter<T> next;
 	private final Class<T> tClass;
 
 	public RuntimeTypeConverter(Class<T> tClass, Converter<T> next) {
 		super(next);
 		this.tClass = tClass;
-		this.next = next;
 	}
 
 	@Override
@@ -45,13 +43,13 @@ public class RuntimeTypeConverter<T> extends Wrapper<Converter<T>> implements Co
 		if (!tClass.equals(obj.getClass()))
 			ctx.genson.serialize(obj, obj.getClass(), writer, ctx);
 		else
-			next.serialize(obj, writer, ctx);
+			wrapped.serialize(obj, writer, ctx);
 	}
 
 	@Override
 	public T deserialize(ObjectReader reader, Context ctx) throws TransformationException,
 			IOException {
-		return next.deserialize(reader, ctx);
+		return wrapped.deserialize(reader, ctx);
 	}
 
 }

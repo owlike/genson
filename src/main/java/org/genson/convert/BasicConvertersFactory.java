@@ -8,9 +8,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.genson.Context;
+import org.genson.Converter;
+import org.genson.Deserializer;
 import org.genson.Factory;
 import org.genson.Genson;
 import org.genson.Operations;
+import org.genson.Serializer;
 import org.genson.TransformationException;
 import org.genson.reflect.BeanDescriptorProvider;
 import org.genson.reflect.TypeUtil;
@@ -36,10 +39,9 @@ import org.genson.stream.ObjectWriter;
  * <li>If no factory could create an instance we will use BeanDescriptorProvider.</li>
  * </ol>
  * </li>
- * <li>If the returned serializer is an instance of Converter we finished.</li>
- * <li>Else it will search for a Deserializer (same mechanism as for Serializer). If the
- * deserializer is a converter we finished.</li>
- * <li>Else we will wrap both into a {@link DelegatedConverter} instance.</li>
+ * <li>We apply all the same logic a second time for Deserializer.</li>
+ * <li>If they are both an instance of Converter then we return one of them</li>
+ * <li>Otherwise we will wrap both into a {@link DelegatedConverter} instance.</li>
  * </ul>
  * 
  * Note that the create method from the registered factories will only be called if the type with
@@ -56,8 +58,9 @@ public class BasicConvertersFactory implements Factory<Converter<?>> {
 	private final List<Factory<?>> factories;
 	private final BeanDescriptorProvider beanDescriptorProvider;
 
-	public BasicConvertersFactory(Map<Type, Serializer<?>> serializersMap, Map<Type, Deserializer<?>> deserializersMap,
-			List<Factory<?>> factories, BeanDescriptorProvider beanDescriptorProvider) {
+	public BasicConvertersFactory(Map<Type, Serializer<?>> serializersMap,
+			Map<Type, Deserializer<?>> deserializersMap, List<Factory<?>> factories,
+			BeanDescriptorProvider beanDescriptorProvider) {
 		this.serializersMap = serializersMap;
 		this.deserializersMap = deserializersMap;
 		this.factories = factories;
@@ -69,24 +72,20 @@ public class BasicConvertersFactory implements Factory<Converter<?>> {
 	public Converter<?> create(Type type, Genson genson) {
 		Converter<?> converter = null;
 		Serializer<?> serializer = provide(Serializer.class, type, serializersMap, genson);
-		if (serializer instanceof Converter)
-			converter = (Converter<?>) serializer;
-		else {
-			Deserializer<?> deserializer = provide(Deserializer.class, type, deserializersMap, genson);
-			if (deserializer instanceof Converter)
+		Deserializer<?> deserializer = provide(Deserializer.class, type, deserializersMap, genson);
+		if (serializer instanceof Converter && deserializer instanceof Converter) {
 				converter = (Converter<?>) deserializer;
-			else {
-				if (serializer != null || deserializer != null)
-					converter = new DelegatedConverter(serializer, deserializer);
-			}
+		} else {
+			converter = new DelegatedConverter(serializer, deserializer);
 		}
-
 		return converter;
 	}
 
 	@SuppressWarnings("unchecked")
-	protected <T> T provide(Class<T> forClass, Type withParameterType, Map<Type, ? extends T> fromTypeMap, Genson genson) {
-		if (fromTypeMap.containsKey(withParameterType)) return fromTypeMap.get(withParameterType);
+	protected <T> T provide(Class<T> forClass, Type withParameterType,
+			Map<Type, ? extends T> fromTypeMap, Genson genson) {
+		if (fromTypeMap.containsKey(withParameterType))
+			return fromTypeMap.get(withParameterType);
 
 		Type wrappedParameterType = withParameterType;
 		if (withParameterType instanceof Class<?> && ((Class<?>) withParameterType).isPrimitive())
@@ -108,10 +107,10 @@ public class BasicConvertersFactory implements Factory<Converter<?>> {
 			}
 		}
 
-		return (T) beanDescriptorProvider.create(TypeUtil.getRawClass(withParameterType), genson);
+		return (T) beanDescriptorProvider.provide(TypeUtil.getRawClass(withParameterType), genson);
 	}
 
-	private class DelegatedConverter<T> extends Wrapper<Converter<T>> implements Converter<T> {
+	private class DelegatedConverter<T> extends ConverterDecorator<T> {
 		private final Serializer<T> serializer;
 		private final Deserializer<T> deserializer;
 

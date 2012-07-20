@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.genson.Context;
+import org.genson.Converter;
 import org.genson.TransformationException;
 import org.genson.TransformationRuntimeException;
-import org.genson.convert.Converter;
 import org.genson.reflect.BeanCreator.BeanCreatorProperty;
 import org.genson.stream.ObjectReader;
 import org.genson.stream.ObjectWriter;

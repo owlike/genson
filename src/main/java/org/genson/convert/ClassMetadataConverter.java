@@ -3,8 +3,8 @@ package org.genson.convert;
 import java.io.IOException;
 import java.lang.reflect.Type;
 
-import org.genson.ChainedFactory;
 import org.genson.Context;
+import org.genson.Converter;
 import org.genson.Genson;
 import org.genson.TransformationException;
 import org.genson.annotation.HandleClassMetadata;
@@ -28,7 +28,7 @@ import org.genson.stream.ValueType;
  * 
  * @param <T>
  */
-public class ClassMetadataConverter<T> extends Wrapper<Converter<T>> implements Converter<T> {
+public class ClassMetadataConverter<T> extends ConverterDecorator<T> {
 	public static class ClassMetadataConverterFactory extends ChainedFactory {
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
@@ -39,28 +39,25 @@ public class ClassMetadataConverter<T> extends Wrapper<Converter<T>> implements 
 								+ "as ClassMetadataConverter can not be the last converter in the chain!");
 
 			if (genson.isWithClassMetadata()
-					&& !Wrapper.toAnnotatedElement(nextConverter).isAnnotationPresent(
+					&& !ConverterDecorator.toAnnotatedElement(nextConverter).isAnnotationPresent(
 							HandleClassMetadata.class))
 				return new ClassMetadataConverter(TypeUtil.getRawClass(type), nextConverter);
 			else
 				return nextConverter;
 		}
 	}
-
-	private final Converter<T> converter;
 	private final Class<T> tClass;
 	
 	public ClassMetadataConverter(Class<T> tClass, Converter<T> delegate) {
 		super(delegate);
 		this.tClass = tClass;
-		this.converter = delegate;
 	}
 
 	@Override
 	public void serialize(T obj, ObjectWriter writer, Context ctx)
 			throws TransformationException, IOException {
 		writer.beginNextObjectMetadata().writeMetadata("class", ctx.genson.aliasFor(obj.getClass()));
-		converter.serialize(obj, writer, ctx);
+		wrapped.serialize(obj, writer, ctx);
 	}
 
 	@Override
@@ -72,7 +69,7 @@ public class ClassMetadataConverter<T> extends Wrapper<Converter<T>> implements 
 				try {
 					Class<?> classFromMetadata = ctx.genson.classFor(className);
 					if (!classFromMetadata.equals(tClass)) {
-						Deserializer<T> deser = ctx.genson.provideConverter(classFromMetadata);
+						Converter<T> deser = ctx.genson.provideConverter(classFromMetadata);
 						return deser.deserialize(reader, ctx);
 					}
 				} catch (ClassNotFoundException e) {
@@ -81,7 +78,7 @@ public class ClassMetadataConverter<T> extends Wrapper<Converter<T>> implements 
 				}
 			}
 		}
-		return converter.deserialize(reader, ctx);
+		return wrapped.deserialize(reader, ctx);
 	}
 
 }

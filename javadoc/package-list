@@ -1,0 +1,6 @@
+org.genson
+org.genson.annotation
+org.genson.convert
+org.genson.reflect
+org.genson.spring
+org.genson.stream

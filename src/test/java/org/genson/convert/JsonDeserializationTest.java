@@ -13,6 +13,7 @@ import java.util.Map;
 
 import org.genson.Context;
 import org.genson.Genson;
+import org.genson.Serializer;
 import org.genson.TransformationException;
 import org.genson.annotation.JsonProperty;
 import org.genson.bean.ComplexObject;
@@ -273,7 +274,7 @@ public class JsonDeserializationTest {
 
 	@Test public void testDeserealizeIntoExistingBean() throws IOException, TransformationException {
 		@SuppressWarnings("unchecked")
-		BeanDescriptor<ClassWithConstructorFieldsAndGetters> desc = (BeanDescriptor<ClassWithConstructorFieldsAndGetters>) genson.getBeanDescriptorFactory().create(ClassWithConstructorFieldsAndGetters.class, genson);
+		BeanDescriptor<ClassWithConstructorFieldsAndGetters> desc = (BeanDescriptor<ClassWithConstructorFieldsAndGetters>) genson.getBeanDescriptorFactory().provide(ClassWithConstructorFieldsAndGetters.class, genson);
 		ClassWithConstructorFieldsAndGetters c = new ClassWithConstructorFieldsAndGetters(1) {
 			@Override
 			public void setP2(Integer p2) {

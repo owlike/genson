@@ -20,14 +20,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.genson.convert.BasicConvertersFactory;
 import org.genson.convert.BeanViewConverter;
+import org.genson.convert.ChainedFactory;
 import org.genson.convert.CircularClassReferenceConverterFactory;
 import org.genson.convert.ClassMetadataConverter;
-import org.genson.convert.Converter;
 import org.genson.convert.NullConverter;
 import org.genson.convert.DefaultConverters;
-import org.genson.convert.Deserializer;
 import org.genson.convert.RuntimeTypeConverter;
-import org.genson.convert.Serializer;
 import org.genson.reflect.ASMCreatorParameterNameResolver;
 import org.genson.reflect.BaseBeanDescriptorProvider;
 import org.genson.reflect.BeanDescriptorProvider;
@@ -262,7 +260,7 @@ public final class Genson {
 		private boolean htmlSafe = false;
 		private boolean withClassMetadata = false;
 		private DateFormat dateFormat = null;
-		private boolean throwExcOnNoDebugInfo = true;
+		private boolean throwExcOnNoDebugInfo = false;
 		private boolean useGettersAndSetters = true;
 		private boolean useFields = true;
 		private boolean withBeanViewConverter = false;

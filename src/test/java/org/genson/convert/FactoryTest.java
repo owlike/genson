@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import org.genson.ChainedFactory;
 import org.genson.Context;
+import org.genson.Converter;
 import org.genson.Factory;
 import org.genson.GenericType;
 import org.genson.Genson;
@@ -76,8 +76,8 @@ public class FactoryTest {
 	@Test
 	public void testUnwrapAnnotations() throws TransformationException, IOException {
 		Genson genson = new Genson.Builder().withConverters(new ClassMetadataConverter()).create();
-		@SuppressWarnings("unchecked")
-		Wrapper<Converter<A>> wrapper = (Wrapper<Converter<A>>) genson.provideConverter(A.class);
+		@SuppressWarnings({ "unchecked", "rawtypes" }) // argh its ugly with those warnings...
+		ConverterDecorator<A> wrapper = (ConverterDecorator) genson.provideConverter(A.class);
 		Converter<A> converter = wrapper.unwrap();
 		assertTrue(converter instanceof ClassMetadataConverter);
 		assertFalse(ClassMetadataConverter.used);

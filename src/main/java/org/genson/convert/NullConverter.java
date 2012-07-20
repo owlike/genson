@@ -3,8 +3,8 @@ package org.genson.convert;
 import java.io.IOException;
 import java.lang.reflect.Type;
 
-import org.genson.ChainedFactory;
 import org.genson.Context;
+import org.genson.Converter;
 import org.genson.Genson;
 import org.genson.TransformationException;
 import org.genson.annotation.HandleNull;
@@ -14,7 +14,7 @@ import org.genson.stream.ValueType;
 
 /**
  * You can also change the way null values are handled by registering your own Converter
- * {@link org.genson.Genson.Builder#setNullConverter(org.genson.convert.Converter)
+ * {@link org.genson.Genson.Builder#setNullConverter(org.genson.Converter)
  * Genson.Builder.setNullConverter(org.genson.convert.Converter)}.
  * 
  * @author eugen
@@ -25,20 +25,17 @@ public class NullConverter implements Converter<Object> {
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
 		protected Converter<?> create(Type type, Genson genson, Converter<?> nextConverter) {
-			return Wrapper.toAnnotatedElement(nextConverter).isAnnotationPresent(HandleNull.class) ? nextConverter
+			return ConverterDecorator.toAnnotatedElement(nextConverter).isAnnotationPresent(HandleNull.class) ? nextConverter
 					: new NullConverterWrapper(genson.getNullConverter(), nextConverter);
 		}
 	}
 
-	public static class NullConverterWrapper<T> extends Wrapper<Converter<T>> implements
-			Converter<T> {
+	public static class NullConverterWrapper<T> extends ConverterDecorator<T> {
 		private final Converter<Object> nullConverter;
-		private final Converter<T> converter;
 
 		public NullConverterWrapper(Converter<Object> nullConverter, Converter<T> converter) {
 			super(converter);
 			this.nullConverter = nullConverter;
-			this.converter = converter;
 		}
 
 		@Override
@@ -47,7 +44,7 @@ public class NullConverter implements Converter<Object> {
 			if (obj == null) {
 				nullConverter.serialize(obj, writer, ctx);
 			} else {
-				converter.serialize(obj, writer, ctx);
+				wrapped.serialize(obj, writer, ctx);
 			}
 		}
 
@@ -58,7 +55,7 @@ public class NullConverter implements Converter<Object> {
 			if (ValueType.NULL.equals(reader.getValueType()))
 				return (T) nullConverter.deserialize(reader, ctx);
 
-			return converter.deserialize(reader, ctx);
+			return wrapped.deserialize(reader, ctx);
 		}
 	}
 

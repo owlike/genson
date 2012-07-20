@@ -13,14 +13,24 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.genson.BeanView;
+import org.genson.Deserializer;
 import org.genson.Genson;
+import org.genson.Serializer;
 import org.genson.TransformationRuntimeException;
+import org.genson.Trilean;
+import static org.genson.Trilean.TRUE;
+import static org.genson.Trilean.FALSE;
 import org.genson.annotation.Creator;
-import org.genson.convert.Deserializer;
-import org.genson.convert.Serializer;
 import org.genson.reflect.PropertyAccessor.MethodAccessor;
 import org.genson.reflect.PropertyMutator.MethodMutator;
 
+/**
+ * This class constructs BeanDescriptor for the {@link org.genson.BeanView BeanView} mechanism. You
+ * should not extend it as it may change in the future.
+ * 
+ * @author eugen
+ * 
+ */
 public class BeanViewDescriptorProvider extends BaseBeanDescriptorProvider {
 	private Map<Class<?>, BeanView<?>> views = new HashMap<Class<?>, BeanView<?>>();
 	private Map<Class<?>, BeanDescriptor<?>> descriptors = new ConcurrentHashMap<Class<?>, BeanDescriptor<?>>();
@@ -90,9 +100,11 @@ public class BeanViewDescriptorProvider extends BaseBeanDescriptorProvider {
 		// the target bean must be first (and single) parameter for beanview accessors
 		@SuppressWarnings("unchecked")
 		BeanView<T> beanview = (BeanView<T>) views.get(baseClass);
-		Type superTypeWithParameter = TypeUtil.lookupGenericType(BeanView.class, beanview.getClass());
+		Type superTypeWithParameter = TypeUtil.lookupGenericType(BeanView.class,
+				beanview.getClass());
 		@SuppressWarnings("unchecked")
-		Class<T> tClass = (Class<T>) TypeUtil.typeOf(0, TypeUtil.expandType(superTypeWithParameter, beanview.getClass()));
+		Class<T> tClass = (Class<T>) TypeUtil.typeOf(0,
+				TypeUtil.expandType(superTypeWithParameter, beanview.getClass()));
 		Type type = TypeUtil.expand(method.getGenericReturnType(), baseClass);
 		return new BeanViewPropertyAccessor<T, Object>(name, method, type, beanview, tClass,
 				genson.provideConverter(type));
@@ -104,9 +116,11 @@ public class BeanViewDescriptorProvider extends BaseBeanDescriptorProvider {
 		// the target bean must be second parameter for beanview mutators
 		@SuppressWarnings("unchecked")
 		BeanView<T> beanview = (BeanView<T>) views.get(baseClass);
-		Type superTypeWithParameter = TypeUtil.lookupGenericType(BeanView.class, beanview.getClass());
+		Type superTypeWithParameter = TypeUtil.lookupGenericType(BeanView.class,
+				beanview.getClass());
 		@SuppressWarnings("unchecked")
-		Class<T> tClass = (Class<T>) TypeUtil.typeOf(0, TypeUtil.expandType(superTypeWithParameter, beanview.getClass()));
+		Class<T> tClass = (Class<T>) TypeUtil.typeOf(0,
+				TypeUtil.expandType(superTypeWithParameter, beanview.getClass()));
 		Type type = TypeUtil.expand(method.getGenericParameterTypes()[0], baseClass);
 
 		return new BeanViewPropertyMutator<T, Object>(name, method, type, beanview, tClass,
@@ -116,52 +130,52 @@ public class BeanViewDescriptorProvider extends BaseBeanDescriptorProvider {
 	public static class BeanViewMutatorAccessorResolver implements BeanMutatorAccessorResolver {
 
 		@Override
-		public boolean isAccessor(Field field, Class<?> baseClass) {
-			return false;
+		public Trilean isAccessor(Field field, Class<?> baseClass) {
+			return FALSE;
 		}
 
 		@Override
-		public boolean isAccessor(Method method, Class<?> baseClass) {
+		public Trilean isAccessor(Method method, Class<?> baseClass) {
 			int modifiers = method.getModifiers();
-			return (method.getName().startsWith("get") || (method.getName().startsWith("is") && (TypeUtil
-					.match(method.getGenericReturnType(), Boolean.class, false) || boolean.class
-					.equals(method.getReturnType()))))
+			return Trilean.valueOf((method.getName().startsWith("get") || (method.getName()
+					.startsWith("is") && (TypeUtil.match(method.getGenericReturnType(),
+					Boolean.class, false) || boolean.class.equals(method.getReturnType()))))
 					&& TypeUtil.match(
 							TypeUtil.typeOf(0,
 									TypeUtil.lookupGenericType(BeanView.class, baseClass)),
 							baseClass, method.getGenericParameterTypes()[0], baseClass, false)
 					&& Modifier.isPublic(modifiers)
 					&& !Modifier.isAbstract(modifiers)
-					&& !Modifier.isNative(modifiers);
+					&& !Modifier.isNative(modifiers));
 		}
 
 		@Override
-		public boolean isCreator(Constructor<?> constructor, Class<?> baseClass) {
+		public Trilean isCreator(Constructor<?> constructor, Class<?> baseClass) {
 			int modifier = constructor.getModifiers();
-			return Modifier.isPublic(modifier)
-					|| !(Modifier.isPrivate(modifier) || Modifier.isProtected(modifier));
+			return Trilean.valueOf(Modifier.isPublic(modifier)
+					|| !(Modifier.isPrivate(modifier) || Modifier.isProtected(modifier)));
 		}
 
 		@Override
-		public boolean isCreator(Method method, Class<?> baseClass) {
+		public Trilean isCreator(Method method, Class<?> baseClass) {
 			if (method.getAnnotation(Creator.class) != null) {
 				if (Modifier.isStatic(method.getModifiers()))
-					return true;
+					return TRUE;
 				throw new TransformationRuntimeException("Method " + method.toGenericString()
 						+ " annotated with @Creator must be static!");
 			}
-			return false;
+			return FALSE;
 		}
 
 		@Override
-		public boolean isMutator(Field field, Class<?> baseClass) {
-			return false;
+		public Trilean isMutator(Field field, Class<?> baseClass) {
+			return FALSE;
 		}
 
 		@Override
-		public boolean isMutator(Method method, Class<?> baseClass) {
+		public Trilean isMutator(Method method, Class<?> baseClass) {
 			int modifiers = method.getModifiers();
-			return method.getName().startsWith("set")
+			return Trilean.valueOf(method.getName().startsWith("set")
 					&& void.class.equals(method.getReturnType())
 					&& method.getGenericParameterTypes().length == 2
 					&& TypeUtil.match(
@@ -171,7 +185,7 @@ public class BeanViewDescriptorProvider extends BaseBeanDescriptorProvider {
 									TypeUtil.lookupGenericType(BeanView.class,
 											method.getDeclaringClass())), false)
 					&& Modifier.isPublic(modifiers) && !Modifier.isAbstract(modifiers)
-					&& !Modifier.isNative(modifiers);
+					&& !Modifier.isNative(modifiers));
 		}
 
 	}

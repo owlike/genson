@@ -14,9 +14,11 @@ import org.genson.annotation.JsonProperty;
 
 /**
  * This interface is intended to be implemented by classes who want to change the way genson does
- * name resolution. The resolved name will be used in the generated stream (based on the getters)
- * and injected into constructors/or setters. If you can not resolve the name just return null. You
- * can have a look to {@link AnnotationPropertyNameResolver} for an example.
+ * name resolution. The resolved name will be used in the generated stream during serialization and
+ * injected into constructors/or setters during deserialization. If you can not resolve the name
+ * just return null. You can have a look at the <a href=
+ * "http://code.google.com/p/genson/source/browse/src/main/java/org/genson/reflect/PropertyNameResolver.java"
+ * >source code</a> for an example.
  * 
  * @see org.genson.annotation.JsonProperty JsonProperty
  * 
@@ -28,14 +30,20 @@ public interface PropertyNameResolver {
 	 * 
 	 * @param parameterIdx
 	 * @param fromConstructor
-	 * @return the resolved name of the parameter
+	 * @return the resolved name of the parameter or null
 	 */
 	public String resolve(int parameterIdx, Constructor<?> fromConstructor);
 
+	/**
+	 * Resolve the name of the parameter with parameterIdx as index in fromMethod method.
+	 * @param parameterIdx
+	 * @param fromMethod
+	 * @return the resolved name of the parameter or null
+	 */
 	public String resolve(int parameterIdx, Method fromMethod);
 
 	/**
-	 * Resolve the bean property name from this field.
+	 * Resolve the property name from this field.
 	 * 
 	 * @param fromField - the field to use for name resolution.
 	 * @return the resolved name or null.
@@ -43,7 +51,7 @@ public interface PropertyNameResolver {
 	public String resolve(Field fromField);
 
 	/**
-	 * Resolve the bean property name from this method.
+	 * Resolve the property name from this method.
 	 * 
 	 * @param fromMethod - the method to be used for name resolution.
 	 * @return the resolved name or null.
@@ -188,7 +196,7 @@ public interface PropertyNameResolver {
 		public String resolve(Method fromMethod) {
 			return getName(fromMethod);
 		}
-		
+
 		protected String getName(AnnotatedElement annElement) {
 			JsonProperty name = annElement.getAnnotation(JsonProperty.class);
 			return name != null && name.value() != null && !name.value().isEmpty() ? name.value()
