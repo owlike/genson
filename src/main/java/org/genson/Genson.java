@@ -43,20 +43,33 @@ import org.genson.stream.ObjectWriter;
  * <p>
  * Main class of the library. Instances of this class are intended to be reused. You can instantiate
  * it multiple times but it is better to have an instance per configuration so you can benefit of
- * the cache. This class is immutable and thread safe.
+ * better performances. This class is immutable and thread safe.
  * 
  * <p>
- * To create a new instance you can use the default constructor {@link #Genson} or the
- * {@link Builder} class to have control over its configuration. <br>
- * For example, if you want to register a custom Serializer : <br>
+ * To create a new instance of Genson you can use the default no arg constructor or the
+ * {@link Builder} class to have control over Gensons configuration. <br>
+ * A basic usage of Genson would be:
  * 
  * <pre>
- * Genson genson = new Genson.Builder().with(mySerializer, anotherSerializer).create();
+ * Genson genson = new Genson();
+ * String json = genson.serialize(new int[] { 1, 2, 3 });
+ * int[] arrayOfInt = genson.deserialize(json, int[].class);
+ * // (multi-dimensional arrays are also supported)
+ * 
+ * // genson can also deserialize primitive types without class information
+ * Number[] arrayOfNumber = genson.deserialize(&quot;[1, 2.03, 8877463]&quot;, Number[].class);
+ * // or even
+ * Object[] arrayOfUnknownTypes = genson
+ * 		.deserialize(&quot;[1, false, null, 4.05, \&quot;hey this is a string!\&quot;]&quot;);
+ * // it can also deserialize json objects of unknown type to maps!
+ * Map&lt;String, Object&gt; map = (Map&lt;String, Object&gt;) genson.deserialize(&quot;{\&quot;foo\&quot;:1232}&quot;, Object.class);
  * </pre>
  * 
- * Use the {@link #serialize} and {@link #deserialize} methods to convert java to json and json to
- * java. The Serializers and Deserializers take as an argument an instance of {@link Context} class,
- * this object will be passed through all the chain and is statefull, so you can store inside some
+ * Every object serialized with Genson, can be deserialized back into its concrete type! Have a look
+ * at {@link org.genson.convert.ClassMetadataConverter ClassMetadataConverter} for an explanation
+ * and examples.
+ * 
+ * @author eugen
  */
 public final class Genson {
 	/**
@@ -88,17 +101,14 @@ public final class Genson {
 	}
 
 	/**
-	 * The configurable constructor, the {@link Builder} should be used instead of this constructor
-	 * directly.
 	 * 
-	 * @param serializerProvider
-	 * @param deserializerProvider
+	 * @param converterFactory
+	 * @param beanDescProvider
+	 * @param nullConverter
 	 * @param skipNull
 	 * @param htmlSafe
 	 * @param classAliases
-	 * @param withClassMetadata indicates wether class information should be written/readen to/from
-	 *        json. If true the deserializers will try to use it to determine the type of the object
-	 *        being deserialized.
+	 * @param withClassMetadata
 	 */
 	public Genson(Factory<Converter<?>> converterFactory, BeanDescriptorProvider beanDescProvider,
 			Converter<Object> nullConverter, boolean skipNull, boolean htmlSafe,
@@ -280,12 +290,28 @@ public final class Genson {
 		public Builder() {
 		}
 
+		/**
+		 * Alias used in serialized class metadata instead of the full class name. See
+		 * {@link org.genson.convert.ClassMetadataConverter ClassMetadataConverter} for more
+		 * metadata. If you add an alias, it will automatically enable the class metadata feature,
+		 * as if you used {@link #setWithClassMetadata(boolean)}.
+		 * 
+		 * @param alias
+		 * @param forClass
+		 * @return a reference to this builder.
+		 */
 		public Builder addAlias(String alias, Class<?> forClass) {
 			withClassMetadata = true;
 			withClassAliases.put(alias, forClass);
 			return this;
 		}
-		
+
+		/**
+		 * Registers converters mapping them to their corresponding parameterized type.
+		 * 
+		 * @param converter
+		 * @return a reference to this builder.
+		 */
 		public Builder withConverters(Converter<?>... converter) {
 			for (Converter<?> c : converter) {
 				Type typeOfConverter = TypeUtil.typeOf(0,
@@ -296,25 +322,39 @@ public final class Genson {
 			return this;
 		}
 
+		/**
+		 * Register converter by mapping it to type argument.
+		 * 
+		 * @param converter to register
+		 * @param type of objects this converter handles
+		 * @return a reference to this builder.
+		 */
 		public <T> Builder withConverter(Converter<T> converter, Class<? extends T> type) {
 			registerConverter(converter, type);
 			return this;
 		}
-		
+
+		/**
+		 * Register converter by mapping it to the parameterized type of type argument.
+		 * 
+		 * @param converter to register
+		 * @param type of objects this converter handles
+		 * @return a reference to this builder.
+		 */
 		public <T> Builder withConverter(Converter<T> converter, GenericType<? extends T> type) {
 			registerConverter(converter, type.getType());
 			return this;
 		}
-		
+
 		private <T> void registerConverter(Converter<T> converter, Type type) {
 			if (serializersMap.containsKey(type))
-				throw new IllegalStateException("Can not register converter " + converter.getClass()
-						+ ". A custom serializer is already registered for type "
-						+ type);
+				throw new IllegalStateException("Can not register converter "
+						+ converter.getClass()
+						+ ". A custom serializer is already registered for type " + type);
 			if (deserializersMap.containsKey(type))
-				throw new IllegalStateException("Can not register converter " + converter.getClass()
-						+ ". A custom deserializer is already registered for type "
-						+ type);
+				throw new IllegalStateException("Can not register converter "
+						+ converter.getClass()
+						+ ". A custom deserializer is already registered for type " + type);
 			serializersMap.put(type, converter);
 			deserializersMap.put(type, converter);
 		}
@@ -328,22 +368,22 @@ public final class Genson {
 			}
 			return this;
 		}
-		
+
 		public <T> Builder withSerializer(Serializer<T> serializer, Class<? extends T> type) {
 			registerSerializer(serializer, type);
 			return this;
 		}
-		
+
 		public <T> Builder withSerializer(Serializer<T> serializer, GenericType<? extends T> type) {
 			registerSerializer(serializer, type.getType());
 			return this;
 		}
-		
+
 		private <T> void registerSerializer(Serializer<T> serializer, Type type) {
 			if (serializersMap.containsKey(type))
-				throw new IllegalStateException("Can not register serializer " + serializer.getClass()
-						+ ". A custom serializer is already registered for type "
-						+ type);
+				throw new IllegalStateException("Can not register serializer "
+						+ serializer.getClass()
+						+ ". A custom serializer is already registered for type " + type);
 			serializersMap.put(type, serializer);
 		}
 
@@ -356,40 +396,65 @@ public final class Genson {
 			}
 			return this;
 		}
-		
+
 		public <T> Builder withDeserializer(Deserializer<T> deserializer, Class<? extends T> type) {
 			registerDeserializer(deserializer, type);
 			return this;
 		}
-		
-		public <T> Builder withDeserializer(Deserializer<T> deserializer, GenericType<? extends T> type) {
+
+		public <T> Builder withDeserializer(Deserializer<T> deserializer,
+				GenericType<? extends T> type) {
 			registerDeserializer(deserializer, type.getType());
 			return this;
 		}
-		
+
 		private <T> void registerDeserializer(Deserializer<T> deserializer, Type type) {
 			if (deserializersMap.containsKey(type))
-				throw new IllegalStateException("Can not register deserializer " + deserializer.getClass()
-						+ ". A custom deserializer is already registered for type "
-						+ type);
+				throw new IllegalStateException("Can not register deserializer "
+						+ deserializer.getClass()
+						+ ". A custom deserializer is already registered for type " + type);
 			deserializersMap.put(type, deserializer);
 		}
 
+		/**
+		 * Registers converter factories.
+		 * 
+		 * @param factory to register
+		 * @return a reference to this builder.
+		 */
 		public Builder withConverterFactory(Factory<? extends Converter<?>>... factory) {
 			converterFactories.addAll(Arrays.asList(factory));
 			return this;
 		}
 
+		/**
+		 * Registers serializer factories.
+		 * 
+		 * @param factory to register
+		 * @return a reference to this builder.
+		 */
 		public Builder withSerializerFactory(Factory<? extends Serializer<?>>... factory) {
 			converterFactories.addAll(Arrays.asList(factory));
 			return this;
 		}
 
+		/**
+		 * Registers deserializer factories.
+		 * 
+		 * @param factory to register
+		 * @return a reference to this builder.
+		 */
 		public Builder withDeserializerFactory(Factory<? extends Deserializer<?>>... factory) {
 			converterFactories.addAll(Arrays.asList(factory));
 			return this;
 		}
 
+		/**
+		 * If true will not serialize null values
+		 * 
+		 * @param skipNull indicates whether null values should be serialized or not.
+		 * @return a reference to this builder.
+		 */
 		public Builder setSkipNull(boolean skipNull) {
 			this.skipNull = skipNull;
 			return this;
@@ -399,6 +464,12 @@ public final class Genson {
 			return skipNull;
 		}
 
+		/**
+		 * If true \,<,>,&,= characters will be replaced by \u0027, \u003c, \u003e, \u0026, \u003d
+		 * 
+		 * @param htmlSafe indicates whether serialized data should be html safe.
+		 * @return a reference to this builder.
+		 */
 		public Builder setHtmlSafe(boolean htmlSafe) {
 			this.htmlSafe = htmlSafe;
 			return this;
@@ -408,16 +479,37 @@ public final class Genson {
 			return htmlSafe;
 		}
 
+		/**
+		 * Replaces default {@link org.genson.reflect.BeanMutatorAccessorResolver
+		 * BeanMutatorAccessorResolver} by the specified one.
+		 * 
+		 * @param resolver
+		 * @return a reference to this builder.
+		 */
 		public Builder set(BeanMutatorAccessorResolver resolver) {
 			mutatorAccessorResolver = resolver;
 			return this;
 		}
 
+		/**
+		 * Replaces default {@link org.genson.reflect.PropertyNameResolver PropertyNameResolver} by
+		 * the specified one.
+		 * 
+		 * @param resolver
+		 * @return a reference to this builder.
+		 */
 		public Builder set(PropertyNameResolver resolver) {
 			propertyNameResolver = resolver;
 			return this;
 		}
 
+		/**
+		 * Registers the specified resolvers in the order they were defined and before the standard
+		 * ones.
+		 * 
+		 * @param resolvers
+		 * @return a reference to this builder.
+		 */
 		public Builder with(PropertyNameResolver... resolvers) {
 			if (propertyNameResolver == null)
 				propertyNameResolver = createPropertyNameResolver();
@@ -425,7 +517,7 @@ public final class Genson {
 				((CompositePropertyNameResolver) propertyNameResolver).add(resolvers);
 			else
 				throw new IllegalStateException(
-						"You can not add multiple resolvers if the base resolver if not of type "
+						"You can not add multiple resolvers if the base resolver is not of type "
 								+ CompositePropertyNameResolver.class.getName());
 			return this;
 		}
@@ -434,6 +526,13 @@ public final class Genson {
 			return withClassMetadata;
 		}
 
+		/**
+		 * Indicates whether class metadata should be serialized and used during deserialization.
+		 * 
+		 * @see org.genson.convert.ClassMetadataConverter ClassMetadataConverter
+		 * @param withClassMetadata
+		 * @return a reference to this builder.
+		 */
 		public Builder setWithClassMetadata(boolean withClassMetadata) {
 			this.withClassMetadata = withClassMetadata;
 			return this;
@@ -443,6 +542,13 @@ public final class Genson {
 			return dateFormat;
 		}
 
+		/**
+		 * Specifies the data format that should be used for java.util.Date serialization and
+		 * deserialization.
+		 * 
+		 * @param dateFormat
+		 * @return a reference to this builder.
+		 */
 		public Builder setDateFormat(DateFormat dateFormat) {
 			this.dateFormat = dateFormat;
 			return this;
@@ -452,6 +558,14 @@ public final class Genson {
 			return throwExcOnNoDebugInfo;
 		}
 
+		/**
+		 * Used in conjunction with {@link #setWithDebugInfoPropertyNameResolver(boolean)}. If true
+		 * an exception will be thrown when a class has been compiled without debug informations.
+		 * 
+		 * @see org.genson.reflect.ASMCreatorParameterNameResolver ASMCreatorParameterNameResolver
+		 * @param throwExcOnNoDebugInfo
+		 * @return a reference to this builder.
+		 */
 		public Builder setThrowExceptionIfNoDebugInfo(boolean throwExcOnNoDebugInfo) {
 			this.throwExcOnNoDebugInfo = throwExcOnNoDebugInfo;
 			return this;
@@ -461,6 +575,15 @@ public final class Genson {
 			return useGettersAndSetters;
 		}
 
+		/**
+		 * If true, getters and setters would be used during serialization/deserialization in favor
+		 * of fields. If there is not getter/setter for a field then the field will be used, except
+		 * if you specified that fields should not be used with {@link #setUseFields(boolean)}. By
+		 * default getters, setters and fields will be used.
+		 * 
+		 * @param useGettersAndSetters
+		 * @return a reference to this builder.
+		 */
 		public Builder setUseGettersAndSetters(boolean useGettersAndSetters) {
 			this.useGettersAndSetters = useGettersAndSetters;
 			return this;
@@ -470,6 +593,14 @@ public final class Genson {
 			return useFields;
 		}
 
+		/**
+		 * If true, fields will be used when no getter/setter is available, except if you specified
+		 * that no getter/setter should be used with {@link #setUseGettersAndSetters(boolean)}, in
+		 * that case only fields will be used. By default getters, setters and fields will be used.
+		 * 
+		 * @param useFields
+		 * @return a reference to this builder.
+		 */
 		public Builder setUseFields(boolean useFields) {
 			this.useFields = useFields;
 			return this;
@@ -479,6 +610,12 @@ public final class Genson {
 			return withBeanViewConverter;
 		}
 
+		/**
+		 * If true {@link BeanView} mechanism will be enabled.
+		 * 
+		 * @param withBeanViewConverter
+		 * @return a reference to this builder.
+		 */
 		public Builder setWithBeanViewConverter(boolean withBeanViewConverter) {
 			this.withBeanViewConverter = withBeanViewConverter;
 			return this;
@@ -488,6 +625,14 @@ public final class Genson {
 			return useRuntimeTypeForSerialization;
 		}
 
+		/**
+		 * If true the concrete type of the serialized object will always be used. So if you have
+		 * List<Number> type it will not use the Number serializer but the one for the concrete type
+		 * of the current value.
+		 * 
+		 * @param useRuntimeTypeForSerialization
+		 * @return a reference to this builder.
+		 */
 		public Builder setUseRuntimeTypeForSerialization(boolean useRuntimeTypeForSerialization) {
 			this.useRuntimeTypeForSerialization = useRuntimeTypeForSerialization;
 			return this;
@@ -497,6 +642,16 @@ public final class Genson {
 			return withDebugInfoPropertyNameResolver;
 		}
 
+		/**
+		 * If true constructor and method arguments name will be resolved from the generated debug
+		 * symbols during compilation. It is a very powerful feature from Genson, you should have a
+		 * look at {@link org.genson.reflect.ASMCreatorParameterNameResolver
+		 * ASMCreatorParameterNameResolver}.
+		 * 
+		 * @see #setThrowExceptionIfNoDebugInfo(boolean)
+		 * @param withDebugInfoPropertyNameResolver
+		 * @return a reference to this builder.
+		 */
 		public Builder setWithDebugInfoPropertyNameResolver(
 				boolean withDebugInfoPropertyNameResolver) {
 			this.withDebugInfoPropertyNameResolver = withDebugInfoPropertyNameResolver;
@@ -507,6 +662,13 @@ public final class Genson {
 			return nullConverter;
 		}
 
+		/**
+		 * Sets the null converter that should be used to handle null object values. If the
+		 * converter is called you are guaranteed that the value is null (for both, ser and deser).
+		 * 
+		 * @param nullConverter
+		 * @return a reference to this builder.
+		 */
 		public Builder setNullConverter(Converter<Object> nullConverter) {
 			this.nullConverter = nullConverter;
 			return this;
@@ -520,6 +682,13 @@ public final class Genson {
 			return Collections.unmodifiableMap(deserializersMap);
 		}
 
+		/**
+		 * Creates an instance of Genson. You may use this method as many times you want. It wont
+		 * change the state of the builder, in sense that the returned instance will have always the
+		 * same configuration.
+		 * 
+		 * @return a new instance of Genson built for the current configuration.
+		 */
 		public Genson create() {
 			if (nullConverter == null)
 				nullConverter = new NullConverter();
@@ -556,35 +725,55 @@ public final class Genson {
 
 			return create(createConverterFactory(), withClassAliases);
 		}
-		
+
 		private void addDefaultSerializers(List<? extends Serializer<?>> serializers) {
 			if (serializers != null) {
-    			for (Serializer<?> serializer : serializers) {
-    				Type typeOfConverter = TypeUtil.typeOf(0,
-    						TypeUtil.lookupGenericType(Serializer.class, serializer.getClass()));
-    				typeOfConverter = TypeUtil.expandType(typeOfConverter, serializer.getClass());
-    				if (!serializersMap.containsKey(typeOfConverter)) serializersMap.put(typeOfConverter, serializer);
-    			}
-			}
-		}
-		
-		private void addDefaultDeserializers(List<? extends Deserializer<?>> deserializers) {
-			if (deserializers != null) {
-    			for (Deserializer<?> deserializer : deserializers) {
-    				Type typeOfConverter = TypeUtil.typeOf(0,
-    						TypeUtil.lookupGenericType(Deserializer.class, deserializer.getClass()));
-    				typeOfConverter = TypeUtil.expandType(typeOfConverter, deserializer.getClass());
-    				if (!deserializersMap.containsKey(typeOfConverter)) deserializersMap.put(typeOfConverter, deserializer);
-    			}
+				for (Serializer<?> serializer : serializers) {
+					Type typeOfConverter = TypeUtil.typeOf(0,
+							TypeUtil.lookupGenericType(Serializer.class, serializer.getClass()));
+					typeOfConverter = TypeUtil.expandType(typeOfConverter, serializer.getClass());
+					if (!serializersMap.containsKey(typeOfConverter))
+						serializersMap.put(typeOfConverter, serializer);
+				}
 			}
 		}
 
+		private void addDefaultDeserializers(List<? extends Deserializer<?>> deserializers) {
+			if (deserializers != null) {
+				for (Deserializer<?> deserializer : deserializers) {
+					Type typeOfConverter = TypeUtil
+							.typeOf(0,
+									TypeUtil.lookupGenericType(Deserializer.class,
+											deserializer.getClass()));
+					typeOfConverter = TypeUtil.expandType(typeOfConverter, deserializer.getClass());
+					if (!deserializersMap.containsKey(typeOfConverter))
+						deserializersMap.put(typeOfConverter, deserializer);
+				}
+			}
+		}
+
+		/**
+		 * In theory this allows you to extend Genson class and to instantiate it, but actually you
+		 * can not do it as Genson class is final. If some uses cases are discovered it may change.
+		 * 
+		 * @param converterFactory
+		 * @param classAliases
+		 * @return a new Genson instance.
+		 */
 		protected Genson create(Factory<Converter<?>> converterFactory,
 				Map<String, Class<?>> classAliases) {
 			return new Genson(converterFactory, getBeanDescriptorProvider(), getNullConverter(),
 					isSkipNull(), isHtmlSafe(), classAliases, isWithClassMetadata());
 		}
 
+		/**
+		 * You should override this method if you want to add custom
+		 * {@link org.genson.convert.ChainedFactory ChainedFactory} or if you need to chain them
+		 * differently.
+		 * 
+		 * @return the converter <u>factory instance that will be used to resolve
+		 *         <strong>ALL</strong> converters</u>.
+		 */
 		protected Factory<Converter<?>> createConverterFactory() {
 			ChainedFactory chainHead = new CircularClassReferenceConverterFactory();
 			ChainedFactory chainTail = chainHead;
@@ -596,8 +785,8 @@ public final class Genson {
 				chainTail = chainTail.withNext(new BeanViewConverter.BeanViewConverterFactory(
 						getBeanViewDescriptorProvider()));
 
-			chainTail.withNext(new BasicConvertersFactory(getSerializersMap(), getDeserializersMap(), getFactories(),
-					getBeanDescriptorProvider()));
+			chainTail.withNext(new BasicConvertersFactory(getSerializersMap(),
+					getDeserializersMap(), getFactories(), getBeanDescriptorProvider()));
 
 			return chainHead;
 		}
@@ -606,6 +795,18 @@ public final class Genson {
 			return new BeanMutatorAccessorResolver.StandardMutaAccessorResolver();
 		}
 
+		/**
+		 * You can override this method if you want to change the
+		 * {@link org.genson.reflect.PropertyNameResolver PropertyNameResolver} that are registered
+		 * by default. You can also simply replace the default PropertyNameResolver by setting
+		 * another one with {@link #set(PropertyNameResolver)}.
+		 * 
+		 * @return the property name resolver to be used. It should be an instance of
+		 *         {@link org.genson.reflect.PropertyNameResolver.CompositePropertyNameResolver
+		 *         PropertyNameResolver.CompositePropertyNameResolver}, otherwise you will not be
+		 *         able to add others PropertyNameResolvers using
+		 *         {@link #with(PropertyNameResolver...)} method.
+		 */
 		protected PropertyNameResolver createPropertyNameResolver() {
 			List<PropertyNameResolver> resolvers = new ArrayList<PropertyNameResolver>();
 			resolvers.add(new PropertyNameResolver.AnnotationPropertyNameResolver());
@@ -616,6 +817,12 @@ public final class Genson {
 			return new PropertyNameResolver.CompositePropertyNameResolver(resolvers);
 		}
 
+		/**
+		 * You can override this methods if you want to change the default converters (remove some,
+		 * change the order, etc).
+		 * 
+		 * @return the default converters list, must be not null.
+		 */
 		protected List<Converter<?>> getDefaultConverters() {
 			List<Converter<?>> converters = new ArrayList<Converter<?>>();
 			converters.add(DefaultConverters.StringConverter.instance);
@@ -628,6 +835,11 @@ public final class Genson {
 			return converters;
 		}
 
+		/**
+		 * Override this method if you want to change the default converter factories.
+		 * 
+		 * @param factories list, is not null.
+		 */
 		protected void addDefaultConverterFactories(List<Factory<? extends Converter<?>>> factories) {
 			factories.add(DefaultConverters.ArrayConverterFactory.instance);
 			factories.add(DefaultConverters.CollectionConverterFactory.instance);
@@ -653,28 +865,36 @@ public final class Genson {
 				List<Factory<? extends Deserializer<?>>> deserializerFactories) {
 		}
 
+		/**
+		 * Creates the standard BeanDescriptorProvider that will be used to provide
+		 * {@link org.genson.reflect.BeanDescriptor BeanDescriptor} instances for
+		 * serialization/deserialization of all types that couldn't be handled by standard and
+		 * custom converters and converter factories.
+		 * 
+		 * @return the BeanDescriptorProvider instance.
+		 */
 		protected BeanDescriptorProvider createBeanDescriptorProvider() {
 			return new BaseBeanDescriptorProvider(getMutatorAccessorResolver(),
 					getPropertyNameResolver(), isUseGettersAndSetters(), isUseFields());
 		}
 
-		protected PropertyNameResolver getPropertyNameResolver() {
+		protected final PropertyNameResolver getPropertyNameResolver() {
 			return propertyNameResolver;
 		}
 
-		protected BeanMutatorAccessorResolver getMutatorAccessorResolver() {
+		protected final BeanMutatorAccessorResolver getMutatorAccessorResolver() {
 			return mutatorAccessorResolver;
 		}
 
-		protected BeanDescriptorProvider getBeanDescriptorProvider() {
+		protected final BeanDescriptorProvider getBeanDescriptorProvider() {
 			return beanDescriptorProvider;
 		}
 
-		protected BeanViewDescriptorProvider getBeanViewDescriptorProvider() {
+		protected final BeanViewDescriptorProvider getBeanViewDescriptorProvider() {
 			return beanViewDescriptorProvider;
 		}
 
-		public List<Factory<?>> getFactories() {
+		public final List<Factory<?>> getFactories() {
 			return converterFactories;
 		}
 	}

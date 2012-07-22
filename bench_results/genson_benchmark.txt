@@ -12,11 +12,11 @@ based on big objects (large numbers, quite big lists, but no long string)
  Gson avg serialization time=0.61916 ms
 
  ======= Deserialization Bench ======
- Genson global deserialization time=23.663 s
- Genson avg deserialization time=0.47326 ms
+ Genson global deserialization time=22.922 s
+ Genson avg deserialization time=0.45844 ms
 
- Jackson global deserialization time=27.131 s
- Jackson avg deserialization time=0.54262 ms
+ Jackson global deserialization time=27.463 s
+ Jackson avg deserialization time=0.54926 ms
 
- Gson global deserialization time=39.17 s
- Gson avg deserialization time=0.7834 ms
+ Gson global deserialization time=38.987 s
+ Gson avg deserialization time=0.77972 ms

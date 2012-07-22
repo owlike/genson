@@ -103,7 +103,7 @@ public class GensonBenchmark {
 	public void benchSerialization() throws JsonGenerationException, JsonMappingException,
 			IOException, TransformationException {
 		// warm up
-		for (int i = 0; i < 15; i++) {
+		for (int i = 0; i < 35; i++) {
 			om.writeValueAsString(map);
 			genson.serialize(map);
 			gson.toJson(map);
@@ -149,7 +149,7 @@ public class GensonBenchmark {
 	public void benchDeserialization() throws JsonGenerationException, JsonMappingException,
 			IOException, TransformationException {
 		// warm up
-		for (int i = 0; i < 15; i++) {
+		for (int i = 0; i < 35; i++) {
 			om.readValue(json, ComplexObject[].class);
 			gson.fromJson(json, ComplexObject[].class);
 			genson.deserialize(json, ComplexObject[].class);

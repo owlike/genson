@@ -64,7 +64,7 @@ public class JsonSerDeserSymetricTest {
 		b.b = "bb";
 		Genson genson = new Genson.Builder().setWithClassMetadata(true).create();
 		String json = genson.serialize(b);
-		B b2 = (B) genson.deserialize(json, A.class);
+		B b2 = (B) genson.deserialize(json, Object.class);
 		assertEquals(b.a, b2.a);
 		assertEquals(b.b, b2.b);
 	}

@@ -29,7 +29,6 @@ public class JsonWriter implements ObjectWriter {
 		HTML_SAFE_REPLACEMENT_CHARS['>'] = "\\u003e";
 		HTML_SAFE_REPLACEMENT_CHARS['&'] = "\\u0026";
 		HTML_SAFE_REPLACEMENT_CHARS['='] = "\\u003d";
-		HTML_SAFE_REPLACEMENT_CHARS['\''] = "\\u0027";
 	}
 
 	private final static char[] _INT_TO_CHARARRAY = new char[10];

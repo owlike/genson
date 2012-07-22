@@ -25,7 +25,7 @@
 			<name>Eugen Cepoi</name>
 			<email>cepoi.eugen@gmail.com</email>
 			<roles>
-				<role>Project creator</role>
+				<role>Project owner</role>
 			</roles>
 		</developer>
 	</developers>
@@ -122,29 +122,38 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>org.sonatype.plugins</groupId>
-				<artifactId>jarjar-maven-plugin</artifactId>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>1.7.1</version>
 				<executions>
 					<execution>
 						<phase>package</phase>
 						<goals>
-							<goal>jarjar</goal>
+							<goal>shade</goal>
 						</goals>
 						<configuration>
-							<skipManifest>false</skipManifest>
-							<includes>
-								<include>asm:asm</include>
-							</includes>
-							<rules>
-								<rule>
-									<pattern>org.objectweb.asm.**</pattern>
-									<result>org.genson.internal.asm.@1</result>
-								</rule>
-							</rules>
+							<minimizeJar>true</minimizeJar>
+							<shadedArtifactAttached>false</shadedArtifactAttached>
+							<createDependencyReducedPom>true</createDependencyReducedPom>
+							<filters>
+								<filter>
+									<includes>
+										<include>org/objectweb/asm</include>
+									</includes>
+								</filter>
+							</filters>
+							<relocations>
+								<relocation>
+									<pattern>org.objectweb.asm</pattern>
+									<shadedPattern>org.genson.internal.asm</shadedPattern>
+								</relocation>
+							</relocations>
+							<shadedGroupFilter>asm</shadedGroupFilter>
 						</configuration>
 					</execution>
 				</executions>
 			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>

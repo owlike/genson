@@ -550,7 +550,6 @@ public final class DefaultConverters {
 		private UntypedConverterFactory() {
 		}
 
-		@HandleClassMetadata
 		private final static class UntypedConverter implements Converter<Object> {
 			final static UntypedConverter instance = new UntypedConverter();
 
