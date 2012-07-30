@@ -11,9 +11,12 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class BeanViewTest {
-	Genson genson = new Genson.Builder().setWithBeanViewConverter(true)
-			.setWithDebugInfoPropertyNameResolver(true).create();
-
+	Genson genson = new Genson.Builder()
+			.setWithBeanViewConverter(true)
+			.setWithDebugInfoPropertyNameResolver(true)
+			.set(new BeanMutatorAccessorResolver.StandardMutaAccessorResolver(VisibilityFilter.ALL,
+					VisibilityFilter.PACKAGE_PUBLIC, VisibilityFilter.PACKAGE_PUBLIC)).create();
+	
 	@Test
 	public void testSerializeWithInheritedView() throws TransformationException, IOException {
 		MyClass c = new MyClass();

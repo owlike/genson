@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.genson.Context;
 import org.genson.Converter;
+import org.genson.Wrapper;
 import org.genson.Genson;
 import org.genson.TransformationException;
 import org.genson.stream.ObjectReader;
@@ -19,7 +20,7 @@ import org.genson.stream.ObjectWriter;
  *
  */
 public class CircularClassReferenceConverterFactory extends ChainedFactory {
-	private final static class CircularConverter<T> extends ConverterDecorator<T> {
+	private final static class CircularConverter<T> extends Wrapper<Converter<T>> implements Converter<T> {
 		protected CircularConverter() {
 			super();
 		}

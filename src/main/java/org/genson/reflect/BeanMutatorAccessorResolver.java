@@ -75,7 +75,7 @@ public interface BeanMutatorAccessorResolver {
 		 * {@link VisibilityFilter#PACKAGE_PUBLIC} visibility for methods and creators.
 		 */
 		public StandardMutaAccessorResolver() {
-			this(VisibilityFilter.DEFAULT, VisibilityFilter.PACKAGE_PUBLIC,
+			this(VisibilityFilter.PACKAGE_PUBLIC, VisibilityFilter.PACKAGE_PUBLIC,
 					VisibilityFilter.PACKAGE_PUBLIC);
 		}
 

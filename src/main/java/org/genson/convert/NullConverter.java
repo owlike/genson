@@ -5,6 +5,7 @@ import java.lang.reflect.Type;
 
 import org.genson.Context;
 import org.genson.Converter;
+import org.genson.Wrapper;
 import org.genson.Genson;
 import org.genson.TransformationException;
 import org.genson.annotation.HandleNull;
@@ -25,12 +26,12 @@ public class NullConverter implements Converter<Object> {
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
 		protected Converter<?> create(Type type, Genson genson, Converter<?> nextConverter) {
-			return ConverterDecorator.toAnnotatedElement(nextConverter).isAnnotationPresent(HandleNull.class) ? nextConverter
+			return Wrapper.toAnnotatedElement(nextConverter).isAnnotationPresent(HandleNull.class) ? nextConverter
 					: new NullConverterWrapper(genson.getNullConverter(), nextConverter);
 		}
 	}
 
-	public static class NullConverterWrapper<T> extends ConverterDecorator<T> {
+	public static class NullConverterWrapper<T> extends Wrapper<Converter<T>> implements Converter<T> {
 		private final Converter<Object> nullConverter;
 
 		public NullConverterWrapper(Converter<Object> nullConverter, Converter<T> converter) {

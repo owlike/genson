@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.genson.Context;
 import org.genson.Converter;
+import org.genson.Wrapper;
 import org.genson.Deserializer;
 import org.genson.Factory;
 import org.genson.Genson;
@@ -110,7 +111,7 @@ public class BasicConvertersFactory implements Factory<Converter<?>> {
 		return (T) beanDescriptorProvider.provide(TypeUtil.getRawClass(withParameterType), genson);
 	}
 
-	private class DelegatedConverter<T> extends ConverterDecorator<T> {
+	private class DelegatedConverter<T> extends Wrapper<Converter<T>> implements Converter<T>  {
 		private final Serializer<T> serializer;
 		private final Deserializer<T> deserializer;
 

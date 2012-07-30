@@ -147,6 +147,16 @@ public final class Genson {
 		writer.flush();
 		return writer.unwrap().toString();
 	}
+	
+	public <T> String serialize(T o, GenericType<T> type) throws TransformationException, IOException {
+		JsonWriter writer = new JsonWriter(new StringWriter(), skipNull, htmlSafe);
+		if (o == null)
+			nullConverter.serialize(null, writer, null);
+		else
+			serialize(o, type.getType(), writer, new Context(this));
+		writer.flush();
+		return writer.unwrap().toString();
+	}
 
 	public <T> String serialize(T o, Class<? extends BeanView<?>>... withViews)
 			throws TransformationException, IOException {
@@ -875,7 +885,7 @@ public final class Genson {
 		 */
 		protected BeanDescriptorProvider createBeanDescriptorProvider() {
 			return new BaseBeanDescriptorProvider(getMutatorAccessorResolver(),
-					getPropertyNameResolver(), isUseGettersAndSetters(), isUseFields());
+					getPropertyNameResolver(), isUseGettersAndSetters(), isUseFields(), true);
 		}
 
 		protected final PropertyNameResolver getPropertyNameResolver() {

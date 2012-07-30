@@ -44,8 +44,6 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 		provideBeanPropertyAccessors(ofClass, accessorsMap, genson);
 		provideBeanPropertyMutators(ofClass, mutatorsMap, genson);
 
-		checkAndUpdate(creators);
-
 		List<PropertyAccessor<T, ?>> accessors = new ArrayList<PropertyAccessor<T, ?>>(
 				accessorsMap.size());
 		for (Map.Entry<String, LinkedList<PropertyAccessor<T, ?>>> entry : accessorsMap.entrySet()) {
@@ -66,7 +64,9 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 
 		mergeMutatorsWithCreatorProperties(mutators, creators);
 
-		return create(ofClass, creators, accessors, mutators);
+		BeanCreator<T> ctr = checkAndMerge(ofClass, creators);
+
+		return create(ofClass, ctr, accessors, mutators);
 	}
 
 	/**
@@ -80,9 +80,9 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 	 * @return an instance of a BeanDescriptor.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	protected <T> BeanDescriptor<T> create(Class<?> ofClass, List<BeanCreator<T>> creators,
+	protected <T> BeanDescriptor<T> create(Class<?> ofClass, BeanCreator<T> creator,
 			List<PropertyAccessor<T, ?>> accessors, Map<String, PropertyMutator<T, ?>> mutators) {
-		return new BeanDescriptor(ofClass, accessors, mutators, creators);
+		return new BeanDescriptor(ofClass, accessors, mutators, creator);
 	}
 
 	/**
@@ -116,12 +116,14 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 
 	/**
 	 * Implementations of this method can do some additional checks on the creators validity or do
-	 * any other operations related to creators.
+	 * any other operations related to creators. This method must merge all creators into a single
+	 * one.
 	 * 
 	 * @param creators
-	 * @return
+	 * @return the creator that will be used by the BeanDescriptor
 	 */
-	protected abstract <T> void checkAndUpdate(List<BeanCreator<T>> creators);
+	protected abstract <T> BeanCreator<T> checkAndMerge(Class<?> ofClass,
+			List<BeanCreator<T>> creators);
 
 	/**
 	 * Implementations are supposed to merge the {@link PropertyMutator}s from mutators list into a

@@ -9,6 +9,7 @@ import org.genson.Converter;
 import org.genson.Factory;
 import org.genson.Genson;
 import org.genson.TransformationException;
+import org.genson.annotation.Creator;
 import org.genson.annotation.JsonIgnore;
 import org.genson.annotation.JsonProperty;
 import org.genson.convert.BasicConvertersFactory;
@@ -19,7 +20,8 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class BeanDescriptorTest {
-
+	private Genson genson = new Genson();
+	
 	private static class ThatObject {
 		@SuppressWarnings("unused")
 		String aString;
@@ -72,7 +74,7 @@ public class BeanDescriptorTest {
 	public void genericTypeTest() throws TransformationException, IOException {
 		BaseBeanDescriptorProvider provider = new BaseBeanDescriptorProvider(
 				new BeanMutatorAccessorResolver.StandardMutaAccessorResolver(),
-				new PropertyNameResolver.ConventionalBeanPropertyNameResolver(), true, true);
+				new PropertyNameResolver.ConventionalBeanPropertyNameResolver(), true, true, true);
 
 		BeanDescriptor<SpecilizedClass> bd = provider.provideBeanDescriptor(SpecilizedClass.class,
 				new Genson());
@@ -124,6 +126,52 @@ public class BeanDescriptorTest {
 		return null;
 	}
 
+	@Test public void testOneCreatorPerClass() {
+		try {
+			genson.provideConverter(MultipleCreator.class);
+			fail();
+		} catch (Exception e) {
+		}
+	}
+	
+	@Test public void testUseExplicitMethodCtr() throws TransformationException, IOException {
+		genson.deserialize("{}", ForceMethodCreator.class);
+		assertTrue(ForceMethodCreator.usedMethod);
+	}
+	
+	@Test public void testUseExplicitConstructorCtr() throws TransformationException, IOException {
+		genson.deserialize("{}", ForceConstructorCreator.class);
+		assertTrue(ForceConstructorCreator.usedCtr);
+	}
+	
+	static class ForceMethodCreator {
+		public static boolean usedMethod = false;
+		ForceMethodCreator() {
+		}
+		
+		@Creator public static ForceMethodCreator create() {
+			usedMethod = true; 
+			return new ForceMethodCreator();
+		}
+	}
+	
+	static class ForceConstructorCreator {
+		public static boolean usedCtr = false;
+		ForceConstructorCreator() {
+		}
+		
+		@Creator ForceConstructorCreator(Integer iii) {
+			usedCtr = true;
+		}
+	}
+	
+	static class MultipleCreator {
+		@Creator MultipleCreator() {} 
+		@Creator public static MultipleCreator create() {
+			return null;
+		}
+	}
+	
 	public static class B {
 		public String v;
 	}

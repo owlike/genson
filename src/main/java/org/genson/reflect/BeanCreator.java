@@ -1,6 +1,7 @@
 package org.genson.reflect;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -12,8 +13,9 @@ import java.util.Map;
 
 import org.genson.Deserializer;
 import org.genson.TransformationException;
+import org.genson.Wrapper;
 
-public abstract class BeanCreator<T> implements Comparable<BeanCreator<T>> {
+public abstract class BeanCreator<T> extends Wrapper<AnnotatedElement> implements Comparable<BeanCreator<T>> {
 	// The type of object it can create
 	protected final Class<T> ofClass;
 	protected final Map<String, BeanCreatorProperty<T, ?>> parameters;
@@ -65,6 +67,7 @@ public abstract class BeanCreator<T> implements Comparable<BeanCreator<T>> {
 			if (!constructor.isAccessible()) {
 				constructor.setAccessible(true);
 			}
+			decorate(constructor);
 		}
 
 		public T create(Object... args) throws TransformationException {
@@ -107,6 +110,7 @@ public abstract class BeanCreator<T> implements Comparable<BeanCreator<T>> {
 			if (!_creator.isAccessible()) {
 				_creator.setAccessible(true);
 			}
+			decorate(_creator);
 		}
 
 		public T create(Object... args) throws TransformationException {

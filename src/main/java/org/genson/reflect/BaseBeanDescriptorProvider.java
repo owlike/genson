@@ -6,6 +6,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,6 +15,7 @@ import java.util.Map;
 
 import org.genson.Converter;
 import org.genson.Genson;
+import org.genson.annotation.Creator;
 import org.genson.reflect.BeanCreator.BeanCreatorProperty;
 import static org.genson.Trilean.*;
 
@@ -27,13 +30,22 @@ import static org.genson.Trilean.*;
  * 
  */
 public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
+
+	private final static Comparator<BeanCreator<?>> _beanCreatorsComparator = new Comparator<BeanCreator<?>>() {
+		@Override
+		public int compare(BeanCreator<?> o1, BeanCreator<?> o2) {
+			return o1.parameters.size() - o2.parameters.size();
+		}
+	};
+	
 	protected final BeanMutatorAccessorResolver mutatorAccessorResolver;
 	protected final PropertyNameResolver nameResolver;
 	protected final boolean useGettersAndSetters;
 	protected final boolean useFields;
+	protected final boolean favorEmptyCreators;
 
 	public BaseBeanDescriptorProvider(BeanMutatorAccessorResolver mutatorAccessorResolver,
-			PropertyNameResolver nameResolver, boolean useGettersAndSetters, boolean useFields) {
+			PropertyNameResolver nameResolver, boolean useGettersAndSetters, boolean useFields, boolean favorEmptyCreators) {
 		super();
 		if (mutatorAccessorResolver == null)
 			throw new IllegalArgumentException("mutatorAccessorResolver must be not null!");
@@ -47,6 +59,7 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 		if (!useFields && !useGettersAndSetters)
 			throw new IllegalArgumentException(
 					"You must allow at least one mode: with fields or methods.");
+		this.favorEmptyCreators = favorEmptyCreators;
 	}
 
 	@Override
@@ -285,9 +298,47 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 	}
 
 	@Override
-	protected <T> void checkAndUpdate(List<BeanCreator<T>> creators) {
-		// if ( creators == null || creators.isEmpty() ) throw new
-		// IllegalStateException("No valid bean creator found!");
+	protected <T> BeanCreator<T> checkAndMerge(Class<?> ofClass, List<BeanCreator<T>> creators) {
+		// hum maybe do not check this case as we may have class that will only be serialized so
+		// they do not need a ctr?
+		// if (creators == null || creators.isEmpty())
+		// throw new IllegalStateException("Could not create BeanDescriptor for type "
+		// + ofClass.getName() + ", no creator has been found.");
+		if (creators == null || creators.isEmpty()) return null;
+		
+		// now lets do the merge
+		if (favorEmptyCreators) {
+			Collections.sort(creators, _beanCreatorsComparator);
+		}
+		
+		boolean hasCreatorAnnotation = false;
+		BeanCreator<T> creator = null;
+		
+		// first lets do some checks
+		for ( int i = 0; i < creators.size(); i++ ) {
+			BeanCreator<T> ctr = creators.get(i);
+			if (ctr.isAnnotationPresent(Creator.class)) {
+				if (!hasCreatorAnnotation)
+					hasCreatorAnnotation = true;
+				else
+					_throwCouldCreateBeanDescriptor(ofClass,
+							" only one @Creator annotation per class is allowed.");
+			}
+		}
+		
+		if (hasCreatorAnnotation) {
+			for (BeanCreator<T> ctr : creators)
+				if (ctr.isAnnotationPresent(Creator.class)) return ctr;
+		} else {
+			creator = creators.get(0);
+		}
+		
+		return creator;
+	}
+
+	protected void _throwCouldCreateBeanDescriptor(Class<?> ofClass, String reason) {
+		throw new IllegalStateException("Could not create BeanDescriptor for type "
+				+ ofClass.getName() + "," + reason);
 	}
 
 	@Override
@@ -348,6 +399,8 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 					BeanCreatorProperty<T, ?> ctrProperty = (BeanCreatorProperty<T, ?>) entry
 							.getValue();
 					mutators.put(entry.getKey(), ctrProperty);
+					
+					// TODO we should maybe remove the other creators ?
 				}
 			}
 		}

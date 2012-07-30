@@ -37,7 +37,7 @@ public class BeanViewDescriptorProvider extends BaseBeanDescriptorProvider {
 
 	public BeanViewDescriptorProvider(BeanMutatorAccessorResolver mutatorAccessorResolver,
 			PropertyNameResolver nameResolver) {
-		super(mutatorAccessorResolver, nameResolver, true, false);
+		super(mutatorAccessorResolver, nameResolver, true, false, true);
 	}
 
 	@SuppressWarnings("unchecked")

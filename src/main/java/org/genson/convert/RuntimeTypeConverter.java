@@ -5,6 +5,7 @@ import java.lang.reflect.Type;
 
 import org.genson.Context;
 import org.genson.Converter;
+import org.genson.Wrapper;
 import org.genson.Genson;
 import org.genson.TransformationException;
 import org.genson.reflect.TypeUtil;
@@ -18,7 +19,7 @@ import org.genson.stream.ObjectWriter;
  * 
  * @param <T> the type this converter is handling.
  */
-public class RuntimeTypeConverter<T> extends ConverterDecorator<T> {
+public class RuntimeTypeConverter<T> extends Wrapper<Converter<T>> implements Converter<T> {
 	public final static ChainedFactory runtimeTypeConverterFactory = new ChainedFactory() {
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override

@@ -231,32 +231,33 @@ public class JsonDeserializationTest {
 
 	@Test
 	public void testDeserializeWithConstructorAndFieldsAndSetters() throws TransformationException, IOException {
-		String json = "{\"p0\":0,\"p1\":1,\"p2\":2,\"shouldSkipIt\":55}";
+		String json = "{\"p0\":0,\"p1\":1,\"p2\":2,\"shouldSkipIt\":55, \"nameInJson\": 3}";
 		ClassWithConstructorFieldsAndGetters c = genson.deserialize(json,
 				ClassWithConstructorFieldsAndGetters.class);
-		assertEquals(c.constructorCalled, 2);
 		assertEquals(c.p0, new Integer(0));
 		assertEquals(c.p1, new Integer(1));
 		assertEquals(c.p2, new Integer(2));
+		assertTrue(c.constructorCalled);
 	}
 
 	@Test
 	public void testDeserializeWithConstructorAndMissingFields() throws TransformationException, IOException {
-		String json = "{\"p0\":0,\"p1\":1}";
+		String json = "{\"p0\":0,\"p1\":1, \"nameInJson\": 3}";
 		ClassWithConstructorFieldsAndGetters c = genson.deserialize(json,
 				ClassWithConstructorFieldsAndGetters.class);
-		assertEquals(c.p0, new Integer(0));
-		assertEquals(c.p1, new Integer(1));
-		assertEquals(c.p2, null);
-		assertEquals(c.constructorCalled, 1);
+		assertTrue(c.constructorCalled);
+		assertEquals(new Integer(0), c.p0);
+		assertEquals(new Integer(1), c.p1);
+		assertEquals(null, c.p2);
+		assertEquals(new Integer(3), c.hidden);
 	}
-
+	
 	@Test
 	public void testDeserializeWithConstructorMixedAnnotation() throws TransformationException, IOException {
 		String json = "{\"p0\":0,\"p1\":1,\"p2\":2,\"shouldSkipIt\":55,   \"nameInJson\":\"125\"}";
 		ClassWithConstructorFieldsAndGetters c = genson.deserialize(json,
 				ClassWithConstructorFieldsAndGetters.class);
-		assertEquals(3, c.constructorCalled);
+		assertTrue(c.constructorCalled);
 		assertEquals(c.p0, new Integer(0));
 		assertEquals(c.p1, new Integer(1));
 		assertEquals(c.p2, new Integer(2));
@@ -275,15 +276,16 @@ public class JsonDeserializationTest {
 	@Test public void testDeserealizeIntoExistingBean() throws IOException, TransformationException {
 		@SuppressWarnings("unchecked")
 		BeanDescriptor<ClassWithConstructorFieldsAndGetters> desc = (BeanDescriptor<ClassWithConstructorFieldsAndGetters>) genson.getBeanDescriptorFactory().provide(ClassWithConstructorFieldsAndGetters.class, genson);
-		ClassWithConstructorFieldsAndGetters c = new ClassWithConstructorFieldsAndGetters(1) {
+		ClassWithConstructorFieldsAndGetters c = new ClassWithConstructorFieldsAndGetters(1, 2, "3") {
 			@Override
 			public void setP2(Integer p2) {
 				this.p2 = p2;
 			}
 		};
+		c.constructorCalled = false;
 		String json = "{\"p0\":0,\"p1\":1,\"p2\":2,\"shouldSkipIt\":55,   \"nameInJson\":\"125\"}";
 		desc.deserialize(c, new JsonReader(json), new Context(genson));
-		
+		assertFalse(c.constructorCalled);
 		assertEquals(c.p0, new Integer(0));
 		assertEquals(c.p1, new Integer(1));
 		assertEquals(c.p2, new Integer(2));
@@ -300,24 +302,11 @@ public class JsonDeserializationTest {
 		protected Integer p2;
 		transient final Integer hidden;
 		// should not be serialized
-		public final transient int constructorCalled;
-
-		public ClassWithConstructorFieldsAndGetters(Integer p0, Integer p2) {
-			constructorCalled = 2;
-			this.p0 = p0;
-			this.p2 = p2;
-			this.hidden = null;
-		}
-
-		public ClassWithConstructorFieldsAndGetters(Integer p0) {
-			constructorCalled = 1;
-			this.p0 = p0;
-			this.hidden = null;
-		}
+		public transient boolean constructorCalled = false;
 
 		public ClassWithConstructorFieldsAndGetters(Integer p0, Integer p2,
 				@JsonProperty(value = "nameInJson") String dontCareOfTheName) {
-			constructorCalled = 3;
+			constructorCalled = true;
 			this.p0 = p0;
 			this.p2 = p2;
 			this.hidden = Integer.parseInt(dontCareOfTheName);

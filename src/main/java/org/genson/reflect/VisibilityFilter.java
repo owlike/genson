@@ -39,7 +39,7 @@ public final class VisibilityFilter {
 	public final static VisibilityFilter PROTECTED = new VisibilityFilter(Modifier.TRANSIENT,
 			Modifier.NATIVE, Modifier.PRIVATE);
 	public final static VisibilityFilter PACKAGE_PUBLIC = new VisibilityFilter(Modifier.TRANSIENT,
-			Modifier.NATIVE, Modifier.PRIVATE, Modifier.PRIVATE);
+			Modifier.NATIVE, Modifier.PRIVATE, Modifier.PROTECTED);
 
 	private final static int JAVA_MODIFIERS = Modifier.PUBLIC | Modifier.PROTECTED
 			| Modifier.PRIVATE | Modifier.ABSTRACT | Modifier.STATIC | Modifier.FINAL

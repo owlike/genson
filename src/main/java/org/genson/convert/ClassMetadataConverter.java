@@ -5,6 +5,7 @@ import java.lang.reflect.Type;
 
 import org.genson.Context;
 import org.genson.Converter;
+import org.genson.Wrapper;
 import org.genson.Genson;
 import org.genson.TransformationException;
 import org.genson.annotation.HandleClassMetadata;
@@ -45,7 +46,7 @@ import org.genson.stream.ValueType;
  * 
  * @param <T>
  */
-public class ClassMetadataConverter<T> extends ConverterDecorator<T> {
+public class ClassMetadataConverter<T> extends Wrapper<Converter<T>> implements Converter<T> {
 	public static class ClassMetadataConverterFactory extends ChainedFactory {
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
@@ -56,7 +57,7 @@ public class ClassMetadataConverter<T> extends ConverterDecorator<T> {
 								+ "as ClassMetadataConverter can not be the last converter in the chain!");
 
 			if (genson.isWithClassMetadata()
-					&& !ConverterDecorator.toAnnotatedElement(nextConverter).isAnnotationPresent(
+					&& !Wrapper.toAnnotatedElement(nextConverter).isAnnotationPresent(
 							HandleClassMetadata.class))
 				return new ClassMetadataConverter(TypeUtil.getRawClass(type), nextConverter);
 			else

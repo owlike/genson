@@ -22,7 +22,7 @@ import org.genson.Genson;
  * decorated converter that adds null handling support.
  * 
  * <pre>
- * public class NullConverter extends ConverterDecorator&lt;Converter&lt;Object&gt;&gt; implements
+ * public class NullConverter extends Wrapper&lt;Converter&lt;Object&gt;&gt; implements
  * 		Converter&lt;Object&gt; {
  * 	private final Converter&lt;Object&gt; converter;
  * 
@@ -63,16 +63,16 @@ import org.genson.Genson;
  * </pre>
  * 
  * As you can see it is pretty simple but also powerful. Note that our NullConverter extends
- * ConverterDecorator class. When you encapsulate converters you should extend ConverterDecorator
+ * Wrapper class. When you encapsulate converters you should extend Wrapper
  * class this way Genson can access the class information of wrapped converters. Imagine for example
  * that you put some annotation on converter A and wrap it in converter B, now if you wrap B in C
- * you wont be able to get class information of A (ex: its annotations). ConverterDecorator class
+ * you wont be able to get class information of A (ex: its annotations). Wrapper class
  * allows to merge class information of current implementation and the wrapped one.
  * 
  * 
  * @see org.genson.convert.NullConverter NullConverter
  * @see org.genson.convert.BasicConvertersFactory BasicConvertersFactory
- * @see org.genson.convert.ConverterDecorator ConverterDecorator
+ * @see org.genson.Wrapper Wrapper
  * 
  * @author eugen
  * 

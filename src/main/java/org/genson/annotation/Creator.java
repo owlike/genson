@@ -32,7 +32,7 @@ import java.lang.annotation.Target;
  * @author eugen
  * 
  */
-@Target({ ElementType.METHOD, ElementType.PARAMETER, ElementType.FIELD })
+@Target({ ElementType.METHOD, ElementType.CONSTRUCTOR })
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented

@@ -19,13 +19,11 @@ import org.genson.stream.ObjectWriter;
 public class BeanDescriptor<T> implements Converter<T> {
 
 	final Class<T> ofClass;
-	final List<BeanCreator<T>> _creators;
 	final Map<String, PropertyMutator<T, ?>> mutableProperties;
 	final List<PropertyAccessor<T, ?>> accessibleProperties;
 
-	private final Map<List<String>, BeanCreator<T>> namesCreatorCache;
-	private final BeanCreator<T> _emptyCtr;
-	private final boolean _noCtr;
+	private final BeanCreator<T> _creator;
+	private final boolean _noArgCtr;
 
 	private final static Comparator<BeanProperty<?>> _readablePropsComparator = new Comparator<BeanProperty<?>>() {
 		@Override
@@ -43,33 +41,33 @@ public class BeanDescriptor<T> implements Converter<T> {
 	// };
 
 	public BeanDescriptor(Class<T> forClass, List<PropertyAccessor<T, ?>> readableBps,
-			Map<String, PropertyMutator<T, ?>> writableBps, List<BeanCreator<T>> creators) {
+			Map<String, PropertyMutator<T, ?>> writableBps, BeanCreator<T> creator) {
 		this.ofClass = forClass;
-		this._creators = creators;
-		this._noCtr = _creators.isEmpty();
-		namesCreatorCache = new HashMap<List<String>, BeanCreator<T>>();
+		this._creator = creator;
 		mutableProperties = writableBps;
 
-		Collections.sort(creators);
 		Collections.sort(readableBps, _readablePropsComparator);
 
 		accessibleProperties = Collections.unmodifiableList(readableBps);
-		if (_creators.size() > 0 && _creators.get(0).parameters.size() == 0) {
-			// lets look if all properties have a field or method mutator, this means that we can
-			// use the no arg beancreator (constructor or method) and still set all the properties
-			boolean ok = true;
-			// we look if there exists property that is only present as ctr arg, if so we will have
-			for (PropertyMutator<T, ?> muta : mutableProperties.values())
-				if (muta instanceof BeanCreatorProperty) {
-					ok = false;
-					break;
-				}
-			if (ok)
-				_emptyCtr = _creators.get(0);
-			else
-				_emptyCtr = null;
-		} else
-			_emptyCtr = null;
+		if (_creator != null)
+			_noArgCtr = _creator.parameters.size() == 0;
+		else _noArgCtr = false;
+		// if (_creators.size() > 0 && _creators.get(0).parameters.size() == 0) {
+		// // lets look if all properties have a field or method mutator, this means that we can
+		// // use the no arg beancreator (constructor or method) and still set all the properties
+		// boolean ok = true;
+		// // we look if there exists property that is only present as ctr arg, if so we will have
+		// for (PropertyMutator<T, ?> muta : mutableProperties.values())
+		// if (muta instanceof BeanCreatorProperty) {
+		// ok = false;
+		// break;
+		// }
+		// if (ok)
+		// _emptyCtr = _creators.get(0);
+		// else
+		// _emptyCtr = null;
+		// } else
+		// _emptyCtr = null;
 	}
 
 	public boolean isReadable() {
@@ -77,12 +75,12 @@ public class BeanDescriptor<T> implements Converter<T> {
 	}
 
 	public boolean isWritable() {
-		return !_creators.isEmpty();
+		return _creator != null;
 	}
 
 	@Override
-	public void serialize(T obj, ObjectWriter writer, Context ctx)
-			throws TransformationException, IOException {
+	public void serialize(T obj, ObjectWriter writer, Context ctx) throws TransformationException,
+			IOException {
 		writer.beginObject();
 		for (PropertyAccessor<T, ?> accessor : accessibleProperties) {
 			accessor.serialize(obj, writer, ctx);
@@ -91,12 +89,12 @@ public class BeanDescriptor<T> implements Converter<T> {
 	}
 
 	@Override
-	public T deserialize(ObjectReader reader, Context ctx)
-			throws TransformationException, IOException {
+	public T deserialize(ObjectReader reader, Context ctx) throws TransformationException,
+			IOException {
 		T bean = null;
 		// optimization for default ctr
-		if (_emptyCtr != null) {
-			bean = _emptyCtr.create();
+		if (_noArgCtr) {
+			bean = _creator.create();
 			deserialize(bean, reader, ctx);
 		} else
 			bean = _deserWithCtrArgs(reader, ctx);
@@ -105,10 +103,6 @@ public class BeanDescriptor<T> implements Converter<T> {
 
 	public void deserialize(T into, ObjectReader reader, Context ctx) throws IOException,
 			TransformationException {
-		if (_noCtr)
-			throw new TransformationRuntimeException("Can not create BeanDescriptor for " + ofClass
-					+ ", the creators list is empty!");
-
 		reader.beginObject();
 		for (; reader.hasNext();) {
 			reader.next();
@@ -124,12 +118,8 @@ public class BeanDescriptor<T> implements Converter<T> {
 		reader.endObject();
 	}
 
-	protected T _deserWithCtrArgs(ObjectReader reader, Context ctx)
-			throws TransformationException, IOException {
-		if (_noCtr)
-			throw new TransformationRuntimeException("Can not create BeanDescriptor for " + ofClass
-					+ ", the creators list is empty!");
-
+	protected T _deserWithCtrArgs(ObjectReader reader, Context ctx) throws TransformationException,
+			IOException {
 		List<String> names = new ArrayList<String>();
 		List<Object> values = new ArrayList<Object>();
 
@@ -149,29 +139,16 @@ public class BeanDescriptor<T> implements Converter<T> {
 			}
 		}
 
-		BeanCreator<T> creator = namesCreatorCache.get(names);
-		if (creator == null) {
-			int bestMatch = -1;
-			for (BeanCreator<T> c : _creators) {
-				int cnt = c.contains(names);
-				if (cnt > bestMatch) {
-					creator = c;
-					bestMatch = cnt;
-				}
-			}
-			namesCreatorCache.put(names, creator);
-		}
-
 		int size = names.size();
-		int settersToCallCnt = size - creator.parameters.size();
+		int settersToCallCnt = size - _creator.parameters.size();
 		if (settersToCallCnt < 0)
 			settersToCallCnt = 0;
-		Object[] creatorArgs = new Object[creator.parameters.size()];
+		Object[] creatorArgs = new Object[_creator.parameters.size()];
 		String[] newNames = new String[size];
 		Object[] newValues = new Object[size];
 		// TODO if field for ctr is missing what to do? make it also configurable...?
 		for (int i = 0, j = 0; i < size; i++) {
-			BeanCreatorProperty<T, ?> mp = creator.parameters.get(names.get(i));
+			BeanCreatorProperty<T, ?> mp = _creator.parameters.get(names.get(i));
 			if (mp != null) {
 				creatorArgs[mp.index] = values.get(i);
 			} else {
@@ -181,7 +158,7 @@ public class BeanDescriptor<T> implements Converter<T> {
 			}
 		}
 
-		T bean = creator.create(creatorArgs);
+		T bean = _creator.create(creatorArgs);
 		for (int i = 0; i < size; i++) {
 			@SuppressWarnings("unchecked")
 			PropertyMutator<T, Object> property = (PropertyMutator<T, Object>) mutableProperties

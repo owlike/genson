@@ -7,6 +7,7 @@ import java.util.List;
 import org.genson.BeanView;
 import org.genson.Context;
 import org.genson.Converter;
+import org.genson.Wrapper;
 import org.genson.Genson;
 import org.genson.TransformationException;
 import org.genson.annotation.WithoutBeanView;
@@ -26,7 +27,7 @@ import org.genson.stream.ObjectWriter;
  * 
  * @param <T> type of objects this BeanViewConverter can handle.
  */
-public class BeanViewConverter<T> extends ConverterDecorator<T> {
+public class BeanViewConverter<T> extends Wrapper<Converter<T>> implements Converter<T> {
 
 	public static class BeanViewConverterFactory extends ChainedFactory {
 		private final BeanViewDescriptorProvider provider;
@@ -38,7 +39,7 @@ public class BeanViewConverter<T> extends ConverterDecorator<T> {
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		@Override
 		protected Converter<?> create(Type type, Genson genson, Converter<?> nextConverter) {
-			if (!ConverterDecorator.toAnnotatedElement(nextConverter).isAnnotationPresent(
+			if (!Wrapper.toAnnotatedElement(nextConverter).isAnnotationPresent(
 					WithoutBeanView.class))
 				return new BeanViewConverter(type, provider, nextConverter);
 			return nextConverter;
