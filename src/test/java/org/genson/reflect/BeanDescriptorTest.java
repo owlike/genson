@@ -160,7 +160,7 @@ public class BeanDescriptorTest {
 		ForceConstructorCreator() {
 		}
 		
-		@Creator ForceConstructorCreator(Integer iii) {
+		@Creator ForceConstructorCreator(@JsonProperty("i") Integer iii) {
 			usedCtr = true;
 		}
 	}

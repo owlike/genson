@@ -842,6 +842,7 @@ public final class Genson {
 			converters.add(DefaultConverters.LongConverter.instance);
 			converters.add(DefaultConverters.NumberConverter.instance);
 			converters.add(new DefaultConverters.DateConverter(getDateFormat()));
+			converters.add(DefaultConverters.URLConverter.instance);
 			return converters;
 		}
 

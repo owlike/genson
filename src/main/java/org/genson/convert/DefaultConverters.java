@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Type;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -617,4 +618,21 @@ public final class DefaultConverters {
 					rawClass) : null;
 		}
 	};
+	
+	public static class URLConverter implements Converter<URL> {
+		public final static URLConverter instance = new URLConverter();
+		private URLConverter() {}
+		
+		@Override
+		public URL deserialize(ObjectReader reader, Context ctx) throws TransformationException,
+				IOException {
+			return new URL(reader.valueAsString());
+		}
+
+		@Override
+		public void serialize(URL object, ObjectWriter writer, Context ctx)
+				throws TransformationException, IOException {
+			writer.writeValue(object.toExternalForm());
+		}
+	}
 }
