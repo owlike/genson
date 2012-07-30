@@ -63,7 +63,6 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 		}
 
 		mergeMutatorsWithCreatorProperties(ofClass, mutators, creators);
-
 		BeanCreator<T> ctr = checkAndMerge(ofClass, creators);
 
 		return create(ofClass, ctr, accessors, mutators);
