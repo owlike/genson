@@ -62,7 +62,7 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 				mutators.put(mutator.name, mutator);
 		}
 
-		mergeMutatorsWithCreatorProperties(mutators, creators);
+		mergeMutatorsWithCreatorProperties(ofClass, mutators, creators);
 
 		BeanCreator<T> ctr = checkAndMerge(ofClass, creators);
 
@@ -143,7 +143,7 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 	 * @param mutators
 	 * @param creators
 	 */
-	protected abstract <T> void mergeMutatorsWithCreatorProperties(
+	protected abstract <T> void mergeMutatorsWithCreatorProperties(Class<?> tClass,
 			Map<String, PropertyMutator<T, ?>> mutators, List<BeanCreator<T>> creators);
 
 	/**

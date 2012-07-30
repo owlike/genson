@@ -41,7 +41,7 @@ import com.google.gson.Gson;
  =================================
  */
 public class GensonBenchmark {
-	final int ITERATION_CNT = 50000;
+	final int ITERATION_CNT = 1000;
 	private Genson genson = new Genson();
 	private Gson gson = new Gson();
 	private ObjectMapper om = new ObjectMapper();

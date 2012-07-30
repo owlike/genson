@@ -169,13 +169,13 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 		}
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings( { "unchecked", "rawtypes" })
 	// ofClass is not necessarily of same type as method return type, as ofClass corresponds to the
 	// declaring class!
 	protected <T> BeanCreator<T> createCreator(Class<?> ofClass, Method method,
 			String[] resolvedNames, Genson genson) {
-		return new BeanCreator.MethodBeanCreator(method, resolvedNames, resolveConverters(
-				method.getGenericParameterTypes(), genson));
+		return new BeanCreator.MethodBeanCreator(method, resolvedNames, resolveConverters(method
+				.getGenericParameterTypes(), genson));
 	}
 
 	private Converter<?>[] resolveConverters(Type[] types, Genson genson) {
@@ -208,8 +208,8 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 
 	protected <T> PropertyAccessor<T, ?> createAccessor(String name, Field field,
 			Class<T> baseClass, Genson genson) {
-		return new PropertyAccessor.FieldAccessor<T, Object>(name, field, baseClass,
-				genson.provideConverter(field.getGenericType()));
+		return new PropertyAccessor.FieldAccessor<T, Object>(name, field, baseClass, genson
+				.provideConverter(field.getGenericType()));
 	}
 
 	protected <T> void provideMethodAccessors(Class<?> ofClass,
@@ -230,11 +230,11 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 		}
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings( { "rawtypes", "unchecked" })
 	protected <T> PropertyAccessor<T, ?> createAccessor(String name, Method method,
 			Class<?> baseClass, Genson genson) {
-		return new PropertyAccessor.MethodAccessor(name, method, baseClass,
-				genson.provideConverter(method.getGenericReturnType()));
+		return new PropertyAccessor.MethodAccessor(name, method, baseClass, genson
+				.provideConverter(method.getGenericReturnType()));
 	}
 
 	protected <T> void provideFieldMutators(Class<?> ofClass,
@@ -259,8 +259,8 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 
 	protected <T> PropertyMutator<T, ?> createMutator(String name, Field field, Class<T> baseClass,
 			Genson genson) {
-		return new PropertyMutator.FieldMutator<T, Object>(name, field, baseClass,
-				genson.provideConverter(field.getGenericType()));
+		return new PropertyMutator.FieldMutator<T, Object>(name, field, baseClass, genson
+				.provideConverter(field.getGenericType()));
 	}
 
 	protected <T> void provideMethodMutators(Class<?> ofClass,
@@ -281,11 +281,11 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 		}
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings( { "rawtypes", "unchecked" })
 	protected <T> PropertyMutator<T, ?> createMutator(String name, Method method,
 			Class<?> baseClass, Genson genson) {
-		return new PropertyMutator.MethodMutator(name, method, baseClass,
-				genson.provideConverter(method.getGenericParameterTypes()[0]));
+		return new PropertyMutator.MethodMutator(name, method, baseClass, genson
+				.provideConverter(method.getGenericParameterTypes()[0]));
 	}
 
 	protected <T extends BeanProperty<?>> void update(T property, Map<String, LinkedList<T>> map) {
@@ -386,7 +386,7 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 	 * for property in the ctr props...
 	 */
 	@Override
-	protected <T> void mergeMutatorsWithCreatorProperties(
+	protected <T> void mergeMutatorsWithCreatorProperties(Class<?> tClass, 
 			Map<String, PropertyMutator<T, ?>> mutators, List<BeanCreator<T>> creators) {
 		for (BeanCreator<?> creator : creators) {
 			for (Map.Entry<String, ? extends BeanCreatorProperty<?, ?>> entry : creator.parameters
@@ -399,7 +399,6 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 					BeanCreatorProperty<T, ?> ctrProperty = (BeanCreatorProperty<T, ?>) entry
 							.getValue();
 					mutators.put(entry.getKey(), ctrProperty);
-					
 					// TODO we should maybe remove the other creators ?
 				}
 			}
