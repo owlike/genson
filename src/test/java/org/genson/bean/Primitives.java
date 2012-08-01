@@ -10,12 +10,12 @@ public class Primitives {
 	private String text;
 	private boolean booleanPrimitive;
 	private boolean booleanObject;
-	
-	public Primitives() {}
-	
-	public Primitives(int intPrimitive, Integer integerObject,
-			double doublePrimitive, Double doubleObject, String text,
-			boolean booleanPrimitive, boolean booleanObject) {
+
+	public Primitives() {
+	}
+
+	public Primitives(int intPrimitive, Integer integerObject, double doublePrimitive,
+			Double doubleObject, String text, boolean booleanPrimitive, boolean booleanObject) {
 		super();
 		this.intPrimitive = intPrimitive;
 		this.integerObject = integerObject;
@@ -25,7 +25,7 @@ public class Primitives {
 		this.booleanPrimitive = booleanPrimitive;
 		this.booleanObject = booleanObject;
 	}
-	
+
 	public static void assertComparePrimitives(Primitives p1, Primitives p2) {
 		assertEquals(p1.getIntPrimitive(), p2.getIntPrimitive());
 		assertEquals(p1.getIntegerObject(), p2.getIntegerObject());
@@ -35,67 +35,74 @@ public class Primitives {
 		assertEquals(p1.isBooleanPrimitive(), p2.isBooleanPrimitive());
 		assertEquals(p1.isBooleanObject(), p2.isBooleanObject());
 	}
-	
+
 	public String jsonString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("{\"booleanObject\":")
-			.append(booleanObject)
-			.append(",\"booleanPrimitive\":")
-			.append(booleanPrimitive)
-			.append(",\"doubleObject\":")
-			.append(doubleObject)
-			.append(",\"doublePrimitive\":")
-			.append(doublePrimitive)
-			.append(",\"integerObject\":")
-			.append(integerObject)
-			.append(",\"intPrimitive\":")
-			.append(intPrimitive)
-			.append(",\"text\":");
-			if (text != null) sb.append("\"" + text + "\"");
-			else sb.append("null");
-			sb.append('}');
+		sb.append("{\"booleanObject\":").append(booleanObject).append(",\"booleanPrimitive\":")
+				.append(booleanPrimitive).append(",\"doubleObject\":").append(doubleObject)
+				.append(",\"doublePrimitive\":").append(doublePrimitive)
+				.append(",\"integerObject\":").append(integerObject).append(",\"intPrimitive\":")
+				.append(intPrimitive).append(",\"text\":");
+		if (text != null)
+			sb.append("\"" + text + "\"");
+		else
+			sb.append("null");
+		sb.append('}');
 		return sb.toString();
 	}
-	
+
 	public int getIntPrimitive() {
 		return intPrimitive;
 	}
+
 	public void setIntPrimitive(int intPrimitive) {
 		this.intPrimitive = intPrimitive;
 	}
+
 	public Integer getIntegerObject() {
 		return integerObject;
 	}
+
 	public void setIntegerObject(Integer integerObject) {
 		this.integerObject = integerObject;
 	}
+
 	public double getDoublePrimitive() {
 		return doublePrimitive;
 	}
+
 	public void setDoublePrimitive(double doublePrimitive) {
 		this.doublePrimitive = doublePrimitive;
 	}
+
 	public Double getDoubleObject() {
 		return doubleObject;
 	}
+
 	public void setDoubleObject(Double doubleObject) {
 		this.doubleObject = doubleObject;
 	}
+
 	public String getText() {
 		return text;
 	}
+
 	public void setText(String text) {
 		this.text = text;
 	}
+
 	public boolean isBooleanPrimitive() {
 		return booleanPrimitive;
 	}
+
 	public void setBooleanPrimitive(boolean booleanPrimitive) {
 		this.booleanPrimitive = booleanPrimitive;
 	}
+
 	public boolean isBooleanObject() {
 		return booleanObject;
 	}
+
 	public void setBooleanObject(boolean booleanObject) {
 		this.booleanObject = booleanObject;
 	}

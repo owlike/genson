@@ -16,11 +16,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 /**
- * Serialization bench, based on same data as DeserializeBenchmark.
- * Jackson is slightly faster.
+ * Serialization bench, based on same data as DeserializeBenchmark. Jackson is slightly faster.
  * 
  * @author eugen
- *
+ * 
  */
 public class SerializationBenchmark {
 	private final int ITER = 5000;
@@ -31,11 +30,11 @@ public class SerializationBenchmark {
 	private Tweet[] tweets;
 	private Feed shortFeed;
 	private Feed longFeed;
-	
+
 	public SerializationBenchmark() throws TransformationException, IOException {
 		setUp();
 	}
-	
+
 	private void setUp() throws TransformationException, IOException {
 		genson = new Genson.Builder().setDateFormat(
 				new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", Locale.US)).create();
@@ -45,12 +44,19 @@ public class SerializationBenchmark {
 		mapper.configure(DeserializationConfig.Feature.AUTO_DETECT_FIELDS, true);
 		mapper.setDateFormat(new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", Locale.US));
 
-		tweets = genson.deserialize(new InputStreamReader(ClassLoader.class.getResourceAsStream("/TWEETS.json")), Tweet[].class);
-		shortFeed = genson.deserialize(new InputStreamReader(ClassLoader.class.getResourceAsStream("/READER_SHORT.json")), Feed.class);
-		longFeed = genson.deserialize(new InputStreamReader(ClassLoader.class.getResourceAsStream("/READER_LONG.json")), Feed.class);
+		tweets = genson.deserialize(
+				new InputStreamReader(ClassLoader.class.getResourceAsStream("/TWEETS.json")),
+				Tweet[].class);
+		shortFeed = genson.deserialize(
+				new InputStreamReader(ClassLoader.class.getResourceAsStream("/READER_SHORT.json")),
+				Feed.class);
+		longFeed = genson.deserialize(
+				new InputStreamReader(ClassLoader.class.getResourceAsStream("/READER_LONG.json")),
+				Feed.class);
 	}
-	
-	public void go() throws JsonGenerationException, JsonMappingException, IOException, TransformationException {
+
+	public void go() throws JsonGenerationException, JsonMappingException, IOException,
+			TransformationException {
 		Timer timer = new Timer();
 		// warmup
 		jacksonWrite(WARMUP_ITER, tweets);
@@ -65,12 +71,13 @@ public class SerializationBenchmark {
 		freeMem();
 		timer.start();
 		gensonWrite(ITER, tweets);
-		System.out.println("Genson tweets:" + timer.stop().printS());	freeMem();
+		System.out.println("Genson tweets:" + timer.stop().printS());
+		freeMem();
 		timer.start();
 		gsonWrite(ITER, tweets);
 		System.out.println("Gson tweets:" + timer.stop().printS());
 		System.out.println("**************************");
-		
+
 		// warmup
 		jacksonWrite(WARMUP_ITER, shortFeed);
 		gensonWrite(WARMUP_ITER, shortFeed);
@@ -84,13 +91,13 @@ public class SerializationBenchmark {
 		freeMem();
 		timer.start();
 		gensonWrite(ITER, shortFeed);
-		System.out.println("Genson shortFeed:" + timer.stop().printS());	
+		System.out.println("Genson shortFeed:" + timer.stop().printS());
 		freeMem();
 		timer.start();
 		gsonWrite(ITER, shortFeed);
 		System.out.println("Gson shortFeed:" + timer.stop().printS());
 		System.out.println("**************************");
-		
+
 		// warmup
 		jacksonWrite(WARMUP_ITER, longFeed);
 		gensonWrite(WARMUP_ITER, longFeed);
@@ -104,30 +111,32 @@ public class SerializationBenchmark {
 		freeMem();
 		timer.start();
 		gensonWrite(ITER, longFeed);
-		System.out.println("Genson longFeed:" + timer.stop().printS());freeMem();
+		System.out.println("Genson longFeed:" + timer.stop().printS());
+		freeMem();
 		timer.start();
 		gsonWrite(ITER, longFeed);
 		System.out.println("Gson longFeed:" + timer.stop().printS());
 	}
-	
-	public <T> void jacksonWrite(int iter, T object) throws JsonGenerationException, JsonMappingException, IOException {
-		for(int i = 0; i < iter; i++) {
+
+	public <T> void jacksonWrite(int iter, T object) throws JsonGenerationException,
+			JsonMappingException, IOException {
+		for (int i = 0; i < iter; i++) {
 			mapper.writeValueAsString(object);
 		}
 	}
-	
+
 	public <T> void gensonWrite(int iter, T object) throws TransformationException, IOException {
-		for(int i = 0; i < iter; i++) {
+		for (int i = 0; i < iter; i++) {
 			genson.serialize(object);
 		}
 	}
-	
+
 	public <T> void gsonWrite(int iter, T object) throws TransformationException, IOException {
-		for(int i = 0; i < iter; i++) {
+		for (int i = 0; i < iter; i++) {
 			gson.toJson(object);
 		}
 	}
-	
+
 	public void freeMem() {
 		System.gc();
 		synchronized (this) {
@@ -138,8 +147,9 @@ public class SerializationBenchmark {
 			}
 		}
 	}
-	
-	public static void main(String[] args) throws JsonGenerationException, JsonMappingException, IOException, TransformationException {
+
+	public static void main(String[] args) throws JsonGenerationException, JsonMappingException,
+			IOException, TransformationException {
 		new SerializationBenchmark().go();
 	}
 }

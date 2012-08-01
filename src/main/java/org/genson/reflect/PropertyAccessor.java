@@ -88,7 +88,7 @@ public abstract class PropertyAccessor<T, P> extends BeanProperty<T> implements
 
 	public static class FieldAccessor<T, P> extends PropertyAccessor<T, P> {
 		protected final Field _field;
-
+		
 		public FieldAccessor(String name, Field field, Class<T> declaringClass,
 				Serializer<P> propertySerializer) {
 			super(name, TypeUtil.expandType(field.getGenericType(), declaringClass),

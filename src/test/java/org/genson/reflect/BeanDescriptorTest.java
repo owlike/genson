@@ -145,7 +145,7 @@ public class BeanDescriptorTest {
 	}
 	
 	static class ForceMethodCreator {
-		public static boolean usedMethod = false;
+		public static transient boolean usedMethod = false;
 		ForceMethodCreator() {
 		}
 		
@@ -156,7 +156,7 @@ public class BeanDescriptorTest {
 	}
 	
 	static class ForceConstructorCreator {
-		public static boolean usedCtr = false;
+		public static transient boolean usedCtr = false;
 		ForceConstructorCreator() {
 		}
 		
