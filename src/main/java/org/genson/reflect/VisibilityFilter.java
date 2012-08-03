@@ -34,12 +34,12 @@ public final class VisibilityFilter {
 	 * Modifier.TRANSIENT Modifier.NATIVE
 	 */
 	public final static VisibilityFilter DEFAULT = new VisibilityFilter(Modifier.TRANSIENT,
-			Modifier.NATIVE);
+			Modifier.NATIVE, Modifier.STATIC);
 	public final static VisibilityFilter ALL = new VisibilityFilter();
 	public final static VisibilityFilter PROTECTED = new VisibilityFilter(Modifier.TRANSIENT,
-			Modifier.NATIVE, Modifier.PRIVATE);
+			Modifier.NATIVE, Modifier.STATIC, Modifier.PRIVATE);
 	public final static VisibilityFilter PACKAGE_PUBLIC = new VisibilityFilter(Modifier.TRANSIENT,
-			Modifier.NATIVE, Modifier.PRIVATE, Modifier.PROTECTED);
+			Modifier.NATIVE, Modifier.STATIC, Modifier.PRIVATE, Modifier.PROTECTED);
 
 	private final static int JAVA_MODIFIERS = Modifier.PUBLIC | Modifier.PROTECTED
 			| Modifier.PRIVATE | Modifier.ABSTRACT | Modifier.STATIC | Modifier.FINAL

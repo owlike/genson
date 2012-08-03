@@ -7,6 +7,7 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -157,6 +158,12 @@ public final class TypeUtil {
 				TypeVariable<?>[] tvs = clazz.getTypeParameters();
 				if (tvs.length > 0)
 					return expand(tvs[0], inClass);
+				else {
+					Type collectionType = lookupGenericType(Collection.class, (Class<?>) type);
+					if (collectionType != null) {
+						return typeOf(0, collectionType);
+					}
+				}
 			}
 		} else {
 			return expand(typeOf(0, type), inClass);

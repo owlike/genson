@@ -2,12 +2,15 @@ package org.genson.reflect;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import org.genson.GenericType;
 import org.junit.Test;
+
+import static com.google.gson.internal.$Gson$Types.*;
 
 import static org.genson.reflect.TypeUtil.*;
 import static org.junit.Assert.*;
