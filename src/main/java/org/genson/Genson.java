@@ -32,6 +32,7 @@ import org.genson.reflect.BeanDescriptorProvider;
 import org.genson.reflect.BeanMutatorAccessorResolver;
 import org.genson.reflect.BeanViewDescriptorProvider;
 import org.genson.reflect.PropertyNameResolver;
+import org.genson.reflect.VisibilityFilter;
 import org.genson.reflect.PropertyNameResolver.CompositePropertyNameResolver;
 import org.genson.reflect.TypeUtil;
 import org.genson.stream.JsonReader;
@@ -289,6 +290,10 @@ public final class Genson {
 
 		private PropertyNameResolver propertyNameResolver;
 		private BeanMutatorAccessorResolver mutatorAccessorResolver;
+		private VisibilityFilter propertyFilter;
+		private VisibilityFilter methodFilter;
+		private VisibilityFilter constructorFilter;
+		
 		private BeanDescriptorProvider beanDescriptorProvider;
 		private Converter<Object> nullConverter;
 
@@ -432,8 +437,8 @@ public final class Genson {
 		 * @param factory to register
 		 * @return a reference to this builder.
 		 */
-		public Builder withConverterFactory(Factory<? extends Converter<?>>... factory) {
-			converterFactories.addAll(Arrays.asList(factory));
+		public Builder withConverterFactory(Factory<? extends Converter<?>> factory) {
+			converterFactories.add(factory);
 			return this;
 		}
 
@@ -443,8 +448,8 @@ public final class Genson {
 		 * @param factory to register
 		 * @return a reference to this builder.
 		 */
-		public Builder withSerializerFactory(Factory<? extends Serializer<?>>... factory) {
-			converterFactories.addAll(Arrays.asList(factory));
+		public Builder withSerializerFactory(Factory<? extends Serializer<?>> factory) {
+			converterFactories.add(factory);
 			return this;
 		}
 
@@ -454,8 +459,8 @@ public final class Genson {
 		 * @param factory to register
 		 * @return a reference to this builder.
 		 */
-		public Builder withDeserializerFactory(Factory<? extends Deserializer<?>>... factory) {
-			converterFactories.addAll(Arrays.asList(factory));
+		public Builder withDeserializerFactory(Factory<? extends Deserializer<?>> factory) {
+			converterFactories.add(factory);
 			return this;
 		}
 
@@ -684,6 +689,33 @@ public final class Genson {
 			return this;
 		}
 
+		public VisibilityFilter getFieldFilter() {
+			return propertyFilter;
+		}
+
+		public Builder setFieldFilter(VisibilityFilter propertyFilter) {
+			this.propertyFilter = propertyFilter;
+			return this;
+		}
+
+		public VisibilityFilter getMethodFilter() {
+			return methodFilter;
+		}
+
+		public Builder setMethodFilter(VisibilityFilter methodFilter) {
+			this.methodFilter = methodFilter;
+			return this;
+		}
+
+		public VisibilityFilter getConstructorFilter() {
+			return constructorFilter;
+		}
+
+		public Builder setConstructorFilter(VisibilityFilter constructorFilter) {
+			this.constructorFilter = constructorFilter;
+			return this;
+		}
+
 		public Map<Type, Serializer<?>> getSerializersMap() {
 			return Collections.unmodifiableMap(serializersMap);
 		}
@@ -802,7 +834,13 @@ public final class Genson {
 		}
 
 		protected BeanMutatorAccessorResolver createBeanMutatorAccessorResolver() {
-			return new BeanMutatorAccessorResolver.StandardMutaAccessorResolver();
+			VisibilityFilter propFilter = getFieldFilter();
+			if (propFilter == null) propFilter =  VisibilityFilter.PACKAGE_PUBLIC;
+			VisibilityFilter methodFilter = getFieldFilter();
+			if (methodFilter == null) methodFilter =  VisibilityFilter.PACKAGE_PUBLIC;
+			VisibilityFilter ctrFilter = getFieldFilter();
+			if (ctrFilter == null) ctrFilter =  VisibilityFilter.PACKAGE_PUBLIC;
+			return new BeanMutatorAccessorResolver.StandardMutaAccessorResolver(propFilter, methodFilter, ctrFilter);
 		}
 
 		/**
