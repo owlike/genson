@@ -36,7 +36,6 @@ public abstract class PropertyMutator<T, P> extends BeanProperty<T> implements
 
 	public abstract void mutate(T target, P value);
 
-	@Override
 	public int compareTo(PropertyMutator<T, ?> o) {
 		return o.priority() - priority();
 	}

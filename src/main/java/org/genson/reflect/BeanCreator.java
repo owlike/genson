@@ -39,7 +39,6 @@ public abstract class BeanCreator<T> extends Wrapper<AnnotatedElement> implement
 		return cnt;
 	}
 
-	@Override
 	public int compareTo(BeanCreator<T> o) {
 		int comp = o.priority() - priority();
 		return comp != 0 ? comp : parameters.size() - o.parameters.size();

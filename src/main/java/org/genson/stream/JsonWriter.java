@@ -72,7 +72,6 @@ public class JsonWriter implements ObjectWriter {
 		writer.close();
 	}
 
-	@Override
 	public void flush() throws IOException {
 		flushBuffer();
 		writer.flush();
@@ -306,7 +305,6 @@ public class JsonWriter implements ObjectWriter {
 		return this;
 	}
 
-	@Override
 	public ObjectWriter writeNull() throws IOException {
 		if (skipNull) {
 			_name = null;
@@ -318,7 +316,6 @@ public class JsonWriter implements ObjectWriter {
 		return this;
 	}
 
-	@Override
 	public ObjectWriter beginNextObjectMetadata() throws IOException {
 		// this way we can use this method multiple times in different converters before calling
 		// beginObject
@@ -329,7 +326,6 @@ public class JsonWriter implements ObjectWriter {
 		return this;
 	}
 
-	@Override
 	public ObjectWriter writeMetadata(String name, String value) throws IOException {
 		writeName('@' + name);
 		writeValue(value);

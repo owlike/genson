@@ -32,7 +32,6 @@ import static org.genson.Trilean.*;
 public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 
 	private final static Comparator<BeanCreator<?>> _beanCreatorsComparator = new Comparator<BeanCreator<?>>() {
-		@Override
 		public int compare(BeanCreator<?> o1, BeanCreator<?> o2) {
 			return o1.parameters.size() - o2.parameters.size();
 		}

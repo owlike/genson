@@ -97,7 +97,6 @@ public interface BeanMutatorAccessorResolver {
 		/**
 		 * Will resolve all public/package and non transient/static fields as accesssors.
 		 */
-		@Override
 		public Trilean isAccessor(Field field, Class<?> fromClass) {
 			// ok to look for this$ is ugly but it will do the job for the moment
 			if (mustIgnore(field, true) || field.getName().startsWith("this$"))
@@ -111,7 +110,6 @@ public interface BeanMutatorAccessorResolver {
 		 * Resolves all public methods starting with get/is (boolean) and parameter less as
 		 * accessors.
 		 */
-		@Override
 		public Trilean isAccessor(Method method, Class<?> fromClass) {
 			if (mustIgnore(method, true))
 				return FALSE;
@@ -131,7 +129,6 @@ public interface BeanMutatorAccessorResolver {
 			return FALSE;
 		}
 
-		@Override
 		public Trilean isCreator(Constructor<?> constructor, Class<?> fromClass) {
 			/*
 			 * hum... it depends on different things, such as parameters name resolution, types, etc
@@ -143,7 +140,6 @@ public interface BeanMutatorAccessorResolver {
 			return Trilean.valueOf(creatorVisibilityFilter.isVisible(constructor));
 		}
 
-		@Override
 		public Trilean isCreator(Method method, Class<?> fromClass) {
 			if (method.getAnnotation(Creator.class) != null) {
 				if (Modifier.isPublic(method.getModifiers())
@@ -155,7 +151,6 @@ public interface BeanMutatorAccessorResolver {
 			return FALSE;
 		}
 
-		@Override
 		public Trilean isMutator(Field field, Class<?> fromClass) {
 			if (mustIgnore(field, false) || field.getName().startsWith("this$"))
 				return FALSE;
@@ -165,7 +160,6 @@ public interface BeanMutatorAccessorResolver {
 			return Trilean.valueOf(!Modifier.isTransient(modifier) && !Modifier.isStatic(modifier));
 		}
 
-		@Override
 		public Trilean isMutator(Method method, Class<?> fromClass) {
 			if (mustIgnore(method, false))
 				return FALSE;

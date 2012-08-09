@@ -77,7 +77,6 @@ public final class ASMCreatorParameterNameResolver implements PropertyNameResolv
 		}
 	}
 
-	@Override
 	public String resolve(int parameterIdx, Constructor<?> fromConstructor) {
 		String[] names = constructorParameterNames.get(fromConstructor);
 		if (names == null) {
@@ -94,17 +93,14 @@ public final class ASMCreatorParameterNameResolver implements PropertyNameResolv
 		return names[parameterIdx];
 	}
 
-	@Override
 	public String resolve(Field fromField) {
 		return null;
 	}
 
-	@Override
 	public String resolve(Method fromMethod) {
 		return null;
 	}
 
-	@Override
 	public String resolve(int parameterIdx, Method fromMethod) {
 		String[] names = methodParameterNames.get(fromMethod);
 		if (names == null) {

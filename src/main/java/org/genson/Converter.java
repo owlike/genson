@@ -40,11 +40,9 @@ import org.genson.stream.ObjectReader;
  * @param <T> type of objects handled by this converter.
  */
 public interface Converter<T> extends Serializer<T>, Deserializer<T> {
-	@Override
 	public void serialize(T object, org.genson.stream.ObjectWriter writer, Context ctx)
 			throws TransformationException, java.io.IOException;
 
-	@Override
 	public T deserialize(ObjectReader reader, Context ctx) throws TransformationException,
 			IOException;
 }

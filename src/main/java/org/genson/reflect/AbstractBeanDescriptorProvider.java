@@ -28,13 +28,11 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 	protected AbstractBeanDescriptorProvider() {
 	}
 
-	@Override
 	public BeanDescriptor<?> provide(Type type, Genson genson) {
 		Class<?> rawType = TypeUtil.getRawClass(type);
 		return provideBeanDescriptor(rawType, genson);
 	}
 
-	@Override
 	public <T> BeanDescriptor<T> provideBeanDescriptor(Class<?> ofClass, Genson genson) {
 		Map<String, LinkedList<PropertyMutator<T, ?>>> mutatorsMap = new LinkedHashMap<String, LinkedList<PropertyMutator<T, ?>>>();
 		Map<String, LinkedList<PropertyAccessor<T, ?>>> accessorsMap = new LinkedHashMap<String, LinkedList<PropertyAccessor<T, ?>>>();

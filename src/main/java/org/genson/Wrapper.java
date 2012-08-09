@@ -33,25 +33,21 @@ public abstract class Wrapper<T> implements AnnotatedElement {
 		decorate(wrappedObject);
 	}
 
-	@Override
 	public Annotation[] getAnnotations() {
 		return Operations.union(Annotation[].class, wrappedElement.getAnnotations(), getClass()
 				.getAnnotations());
 	}
 
-	@Override
 	public <A extends Annotation> A getAnnotation(Class<A> aClass) {
 		A ann = wrappedElement.getAnnotation(aClass);
 		return ann == null ? getClass().getAnnotation(aClass) : ann;
 	}
 
-	@Override
 	public Annotation[] getDeclaredAnnotations() {
 		return Operations.union(Annotation[].class, wrappedElement.getDeclaredAnnotations(),
 				getClass().getDeclaredAnnotations());
 	}
 
-	@Override
 	public boolean isAnnotationPresent(Class<? extends Annotation> annotationClass) {
 		return wrappedElement.isAnnotationPresent(annotationClass)
 				|| getClass().isAnnotationPresent(annotationClass);

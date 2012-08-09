@@ -117,12 +117,10 @@ public class JsonReader implements ObjectReader {
 		}
 	}
 
-	@Override
 	public void close() throws IOException {
 		reader.close();
 	}
 	
-	@Override
 	public ObjectReader beginArray() throws IOException {
 		begin('[', JsonType.ARRAY);
 		valueType = ValueType.ARRAY;
@@ -130,7 +128,6 @@ public class JsonReader implements ObjectReader {
 		return this;
 	}
 
-	@Override
 	public ObjectReader beginObject() throws IOException {
 		if (!_metadata_readen) {
     		begin('{', JsonType.OBJECT);
@@ -145,13 +142,11 @@ public class JsonReader implements ObjectReader {
 		return beginObject();
 	}
 
-	@Override
 	public ObjectReader endArray() throws IOException {
 		end(']', JsonType.ARRAY);
 		return this;
 	}
 
-	@Override
 	public ObjectReader endObject() throws IOException {
 		end('}', JsonType.OBJECT);
 		_metadata.clear();
@@ -159,12 +154,10 @@ public class JsonReader implements ObjectReader {
 		return this;
 	}
 
-	@Override
 	public String name() {
 		return currentName;
 	}
 
-	@Override
 	public String valueAsString() {
 		if (ValueType.STRING.equals(valueType))
 			return _stringValue;
@@ -273,13 +266,11 @@ public class JsonReader implements ObjectReader {
 		throw new IllegalStateException("Readen value is not of type boolean");
 	}
 	
-	@Override
 	public String metadata(String name) throws IOException {
 		if (!_metadata_readen) nextObjectMetadata();
 		return _metadata.get(name);
 	}
 
-	@Override
 	public ValueType getValueType() {
 		return valueType;
 	}
@@ -314,7 +305,6 @@ public class JsonReader implements ObjectReader {
 		return this;
 	}
 
-	@Override
 	public boolean hasNext() throws IOException {
 		if (_checkedNext)
 			return _hasNext;
@@ -334,7 +324,6 @@ public class JsonReader implements ObjectReader {
 		}
 	}
 
-	@Override
 	public ValueType next() throws IOException {
 		_metadata_readen = false;
 		_checkedNext = false;

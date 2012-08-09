@@ -90,13 +90,11 @@ public class FactoryTest {
 	static class ClassMetadataConverter implements Converter<A> {
 		static boolean used = false;
 
-		@Override
 		public void serialize(A obj, ObjectWriter writer, Context ctx)
 				throws TransformationException, IOException {
 			used = true;
 		}
 
-		@Override
 		public A deserialize(ObjectReader reader, Context ctx) throws TransformationException,
 				IOException {
 			return null;

@@ -32,7 +32,6 @@ public abstract class PropertyAccessor<T, P> extends BeanProperty<T> implements
 
 	public abstract P access(final T target);
 
-	@Override
 	public int compareTo(PropertyAccessor<T, ?> o) {
 		return o.priority() - priority();
 	}

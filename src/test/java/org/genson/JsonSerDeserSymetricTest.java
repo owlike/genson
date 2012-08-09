@@ -91,13 +91,11 @@ public class JsonSerDeserSymetricTest {
 	public void testWithUrlConverter() throws TransformationException, IOException {
 		Genson genson = new Genson.Builder().withConverters(new Converter<URL>() {
 
-			@Override
 			public void serialize(URL obj, ObjectWriter writer, Context ctx)
 					throws TransformationException, IOException {
 				writer.writeValue(obj.toExternalForm());
 			}
 
-			@Override
 			public URL deserialize(ObjectReader reader, Context ctx)
 					throws TransformationException, IOException {
 				return new URL(reader.valueAsString());
@@ -184,14 +182,12 @@ public class JsonSerDeserSymetricTest {
 	public void testWithCustomObjectConverter() throws TransformationException, IOException {
 		Genson genson = new Genson.Builder().withConverters(new Converter<Point>() {
 
-			@Override
 			public void serialize(Point obj, ObjectWriter writer, Context ctx)
 					throws TransformationException, IOException {
 				writer.beginObject().writeName("x").writeValue(obj.x).writeName("y").writeValue(
 						obj.y).endObject();
 			}
 
-			@Override
 			public Point deserialize(ObjectReader reader, Context ctx)
 					throws TransformationException, IOException {
 				Point p = new Point();

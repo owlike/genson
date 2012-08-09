@@ -74,7 +74,6 @@ public interface PropertyNameResolver {
 			return this;
 		}
 
-		@Override
 		public String resolve(int parameterIdx, Constructor<?> fromConstructor) {
 			String resolvedName = null;
 			for (Iterator<PropertyNameResolver> it = components.iterator(); resolvedName == null
@@ -84,7 +83,6 @@ public interface PropertyNameResolver {
 			return resolvedName;
 		}
 
-		@Override
 		public String resolve(int parameterIdx, Method fromMethod) {
 			String resolvedName = null;
 			for (Iterator<PropertyNameResolver> it = components.iterator(); resolvedName == null
@@ -94,7 +92,6 @@ public interface PropertyNameResolver {
 			return resolvedName;
 		}
 
-		@Override
 		public String resolve(Field fromField) {
 			String resolvedName = null;
 			for (Iterator<PropertyNameResolver> it = components.iterator(); resolvedName == null
@@ -104,7 +101,6 @@ public interface PropertyNameResolver {
 			return resolvedName;
 		}
 
-		@Override
 		public String resolve(Method fromMethod) {
 			String resolvedName = null;
 			for (Iterator<PropertyNameResolver> it = components.iterator(); resolvedName == null
@@ -118,17 +114,14 @@ public interface PropertyNameResolver {
 
 	public static class ConventionalBeanPropertyNameResolver implements PropertyNameResolver {
 
-		@Override
 		public String resolve(int parameterIdx, Constructor<?> fromConstructor) {
 			return null;
 		}
 
-		@Override
 		public String resolve(Field fromField) {
 			return fromField.getName();
 		}
 
-		@Override
 		public String resolve(Method fromMethod) {
 			String name = fromMethod.getName();
 			int length = -1;
@@ -146,7 +139,6 @@ public interface PropertyNameResolver {
 				return null;
 		}
 
-		@Override
 		public String resolve(int parameterIdx, Method fromMethod) {
 			return null;
 		}
@@ -161,7 +153,6 @@ public interface PropertyNameResolver {
 		public AnnotationPropertyNameResolver() {
 		}
 
-		@Override
 		public String resolve(int parameterIdx, Constructor<?> fromConstructor) {
 			Annotation[] paramAnns = fromConstructor.getParameterAnnotations()[parameterIdx];
 			String name = null;
@@ -174,7 +165,6 @@ public interface PropertyNameResolver {
 			return "".equals(name) ? null : name;
 		}
 
-		@Override
 		public String resolve(int parameterIdx, Method fromMethod) {
 			Annotation[] anns = fromMethod.getParameterAnnotations()[parameterIdx];
 			String name = null;
@@ -187,12 +177,10 @@ public interface PropertyNameResolver {
 			return "".equals(name) ? null : name;
 		}
 
-		@Override
 		public String resolve(Field fromField) {
 			return getName(fromField);
 		}
 
-		@Override
 		public String resolve(Method fromMethod) {
 			return getName(fromMethod);
 		}

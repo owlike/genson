@@ -129,12 +129,10 @@ public class BeanViewDescriptorProvider extends BaseBeanDescriptorProvider {
 
 	public static class BeanViewMutatorAccessorResolver implements BeanMutatorAccessorResolver {
 
-		@Override
 		public Trilean isAccessor(Field field, Class<?> baseClass) {
 			return FALSE;
 		}
 
-		@Override
 		public Trilean isAccessor(Method method, Class<?> baseClass) {
 			int modifiers = method.getModifiers();
 			return Trilean.valueOf((method.getName().startsWith("get") || (method.getName()
@@ -149,14 +147,12 @@ public class BeanViewDescriptorProvider extends BaseBeanDescriptorProvider {
 					&& !Modifier.isNative(modifiers));
 		}
 
-		@Override
 		public Trilean isCreator(Constructor<?> constructor, Class<?> baseClass) {
 			int modifier = constructor.getModifiers();
 			return Trilean.valueOf(Modifier.isPublic(modifier)
 					|| !(Modifier.isPrivate(modifier) || Modifier.isProtected(modifier)));
 		}
 
-		@Override
 		public Trilean isCreator(Method method, Class<?> baseClass) {
 			if (method.getAnnotation(Creator.class) != null) {
 				if (Modifier.isStatic(method.getModifiers()))
@@ -167,12 +163,10 @@ public class BeanViewDescriptorProvider extends BaseBeanDescriptorProvider {
 			return FALSE;
 		}
 
-		@Override
 		public Trilean isMutator(Field field, Class<?> baseClass) {
 			return FALSE;
 		}
 
-		@Override
 		public Trilean isMutator(Method method, Class<?> baseClass) {
 			int modifiers = method.getModifiers();
 			return Trilean.valueOf(method.getName().startsWith("set")

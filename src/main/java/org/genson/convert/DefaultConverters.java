@@ -50,7 +50,6 @@ public final class DefaultConverters {
 			this.elementConverter = elementConverter;
 		}
 
-		@Override
 		public Collection<E> deserialize(ObjectReader reader, Context ctx)
 				throws TransformationException, IOException {
 			reader.beginArray();
@@ -64,7 +63,6 @@ public final class DefaultConverters {
 			return col;
 		}
 
-		@Override
 		public void serialize(Collection<E> array, ObjectWriter writer, Context ctx)
 				throws TransformationException, IOException {
 			writer.beginArray();
@@ -87,7 +85,6 @@ public final class DefaultConverters {
 		}
 
 		@SuppressWarnings({ "rawtypes", "unchecked" })
-		@Override
 		public Converter<Collection<?>> create(Type forType, Genson genson) {
 			Converter<?> elementConverter = genson.provideConverter(TypeUtil
 					.getCollectionType(forType));
@@ -106,7 +103,6 @@ public final class DefaultConverters {
 			this.elementConverter = elementConverter;
 		}
 
-		@Override
 		public void serialize(Object array, ObjectWriter writer, Context ctx)
 				throws TransformationException, IOException {
 			writer.beginArray();
@@ -119,7 +115,6 @@ public final class DefaultConverters {
 			writer.endArray();
 		}
 
-		@Override
 		public Object deserialize(ObjectReader reader, Context ctx) throws TransformationException,
 				IOException {
 			reader.beginArray();
@@ -155,7 +150,6 @@ public final class DefaultConverters {
 		}
 
 		@SuppressWarnings({ "rawtypes", "unchecked" })
-		@Override
 		public Converter<Object> create(Type forType, Genson genson) {
 			if (forType instanceof GenericArrayType
 					|| (forType instanceof Class<?> && ((Class<?>) forType).isArray())) {
@@ -176,13 +170,11 @@ public final class DefaultConverters {
 		private StringConverter() {
 		}
 
-		@Override
 		public void serialize(String value, ObjectWriter writer, Context ctx)
 				throws TransformationException, IOException {
 			writer.writeValue(value);
 		}
 
-		@Override
 		public String deserialize(ObjectReader reader, Context ctx) throws TransformationException,
 				IOException {
 			return reader.valueAsString();
@@ -197,13 +189,11 @@ public final class DefaultConverters {
 		private BooleanConverter() {
 		}
 
-		@Override
 		public void serialize(Boolean obj, ObjectWriter writer, Context ctx)
 				throws TransformationException, IOException {
 			writer.writeValue(obj.booleanValue());
 		}
 
-		@Override
 		public Boolean deserialize(ObjectReader reader, Context ctx)
 				throws TransformationException, IOException {
 			if (ValueType.STRING.equals(reader.getValueType())) {
@@ -222,13 +212,11 @@ public final class DefaultConverters {
 		private IntegerConverter() {
 		}
 
-		@Override
 		public void serialize(Integer obj, ObjectWriter writer, Context ctx)
 				throws TransformationException, IOException {
 			writer.writeValue(obj.intValue());
 		}
 
-		@Override
 		public Integer deserialize(ObjectReader reader, Context ctx)
 				throws TransformationException, IOException {
 			if (ValueType.STRING.equals(reader.getValueType())) {
@@ -247,7 +235,6 @@ public final class DefaultConverters {
 		private LongConverter() {
 		}
 
-		@Override
 		public Long deserialize(ObjectReader reader, Context ctx) throws NumberFormatException,
 				IOException {
 			if (ValueType.STRING.equals(reader.getValueType())) {
@@ -257,7 +244,6 @@ public final class DefaultConverters {
 			return reader.valueAsLong();
 		}
 
-		@Override
 		public void serialize(Long obj, ObjectWriter writer, Context ctx)
 				throws TransformationException, IOException {
 			writer.writeValue(obj.longValue());
@@ -272,7 +258,6 @@ public final class DefaultConverters {
 		private DoubleConverter() {
 		}
 
-		@Override
 		public Double deserialize(ObjectReader reader, Context ctx) throws NumberFormatException,
 				IOException {
 			if (ValueType.STRING.equals(reader.getValueType())) {
@@ -282,7 +267,6 @@ public final class DefaultConverters {
 			return reader.valueAsDouble();
 		}
 
-		@Override
 		public void serialize(Double obj, ObjectWriter writer, Context ctx)
 				throws TransformationException, IOException {
 			writer.writeValue(obj.doubleValue());
@@ -297,7 +281,6 @@ public final class DefaultConverters {
 		private NumberConverter() {
 		}
 
-		@Override
 		public Number deserialize(ObjectReader reader, Context ctx) throws TransformationException,
 				IOException {
 			ValueType vt = reader.getValueType();
@@ -311,7 +294,6 @@ public final class DefaultConverters {
 			}
 		}
 
-		@Override
 		public void serialize(Number obj, ObjectWriter writer, Context ctx)
 				throws TransformationException, IOException {
 			writer.writeValue(obj);
@@ -340,7 +322,6 @@ public final class DefaultConverters {
 		private PrimitiveConverterFactory() {
 		}
 
-		@Override
 		public Converter<?> create(Type type, Genson genson) {
 			Class<?> rawClass = TypeUtil.getRawClass(type);
 			if (rawClass.isPrimitive()) {
@@ -365,13 +346,11 @@ public final class DefaultConverters {
 			private booleanConverter() {
 			}
 
-			@Override
 			public void serialize(Boolean obj, ObjectWriter writer, Context ctx)
 					throws TransformationException, IOException {
 				writer.writeValue(obj.booleanValue());
 			}
 
-			@Override
 			public Boolean deserialize(ObjectReader reader, Context ctx)
 					throws TransformationException, IOException {
 				return ValueType.NULL.equals(reader.getValueType()) ? false : reader
@@ -388,13 +367,11 @@ public final class DefaultConverters {
 			private intConverter() {
 			}
 
-			@Override
 			public void serialize(Integer obj, ObjectWriter writer, Context ctx)
 					throws TransformationException, IOException {
 				writer.writeValue(obj);
 			}
 
-			@Override
 			public Integer deserialize(ObjectReader reader, Context ctx)
 					throws TransformationException, IOException {
 				return ValueType.NULL.equals(reader.getValueType()) ? 0 : reader.valueAsInt();
@@ -410,13 +387,11 @@ public final class DefaultConverters {
 			private doubleConverter() {
 			}
 
-			@Override
 			public void serialize(Double obj, ObjectWriter writer, Context ctx)
 					throws TransformationException, IOException {
 				writer.writeValue(obj);
 			}
 
-			@Override
 			public Double deserialize(ObjectReader reader, Context ctx)
 					throws TransformationException, IOException {
 				return ValueType.NULL.equals(reader.getValueType()) ? 0d : reader.valueAsDouble();
@@ -432,13 +407,11 @@ public final class DefaultConverters {
 			private longConverter() {
 			}
 
-			@Override
 			public void serialize(Long obj, ObjectWriter writer, Context ctx)
 					throws TransformationException, IOException {
 				writer.writeValue(obj);
 			}
 
-			@Override
 			public Long deserialize(ObjectReader reader, Context ctx)
 					throws TransformationException, IOException {
 				return ValueType.NULL.equals(reader.getValueType()) ? 0l : reader.valueAsLong();
@@ -456,7 +429,6 @@ public final class DefaultConverters {
 			this.valueConverter = valueConverter;
 		}
 
-		@Override
 		public Map<String, V> deserialize(ObjectReader reader, Context ctx)
 				throws TransformationException, IOException {
 			reader.beginObject();
@@ -471,7 +443,6 @@ public final class DefaultConverters {
 			return map;
 		}
 
-		@Override
 		public void serialize(Map<String, V> obj, ObjectWriter writer, Context ctx)
 				throws TransformationException, IOException {
 			writer.beginObject();
@@ -497,7 +468,6 @@ public final class DefaultConverters {
 		}
 
 		@SuppressWarnings({ "rawtypes", "unchecked" })
-		@Override
 		public Converter<Map<?, ?>> create(Type type, Genson genson) {
 			return new MapConverter(TypeUtil.getRawClass(type), genson.provideConverter(TypeUtil
 					.typeOf(1, type)));
@@ -519,7 +489,6 @@ public final class DefaultConverters {
 			this.dateFormat = dateFormat;
 		}
 
-		@Override
 		public void serialize(Date obj, ObjectWriter writer, Context ctx)
 				throws TransformationException, IOException {
 			writer.writeUnsafeValue(format(obj));
@@ -529,7 +498,6 @@ public final class DefaultConverters {
 			return dateFormat.format(date);
 		}
 
-		@Override
 		public Date deserialize(ObjectReader reader, Context ctx) throws TransformationException,
 				IOException {
 			try {
@@ -557,7 +525,6 @@ public final class DefaultConverters {
 			private UntypedConverter() {
 			}
 
-			@Override
 			public Object deserialize(ObjectReader reader, Context ctx)
 					throws TransformationException, IOException {
 				if (ValueType.OBJECT.equals(reader.getValueType()))
@@ -565,7 +532,6 @@ public final class DefaultConverters {
 				return ctx.genson.deserialize(reader.getValueType().toClass(), reader, ctx);
 			}
 
-			@Override
 			public void serialize(Object obj, ObjectWriter writer, Context ctx)
 					throws TransformationException, IOException {
 				if (Object.class.equals(obj.getClass()))
@@ -575,7 +541,6 @@ public final class DefaultConverters {
 			}
 		};
 
-		@Override
 		public Converter<Object> create(Type type, Genson genson) {
 			if (TypeUtil.match(type, Object.class, true)) {
 				return UntypedConverter.instance;
@@ -591,13 +556,11 @@ public final class DefaultConverters {
 			this.eClass = eClass;
 		}
 
-		@Override
 		public void serialize(T obj, ObjectWriter writer, Context ctx)
 				throws TransformationException, IOException {
 			writer.writeUnsafeValue(obj.name());
 		}
 
-		@Override
 		public T deserialize(ObjectReader reader, Context ctx) throws TransformationException,
 				IOException {
 			return Enum.valueOf(eClass, reader.valueAsString());
@@ -611,7 +574,6 @@ public final class DefaultConverters {
 		}
 
 		@SuppressWarnings({ "rawtypes", "unchecked" })
-		@Override
 		public Converter<Enum<?>> create(Type type, Genson genson) {
 			Class<?> rawClass = TypeUtil.getRawClass(type);
 			return rawClass.isEnum() || Enum.class.isAssignableFrom(rawClass) ? new EnumConverter(
@@ -623,13 +585,11 @@ public final class DefaultConverters {
 		public final static URLConverter instance = new URLConverter();
 		private URLConverter() {}
 		
-		@Override
 		public URL deserialize(ObjectReader reader, Context ctx) throws TransformationException,
 				IOException {
 			return new URL(reader.valueAsString());
 		}
 
-		@Override
 		public void serialize(URL object, ObjectWriter writer, Context ctx)
 				throws TransformationException, IOException {
 			writer.writeValue(object.toExternalForm());

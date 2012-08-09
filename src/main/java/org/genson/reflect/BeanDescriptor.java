@@ -26,7 +26,6 @@ public class BeanDescriptor<T> implements Converter<T> {
 	private final boolean _noArgCtr;
 
 	private final static Comparator<BeanProperty<?>> _readablePropsComparator = new Comparator<BeanProperty<?>>() {
-		@Override
 		public int compare(BeanProperty<?> o1, BeanProperty<?> o2) {
 			return o1.name.compareToIgnoreCase(o2.name);
 		}
@@ -78,7 +77,6 @@ public class BeanDescriptor<T> implements Converter<T> {
 		return _creator != null;
 	}
 
-	@Override
 	public void serialize(T obj, ObjectWriter writer, Context ctx) throws TransformationException,
 			IOException {
 		writer.beginObject();
@@ -88,7 +86,6 @@ public class BeanDescriptor<T> implements Converter<T> {
 		writer.endObject();
 	}
 
-	@Override
 	public T deserialize(ObjectReader reader, Context ctx) throws TransformationException,
 			IOException {
 		T bean = null;

@@ -12,12 +12,10 @@ public class GensonBuilderTest {
 	@Test
 	public void testCustomConverterRegistration() {
 		final Converter<Number> dummyConverter = new Converter<Number>() {
-			@Override
 			public void serialize(Number object, ObjectWriter writer, Context ctx)
 					throws TransformationException, IOException {
 			}
 
-			@Override
 			public Number deserialize(ObjectReader reader, Context ctx)
 					throws TransformationException, IOException {
 				return null;
