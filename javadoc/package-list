@@ -1,6 +1,6 @@
-org.genson
-org.genson.annotation
-org.genson.convert
-org.genson.reflect
-org.genson.spring
-org.genson.stream
+com.owlike.genson
+com.owlike.genson.annotation
+com.owlike.genson.convert
+com.owlike.genson.reflect
+com.owlike.genson.spring
+com.owlike.genson.stream
