@@ -460,7 +460,6 @@ public final class TypeUtil {
 			this.componentType = componentType;
 		}
 
-		@Override
 		public Type getGenericComponentType() {
 			return componentType;
 		}
@@ -552,17 +551,14 @@ public final class TypeUtil {
 			this.typeArgs = typeArgs;
 		}
 
-		@Override
 		public Type[] getActualTypeArguments() {
 			return typeArgs;
 		}
 
-		@Override
 		public Type getOwnerType() {
 			return originalType.getOwnerType();
 		}
 
-		@Override
 		public Type getRawType() {
 			return originalType.getRawType();
 		}
@@ -582,12 +578,10 @@ public final class TypeUtil {
 			this.upperBounds = upperBounds;
 		}
 
-		@Override
 		public Type[] getLowerBounds() {
 			return lowerBounds;
 		}
 
-		@Override
 		public Type[] getUpperBounds() {
 			return upperBounds;
 		}

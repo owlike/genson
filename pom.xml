@@ -20,7 +20,6 @@
 		<url>http://genson.googlecode.com/git</url>
 		<connection>scm:git:http://genson.googlecode.com/git</connection>
 		<developerConnection>scm:git:http://genson.googlecode.com/git</developerConnection>
-		<tag>HEAD</tag>
 	</scm>
 	<issueManagement>
 		<system>Google Code Issue List</system>
@@ -224,7 +223,7 @@
 							<relocations>
 								<relocation>
 									<pattern>org.objectweb.asm</pattern>
-									<shadedPattern>org.genson.internal.asm</shadedPattern>
+									<shadedPattern>com.owlike.genson.internal.asm</shadedPattern>
 								</relocation>
 							</relocations>
 							<shadedGroupFilter>asm</shadedGroupFilter>

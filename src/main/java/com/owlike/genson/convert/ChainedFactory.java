@@ -87,7 +87,6 @@ public abstract class ChainedFactory implements Factory<Converter<?>> {
 		this.next = next;
 	}
 
-	@Override
 	public Converter<?> create(Type type, Genson genson) {
 		Converter<?> nextConverter = null;
 		if (next != null) {

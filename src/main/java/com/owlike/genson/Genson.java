@@ -46,6 +46,9 @@ import com.owlike.genson.stream.ObjectWriter;
  * it multiple times but it is better to have an instance per configuration so you can benefit of
  * better performances. This class is immutable and thread safe.
  * 
+ * For more examples have a look at the <a
+ * href="http://code.google.com/p/genson/wiki/GettingStarted">wiki</a>.
+ * 
  * <p>
  * To create a new instance of Genson you can use the default no arg constructor or the
  * {@link Builder} class to have control over Gensons configuration. <br>
@@ -67,8 +70,8 @@ import com.owlike.genson.stream.ObjectWriter;
  * </pre>
  * 
  * Every object serialized with Genson, can be deserialized back into its concrete type! Have a look
- * at {@link com.owlike.genson.convert.ClassMetadataConverter ClassMetadataConverter} for an explanation
- * and examples.
+ * at {@link com.owlike.genson.convert.ClassMetadataConverter ClassMetadataConverter} for an
+ * explanation and examples.
  * 
  * @author eugen
  */
@@ -102,14 +105,29 @@ public final class Genson {
 	}
 
 	/**
+	 * Instead of using this constructor you should use {@link Builder}.
 	 * 
 	 * @param converterFactory
+	 *            providing instance of converters.
 	 * @param beanDescProvider
+	 *            providing instance of {@link com.owlike.genson.reflect.BeanDescriptor
+	 *            BeanDescriptor} used during bean serialization and deserialization.
 	 * @param nullConverter
+	 *            handling null objects. If its serialize/deserialize methods are called you are
+	 *            sure that it is a null value. This converter is used in
+	 *            {@link com.owlike.genson.convert.NullConverter NullConverter}
 	 * @param skipNull
+	 *            indicates whether null values should be serialized. False by default, null values
+	 *            will be serialized.
 	 * @param htmlSafe
+	 *            indicates whether \,<,>,&,= characters should be replaced by their Unicode
+	 *            representation.
 	 * @param classAliases
+	 *            association map between classes and their aliases, used if withClassMetadata is
+	 *            true.
 	 * @param withClassMetadata
+	 *            indicates whether class name should be serialized and used during deserialization
+	 *            to determine the type. False by default.
 	 */
 	public Genson(Factory<Converter<?>> converterFactory, BeanDescriptorProvider beanDescProvider,
 			Converter<Object> nullConverter, boolean skipNull, boolean htmlSafe,
@@ -127,6 +145,13 @@ public final class Genson {
 		}
 	}
 
+	/**
+	 * Provides an instance of Converter capable of handling objects of type forType.
+	 * 
+	 * @param forType
+	 *            the type for which a converter is needed.
+	 * @return the converter instance.
+	 */
 	@SuppressWarnings("unchecked")
 	public <T> Converter<T> provideConverter(Type forType) {
 		Converter<T> converter = (Converter<T>) converterCache.get(forType);
@@ -139,6 +164,17 @@ public final class Genson {
 		return converter;
 	}
 
+	/**
+	 * Serializes the object into a string.
+	 * 
+	 * @param o
+	 *            object to be serialized.
+	 * @return the serialized object as a string.
+	 * @throws TransformationException
+	 *             if there was any kind of error during serialization.
+	 * @throws IOException
+	 *             if there was a problem during writing of the object to the output.
+	 */
 	public <T> String serialize(T o) throws TransformationException, IOException {
 		JsonWriter writer = new JsonWriter(new StringWriter(), skipNull, htmlSafe);
 		if (o == null)
@@ -148,8 +184,20 @@ public final class Genson {
 		writer.flush();
 		return writer.unwrap().toString();
 	}
-	
-	public <T> String serialize(T o, GenericType<T> type) throws TransformationException, IOException {
+
+	/**
+	 * Serializes the object using its GenericType instead of using its runtime type.
+	 * 
+	 * @param o
+	 *            object to be serialized.
+	 * @param type
+	 *            the type of the object to be serialized.
+	 * @return its string representation.
+	 * @throws TransformationException
+	 * @throws IOException
+	 */
+	public <T> String serialize(T o, GenericType<T> type) throws TransformationException,
+			IOException {
 		JsonWriter writer = new JsonWriter(new StringWriter(), skipNull, htmlSafe);
 		if (o == null)
 			nullConverter.serialize(null, writer, null);
@@ -159,6 +207,17 @@ public final class Genson {
 		return writer.unwrap().toString();
 	}
 
+	/**
+	 * Serializes the object using the specified BeanViews.
+	 * 
+	 * @see BeanView
+	 * @param o
+	 * @param withViews
+	 *            the BeanViews to apply during this serialization.
+	 * @return
+	 * @throws TransformationException
+	 * @throws IOException
+	 */
 	public <T> String serialize(T o, Class<? extends BeanView<?>>... withViews)
 			throws TransformationException, IOException {
 		JsonWriter writer = new JsonWriter(new StringWriter(), skipNull, htmlSafe);
@@ -170,6 +229,16 @@ public final class Genson {
 		return writer.unwrap().toString();
 	}
 
+	/**
+	 * Serializes this object and writes its representation to writer.
+	 * 
+	 * @param o
+	 * @param writer
+	 *            into which to write the serialized object.
+	 * @param withViews
+	 * @throws TransformationException
+	 * @throws IOException
+	 */
 	public <T> void serialize(T o, ObjectWriter writer, Class<? extends BeanView<?>>... withViews)
 			throws TransformationException, IOException {
 		if (o == null)
@@ -185,6 +254,17 @@ public final class Genson {
 		ser.serialize(obj, writer, ctx);
 	}
 
+	/**
+	 * Deserializes fromSource String into an instance of toClass.
+	 * 
+	 * @param fromSource
+	 *            source from which to deserialize.
+	 * @param toClass
+	 *            type into which to deserialize.
+	 * @return
+	 * @throws TransformationException
+	 * @throws IOException
+	 */
 	public <T> T deserialize(String fromSource, Class<T> toClass) throws TransformationException,
 			IOException {
 		return deserialize(toClass, new JsonReader(new StringReader(fromSource)), new Context(this));
@@ -272,6 +352,25 @@ public final class Genson {
 		return nullConverter;
 	}
 
+	/**
+	 * Use the Builder class when you want to create a custom Genson instance. This class allows you
+	 * for example to register custom converters/serializers/deserializers
+	 * {@link #withConverters(Converter...)} or custom converter Factories
+	 * {@link #withConverterFactory(Factory)}.
+	 * 
+	 * This class combines the builder design pattern with template pattern providing handy
+	 * configuration and extensibility. All its public methods are intended to be used in the
+	 * builder "style" and its protected methods are part of the template. When you call
+	 * {@link #create()} method, it will start assembling all the configuration and build all the
+	 * required components by using the protected methods. For example if you wish to use in your
+	 * projects a Builder that will always create some custom
+	 * {@link com.owlike.genson.reflect.BeanDescriptorProvider BeanDescriptorProvider} you have to
+	 * extend {@link #createBeanDescriptorProvider()}, or imagine that you implemented some
+	 * Converters that you always want to register then override {@link #getDefaultConverters()}.
+	 * 
+	 * @author eugen
+	 * 
+	 */
 	public static class Builder {
 		private final Map<Type, Serializer<?>> serializersMap = new HashMap<Type, Serializer<?>>();
 		private final Map<Type, Deserializer<?>> deserializersMap = new HashMap<Type, Deserializer<?>>();
@@ -293,7 +392,7 @@ public final class Genson {
 		private VisibilityFilter propertyFilter;
 		private VisibilityFilter methodFilter;
 		private VisibilityFilter constructorFilter;
-		
+
 		private BeanDescriptorProvider beanDescriptorProvider;
 		private Converter<Object> nullConverter;
 
@@ -340,8 +439,10 @@ public final class Genson {
 		/**
 		 * Register converter by mapping it to type argument.
 		 * 
-		 * @param converter to register
-		 * @param type of objects this converter handles
+		 * @param converter
+		 *            to register
+		 * @param type
+		 *            of objects this converter handles
 		 * @return a reference to this builder.
 		 */
 		public <T> Builder withConverter(Converter<T> converter, Class<? extends T> type) {
@@ -352,8 +453,10 @@ public final class Genson {
 		/**
 		 * Register converter by mapping it to the parameterized type of type argument.
 		 * 
-		 * @param converter to register
-		 * @param type of objects this converter handles
+		 * @param converter
+		 *            to register
+		 * @param type
+		 *            of objects this converter handles
 		 * @return a reference to this builder.
 		 */
 		public <T> Builder withConverter(Converter<T> converter, GenericType<? extends T> type) {
@@ -434,7 +537,8 @@ public final class Genson {
 		/**
 		 * Registers converter factories.
 		 * 
-		 * @param factory to register
+		 * @param factory
+		 *            to register
 		 * @return a reference to this builder.
 		 */
 		public Builder withConverterFactory(Factory<? extends Converter<?>> factory) {
@@ -445,7 +549,8 @@ public final class Genson {
 		/**
 		 * Registers serializer factories.
 		 * 
-		 * @param factory to register
+		 * @param factory
+		 *            to register
 		 * @return a reference to this builder.
 		 */
 		public Builder withSerializerFactory(Factory<? extends Serializer<?>> factory) {
@@ -456,7 +561,8 @@ public final class Genson {
 		/**
 		 * Registers deserializer factories.
 		 * 
-		 * @param factory to register
+		 * @param factory
+		 *            to register
 		 * @return a reference to this builder.
 		 */
 		public Builder withDeserializerFactory(Factory<? extends Deserializer<?>> factory) {
@@ -467,7 +573,8 @@ public final class Genson {
 		/**
 		 * If true will not serialize null values
 		 * 
-		 * @param skipNull indicates whether null values should be serialized or not.
+		 * @param skipNull
+		 *            indicates whether null values should be serialized or not.
 		 * @return a reference to this builder.
 		 */
 		public Builder setSkipNull(boolean skipNull) {
@@ -482,7 +589,8 @@ public final class Genson {
 		/**
 		 * If true \,<,>,&,= characters will be replaced by \u0027, \u003c, \u003e, \u0026, \u003d
 		 * 
-		 * @param htmlSafe indicates whether serialized data should be html safe.
+		 * @param htmlSafe
+		 *            indicates whether serialized data should be html safe.
 		 * @return a reference to this builder.
 		 */
 		public Builder setHtmlSafe(boolean htmlSafe) {
@@ -507,8 +615,8 @@ public final class Genson {
 		}
 
 		/**
-		 * Replaces default {@link com.owlike.genson.reflect.PropertyNameResolver PropertyNameResolver} by
-		 * the specified one.
+		 * Replaces default {@link com.owlike.genson.reflect.PropertyNameResolver
+		 * PropertyNameResolver} by the specified one.
 		 * 
 		 * @param resolver
 		 * @return a reference to this builder.
@@ -526,8 +634,7 @@ public final class Genson {
 		 * @return a reference to this builder.
 		 */
 		public Builder with(PropertyNameResolver... resolvers) {
-			if (propertyNameResolver == null)
-				propertyNameResolver = createPropertyNameResolver();
+			if (propertyNameResolver == null) propertyNameResolver = createPropertyNameResolver();
 			if (propertyNameResolver instanceof CompositePropertyNameResolver)
 				((CompositePropertyNameResolver) propertyNameResolver).add(resolvers);
 			else
@@ -577,7 +684,8 @@ public final class Genson {
 		 * Used in conjunction with {@link #setWithDebugInfoPropertyNameResolver(boolean)}. If true
 		 * an exception will be thrown when a class has been compiled without debug informations.
 		 * 
-		 * @see com.owlike.genson.reflect.ASMCreatorParameterNameResolver ASMCreatorParameterNameResolver
+		 * @see com.owlike.genson.reflect.ASMCreatorParameterNameResolver
+		 *      ASMCreatorParameterNameResolver
 		 * @param throwExcOnNoDebugInfo
 		 * @return a reference to this builder.
 		 */
@@ -732,10 +840,8 @@ public final class Genson {
 		 * @return a new instance of Genson built for the current configuration.
 		 */
 		public Genson create() {
-			if (nullConverter == null)
-				nullConverter = new NullConverter();
-			if (propertyNameResolver == null)
-				propertyNameResolver = createPropertyNameResolver();
+			if (nullConverter == null) nullConverter = new NullConverter();
+			if (propertyNameResolver == null) propertyNameResolver = createPropertyNameResolver();
 			if (mutatorAccessorResolver == null)
 				mutatorAccessorResolver = createBeanMutatorAccessorResolver();
 
@@ -810,8 +916,8 @@ public final class Genson {
 
 		/**
 		 * You should override this method if you want to add custom
-		 * {@link com.owlike.genson.convert.ChainedFactory ChainedFactory} or if you need to chain them
-		 * differently.
+		 * {@link com.owlike.genson.convert.ChainedFactory ChainedFactory} or if you need to chain
+		 * them differently.
 		 * 
 		 * @return the converter <u>factory instance that will be used to resolve
 		 *         <strong>ALL</strong> converters</u>.
@@ -835,19 +941,20 @@ public final class Genson {
 
 		protected BeanMutatorAccessorResolver createBeanMutatorAccessorResolver() {
 			VisibilityFilter propFilter = getFieldFilter();
-			if (propFilter == null) propFilter =  VisibilityFilter.PACKAGE_PUBLIC;
+			if (propFilter == null) propFilter = VisibilityFilter.PACKAGE_PUBLIC;
 			VisibilityFilter methodFilter = getFieldFilter();
-			if (methodFilter == null) methodFilter =  VisibilityFilter.PACKAGE_PUBLIC;
+			if (methodFilter == null) methodFilter = VisibilityFilter.PACKAGE_PUBLIC;
 			VisibilityFilter ctrFilter = getFieldFilter();
-			if (ctrFilter == null) ctrFilter =  VisibilityFilter.PACKAGE_PUBLIC;
-			return new BeanMutatorAccessorResolver.StandardMutaAccessorResolver(propFilter, methodFilter, ctrFilter);
+			if (ctrFilter == null) ctrFilter = VisibilityFilter.PACKAGE_PUBLIC;
+			return new BeanMutatorAccessorResolver.StandardMutaAccessorResolver(propFilter,
+					methodFilter, ctrFilter);
 		}
 
 		/**
 		 * You can override this method if you want to change the
-		 * {@link com.owlike.genson.reflect.PropertyNameResolver PropertyNameResolver} that are registered
-		 * by default. You can also simply replace the default PropertyNameResolver by setting
-		 * another one with {@link #set(PropertyNameResolver)}.
+		 * {@link com.owlike.genson.reflect.PropertyNameResolver PropertyNameResolver} that are
+		 * registered by default. You can also simply replace the default PropertyNameResolver by
+		 * setting another one with {@link #set(PropertyNameResolver)}.
 		 * 
 		 * @return the property name resolver to be used. It should be an instance of
 		 *         {@link com.owlike.genson.reflect.PropertyNameResolver.CompositePropertyNameResolver
@@ -887,7 +994,8 @@ public final class Genson {
 		/**
 		 * Override this method if you want to change the default converter factories.
 		 * 
-		 * @param factories list, is not null.
+		 * @param factories
+		 *            list, is not null.
 		 */
 		protected void addDefaultConverterFactories(List<Factory<? extends Converter<?>>> factories) {
 			factories.add(DefaultConverters.ArrayConverterFactory.instance);

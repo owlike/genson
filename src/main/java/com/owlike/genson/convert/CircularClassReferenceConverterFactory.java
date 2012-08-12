@@ -25,13 +25,11 @@ public class CircularClassReferenceConverterFactory extends ChainedFactory {
 			super();
 		}
 		
-		@Override
 		public void serialize(T obj, ObjectWriter writer, Context ctx)
 				throws TransformationException, IOException {
 			wrapped.serialize(obj, writer, ctx);
 		}
 
-		@Override
 		public T deserialize(ObjectReader reader, Context ctx)
 				throws TransformationException, IOException {
 			return wrapped.deserialize(reader, ctx);

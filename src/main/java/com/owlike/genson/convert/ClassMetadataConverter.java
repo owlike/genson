@@ -72,7 +72,6 @@ public class ClassMetadataConverter<T> extends Wrapper<Converter<T>> implements 
 		this.tClass = tClass;
 	}
 
-	@Override
 	public void serialize(T obj, ObjectWriter writer, Context ctx) throws TransformationException,
 			IOException {
 		writer.beginNextObjectMetadata()
@@ -80,7 +79,6 @@ public class ClassMetadataConverter<T> extends Wrapper<Converter<T>> implements 
 		wrapped.serialize(obj, writer, ctx);
 	}
 
-	@Override
 	public T deserialize(ObjectReader reader, Context ctx) throws TransformationException,
 			IOException {
 		if (ValueType.OBJECT.equals(reader.getValueType())) {

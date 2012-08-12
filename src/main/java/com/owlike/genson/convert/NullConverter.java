@@ -39,7 +39,6 @@ public class NullConverter implements Converter<Object> {
 			this.nullConverter = nullConverter;
 		}
 
-		@Override
 		public void serialize(T obj, ObjectWriter writer, Context ctx)
 				throws TransformationException, IOException {
 			if (obj == null) {
@@ -50,7 +49,6 @@ public class NullConverter implements Converter<Object> {
 		}
 
 		@SuppressWarnings("unchecked")
-		@Override
 		public T deserialize(ObjectReader reader, Context ctx) throws TransformationException,
 				IOException {
 			if (ValueType.NULL.equals(reader.getValueType()))
@@ -63,13 +61,11 @@ public class NullConverter implements Converter<Object> {
 	public NullConverter() {
 	}
 
-	@Override
 	public void serialize(Object obj, ObjectWriter writer, Context ctx)
 			throws TransformationException, IOException {
 		writer.writeNull();
 	}
 
-	@Override
 	public Object deserialize(ObjectReader reader, Context ctx) throws TransformationException,
 			IOException {
 		return null;
