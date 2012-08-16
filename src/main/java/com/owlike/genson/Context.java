@@ -49,6 +49,11 @@ public class Context {
 		return views != null && !views.isEmpty();
 	}
 
+	public Context withView(Class<? extends BeanView<?>> view) {
+		views.add(view);
+		return this;
+	}
+	
 	public List<Class<? extends BeanView<?>>> views() {
 		return views;
 	}
