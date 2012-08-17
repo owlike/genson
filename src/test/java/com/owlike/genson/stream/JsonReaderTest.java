@@ -359,4 +359,13 @@ public class JsonReaderTest {
 		assertEquals("me", reader.beginObject().metadata("author"));
 		reader.endObject();
 	}
+	
+	@Test public void testReadMalformedJson() throws IOException {
+		String src = "";
+		JsonReader reader = new JsonReader(src);
+		try {
+			reader.beginObject();
+			fail();
+		} catch (IllegalStateException ise) {}
+	}
 }

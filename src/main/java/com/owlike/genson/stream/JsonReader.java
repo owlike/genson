@@ -717,13 +717,24 @@ public class JsonReader implements ObjectReader {
 	}
 
 	private final void newWrongTokenException(String awaited, int cursor) {
-		throw new IllegalStateException("Illegal character at position " + (_position - valueAsString().length() - _buflen + cursor) + " expected "
+		// otherwise it fails when an error occurs on first character
+		if (cursor < 0) cursor = 0;
+		int pos = (_position - valueAsString().length() - _buflen + cursor);
+		if (pos < 0) pos = 0;
+		
+		if (_buflen < 0) throw new IllegalStateException("Incomplete data or malformed json : encoutered end of stream but expected " + awaited);
+		else throw new IllegalStateException("Illegal character at position " + pos + " expected "
 				+ awaited + " but read '" + _buffer[cursor] + "' !");
 	}
 	
 	private final void newMisplacedTokenException(int cursor) {
-		throw new IllegalStateException("Encountred misplaced character '" + _buffer[cursor] + "' around position "
-				+ (_position - valueAsString().length() - _buflen + cursor));
+		if (_buflen < 0) throw new IllegalStateException("Incomplete data or malformed json : encoutered end of stream.");
+		
+		if (cursor < 0) cursor = 0;
+		int pos = (_position - valueAsString().length() - _buflen + cursor);
+		if (pos < 0) pos = 0;
+		
+		throw new IllegalStateException("Encountred misplaced character '" + _buffer[cursor] + "' around position " + pos);
 	}
 
 	private final void checkIllegalEnd(int token) throws IOException {

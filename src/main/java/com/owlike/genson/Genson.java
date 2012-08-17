@@ -8,6 +8,7 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.lang.reflect.Type;
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -330,6 +331,14 @@ public final class Genson {
 
 	public ObjectReader createReader(InputStream is) {
 		return new JsonReader(new InputStreamReader(is));
+	}
+	
+	public ObjectWriter createWriter(Writer writer) {
+		return new JsonWriter(writer, skipNull, htmlSafe);
+	}
+
+	public ObjectReader createReader(Reader reader) {
+		return new JsonReader(reader);
 	}
 
 	public boolean isSkipNull() {

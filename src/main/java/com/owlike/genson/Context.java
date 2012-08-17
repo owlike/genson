@@ -1,5 +1,6 @@
 package com.owlike.genson;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +34,7 @@ import java.util.Map;
  */
 public class Context {
 	public final Genson genson;
-	private final List<Class<? extends BeanView<?>>> views;
+	private List<Class<? extends BeanView<?>>> views;
 	private Map<String, Object> _ctxData = new HashMap<String, Object>();
 
 	public Context(Genson genson) {
@@ -50,6 +51,7 @@ public class Context {
 	}
 
 	public Context withView(Class<? extends BeanView<?>> view) {
+		if (views == null) views = new ArrayList<Class<? extends BeanView<?>>>();
 		views.add(view);
 		return this;
 	}
