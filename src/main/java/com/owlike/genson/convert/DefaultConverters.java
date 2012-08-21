@@ -549,7 +549,9 @@ public final class DefaultConverters {
 			return null;
 		}
 	};
-
+	
+	@HandleClassMetadata
+	@WithoutBeanView
 	public static class EnumConverter<T extends Enum<T>> implements Converter<T> {
 		private final Class<T> eClass;
 
@@ -582,6 +584,8 @@ public final class DefaultConverters {
 		}
 	};
 	
+	@HandleClassMetadata
+	@WithoutBeanView
 	public static class URLConverter implements Converter<URL> {
 		public final static URLConverter instance = new URLConverter();
 		private URLConverter() {}
@@ -597,6 +601,8 @@ public final class DefaultConverters {
 		}
 	}
 	
+	@HandleClassMetadata
+	@WithoutBeanView
 	public static class URIConverter implements Converter<URI> {
 		public final static URIConverter instance = new URIConverter();
 		private URIConverter() {}
