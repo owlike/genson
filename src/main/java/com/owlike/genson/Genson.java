@@ -997,6 +997,7 @@ public final class Genson {
 			converters.add(DefaultConverters.NumberConverter.instance);
 			converters.add(new DefaultConverters.DateConverter(getDateFormat()));
 			converters.add(DefaultConverters.URLConverter.instance);
+			converters.add(DefaultConverters.URIConverter.instance);
 			return converters;
 		}
 
