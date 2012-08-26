@@ -10,8 +10,8 @@ import java.util.Map;
  * extract its annotations, etc.
  * 
  * @see Context
- * @see com.owlike.genson.spring.ExtendedReqRespBodyMethodProcessor ExtendedReqRespBodyMethodProcessor
- * @see com.owlike.genson.spring.GensonMessageConverter GensonMessageConverter
+ * @see com.owlike.genson.ext.spring.ExtendedReqRespBodyMethodProcessor ExtendedReqRespBodyMethodProcessor
+ * @see com.owlike.genson.ext.spring.GensonMessageConverter GensonMessageConverter
  * 
  * @author eugen
  *

@@ -1,4 +1,4 @@
-package com.owlike.genson.spring;
+package com.owlike.genson.ext.spring;
 
 import java.io.IOException;
 import java.util.List;

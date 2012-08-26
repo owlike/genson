@@ -20,7 +20,7 @@ import com.owlike.genson.stream.ObjectWriter;
  * @param <T> the type this converter is handling.
  */
 public class RuntimeTypeConverter<T> extends Wrapper<Converter<T>> implements Converter<T> {
-	public final static ChainedFactory runtimeTypeConverterFactory = new ChainedFactory() {
+	public static class RuntimeTypeConverterFactory extends ChainedFactory {
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
 		protected Converter<?> create(Type type, Genson genson, Converter<?> nextConverter) {

@@ -17,8 +17,8 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 import com.owlike.genson.Genson;
 import com.owlike.genson.bean.Primitives;
-import com.owlike.genson.spring.ExtendedReqRespBodyMethodProcessor;
-import com.owlike.genson.spring.GensonMessageConverter;
+import com.owlike.genson.ext.spring.ExtendedReqRespBodyMethodProcessor;
+import com.owlike.genson.ext.spring.GensonMessageConverter;
 
 public class SpringIntegrationTest {
 	@Test public void testFromAndTwoJson() throws Exception {

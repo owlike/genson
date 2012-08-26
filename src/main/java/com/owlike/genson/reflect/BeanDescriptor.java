@@ -93,8 +93,10 @@ public class BeanDescriptor<T> implements Converter<T> {
 		if (_noArgCtr) {
 			bean = _creator.create();
 			deserialize(bean, reader, ctx);
-		} else
+		} else {
+			if (_creator == null) throw new TransformationRuntimeException("No constructor has been found for type " + ofClass); 
 			bean = _deserWithCtrArgs(reader, ctx);
+		}
 		return bean;
 	}
 

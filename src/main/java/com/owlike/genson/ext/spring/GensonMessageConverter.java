@@ -1,4 +1,4 @@
-package com.owlike.genson.spring;
+package com.owlike.genson.ext.spring;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -26,7 +26,7 @@ public class GensonMessageConverter extends AbstractHttpMessageConverter<Object>
 	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
 	public GensonMessageConverter() {
-		this(new Genson.Builder().setHtmlSafe(true).setSkipNull(true).create());
+		this(new Genson.Builder().setHtmlSafe(true).setSkipNull(true).setWithBeanViewConverter(true).create());
 	}
 
 	public GensonMessageConverter(Genson genson) {

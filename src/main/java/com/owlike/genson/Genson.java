@@ -937,7 +937,7 @@ public final class Genson {
 			chainTail = chainTail.withNext(new NullConverter.NullConverterFactory()).withNext(
 					new ClassMetadataConverter.ClassMetadataConverterFactory());
 			if (isUseRuntimeTypeForSerialization())
-				chainTail = chainTail.withNext(RuntimeTypeConverter.runtimeTypeConverterFactory);
+				chainTail = chainTail.withNext(new RuntimeTypeConverter.RuntimeTypeConverterFactory());
 			if (isWithBeanViewConverter())
 				chainTail = chainTail.withNext(new BeanViewConverter.BeanViewConverterFactory(
 						getBeanViewDescriptorProvider()));
