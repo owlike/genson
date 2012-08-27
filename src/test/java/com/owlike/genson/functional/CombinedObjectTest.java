@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 import org.junit.Test;
+import static org.junit.Assert.*;
 
 import com.owlike.genson.Context;
 import com.owlike.genson.Deserializer;
@@ -23,7 +24,9 @@ public class CombinedObjectTest {
 		String json = "{\"Person\":{\"id\":\"2\"},\"Dog\":{\"dateOfBirth\":\"2012-08-20 00:00:00\",\"price\" : \"10.00\"}}";
 		Genson genson = new Genson.Builder().withDeserializerFactory(new MyClassConverterFactory()).create();
 		MyClass myClass = genson.deserialize(json, MyClass.class);
-		System.out.println(myClass);
+		assertEquals(Timestamp.valueOf("2012-08-20 00:00:00"), myClass.dogsDateOfBirth);
+		assertEquals("2", myClass.personsId);
+		assertEquals(new BigDecimal("10.00"), myClass.dogsPrice);
 	}
 	
 	public static class MyClassConverterFactory implements Factory<Deserializer<MyClass>> {
