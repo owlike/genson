@@ -4,8 +4,11 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.URI;
 import java.net.URL;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -614,6 +617,66 @@ public final class DefaultConverters {
 		public URI deserialize(ObjectReader reader, Context ctx) throws TransformationException,
 				IOException {
 			return URI.create(reader.valueAsString());
+		}
+	}
+	
+	@HandleClassMetadata
+	@WithoutBeanView
+	public static class BigDecimalConverter implements Converter<BigDecimal> {
+		public final static BigDecimalConverter instance = new BigDecimalConverter();
+		
+		private BigDecimalConverter() {}
+		
+		@Override
+		public BigDecimal deserialize(ObjectReader reader, Context ctx)
+				throws TransformationException, IOException {
+			return new BigDecimal(reader.valueAsString());
+		}
+
+		@Override
+		public void serialize(BigDecimal object, ObjectWriter writer, Context ctx)
+				throws TransformationException, IOException {
+			writer.writeValue(object);
+		}
+	}
+	
+	@HandleClassMetadata
+	@WithoutBeanView
+	public static class BigIntegerConverter implements Converter<BigInteger> {
+		public final static BigIntegerConverter instance = new BigIntegerConverter();
+		
+		private BigIntegerConverter() {}
+		
+		@Override
+		public BigInteger deserialize(ObjectReader reader, Context ctx)
+				throws TransformationException, IOException {
+			return new BigInteger(reader.valueAsString());
+		}
+
+		@Override
+		public void serialize(BigInteger object, ObjectWriter writer, Context ctx)
+				throws TransformationException, IOException {
+			writer.writeValue(object);
+		}
+	}
+	
+	@HandleClassMetadata
+	@WithoutBeanView
+	public static class TimestampConverter implements Converter<Timestamp> {
+		public final static TimestampConverter instance = new TimestampConverter();
+		
+		private TimestampConverter() {}
+		
+		@Override
+		public Timestamp deserialize(ObjectReader reader, Context ctx)
+				throws TransformationException, IOException {
+			return Timestamp.valueOf(reader.valueAsString());
+		}
+
+		@Override
+		public void serialize(Timestamp object, ObjectWriter writer, Context ctx)
+				throws TransformationException, IOException {
+			writer.writeValue(object.toString());
 		}
 	}
 }

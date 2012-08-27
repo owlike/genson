@@ -24,7 +24,7 @@ public class BeanMutatorAccessorResolverTest {
 		resolvers.add(new StandardMutaAccessorResolver());
 		
 		CompositeResolver composite = new CompositeResolver(resolvers);
-		
+
 		assertEquals(Trilean.FALSE, composite.isAccessor(MyPojo.class.getDeclaredField("proxy"), MyPojo.class));
 		assertEquals(Trilean.TRUE, composite.isAccessor(MyPojo.class.getDeclaredField("aString"), MyPojo.class));
 	}

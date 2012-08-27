@@ -227,7 +227,7 @@ public interface BeanMutatorAccessorResolver {
 		public Trilean isAccessor(Method method, Class<?> fromClass) {
 			if (mustIgnore(method, true))
 				return FALSE;
-			if (mustInclude(method, true))
+			if (mustInclude(method, true) && method.getParameterTypes().length == 0)
 				return TRUE;
 
 			String name = method.getName();
@@ -277,7 +277,7 @@ public interface BeanMutatorAccessorResolver {
 		public Trilean isMutator(Method method, Class<?> fromClass) {
 			if (mustIgnore(method, false))
 				return FALSE;
-			if (mustInclude(method, false))
+			if (mustInclude(method, false) && method.getParameterTypes().length == 1)
 				return TRUE;
 
 			if (methodVisibilityFilter.isVisible(method) && method.getName().length() > 3

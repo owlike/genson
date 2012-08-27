@@ -1028,6 +1028,9 @@ public final class Genson {
 			converters.add(new DefaultConverters.DateConverter(getDateFormat()));
 			converters.add(DefaultConverters.URLConverter.instance);
 			converters.add(DefaultConverters.URIConverter.instance);
+			converters.add(DefaultConverters.TimestampConverter.instance);
+			converters.add(DefaultConverters.BigDecimalConverter.instance);
+			converters.add(DefaultConverters.BigIntegerConverter.instance);
 			return converters;
 		}
 
