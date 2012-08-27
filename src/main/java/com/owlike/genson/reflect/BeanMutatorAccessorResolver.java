@@ -5,6 +5,10 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 import static com.owlike.genson.Trilean.FALSE;
 import static com.owlike.genson.Trilean.TRUE;
@@ -56,6 +60,115 @@ public interface BeanMutatorAccessorResolver {
 
 	public Trilean isMutator(Method method, Class<?> fromClass);
 
+	public static class BaseResolver implements BeanMutatorAccessorResolver {
+		@Override
+		public Trilean isAccessor(Field field, Class<?> fromClass) {
+			return Trilean.UNKNOWN;
+		}
+
+		@Override
+		public Trilean isAccessor(Method method, Class<?> fromClass) {
+			return Trilean.UNKNOWN;
+		}
+
+		@Override
+		public Trilean isCreator(Constructor<?> constructor, Class<?> fromClass) {
+			return Trilean.UNKNOWN;
+		}
+
+		@Override
+		public Trilean isCreator(Method method, Class<?> fromClass) {
+			return Trilean.UNKNOWN;
+		}
+
+		@Override
+		public Trilean isMutator(Field field, Class<?> fromClass) {
+			return Trilean.UNKNOWN;
+		}
+
+		@Override
+		public Trilean isMutator(Method method, Class<?> fromClass) {
+			return Trilean.UNKNOWN;
+		}
+	}
+	
+	public static class CompositeResolver implements BeanMutatorAccessorResolver {
+		private List<BeanMutatorAccessorResolver> components;
+
+		public CompositeResolver(List<BeanMutatorAccessorResolver> components) {
+			if (components == null || components.isEmpty()) {
+				throw new IllegalArgumentException(
+						"The composite resolver must have at least one resolver as component!");
+			}
+			this.components = new LinkedList<BeanMutatorAccessorResolver>(components);
+		}
+
+		public CompositeResolver add(BeanMutatorAccessorResolver... resolvers) {
+			components.addAll(0, Arrays.asList(resolvers));
+			return this;
+		}
+
+		@Override
+		public Trilean isAccessor(Field field, Class<?> fromClass) {
+			Trilean resolved = Trilean.UNKNOWN;
+			for (Iterator<BeanMutatorAccessorResolver> it = components.iterator(); resolved == null || resolved.equals(Trilean.UNKNOWN)
+					&& it.hasNext();) {
+				resolved = it.next().isAccessor(field, fromClass);
+			}
+			return resolved;
+		}
+
+		@Override
+		public Trilean isAccessor(Method method, Class<?> fromClass) {
+			Trilean resolved = Trilean.UNKNOWN;
+			for (Iterator<BeanMutatorAccessorResolver> it = components.iterator(); resolved == null || resolved.equals(Trilean.UNKNOWN)
+					&& it.hasNext();) {
+				resolved = it.next().isAccessor(method, fromClass);
+			}
+			return resolved;
+		}
+
+		@Override
+		public Trilean isCreator(Constructor<?> constructor, Class<?> fromClass) {
+			Trilean resolved = Trilean.UNKNOWN;
+			for (Iterator<BeanMutatorAccessorResolver> it = components.iterator(); resolved == null || resolved.equals(Trilean.UNKNOWN)
+					&& it.hasNext();) {
+				resolved = it.next().isCreator(constructor, fromClass);
+			}
+			return resolved;
+		}
+
+		@Override
+		public Trilean isCreator(Method method, Class<?> fromClass) {
+			Trilean resolved = Trilean.UNKNOWN;
+			for (Iterator<BeanMutatorAccessorResolver> it = components.iterator(); resolved == null || resolved.equals(Trilean.UNKNOWN)
+					&& it.hasNext();) {
+				resolved = it.next().isCreator(method, fromClass);
+			}
+			return resolved;
+		}
+
+		@Override
+		public Trilean isMutator(Field field, Class<?> fromClass) {
+			Trilean resolved = Trilean.UNKNOWN;
+			for (Iterator<BeanMutatorAccessorResolver> it = components.iterator(); resolved == null || resolved.equals(Trilean.UNKNOWN)
+					&& it.hasNext();) {
+				resolved = it.next().isMutator(field, fromClass);
+			}
+			return resolved;
+		}
+
+		@Override
+		public Trilean isMutator(Method method, Class<?> fromClass) {
+			Trilean resolved = Trilean.UNKNOWN;
+			for (Iterator<BeanMutatorAccessorResolver> it = components.iterator(); resolved == null || resolved.equals(Trilean.UNKNOWN)
+					&& it.hasNext();) {
+				resolved = it.next().isMutator(method, fromClass);
+			}
+			return resolved;
+		}
+	}
+	
 	/**
 	 * Standard implementation of BeanMutatorAccessorResolver. In the future it will probably be
 	 * split into multiple implementations combined into a composite BeanMutatorAccessorResolver.

@@ -35,6 +35,7 @@ import com.owlike.genson.reflect.BeanViewDescriptorProvider;
 import com.owlike.genson.reflect.PropertyNameResolver;
 import com.owlike.genson.reflect.TypeUtil;
 import com.owlike.genson.reflect.VisibilityFilter;
+import com.owlike.genson.reflect.BeanMutatorAccessorResolver.CompositeResolver;
 import com.owlike.genson.reflect.PropertyNameResolver.CompositePropertyNameResolver;
 import com.owlike.genson.stream.JsonReader;
 import com.owlike.genson.stream.JsonWriter;
@@ -291,8 +292,8 @@ public final class Genson {
 	public <T> T deserialize(String fromSource, Type toType,
 			Class<? extends BeanView<?>>... withViews) throws TransformationException, IOException {
 		StringReader reader = new StringReader(fromSource);
-		return deserialize(toType, new JsonReader(reader),
-				new Context(this, Arrays.asList(withViews)));
+		return deserialize(toType, new JsonReader(reader), new Context(this, Arrays
+				.asList(withViews)));
 	}
 
 	public <T> T deserialize(Type type, Reader reader, Class<? extends BeanView<?>>... withViews)
@@ -332,7 +333,7 @@ public final class Genson {
 	public ObjectReader createReader(InputStream is) {
 		return new JsonReader(new InputStreamReader(is));
 	}
-	
+
 	public ObjectWriter createWriter(Writer writer) {
 		return new JsonWriter(writer, skipNull, htmlSafe);
 	}
@@ -437,8 +438,8 @@ public final class Genson {
 		 */
 		public Builder withConverters(Converter<?>... converter) {
 			for (Converter<?> c : converter) {
-				Type typeOfConverter = TypeUtil.typeOf(0,
-						TypeUtil.lookupGenericType(Converter.class, c.getClass()));
+				Type typeOfConverter = TypeUtil.typeOf(0, TypeUtil.lookupGenericType(
+						Converter.class, c.getClass()));
 				typeOfConverter = TypeUtil.expandType(typeOfConverter, c.getClass());
 				registerConverter(c, typeOfConverter);
 			}
@@ -488,8 +489,8 @@ public final class Genson {
 
 		public Builder withSerializers(Serializer<?>... serializer) {
 			for (Serializer<?> s : serializer) {
-				Type typeOfConverter = TypeUtil.typeOf(0,
-						TypeUtil.lookupGenericType(Serializer.class, s.getClass()));
+				Type typeOfConverter = TypeUtil.typeOf(0, TypeUtil.lookupGenericType(
+						Serializer.class, s.getClass()));
 				typeOfConverter = TypeUtil.expandType(typeOfConverter, s.getClass());
 				registerSerializer(s, typeOfConverter);
 			}
@@ -516,8 +517,8 @@ public final class Genson {
 
 		public Builder withDeserializers(Deserializer<?>... deserializer) {
 			for (Deserializer<?> d : deserializer) {
-				Type typeOfConverter = TypeUtil.typeOf(0,
-						TypeUtil.lookupGenericType(Deserializer.class, d.getClass()));
+				Type typeOfConverter = TypeUtil.typeOf(0, TypeUtil.lookupGenericType(
+						Deserializer.class, d.getClass()));
 				typeOfConverter = TypeUtil.expandType(typeOfConverter, d.getClass());
 				registerDeserializer(d, typeOfConverter);
 			}
@@ -636,6 +637,25 @@ public final class Genson {
 		}
 
 		/**
+		 * Register additional BeanMutatorAccessorResolver that will be used before the standard
+		 * ones.
+		 * 
+		 * @param resolvers
+		 * @return a reference to this builder.
+		 */
+		public Builder with(BeanMutatorAccessorResolver... resolvers) {
+			if (mutatorAccessorResolver == null)
+				mutatorAccessorResolver = createBeanMutatorAccessorResolver();
+			if (mutatorAccessorResolver instanceof CompositeResolver)
+				((CompositeResolver) mutatorAccessorResolver).add(resolvers);
+			else
+				throw new IllegalStateException(
+						"You can not add multiple resolvers if the base resolver is not of type "
+								+ CompositeResolver.class.getName());
+			return this;
+		}
+
+		/**
 		 * Registers the specified resolvers in the order they were defined and before the standard
 		 * ones.
 		 * 
@@ -643,7 +663,8 @@ public final class Genson {
 		 * @return a reference to this builder.
 		 */
 		public Builder with(PropertyNameResolver... resolvers) {
-			if (propertyNameResolver == null) propertyNameResolver = createPropertyNameResolver();
+			if (propertyNameResolver == null)
+				propertyNameResolver = createPropertyNameResolver();
 			if (propertyNameResolver instanceof CompositePropertyNameResolver)
 				((CompositePropertyNameResolver) propertyNameResolver).add(resolvers);
 			else
@@ -849,16 +870,21 @@ public final class Genson {
 		 * @return a new instance of Genson built for the current configuration.
 		 */
 		public Genson create() {
-			if (nullConverter == null) nullConverter = new NullConverter();
-			if (propertyNameResolver == null) propertyNameResolver = createPropertyNameResolver();
+			if (nullConverter == null)
+				nullConverter = new NullConverter();
+			if (propertyNameResolver == null)
+				propertyNameResolver = createPropertyNameResolver();
 			if (mutatorAccessorResolver == null)
 				mutatorAccessorResolver = createBeanMutatorAccessorResolver();
 
 			beanDescriptorProvider = createBeanDescriptorProvider();
 
 			if (withBeanViewConverter) {
+				List<BeanMutatorAccessorResolver> resolvers = new ArrayList<BeanMutatorAccessorResolver>();
+				resolvers.add(new BeanViewDescriptorProvider.BeanViewMutatorAccessorResolver());
+				resolvers.add(mutatorAccessorResolver);
 				beanViewDescriptorProvider = new BeanViewDescriptorProvider(
-						new BeanViewDescriptorProvider.BeanViewMutatorAccessorResolver(),
+						new BeanMutatorAccessorResolver.CompositeResolver(resolvers),
 						getPropertyNameResolver());
 			}
 
@@ -886,8 +912,8 @@ public final class Genson {
 		private void addDefaultSerializers(List<? extends Serializer<?>> serializers) {
 			if (serializers != null) {
 				for (Serializer<?> serializer : serializers) {
-					Type typeOfConverter = TypeUtil.typeOf(0,
-							TypeUtil.lookupGenericType(Serializer.class, serializer.getClass()));
+					Type typeOfConverter = TypeUtil.typeOf(0, TypeUtil.lookupGenericType(
+							Serializer.class, serializer.getClass()));
 					typeOfConverter = TypeUtil.expandType(typeOfConverter, serializer.getClass());
 					if (!serializersMap.containsKey(typeOfConverter))
 						serializersMap.put(typeOfConverter, serializer);
@@ -898,10 +924,8 @@ public final class Genson {
 		private void addDefaultDeserializers(List<? extends Deserializer<?>> deserializers) {
 			if (deserializers != null) {
 				for (Deserializer<?> deserializer : deserializers) {
-					Type typeOfConverter = TypeUtil
-							.typeOf(0,
-									TypeUtil.lookupGenericType(Deserializer.class,
-											deserializer.getClass()));
+					Type typeOfConverter = TypeUtil.typeOf(0, TypeUtil.lookupGenericType(
+							Deserializer.class, deserializer.getClass()));
 					typeOfConverter = TypeUtil.expandType(typeOfConverter, deserializer.getClass());
 					if (!deserializersMap.containsKey(typeOfConverter))
 						deserializersMap.put(typeOfConverter, deserializer);
@@ -937,7 +961,8 @@ public final class Genson {
 			chainTail = chainTail.withNext(new NullConverter.NullConverterFactory()).withNext(
 					new ClassMetadataConverter.ClassMetadataConverterFactory());
 			if (isUseRuntimeTypeForSerialization())
-				chainTail = chainTail.withNext(new RuntimeTypeConverter.RuntimeTypeConverterFactory());
+				chainTail = chainTail
+						.withNext(new RuntimeTypeConverter.RuntimeTypeConverterFactory());
 			if (isWithBeanViewConverter())
 				chainTail = chainTail.withNext(new BeanViewConverter.BeanViewConverterFactory(
 						getBeanViewDescriptorProvider()));
@@ -949,14 +974,19 @@ public final class Genson {
 		}
 
 		protected BeanMutatorAccessorResolver createBeanMutatorAccessorResolver() {
+			List<BeanMutatorAccessorResolver> resolvers = new ArrayList<BeanMutatorAccessorResolver>();
 			VisibilityFilter propFilter = getFieldFilter();
-			if (propFilter == null) propFilter = VisibilityFilter.PACKAGE_PUBLIC;
+			if (propFilter == null)
+				propFilter = VisibilityFilter.PACKAGE_PUBLIC;
 			VisibilityFilter methodFilter = getFieldFilter();
-			if (methodFilter == null) methodFilter = VisibilityFilter.PACKAGE_PUBLIC;
+			if (methodFilter == null)
+				methodFilter = VisibilityFilter.PACKAGE_PUBLIC;
 			VisibilityFilter ctrFilter = getFieldFilter();
-			if (ctrFilter == null) ctrFilter = VisibilityFilter.PACKAGE_PUBLIC;
-			return new BeanMutatorAccessorResolver.StandardMutaAccessorResolver(propFilter,
-					methodFilter, ctrFilter);
+			if (ctrFilter == null)
+				ctrFilter = VisibilityFilter.PACKAGE_PUBLIC;
+			resolvers.add(new BeanMutatorAccessorResolver.StandardMutaAccessorResolver(propFilter,
+					methodFilter, ctrFilter));
+			return new BeanMutatorAccessorResolver.CompositeResolver(resolvers);
 		}
 
 		/**

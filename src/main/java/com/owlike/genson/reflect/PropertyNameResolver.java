@@ -70,7 +70,8 @@ public interface PropertyNameResolver {
 		}
 
 		public CompositePropertyNameResolver add(PropertyNameResolver... resolvers) {
-			components.addAll(Arrays.asList(resolvers));
+			// should at the head position so custom resolvers a privileged
+			components.addAll(0, Arrays.asList(resolvers));
 			return this;
 		}
 
