@@ -55,11 +55,12 @@ public class ClassMetadataConverter<T> extends Wrapper<Converter<T>> implements 
 				throw new IllegalArgumentException(
 						"nextConverter must be not null for ClassMetadataConverter, "
 								+ "as ClassMetadataConverter can not be the last converter in the chain!");
-
+			
+			Class<?> rawClass = TypeUtil.getRawClass(type);
 			if (genson.isWithClassMetadata()
 					&& !Wrapper.toAnnotatedElement(nextConverter).isAnnotationPresent(
 							HandleClassMetadata.class))
-				return new ClassMetadataConverter(TypeUtil.getRawClass(type), nextConverter);
+				return new ClassMetadataConverter(rawClass, nextConverter);
 			else
 				return nextConverter;
 		}
@@ -74,8 +75,10 @@ public class ClassMetadataConverter<T> extends Wrapper<Converter<T>> implements 
 
 	public void serialize(T obj, ObjectWriter writer, Context ctx) throws TransformationException,
 			IOException {
-		writer.beginNextObjectMetadata()
+		if (!Object.class.equals(tClass)) {
+			writer.beginNextObjectMetadata()
 				.writeMetadata("class", ctx.genson.aliasFor(obj.getClass()));
+		}
 		wrapped.serialize(obj, writer, ctx);
 	}
 
