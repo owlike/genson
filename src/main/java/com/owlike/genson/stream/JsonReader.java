@@ -485,7 +485,7 @@ public class JsonReader implements ObjectReader {
 					
 			if (_buffer[_cursor] == '.') {
 				_cursor++;
-				_doubleValue = consumeInt();
+				_doubleValue = consumeDouble();
 				_doubleValue = sign * (_intValue + _doubleValue/Math.pow(10, _numberLen));
 				valueType = ValueType.DOUBLE;
 			} else {
@@ -505,6 +505,10 @@ public class JsonReader implements ObjectReader {
 					double exp = 0;
 					boolean limit = false;
 					if(ctoken=='-') {
+						if (ValueType.INTEGER.equals(valueType)) {
+							_doubleValue = _intValue;
+							valueType = ValueType.DOUBLE;
+						}
 						exp = 1/Math.pow(10, val);
 						if (exp == 0) {
 							exp = Math.pow(10, -val+1);
@@ -583,6 +587,31 @@ public class JsonReader implements ObjectReader {
 		return value;
 	}
 
+	private final double consumeDouble() throws IOException {
+		boolean stop = false;
+		double value = 0;
+		_numberLen = 0;
+		for ( ; _buflen > -1; ) {
+			fillBuffer(true);
+			int i = _cursor;
+			for (; i < _buflen; i++) {
+				if ((_buffer[i] < 48 || _buffer[i] > 57)) {
+					stop = true;
+					break;
+				}
+				
+				_numberLen++;
+				value = 10 * value + _CHAR_TO_INT[_buffer[i]];
+			}
+			_cursor = i;
+			if (stop) {
+				if (_numberLen == 0) newWrongTokenException("numeric value");
+				return value;
+			}
+		}
+		return value;
+	}
+	
 	protected final int readNextToken(boolean consume) throws IOException {
 		boolean stop = false;
 		

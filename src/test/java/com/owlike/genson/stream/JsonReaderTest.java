@@ -34,6 +34,7 @@ public class JsonReaderTest {
 		assertFalse(reader.hasNext());
 
 		reader.endObject();
+		reader.close();
 	}
 
 	@Test
@@ -81,6 +82,7 @@ public class JsonReaderTest {
 		assertFalse(reader.hasNext());
 
 		reader.endArray();
+		reader.close();
 	}
 	
 	@Test public void testReadDoubles() throws IOException {
@@ -99,6 +101,26 @@ public class JsonReaderTest {
 		assertTrue(Double.isInfinite(reader.valueAsDouble()));
 		assertTrue(0 > reader.valueAsDouble());
 		reader.endArray();
+		reader.close();
+	}
+	
+	// bugs signaled by Jesse Wilson
+	@Test public void testReadExtremeDoubles() throws IOException {
+		String src = "[1111e-4, 1e-4, 0.11111111111111111111, 2.2250738585072014e-308, 1.2345678901234567e22]";
+		JsonReader reader = new JsonReader(src);
+		reader.beginArray();
+		reader.next();
+		assertEquals(1111e-4, reader.valueAsDouble(), 0);
+		reader.next();
+		assertEquals(1e-4, reader.valueAsDouble(), 0);
+		reader.next();
+		assertEquals(0.11111111111111111111, reader.valueAsDouble(), 0);
+		reader.next();
+		assertEquals(2.2250738585072014e-308, reader.valueAsDouble(), 0);
+		reader.next();
+		assertEquals(1.2345678901234567e22, reader.valueAsDouble(), 0);
+		reader.endArray();
+		reader.close();
 	}
 	
 	@Test public void testReadLong() throws IOException {
@@ -120,7 +142,7 @@ public class JsonReaderTest {
 		reader.next();
 		assertTrue(999999999999999990l == reader.valueAsLong());
 		reader.endArray();
-		
+		reader.close();
 	}
 
 	@Test
@@ -149,6 +171,7 @@ public class JsonReaderTest {
 		assertFalse(reader.hasNext());
 
 		reader.endArray();
+		reader.close();
 	}
 
 	@Test
@@ -181,6 +204,7 @@ public class JsonReaderTest {
 		assertEquals(reader.valueAsString(), "-0.9");
 
 		reader.endObject();
+		reader.close();
 	}
 
 	@Test
@@ -196,6 +220,7 @@ public class JsonReaderTest {
 		assertFalse(reader.beginArray().hasNext());
 		assertFalse(reader.endArray().hasNext());
 		reader.endArray();
+		reader.close();
 	}
 
 	@Test
@@ -262,6 +287,7 @@ public class JsonReaderTest {
 		reader.endObject();
 
 		reader.endArray();
+		reader.close();
 	}
 	
 	@Test public void testSkipValue() throws IOException {
@@ -293,6 +319,7 @@ public class JsonReaderTest {
 		assertEquals(reader.name(), "end");
 		
 		reader.endObject();
+		reader.close();
 	}
 	
 	@Test public void testIllegalReadObjectInstedOfArray() throws IOException {
@@ -302,6 +329,7 @@ public class JsonReaderTest {
 			reader.beginObject();
 			fail();
 		} catch (IllegalStateException ise) {}
+		reader.close();
 	}
 	
 	@Test public void testIllegalOperationCallNext() throws IOException {
@@ -314,6 +342,7 @@ public class JsonReaderTest {
 			reader.next();
 			fail();
 		} catch (IllegalStateException ise) {}
+		reader.close();
 	}
 	
 	@Test public void testIncompleteSource() throws IOException {
@@ -325,6 +354,7 @@ public class JsonReaderTest {
 			reader.next();
 			fail();
 		} catch (IOException ioe) {}
+		reader.close();
 	}
 	
 	@Test
@@ -345,6 +375,7 @@ public class JsonReaderTest {
 		assertEquals("anotherclass", reader.metadata("class"));
 		assertFalse(reader.hasNext());
 		reader.endObject().endObject();
+		reader.close();
 	}
 	
 	@Test public void testMultipleCallsTonextObjectMetadata() throws IOException {
@@ -358,6 +389,7 @@ public class JsonReaderTest {
 		assertEquals("no comment", reader.nextObjectMetadata().metadata("comment"));
 		assertEquals("me", reader.beginObject().metadata("author"));
 		reader.endObject();
+		reader.close();
 	}
 	
 	@Test public void testReadMalformedJson() throws IOException {
@@ -367,5 +399,6 @@ public class JsonReaderTest {
 			reader.beginObject();
 			fail();
 		} catch (IllegalStateException ise) {}
+		reader.close();
 	}
 }
