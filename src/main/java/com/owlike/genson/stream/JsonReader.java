@@ -11,14 +11,12 @@ import java.util.Map;
 
 import com.owlike.genson.TransformationRuntimeException;
 
-
 /*
  * TODO handle rows/cols for more precise exceptions (pretty printing)
- * TODO - partially done - add checks for number reading, handle overflows : configurable => throw exception or return to the begin of the value (actual behavior)
  */
 public class JsonReader implements ObjectReader {
 	protected final static String NULL_VALUE = "null";
-	
+
 	protected final static int[] SKIPPED_TOKENS;
 	static {
 		SKIPPED_TOKENS = new int[128];
@@ -44,23 +42,25 @@ public class JsonReader implements ObjectReader {
 			sHexValues['A' + i] = 10 + i;
 		}
 	}
-	
+
 	private final static int[] _CHAR_TO_INT = new int[58];
 	static {
-		for (int i = 48; i < 58; i++) _CHAR_TO_INT[i] = i - 48;
+		for (int i = 48; i < 58; i++)
+			_CHAR_TO_INT[i] = i - 48;
 	}
-	
+
 	private final Reader reader;
+	private final boolean strictDoubleParse = true;
 	// TODO recyclebuffer
 	private final char[] _buffer = new char[2048];
 	private int _position;
 	private int _cursor;
 	private int _buflen;
-	
+
 	private char[] _stringBuffer = new char[16];
 	private int _stringBufferTail = 0;
 	private int _stringBufferLength = _stringBuffer.length;
-	
+
 	private String currentName;
 	private String _stringValue;
 	private long _intValue;
@@ -73,7 +73,7 @@ public class JsonReader implements ObjectReader {
 	private boolean _first = false;
 	private boolean _metadata_readen = false;
 	private Map<String, String> _metadata = new HashMap<String, String>(5);
-	
+
 	private final Deque<JsonType> _ctx = new ArrayDeque<JsonType>();
 	{
 		_ctx.push(JsonType.EMPTY);
@@ -87,8 +87,10 @@ public class JsonReader implements ObjectReader {
 		this.reader = reader;
 		try {
 			char token = (char) readNextToken(false);
-			if ( '[' == token ) setValueType(ValueType.ARRAY);
-			else if ( '{' == token ) setValueType(ValueType.OBJECT);
+			if ('[' == token)
+				setValueType(ValueType.ARRAY);
+			else if ('{' == token)
+				setValueType(ValueType.OBJECT);
 			else {
 				// ok lets try to read next
 				if (_buflen > 0) {
@@ -100,17 +102,19 @@ public class JsonReader implements ObjectReader {
 							// and will increment the cursor
 							_cursor = -1;
 							_position = -1;
-    						consumeString('"');
-    						_stringValue = new String(_stringBuffer, 0, _stringBufferTail);
-    						valueType = ValueType.STRING;
+							consumeString('"');
+							_stringValue = new String(_stringBuffer, 0, _stringBufferTail);
+							valueType = ValueType.STRING;
 						} catch (RuntimeException re) {
 							throw ise;
 						}
 					}
 					if (ValueType.valueOf(valueType.name()) == null)
-						throw new TransformationRuntimeException("Failed to instanciate reader, first character was " 
-								+ (char) token + " when possible character are [ and {");
-				} else setValueType(ValueType.NULL);
+						throw new TransformationRuntimeException(
+								"Failed to instanciate reader, first character was " + (char) token
+										+ " when possible character are [ and {");
+				} else
+					setValueType(ValueType.NULL);
 			}
 		} catch (IOException ioe) {
 			throw new TransformationRuntimeException("Failed to instanciate reader!", ioe);
@@ -120,7 +124,7 @@ public class JsonReader implements ObjectReader {
 	public void close() throws IOException {
 		reader.close();
 	}
-	
+
 	public ObjectReader beginArray() throws IOException {
 		begin('[', JsonType.ARRAY);
 		valueType = ValueType.ARRAY;
@@ -130,14 +134,14 @@ public class JsonReader implements ObjectReader {
 
 	public ObjectReader beginObject() throws IOException {
 		if (!_metadata_readen) {
-    		begin('{', JsonType.OBJECT);
-    		valueType = ValueType.OBJECT;
-    		_metadata.clear();
-    		readMetadata();
+			begin('{', JsonType.OBJECT);
+			valueType = ValueType.OBJECT;
+			_metadata.clear();
+			readMetadata();
 		}
 		return this;
 	}
-	
+
 	public ObjectReader nextObjectMetadata() throws IOException {
 		return beginObject();
 	}
@@ -159,103 +163,95 @@ public class JsonReader implements ObjectReader {
 	}
 
 	public String valueAsString() {
-		if (ValueType.STRING.equals(valueType))
-			return _stringValue;
-		if(ValueType.NULL.equals(valueType)) return NULL_VALUE;
-		if (ValueType.INTEGER.equals(valueType)) {
-			return String.valueOf(_intValue);
-		}
-		if (ValueType.DOUBLE.equals(valueType)) {
-			return String.valueOf(_doubleValue);
-		}
+		if (ValueType.STRING.equals(valueType) || ValueType.INTEGER == valueType
+				|| ValueType.DOUBLE == valueType) return _stringValue;
+		if (ValueType.NULL.equals(valueType)) return NULL_VALUE;
 		if (ValueType.BOOLEAN.equals(valueType)) {
 			return _booleanValue.toString();
 		}
 		throw new IllegalStateException("Readen value can not be converted to String");
 	}
-	
+
 	public int valueAsInt() throws IOException {
-		if (ValueType.INTEGER.equals(valueType)) {
-			if (_intValue < Integer.MIN_VALUE || _intValue > Integer.MAX_VALUE)
-				throw new TransformationRuntimeException("The numeric value " + _intValue + " is out of int range.");
-			return (int) _intValue;
-		}
-		if (ValueType.DOUBLE.equals(valueType)) {
-			if (_doubleValue < Integer.MIN_VALUE || _doubleValue > Integer.MAX_VALUE)
-				throw new TransformationRuntimeException("The numeric value " + _doubleValue + " is out of int range.");
-			return (int)_doubleValue;
-		}
-		if (ValueType.NULL.equals(valueType))
-			return 0;
-		if (ValueType.STRING.equals(valueType))
-			return "".equals(_stringValue) ? null : Integer.valueOf(_stringValue);
-		throw new IllegalStateException("Readen value is not of type int");
+		if (ValueType.INTEGER == valueType) {
+			int value = (int) _intValue;
+			if (value != _intValue) throwNumberFormatException("an int", "overflowing long value " +_intValue);
+			return value;
+		} else if (ValueType.DOUBLE == valueType) {
+			int value = (int) _doubleValue;
+			long longValue = (long) _doubleValue;
+			// lets accept only if the integer part is the same and ignore the decimals
+			if (value != longValue) {
+				throwNumberFormatException("an int", "overflowing double value " +_doubleValue);
+			}
+			return value;
+		} else if (ValueType.STRING == valueType)
+			return "".equals(_stringValue) ? 0 : Integer.parseInt(_stringValue);
+		else if (ValueType.NULL == valueType) return 0;
+		
+		throw new IllegalStateException("Expected a int but value is of type " + valueType);
 	}
-	
+
 	public long valueAsLong() throws IOException {
-		if (ValueType.INTEGER.equals(valueType)) {
+		if (ValueType.INTEGER == valueType) {
 			return _intValue;
-		}
-		if (ValueType.DOUBLE.equals(valueType)) {
+		} else if (ValueType.DOUBLE == valueType) {
+			if (Long.MIN_VALUE > _doubleValue || _doubleValue > Long.MAX_VALUE) {
+				throwNumberFormatException("a long", "overflowing double value " + _doubleValue);
+			}
 			return (long) _doubleValue;
-		}
-		if (ValueType.NULL.equals(valueType))
-			return 0;
-		if (ValueType.STRING.equals(valueType))
-			return "".equals(_stringValue) ? null : Long.valueOf(_stringValue);
-		throw new IllegalStateException("Readen value is not of type long");
+		} else if (ValueType.STRING == valueType)
+			return "".equals(_stringValue) ? 0 : Long.parseLong(_stringValue);
+		else if (ValueType.NULL == valueType) return 0l;
+		throw new IllegalStateException("Expected a long but value is of type " + valueType);
 	}
-	
+
 	public double valueAsDouble() throws IOException {
-		if (ValueType.DOUBLE.equals(valueType)) {
+		if (ValueType.DOUBLE == valueType) {
 			return _doubleValue;
-		}
-		if (ValueType.INTEGER.equals(valueType)) {
-			return _intValue;
-		}
-		if (ValueType.NULL.equals(valueType))
-			return 0;
-		if (ValueType.STRING.equals(valueType))
-			return "".equals(_stringValue) ? null : Double.valueOf(_stringValue);
-		throw new IllegalStateException("Readen value is not of type double");
+		} else if (ValueType.INTEGER == valueType) {
+			// for the moment lets do that even if there is some precision loss...
+			return Long.valueOf(_intValue).doubleValue();
+		} else if (ValueType.STRING == valueType)
+			return "".equals(_stringValue) ? 0 : Double.parseDouble(_stringValue);
+		else if (ValueType.NULL == valueType) return 0d;
+		throw new IllegalStateException("Expected a double but value is of type " + valueType);
 	}
-	
+
 	public short valueAsShort() throws IOException {
-		if (ValueType.INTEGER.equals(valueType)) {
-			if (_intValue < Short.MIN_VALUE || _intValue > Short.MAX_VALUE)
-				throw new TransformationRuntimeException("The numeric value " + _intValue + " is out of short range.");
-			return (short) _intValue;
-		}
-		if (ValueType.DOUBLE.equals(valueType)) {
-			if (_doubleValue < Short.MIN_VALUE || _doubleValue > Short.MAX_VALUE)
-				throw new TransformationRuntimeException("The numeric value " + _doubleValue + " is out of short range.");
-			return (short) _doubleValue;
-		}
-		if (ValueType.NULL.equals(valueType))
-			return 0;
-		if (ValueType.STRING.equals(valueType))
-			return "".equals(_stringValue) ? null : Short.valueOf(_stringValue);
-		throw new IllegalStateException("Readen value is not of type short");
+		if (ValueType.INTEGER == valueType) {
+			short value = (short) _intValue;
+			if (value != _intValue) throwNumberFormatException("a short", "overflowing long value " +_intValue);
+			return value;
+		} else if (ValueType.DOUBLE == valueType) {
+			short value = (short) _doubleValue;
+			long longValue = (long) _doubleValue;
+			// lets accept only if the integer part is the same and ignore the decimals
+			if (value != longValue) {
+				throwNumberFormatException("a short", "overflowing double value " +_doubleValue);
+			}
+			return value;
+		} else if (ValueType.STRING == valueType)
+			return "".equals(_stringValue) ? 0 : Short.parseShort(_stringValue);
+		else if (ValueType.NULL == valueType) return 0;
+		
+		throw new IllegalStateException("Expected a short but value is of type " + valueType);
 	}
-	
+
 	public float valueAsFloat() throws IOException {
-		if (ValueType.DOUBLE.equals(valueType)) {
-			if (_doubleValue < Float.MIN_VALUE || _doubleValue > Float.MAX_VALUE)
-				throw new TransformationRuntimeException("The numeric value " + _doubleValue + " is out of float range.");
+		if (ValueType.DOUBLE == valueType) {
+			if (Float.MIN_VALUE > _doubleValue || _doubleValue > Float.MAX_VALUE )
+				throwNumberFormatException("a float", "overflowing double value " + _doubleValue);
 			return (float) _doubleValue;
-		}
-		if (ValueType.INTEGER.equals(valueType)) {
-			if (_intValue < Float.MIN_VALUE || _intValue > Float.MAX_VALUE)
-				throw new TransformationRuntimeException("The numeric value " + _intValue + " is out of float range.");
-			return _intValue;
-		}
-		if (ValueType.NULL.equals(valueType))
-			return 0f;
-		if (ValueType.STRING.equals(valueType))
-			return "".equals(_stringValue) ? null : Float.valueOf(_stringValue);
-		throw new IllegalStateException("Readen value is not of type float");
+		} else if (ValueType.INTEGER == valueType) {
+			// same as for doubles, for the moment lets do that even if there is some precision loss...
+			return Long.valueOf(_intValue).floatValue();
+		} else if (ValueType.STRING == valueType)
+			return "".equals(_stringValue) ? 0 : Float.parseFloat(_stringValue);
+		else if (ValueType.NULL == valueType) return 0f;
+		throw new IllegalStateException("Expected a float but value is of type " + valueType);
 	}
-	
+
 	public boolean valueAsBoolean() throws IOException {
 		if (ValueType.BOOLEAN.equals(valueType)) {
 			return _booleanValue;
@@ -265,7 +261,7 @@ public class JsonReader implements ObjectReader {
 		if (ValueType.NULL.equals(valueType)) return false;
 		throw new IllegalStateException("Readen value is not of type boolean");
 	}
-	
+
 	public String metadata(String name) throws IOException {
 		if (!_metadata_readen) nextObjectMetadata();
 		return _metadata.get(name);
@@ -312,8 +308,10 @@ public class JsonReader implements ObjectReader {
 			int token = readNextToken(false);
 			char ctoken = (char) token;
 			checkIllegalEnd(token);
-			_hasNext = token < 128 && ((ctoken == ',' && !_first) || (_first && ('"' == ctoken || ctoken == '{' || ctoken == '['
-					|| (token > 47 && token < 58) || ctoken == '-' || ctoken == 'n' || ctoken == 't' || ctoken == 'f')));
+			_hasNext = token < 128
+					&& ((ctoken == ',' && !_first) || (_first && ('"' == ctoken || ctoken == '{'
+							|| ctoken == '[' || (token > 47 && token < 58) || ctoken == '-'
+							|| ctoken == 'n' || ctoken == 't' || ctoken == 'f')));
 			_checkedNext = true;
 
 			if (_hasNext && !_first) {
@@ -337,10 +335,8 @@ public class JsonReader implements ObjectReader {
 			_cursor++;
 			ctoken = (char) readNextToken(false);
 		} else if (JsonType.ARRAY == _ctx.peek()) {
-			if (ctoken == '[')
-				return setValueType(ValueType.ARRAY);
-			if (ctoken == '{')
-				return setValueType(ValueType.OBJECT);
+			if (ctoken == '[') return setValueType(ValueType.ARRAY);
+			if (ctoken == '{') return setValueType(ValueType.OBJECT);
 		}
 
 		if (JsonType.OBJECT == _ctx.peek()) {
@@ -348,10 +344,9 @@ public class JsonReader implements ObjectReader {
 			currentName = new String(_stringBuffer, 0, _stringBufferTail);
 			_stringBufferTail = 0;
 
-			if (readNextToken(true) != ':')
-				newWrongTokenException(":", _cursor - 1);
+			if (readNextToken(true) != ':') newWrongTokenException(":", _cursor - 1);
 		}
-		
+
 		return consumeValue();
 	}
 
@@ -369,43 +364,44 @@ public class JsonReader implements ObjectReader {
 			return setValueType(ValueType.OBJECT);
 		else
 			valueType = consumeLiteral();
-		
+
 		return setValueType(valueType);
 	}
-	
+
 	protected final void readMetadata() throws IOException {
 		_metadata_readen = true;
-		while(true) {
-    		char ctoken = (char) readNextToken(false);
-    		if ( '"' != ctoken ) return;
-    		ensureBufferHas(2, true);
-    		
-    		if ( '@' == _buffer[_cursor+1] ) {
-    			_cursor++;
-    			// we cheat here...
-    			consumeString(ctoken);
-    			String key = new String(_stringBuffer, 0, _stringBufferTail);
-    			_stringBufferTail = 0;
-    
-    			if (readNextToken(true) != ':')
-    				newWrongTokenException(":", _cursor - 1);
-    			
-    			consumeString((char) readNextToken(false));
-    			_metadata.put(key, new String(_stringBuffer, 0, _stringBufferTail));
-    			_stringBufferTail = 0;
-    			if (readNextToken(false) == ',') {
-    				_cursor++;
-    			}
-    		} else return;
+		while (true) {
+			char ctoken = (char) readNextToken(false);
+			if ('"' != ctoken) return;
+			ensureBufferHas(2, true);
+
+			if ('@' == _buffer[_cursor + 1]) {
+				_cursor++;
+				// we cheat here...
+				consumeString(ctoken);
+				String key = new String(_stringBuffer, 0, _stringBufferTail);
+				_stringBufferTail = 0;
+
+				if (readNextToken(true) != ':') newWrongTokenException(":", _cursor - 1);
+
+				consumeString((char) readNextToken(false));
+				_metadata.put(key, new String(_stringBuffer, 0, _stringBufferTail));
+				_stringBufferTail = 0;
+				if (readNextToken(false) == ',') {
+					_cursor++;
+				}
+			} else
+				return;
 		}
 	}
-	
+
 	protected final void begin(int character, JsonType type) throws IOException {
 		int token = readNextToken(true);
 		checkIllegalEnd(token);
 		if (character == token) {
 			_ctx.push(type);
-		} else newWrongTokenException("" + (char) character, _cursor - 1);
+		} else
+			newWrongTokenException("" + (char) character, _cursor - 1);
 		_first = true;
 		_checkedNext = false;
 		_hasNext = false;
@@ -416,7 +412,8 @@ public class JsonReader implements ObjectReader {
 		checkIllegalEnd(token);
 		if (character == token && type == _ctx.peek()) {
 			_ctx.pop();
-		} else newWrongTokenException("" + (char) character, _cursor - 1);
+		} else
+			newWrongTokenException("" + (char) character, _cursor - 1);
 		_first = false;
 		_checkedNext = false;
 		_hasNext = false;
@@ -430,23 +427,23 @@ public class JsonReader implements ObjectReader {
 	protected final void consumeName(char token) throws IOException {
 		if (token != '"') newMisplacedTokenException(_cursor);
 		_cursor++;
-		for ( ; _buflen > -1; ) {
+		for (; _buflen > -1;) {
 			fillBuffer(true);
 			int i = _cursor;
 			for (; i < _buflen; i++) {
 				if (_buffer[i] == '"') break;
 			}
-			
+
 			writeToStringBuffer(_buffer, _cursor, i - _cursor);
 			_cursor = i + 1;
 			if (i < _buflen && _buffer[i] == '"') return;
 		}
 	}
-	
+
 	protected final void consumeString(char token) throws IOException {
 		if (token != '"') newMisplacedTokenException(_cursor);
 		_cursor++;
-		for ( ; _buflen > -1; ) {
+		for (; _buflen > -1;) {
 			fillBuffer(true);
 
 			int i = _cursor;
@@ -454,81 +451,87 @@ public class JsonReader implements ObjectReader {
 				if (_buffer[i] == '\\') {
 					writeToStringBuffer(_buffer, _cursor, i - _cursor);
 					_cursor = i + 1;
-					if (_stringBufferLength <= (_stringBufferTail+1)) expandStringBuffer(16);
+					if (_stringBufferLength <= (_stringBufferTail + 1)) expandStringBuffer(16);
 					_stringBuffer[_stringBufferTail++] = readEscaped();
 					i = _cursor;
-				}
-				else if (_buffer[i] == '"') break;
-				else i++;
+				} else if (_buffer[i] == '"')
+					break;
+				else
+					i++;
 			}
 
 			writeToStringBuffer(_buffer, _cursor, i - _cursor);
 			_cursor = i + 1;
-			if (i < _buflen && _buffer[i] == '"')
-				return;
+			if (i < _buflen && _buffer[i] == '"') return;
 		}
 	}
 
 	protected final ValueType consumeLiteral() throws IOException {
-		fillBuffer(true);
+		// fillBuffer(true);
+		ensureBufferHas(_cursor, false);
 		int token = _buffer[_cursor];
 
 		if ((token > 47 && token < 58) || token == 45) {
 			ValueType valueType = null;
-			int sign = 1;
-			if (token == 45) {
-				_cursor++;
-				sign = -1;
-			}
-			_intValue = consumeInt();
-			if (isEOF()) return ValueType.INTEGER;
-					
-			if (_buffer[_cursor] == '.') {
-				_cursor++;
-				_doubleValue = consumeDouble();
-				_doubleValue = sign * (_intValue + _doubleValue/Math.pow(10, _numberLen));
-				valueType = ValueType.DOUBLE;
+			if (strictDoubleParse) {
+				valueType = consumeStrictNumber();
 			} else {
-				_intValue *= sign;
-				valueType = ValueType.INTEGER;
-			}
-			
-			if (isEOF() || ensureBufferHas(2, false) < 0) return valueType;
+				// this part is disabled as the algorithm is wrong for big numbers.
+				int sign = 1;
+				if (token == 45) {
+					_cursor++;
+					sign = -1;
+				}
+				_intValue = consumeInt();
+				if (isEOF()) return ValueType.INTEGER;
 
-			char ctoken = _buffer[_cursor];
-			if (ctoken == 'e' || ctoken == 'E') {
-				_cursor++;
-				ctoken = _buffer[_cursor];
-				if (ctoken == '-'||ctoken == '+'||(ctoken > 47 && ctoken < 58)) {
-					if(ctoken == '-'||ctoken == '+') _cursor++;
-					double val = consumeInt();
-					double exp = 0;
-					boolean limit = false;
-					if(ctoken=='-') {
+				if (_buffer[_cursor] == '.') {
+					_cursor++;
+					_doubleValue = consumeDouble();
+					_doubleValue = sign * (_intValue + _doubleValue / Math.pow(10, _numberLen));
+					valueType = ValueType.DOUBLE;
+				} else {
+					_intValue *= sign;
+					valueType = ValueType.INTEGER;
+				}
+
+				if (isEOF() || ensureBufferHas(2, false) < 0) return valueType;
+
+				char ctoken = _buffer[_cursor];
+				if (ctoken == 'e' || ctoken == 'E') {
+					_cursor++;
+					ctoken = _buffer[_cursor];
+					if (ctoken == '-' || ctoken == '+' || (ctoken > 47 && ctoken < 58)) {
+						if (ctoken == '-' || ctoken == '+') _cursor++;
+						double val = consumeInt();
+						double exp = 0;
+						boolean limit = false;
+						if (ctoken == '-') {
+							if (ValueType.INTEGER.equals(valueType)) {
+								_doubleValue = _intValue;
+								valueType = ValueType.DOUBLE;
+							}
+							exp = 1 / Math.pow(10, val);
+							if (exp == 0) {
+								exp = Math.pow(10, -val + 1);
+								limit = true;
+							}
+						} else {
+							exp = Math.pow(10, val);
+						}
 						if (ValueType.INTEGER.equals(valueType)) {
-							_doubleValue = _intValue;
-							valueType = ValueType.DOUBLE;
+							_intValue = (long) (_intValue * exp);
+						} else {
+							_doubleValue = _doubleValue * exp;
+							if (limit) _doubleValue = _doubleValue / 10d;
 						}
-						exp = 1/Math.pow(10, val);
-						if (exp == 0) {
-							exp = Math.pow(10, -val+1);
-							limit = true;
-						}
-					} else {
-						exp = Math.pow(10, val);
-					}
-					if (ValueType.INTEGER.equals(valueType)) {
-						_intValue = (long) (_intValue * exp);
-					} else {
-						_doubleValue = _doubleValue * exp;
-						if (limit) _doubleValue = _doubleValue/10d;
-					}
-				} else newWrongTokenException("'-' or '+' or '' (same as +)");
+					} else
+						newWrongTokenException("'-' or '+' or '' (same as +)");
+				}
 			}
-
 			return valueType;
 		} else {
-			ensureBufferHas(4, true); 
+			ensureBufferHas(4, true);
 
 			if ((_buffer[_cursor] == 'N' || _buffer[_cursor] == 'n')
 					&& (_buffer[_cursor + 1] == 'U' || _buffer[_cursor + 1] == 'u')
@@ -537,7 +540,7 @@ public class JsonReader implements ObjectReader {
 				_cursor += 4;
 				return ValueType.NULL;
 			}
-			
+
 			if ((_buffer[_cursor] == 'T' || _buffer[_cursor] == 't')
 					&& (_buffer[_cursor + 1] == 'R' || _buffer[_cursor + 1] == 'r')
 					&& (_buffer[_cursor + 2] == 'U' || _buffer[_cursor + 2] == 'u')
@@ -547,7 +550,7 @@ public class JsonReader implements ObjectReader {
 				return ValueType.BOOLEAN;
 			}
 			ensureBufferHas(5, true);
-			
+
 			if ((_buffer[_cursor] == 'F' || _buffer[_cursor] == 'f')
 					&& (_buffer[_cursor + 1] == 'A' || _buffer[_cursor + 1] == 'a')
 					&& (_buffer[_cursor + 2] == 'L' || _buffer[_cursor + 2] == 'l')
@@ -557,17 +560,20 @@ public class JsonReader implements ObjectReader {
 				_cursor += 5;
 				return ValueType.BOOLEAN;
 			} else {
-				throw new IllegalStateException("Illegal character around position " + (_position - valueAsString().length() - _buflen + _cursor)
-						+ " awaited for literal (number, boolean or null) but read '" + _buffer[_cursor] + "'!");
+				throw new IllegalStateException("Illegal character around position "
+						+ (_position - valueAsString().length() - _buflen + _cursor)
+						+ " awaited for literal (number, boolean or null) but read '"
+						+ _buffer[_cursor] + "'!");
 			}
 		}
 	}
 
+	// unused as consumeDouble implementation is wrong.
 	private final long consumeInt() throws IOException {
 		boolean stop = false;
 		long value = 0;
 		_numberLen = 0;
-		for ( ; _buflen > -1; ) {
+		for (; _buflen > -1;) {
 			fillBuffer(true);
 			int i = _cursor;
 			for (; i < _buflen; i++) {
@@ -587,11 +593,12 @@ public class JsonReader implements ObjectReader {
 		return value;
 	}
 
+	// This method should not be used as the implemented algorithm is false.
 	private final double consumeDouble() throws IOException {
 		boolean stop = false;
 		double value = 0;
 		_numberLen = 0;
-		for ( ; _buflen > -1; ) {
+		for (; _buflen > -1;) {
 			fillBuffer(true);
 			int i = _cursor;
 			for (; i < _buflen; i++) {
@@ -599,7 +606,7 @@ public class JsonReader implements ObjectReader {
 					stop = true;
 					break;
 				}
-				
+
 				_numberLen++;
 				value = 10 * value + _CHAR_TO_INT[_buffer[i]];
 			}
@@ -611,11 +618,80 @@ public class JsonReader implements ObjectReader {
 		}
 		return value;
 	}
-	
+
+	private final ValueType consumeStrictNumber() throws IOException {
+		ValueType type;
+		// ensureBufferHas(32, false);
+		int localCursor;
+		if (_buffer[_cursor] == 45) {
+			localCursor = _cursor + 1;
+		} else
+			localCursor = _cursor;
+
+		localCursor = advanceWhileNumeric(localCursor);
+		if (_buffer[localCursor] == '.') {
+			localCursor = advanceWhileNumeric(++localCursor);
+			type = ValueType.DOUBLE;
+		} else
+			type = ValueType.INTEGER;
+
+		if (localCursor + 1 < _buflen) {
+			char ctoken = _buffer[localCursor];
+			if (ctoken == 'e' || ctoken == 'E') {
+				ctoken = _buffer[++localCursor];
+				if (ctoken == '-' || ctoken == '+' || (ctoken > 47 && ctoken < 58)) {
+					if (ctoken == '-') type = ValueType.DOUBLE;
+					localCursor = advanceWhileNumeric(++localCursor);
+				} else
+					newWrongTokenException("'-' or '+' or '' (same as +)");
+			}
+		}
+
+		int length = localCursor - _cursor;
+		_stringValue = new String(_buffer, _cursor, length);
+		if (length < 18) {
+			if (type == ValueType.INTEGER) {
+				// it is a long, an integer or a short
+				_intValue = Long.parseLong(_stringValue);
+			} else {
+				// ok it is a float or double
+				_doubleValue = Double.parseDouble(_stringValue);
+			}
+		} else {
+			// if length is between 18 and 19 it can still be a long.
+			if (type == ValueType.DOUBLE) {
+				// first let's consider the case where we know that its a double as it should occur
+				// more often
+				_doubleValue = Double.parseDouble(_stringValue);
+			} else {
+				try {
+					// then try to read it as a long
+					_intValue = Long.parseLong(_stringValue);
+				} catch (NumberFormatException nfe) {
+					// ok its length is smaller than 19 but the value is greater than
+					// Long.MAX_VALUE, it is a double
+					_doubleValue = Double.parseDouble(_stringValue);
+					type = ValueType.DOUBLE;
+				}
+			}
+		}
+		_cursor = localCursor;
+		return type;
+	}
+
+	private int advanceWhileNumeric(int cursor) {
+		for (; cursor < _buflen; cursor++) {
+			if ((_buffer[cursor] < 48 || _buffer[cursor] > 57)) {
+				return cursor;
+			}
+		}
+		return cursor;
+	}
+
 	protected final int readNextToken(boolean consume) throws IOException {
 		boolean stop = false;
-		
-		for ( ; _buflen > -1; ) {
+
+		for (; _buflen > -1;) {
 			fillBuffer(true);
 
 			for (; _cursor < _buflen; _cursor++) {
@@ -683,21 +759,22 @@ public class JsonReader implements ObjectReader {
 		return (char) value;
 	}
 
-	private final void writeToStringBuffer(final char[] data, final int offset, final int length) throws IOException {
-		if (_stringBufferLength <= (_stringBufferTail+length)) {
+	private final void writeToStringBuffer(final char[] data, final int offset, final int length)
+			throws IOException {
+		if (_stringBufferLength <= (_stringBufferTail + length)) {
 			expandStringBuffer(length);
 		}
 		System.arraycopy(data, offset, _stringBuffer, _stringBufferTail, length);
 		_stringBufferTail += length;
 	}
-	
+
 	private final void expandStringBuffer(int length) {
 		char[] extendedStringBuffer = new char[_stringBufferLength * 2 + length];
 		System.arraycopy(_stringBuffer, 0, extendedStringBuffer, 0, _stringBufferTail);
 		_stringBuffer = extendedStringBuffer;
 		_stringBufferLength = extendedStringBuffer.length;
 	}
-	
+
 	private final int fillBuffer(boolean doThrow) throws IOException {
 		if (_cursor < _buflen) return _buflen;
 		_buflen = reader.read(_buffer);
@@ -706,20 +783,25 @@ public class JsonReader implements ObjectReader {
 		_position += _buflen;
 		return _buflen;
 	}
-	
+
 	private final int ensureBufferHas(int minLength, boolean doThrow) throws IOException {
 		int actualLen = _buflen - _cursor;
-		if ( actualLen >= minLength ) {
+		if (actualLen >= minLength) {
 			return actualLen;
 		}
-		
+
 		System.arraycopy(_buffer, _cursor, _buffer, 0, actualLen);
-		for (; actualLen < minLength; ) {
+		for (; actualLen < minLength;) {
 			int len = reader.read(_buffer, actualLen, _buffer.length - actualLen);
 			if (len < 0) {
 				if (doThrow)
 					throw new IllegalStateException("Encountered end of stream, incomplete json!");
-				else return len;
+				else {
+					_buflen = actualLen;
+					_position += actualLen;
+					_cursor = 0;
+					return len;
+				}
 			}
 			actualLen += len;
 		}
@@ -728,11 +810,11 @@ public class JsonReader implements ObjectReader {
 		_cursor = 0;
 		return actualLen;
 	}
-	
+
 	protected final boolean isEOF() throws IOException {
 		return _buflen < 0 || fillBuffer(false) < 0;
 	}
-	
+
 	private final void resetNameAndValue() {
 		_doubleValue = 0;
 		_intValue = 0;
@@ -750,25 +832,38 @@ public class JsonReader implements ObjectReader {
 		if (cursor < 0) cursor = 0;
 		int pos = (_position - valueAsString().length() - _buflen + cursor);
 		if (pos < 0) pos = 0;
-		
-		if (_buflen < 0) throw new IllegalStateException("Incomplete data or malformed json : encoutered end of stream but expected " + awaited);
-		else throw new IllegalStateException("Illegal character at position " + pos + " expected "
-				+ awaited + " but read '" + _buffer[cursor] + "' !");
+
+		if (_buflen < 0)
+			throw new IllegalStateException(
+					"Incomplete data or malformed json : encoutered end of stream but expected "
+							+ awaited);
+		else
+			throw new IllegalStateException("Illegal character at position " + pos + " expected "
+					+ awaited + " but read '" + _buffer[cursor] + "' !");
 	}
-	
+
 	private final void newMisplacedTokenException(int cursor) {
-		if (_buflen < 0) throw new IllegalStateException("Incomplete data or malformed json : encoutered end of stream.");
-		
+		if (_buflen < 0)
+			throw new IllegalStateException(
+					"Incomplete data or malformed json : encoutered end of stream.");
+
 		if (cursor < 0) cursor = 0;
 		int pos = (_position - valueAsString().length() - _buflen + cursor);
 		if (pos < 0) pos = 0;
-		
-		throw new IllegalStateException("Encountred misplaced character '" + _buffer[cursor] + "' around position " + pos);
+
+		throw new IllegalStateException("Encountred misplaced character '" + _buffer[cursor]
+				+ "' around position " + pos);
 	}
 
 	private final void checkIllegalEnd(int token) throws IOException {
 		if (token == -1 && JsonType.EMPTY != _ctx.peek())
 			throw new IOException("Incomplete data or malformed json : encoutered end of stream!");
+	}
+
+	private void throwNumberFormatException(String expected, String encoutered) {
+		int pos = (_position - valueAsString().length() - _buflen + _cursor);
+		throw new NumberFormatException("Wrong numeric type at position " + pos + ", expected "
+				+ expected + " but encoutered " + encoutered);
 	}
 
 }

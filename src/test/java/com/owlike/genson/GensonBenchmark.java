@@ -12,6 +12,7 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.owlike.genson.Genson;
 import com.owlike.genson.TransformationException;
 import com.owlike.genson.bean.ComplexObject;
@@ -29,21 +30,21 @@ import com.owlike.genson.bean.Primitives;
  Gson avg serialization time=0.61916 ms
 
  ======= Deserialization Bench ======
- Genson global deserialization time=23.663 s
- Genson avg deserialization time=0.47326 ms
+ Genson global deserialization time=34.942 s
+ Genson avg deserialization time=0.69884 ms
 
- Jackson global deserialization time=27.131 s
- Jackson avg deserialization time=0.54262 ms
+ Jackson global deserialization time=32.481 s
+ Jackson avg deserialization time=0.64962 ms
 
- Gson global deserialization time=39.17 s
- Gson avg deserialization time=0.7834 ms
+ Gson global deserialization time=34.731 s
+ Gson avg deserialization time=0.69462 ms
 
  =================================
  */
 public class GensonBenchmark {
 	final int ITERATION_CNT = 50000;
 	private Genson genson = new Genson();
-	private Gson gson = new Gson();
+	private Gson gson = new GsonBuilder().serializeNulls().create();
 	private ObjectMapper om = new ObjectMapper();
 	private Map<String, Object> map;
 	private String json;

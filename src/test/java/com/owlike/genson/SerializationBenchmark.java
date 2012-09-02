@@ -33,6 +33,10 @@ public class SerializationBenchmark {
 	private Feed shortFeed;
 	private Feed longFeed;
 
+	class A {
+		public String s = null;
+	}
+	
 	public SerializationBenchmark() throws TransformationException, IOException {
 		setUp();
 	}
@@ -40,7 +44,7 @@ public class SerializationBenchmark {
 	private void setUp() throws TransformationException, IOException {
 		genson = new Genson.Builder().setDateFormat(
 				new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", Locale.US)).create();
-		gson = new GsonBuilder().setDateFormat("EEE MMM dd HH:mm:ss Z yyyy").create();
+		gson = new GsonBuilder().setDateFormat("EEE MMM dd HH:mm:ss Z yyyy").serializeNulls().create();
 		mapper = new ObjectMapper();
 		mapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		mapper.configure(DeserializationConfig.Feature.AUTO_DETECT_FIELDS, true);

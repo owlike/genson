@@ -219,4 +219,17 @@ public class Tweet {
 	String source;
 	@JsonProperty
 	String in_reply_to_user_id_str;
+	@Override
+	public String toString() {
+		return "Tweet [coordinates=" + coordinates + ", favorited=" + favorited + ", created_at="
+				+ created_at + ", truncated=" + truncated + ", retweeted_status="
+				+ retweeted_status + ", id_str=" + id_str + ", in_reply_to_id_str="
+				+ in_reply_to_id_str + ", contributors=" + contributors + ", text=" + text
+				+ ", id=" + id + ", retweet_count=" + retweet_count
+				+ ", in_reply_to_status_id_str=" + in_reply_to_status_id_str + ", geo=" + geo
+				+ ", retweeted=" + retweeted + ", in_reply_to_user_id=" + in_reply_to_user_id
+				+ ", in_reply_to_screen_name=" + in_reply_to_screen_name + ", place=" + place
+				+ ", user=" + user + ", source=" + source + ", in_reply_to_user_id_str="
+				+ in_reply_to_user_id_str + "]";
+	}
 }

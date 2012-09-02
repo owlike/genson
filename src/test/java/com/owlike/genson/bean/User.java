@@ -251,6 +251,30 @@ public class User {
 		return true;
 	}
 
+	@Override
+	public String toString() {
+		return "User [name=" + name + ", profile_sidebar_border_color="
+				+ profile_sidebar_border_color + ", profile_background_tile="
+				+ profile_background_tile + ", profile_sidebar_fill_color="
+				+ profile_sidebar_fill_color + ", created_at=" + created_at + ", location="
+				+ location + ", profile_image_url=" + profile_image_url + ", follow_request_sent="
+				+ follow_request_sent + ", profile_link_color=" + profile_link_color
+				+ ", is_translator=" + is_translator + ", id_str=" + id_str + ", favourites_count="
+				+ favourites_count + ", contributors_enabled=" + contributors_enabled + ", url="
+				+ url + ", default_profile=" + default_profile + ", utc_offset=" + utc_offset
+				+ ", id=" + id + ", profile_use_background_image=" + profile_use_background_image
+				+ ", listed_count=" + listed_count + ", lang=" + lang + ", isProtected="
+				+ isProtected + ", followers_count=" + followers_count + ", profile_text_color="
+				+ profile_text_color + ", profile_background_color=" + profile_background_color
+				+ ", time_zone=" + time_zone + ", description=" + description + ", notifications="
+				+ notifications + ", geo_enabled=" + geo_enabled + ", verified=" + verified
+				+ ", profile_background_image_url=" + profile_background_image_url
+				+ ", defalut_profile_image=" + defalut_profile_image + ", friends_count="
+				+ friends_count + ", statuses_count=" + statuses_count + ", screen_name="
+				+ screen_name + ", following=" + following + ", show_all_inline_media="
+				+ show_all_inline_media + "]";
+	}
+
 	@JsonProperty
 	String name;
 	@JsonProperty
