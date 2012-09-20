@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,7 +16,7 @@ import com.owlike.genson.stream.ObjectReader;
 import com.owlike.genson.stream.ObjectWriter;
 
 public class BeanDescriptor<T> implements Converter<T> {
-
+	final Class<?> fromDeclaringClass;
 	final Class<T> ofClass;
 	final Map<String, PropertyMutator<T, ?>> mutableProperties;
 	final List<PropertyAccessor<T, ?>> accessibleProperties;
@@ -39,9 +38,10 @@ public class BeanDescriptor<T> implements Converter<T> {
 	// }
 	// };
 
-	public BeanDescriptor(Class<T> forClass, List<PropertyAccessor<T, ?>> readableBps,
+	public BeanDescriptor(Class<T> forClass, Class<?> fromDeclaringClass, List<PropertyAccessor<T, ?>> readableBps,
 			Map<String, PropertyMutator<T, ?>> writableBps, BeanCreator<T> creator) {
 		this.ofClass = forClass;
+		this.fromDeclaringClass = fromDeclaringClass;
 		this._creator = creator;
 		mutableProperties = writableBps;
 
@@ -50,7 +50,8 @@ public class BeanDescriptor<T> implements Converter<T> {
 		accessibleProperties = Collections.unmodifiableList(readableBps);
 		if (_creator != null)
 			_noArgCtr = _creator.parameters.size() == 0;
-		else _noArgCtr = false;
+		else
+			_noArgCtr = false;
 		// if (_creators.size() > 0 && _creators.get(0).parameters.size() == 0) {
 		// // lets look if all properties have a field or method mutator, this means that we can
 		// // use the no arg beancreator (constructor or method) and still set all the properties
@@ -94,7 +95,9 @@ public class BeanDescriptor<T> implements Converter<T> {
 			bean = _creator.create();
 			deserialize(bean, reader, ctx);
 		} else {
-			if (_creator == null) throw new TransformationRuntimeException("No constructor has been found for type " + ofClass); 
+			if (_creator == null)
+				throw new TransformationRuntimeException("No constructor has been found for type "
+						+ ofClass);
 			bean = _deserWithCtrArgs(reader, ctx);
 		}
 		return bean;
@@ -140,8 +143,7 @@ public class BeanDescriptor<T> implements Converter<T> {
 
 		int size = names.size();
 		int settersToCallCnt = size - _creator.parameters.size();
-		if (settersToCallCnt < 0)
-			settersToCallCnt = 0;
+		if (settersToCallCnt < 0) settersToCallCnt = 0;
 		Object[] creatorArgs = new Object[_creator.parameters.size()];
 		String[] newNames = new String[size];
 		Object[] newValues = new Object[size];
@@ -162,11 +164,14 @@ public class BeanDescriptor<T> implements Converter<T> {
 			@SuppressWarnings("unchecked")
 			PropertyMutator<T, Object> property = (PropertyMutator<T, Object>) mutableProperties
 					.get(newNames[i]);
-			if (property != null)
-				property.mutate(bean, newValues[i]);
+			if (property != null) property.mutate(bean, newValues[i]);
 		}
 		reader.endObject();
 		return bean;
+	}
+
+	public Class<T> getOfClass() {
+		return ofClass;
 	}
 
 }

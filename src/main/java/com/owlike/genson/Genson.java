@@ -95,6 +95,7 @@ public final class Genson {
 	private final boolean skipNull;
 	private final boolean htmlSafe;
 	private final boolean withClassMetadata;
+	private final boolean strictDoubleParse;
 
 	/**
 	 * The default constructor will use the default configuration provided by the {@link Builder}.
@@ -103,7 +104,7 @@ public final class Genson {
 	public Genson() {
 		this(_default.converterFactory, _default.beanDescriptorFactory, _default.nullConverter,
 				_default.skipNull, _default.htmlSafe, _default.aliasClassMap,
-				_default.withClassMetadata);
+				_default.withClassMetadata, _default.strictDoubleParse);
 	}
 
 	/**
@@ -130,10 +131,16 @@ public final class Genson {
 	 * @param withClassMetadata
 	 *            indicates whether class name should be serialized and used during deserialization
 	 *            to determine the type. False by default.
+	 * @param strictDoubleParse
+	 *            indicates whether to use or not double approximation. If false (by default) it
+	 *            enables Genson custom double parsing algorithm, that is an approximation of
+	 *            Double.parse but is a lot faster. If true, Double.parse method will be usead
+	 *            instead. In most cases you should be fine with Genson algorithm, but if for some
+	 *            reason you need to have 100% match with Double.parse, then enable strict parsing.
 	 */
 	public Genson(Factory<Converter<?>> converterFactory, BeanDescriptorProvider beanDescProvider,
 			Converter<Object> nullConverter, boolean skipNull, boolean htmlSafe,
-			Map<String, Class<?>> classAliases, boolean withClassMetadata) {
+			Map<String, Class<?>> classAliases, boolean withClassMetadata, boolean strictDoubleParse) {
 		this.converterFactory = converterFactory;
 		this.beanDescriptorFactory = beanDescProvider;
 		this.nullConverter = nullConverter;
@@ -145,6 +152,7 @@ public final class Genson {
 		for (Map.Entry<String, Class<?>> entry : classAliases.entrySet()) {
 			classAliasMap.put(entry.getValue(), entry.getKey());
 		}
+		this.strictDoubleParse = strictDoubleParse;
 	}
 
 	/**
@@ -269,37 +277,36 @@ public final class Genson {
 	 */
 	public <T> T deserialize(String fromSource, Class<T> toClass) throws TransformationException,
 			IOException {
-		return deserialize(toClass, new JsonReader(new StringReader(fromSource)), new Context(this));
+		return deserialize(toClass, createReader(new StringReader(fromSource)), new Context(this));
 	}
 
 	public <T> T deserialize(String fromSource, GenericType<T> toType)
 			throws TransformationException, IOException {
-		return deserialize(toType.getType(), new JsonReader(new StringReader(fromSource)),
+		return deserialize(toType.getType(), createReader(new StringReader(fromSource)),
 				new Context(this));
 	}
 
 	public <T> T deserialize(Reader reader, Type toType) throws TransformationException,
 			IOException {
-		return deserialize(toType, new JsonReader(reader), new Context(this));
+		return deserialize(toType, createReader(reader), new Context(this));
 	}
 
 	public <T> T deserialize(String fromSource, Type toType) throws TransformationException,
 			IOException {
 		StringReader reader = new StringReader(fromSource);
-		return deserialize(toType, new JsonReader(reader), new Context(this, null));
+		return deserialize(toType, createReader(reader), new Context(this, null));
 	}
 
 	public <T> T deserialize(String fromSource, Type toType,
 			Class<? extends BeanView<?>>... withViews) throws TransformationException, IOException {
 		StringReader reader = new StringReader(fromSource);
-		return deserialize(toType, new JsonReader(reader), new Context(this, Arrays
-				.asList(withViews)));
+		return deserialize(toType, createReader(reader),
+				new Context(this, Arrays.asList(withViews)));
 	}
 
 	public <T> T deserialize(Type type, Reader reader, Class<? extends BeanView<?>>... withViews)
 			throws TransformationException, IOException {
-		return deserialize(type, new JsonReader(reader),
-				new Context(this, Arrays.asList(withViews)));
+		return deserialize(type, createReader(reader), new Context(this, Arrays.asList(withViews)));
 	}
 
 	public <T> T deserialize(Type type, ObjectReader reader, Context ctx)
@@ -331,7 +338,7 @@ public final class Genson {
 	}
 
 	public ObjectReader createReader(InputStream is) {
-		return new JsonReader(new InputStreamReader(is));
+		return new JsonReader(new InputStreamReader(is), strictDoubleParse, withClassMetadata);
 	}
 
 	public ObjectWriter createWriter(Writer writer) {
@@ -339,7 +346,7 @@ public final class Genson {
 	}
 
 	public ObjectReader createReader(Reader reader) {
-		return new JsonReader(reader);
+		return new JsonReader(reader, strictDoubleParse, withClassMetadata);
 	}
 
 	public boolean isSkipNull() {
@@ -396,6 +403,7 @@ public final class Genson {
 		private boolean withBeanViewConverter = false;
 		private boolean useRuntimeTypeForSerialization = false;
 		private boolean withDebugInfoPropertyNameResolver = false;
+		private boolean strictDoubleParse = false;
 
 		private PropertyNameResolver propertyNameResolver;
 		private BeanMutatorAccessorResolver mutatorAccessorResolver;
@@ -438,8 +446,8 @@ public final class Genson {
 		 */
 		public Builder withConverters(Converter<?>... converter) {
 			for (Converter<?> c : converter) {
-				Type typeOfConverter = TypeUtil.typeOf(0, TypeUtil.lookupGenericType(
-						Converter.class, c.getClass()));
+				Type typeOfConverter = TypeUtil.typeOf(0,
+						TypeUtil.lookupGenericType(Converter.class, c.getClass()));
 				typeOfConverter = TypeUtil.expandType(typeOfConverter, c.getClass());
 				registerConverter(c, typeOfConverter);
 			}
@@ -489,8 +497,8 @@ public final class Genson {
 
 		public Builder withSerializers(Serializer<?>... serializer) {
 			for (Serializer<?> s : serializer) {
-				Type typeOfConverter = TypeUtil.typeOf(0, TypeUtil.lookupGenericType(
-						Serializer.class, s.getClass()));
+				Type typeOfConverter = TypeUtil.typeOf(0,
+						TypeUtil.lookupGenericType(Serializer.class, s.getClass()));
 				typeOfConverter = TypeUtil.expandType(typeOfConverter, s.getClass());
 				registerSerializer(s, typeOfConverter);
 			}
@@ -517,8 +525,8 @@ public final class Genson {
 
 		public Builder withDeserializers(Deserializer<?>... deserializer) {
 			for (Deserializer<?> d : deserializer) {
-				Type typeOfConverter = TypeUtil.typeOf(0, TypeUtil.lookupGenericType(
-						Deserializer.class, d.getClass()));
+				Type typeOfConverter = TypeUtil.typeOf(0,
+						TypeUtil.lookupGenericType(Deserializer.class, d.getClass()));
 				typeOfConverter = TypeUtil.expandType(typeOfConverter, d.getClass());
 				registerDeserializer(d, typeOfConverter);
 			}
@@ -663,8 +671,7 @@ public final class Genson {
 		 * @return a reference to this builder.
 		 */
 		public Builder with(PropertyNameResolver... resolvers) {
-			if (propertyNameResolver == null)
-				propertyNameResolver = createPropertyNameResolver();
+			if (propertyNameResolver == null) propertyNameResolver = createPropertyNameResolver();
 			if (propertyNameResolver instanceof CompositePropertyNameResolver)
 				((CompositePropertyNameResolver) propertyNameResolver).add(resolvers);
 			else
@@ -862,6 +869,15 @@ public final class Genson {
 			return Collections.unmodifiableMap(deserializersMap);
 		}
 
+		public boolean isStrictDoubleParse() {
+			return strictDoubleParse;
+		}
+
+		public Builder setStrictDoubleParse(boolean strictDoubleParse) {
+			this.strictDoubleParse = strictDoubleParse;
+			return this;
+		}
+
 		/**
 		 * Creates an instance of Genson. You may use this method as many times you want. It wont
 		 * change the state of the builder, in sense that the returned instance will have always the
@@ -870,10 +886,8 @@ public final class Genson {
 		 * @return a new instance of Genson built for the current configuration.
 		 */
 		public Genson create() {
-			if (nullConverter == null)
-				nullConverter = new NullConverter();
-			if (propertyNameResolver == null)
-				propertyNameResolver = createPropertyNameResolver();
+			if (nullConverter == null) nullConverter = new NullConverter();
+			if (propertyNameResolver == null) propertyNameResolver = createPropertyNameResolver();
 			if (mutatorAccessorResolver == null)
 				mutatorAccessorResolver = createBeanMutatorAccessorResolver();
 
@@ -912,8 +926,8 @@ public final class Genson {
 		private void addDefaultSerializers(List<? extends Serializer<?>> serializers) {
 			if (serializers != null) {
 				for (Serializer<?> serializer : serializers) {
-					Type typeOfConverter = TypeUtil.typeOf(0, TypeUtil.lookupGenericType(
-							Serializer.class, serializer.getClass()));
+					Type typeOfConverter = TypeUtil.typeOf(0,
+							TypeUtil.lookupGenericType(Serializer.class, serializer.getClass()));
 					typeOfConverter = TypeUtil.expandType(typeOfConverter, serializer.getClass());
 					if (!serializersMap.containsKey(typeOfConverter))
 						serializersMap.put(typeOfConverter, serializer);
@@ -924,8 +938,10 @@ public final class Genson {
 		private void addDefaultDeserializers(List<? extends Deserializer<?>> deserializers) {
 			if (deserializers != null) {
 				for (Deserializer<?> deserializer : deserializers) {
-					Type typeOfConverter = TypeUtil.typeOf(0, TypeUtil.lookupGenericType(
-							Deserializer.class, deserializer.getClass()));
+					Type typeOfConverter = TypeUtil
+							.typeOf(0,
+									TypeUtil.lookupGenericType(Deserializer.class,
+											deserializer.getClass()));
 					typeOfConverter = TypeUtil.expandType(typeOfConverter, deserializer.getClass());
 					if (!deserializersMap.containsKey(typeOfConverter))
 						deserializersMap.put(typeOfConverter, deserializer);
@@ -944,7 +960,8 @@ public final class Genson {
 		protected Genson create(Factory<Converter<?>> converterFactory,
 				Map<String, Class<?>> classAliases) {
 			return new Genson(converterFactory, getBeanDescriptorProvider(), getNullConverter(),
-					isSkipNull(), isHtmlSafe(), classAliases, isWithClassMetadata());
+					isSkipNull(), isHtmlSafe(), classAliases, isWithClassMetadata(),
+					isStrictDoubleParse());
 		}
 
 		/**
@@ -976,14 +993,11 @@ public final class Genson {
 		protected BeanMutatorAccessorResolver createBeanMutatorAccessorResolver() {
 			List<BeanMutatorAccessorResolver> resolvers = new ArrayList<BeanMutatorAccessorResolver>();
 			VisibilityFilter propFilter = getFieldFilter();
-			if (propFilter == null)
-				propFilter = VisibilityFilter.PACKAGE_PUBLIC;
+			if (propFilter == null) propFilter = VisibilityFilter.PACKAGE_PUBLIC;
 			VisibilityFilter methodFilter = getFieldFilter();
-			if (methodFilter == null)
-				methodFilter = VisibilityFilter.PACKAGE_PUBLIC;
+			if (methodFilter == null) methodFilter = VisibilityFilter.PACKAGE_PUBLIC;
 			VisibilityFilter ctrFilter = getFieldFilter();
-			if (ctrFilter == null)
-				ctrFilter = VisibilityFilter.PACKAGE_PUBLIC;
+			if (ctrFilter == null) ctrFilter = VisibilityFilter.PACKAGE_PUBLIC;
 			resolvers.add(new BeanMutatorAccessorResolver.StandardMutaAccessorResolver(propFilter,
 					methodFilter, ctrFilter));
 			return new BeanMutatorAccessorResolver.CompositeResolver(resolvers);

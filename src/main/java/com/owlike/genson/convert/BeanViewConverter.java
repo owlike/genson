@@ -25,7 +25,8 @@ import com.owlike.genson.stream.ObjectWriter;
  * 
  * @author eugen
  * 
- * @param <T> type of objects this BeanViewConverter can handle.
+ * @param <T>
+ *            type of objects this BeanViewConverter can handle.
  */
 public class BeanViewConverter<T> extends Wrapper<Converter<T>> implements Converter<T> {
 
@@ -66,32 +67,37 @@ public class BeanViewConverter<T> extends Wrapper<Converter<T>> implements Conve
 		return null;
 	}
 
-	public void serialize(T obj, ObjectWriter writer, Context ctx)
-			throws TransformationException, IOException {
+	public void serialize(T obj, ObjectWriter writer, Context ctx) throws TransformationException,
+			IOException {
 		boolean handled = false;
 		List<Class<? extends BeanView<?>>> views = ctx.views();
 		if (views != null && views.size() > 0) {
 			Class<? extends BeanView<T>> viewClass = findViewFor(type, views);
 			if (viewClass != null) {
+				Type viewForType = TypeUtil.expandType(BeanView.class.getTypeParameters()[0],
+						viewClass);
 				@SuppressWarnings("unchecked")
-				BeanDescriptor<T> descriptor = (BeanDescriptor<T>) provider.provideBeanDescriptor(
-						viewClass, ctx.genson);
+				Class<T> viewForClass = (Class<T>) TypeUtil.getRawClass(viewForType);
+				BeanDescriptor<T> descriptor = provider
+						.provide(viewForClass, viewClass, ctx.genson);
 				descriptor.serialize(obj, writer, ctx);
 				handled = true;
 			}
 		}
-		if (!handled)
-			wrapped.serialize(obj, writer, ctx);
+		if (!handled) wrapped.serialize(obj, writer, ctx);
 	}
 
-	public T deserialize(ObjectReader reader, Context ctx)
-			throws TransformationException, IOException {
+	public T deserialize(ObjectReader reader, Context ctx) throws TransformationException,
+			IOException {
 		if (ctx.hasViews()) {
 			Class<? extends BeanView<T>> viewClass = findViewFor(type, ctx.views());
 			if (viewClass != null) {
+				Type viewForType = TypeUtil.expandType(BeanView.class.getTypeParameters()[0],
+						viewClass);
 				@SuppressWarnings("unchecked")
-				BeanDescriptor<T> descriptor = (BeanDescriptor<T>) provider.provideBeanDescriptor(
-						viewClass, ctx.genson);
+				Class<T> viewForClass = (Class<T>) TypeUtil.getRawClass(viewForType);
+				BeanDescriptor<T> descriptor = provider
+						.provide(viewForClass, viewClass, ctx.genson);
 				return descriptor.deserialize(reader, ctx);
 			}
 		}

@@ -17,14 +17,5 @@ public interface BeanDescriptorProvider {
 	 * @param genson
 	 * @return an instance of a BeanDescriptor based on type argument.
 	 */
-	public BeanDescriptor<?> provide(Type type, Genson genson);
-
-	/**
-	 * Creates a BeanDescriptor based on ofClass argument.
-	 * @param ofClass is the class used to create the BeanDescriptor.
-	 * @param genson
-	 * @return an instance of a BeanDescriptor based on ofClass argument.
-	 */
-	// we should have Class<T> ofClass, but if we do that we could not apply the BeanView mecanism as it is...
-	public <T> BeanDescriptor<T> provideBeanDescriptor(Class<?> ofClass, Genson genson);
+	public <T> BeanDescriptor<T> provide(Class<T> ofClass, Type type, Genson genson);
 }

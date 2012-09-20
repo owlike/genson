@@ -11,11 +11,11 @@ import com.owlike.genson.stream.ValueType;
 import static org.junit.Assert.*;
 
 public class JsonReaderTest {
-
+	
 	@Test
 	public void testReader() throws IOException {
 		String src = "{\"nom\" : \"toto titi, tu\", \"prenom\" : \"albert  \", \"entier\" : 1322.6}";
-		JsonReader reader = new JsonReader(new StringReader(src));
+		JsonReader reader = new JsonReader(src);
 		reader.beginObject();
 
 		assertTrue(reader.hasNext());
@@ -39,7 +39,7 @@ public class JsonReaderTest {
 	@Test
 	public void testTokenTypesAndHasNext() throws IOException {
 		String src = "[{\"a\": 1, \"b\": \"a\", \"c\":1.1,\"d\":null,\"e\":false, \"f\":[]},[1, 1.1], null, false, true, \"tt\"]";
-		JsonReader reader = new JsonReader(new StringReader(src));
+		JsonReader reader = new JsonReader(src);
 
 		reader.beginArray();
 
@@ -126,7 +126,7 @@ public class JsonReaderTest {
 		reader.next();
 		assertEquals(0, reader.valueAsInt());
 		assertEquals(0l, reader.valueAsLong());
-		assertEquals(1e-32, reader.valueAsDouble(), 0);
+		assertEquals(1e-32, reader.valueAsDouble(), 1e-33);
 		assertEquals(1e-32f, reader.valueAsFloat(), 0);
 
 		reader.next();
@@ -189,7 +189,7 @@ public class JsonReaderTest {
 	@Test
 	public void testPrimitivesArray() throws IOException {
 		String src = "[\"\\u0019\",\"abcde ..u\",null,12222.0101,true,false,9.0E-7]";
-		JsonReader reader = new JsonReader(new StringReader(src));
+		JsonReader reader = new JsonReader(src);
 
 		reader.beginArray();
 
@@ -218,7 +218,7 @@ public class JsonReaderTest {
 	@Test
 	public void testPrimitivesObject() throws IOException {
 		String src = "{\"a\":1.0,\"b\":\"abcde ..u\",\"c\":null,\"d\":12222.0101,\"e\":true,\"f\":false,\"h\":-0.9}";
-		JsonReader reader = new JsonReader(new StringReader(src));
+		JsonReader reader = new JsonReader(src);
 
 		reader.beginObject();
 
@@ -251,7 +251,7 @@ public class JsonReaderTest {
 	@Test
 	public void testEmptyArrayAndObjects() throws IOException {
 		String src = "[{},[]]";
-		JsonReader reader = new JsonReader(new StringReader(src));
+		JsonReader reader = new JsonReader(src);
 
 		assertTrue(reader.beginArray().hasNext());
 		assertEquals(reader.next(), ValueType.OBJECT);
@@ -269,7 +269,7 @@ public class JsonReaderTest {
 		String src = "[{},      " + "	[]," + "	[\"a a\", -9.9909], " + "false, " + "{"
 				+ "	\"nom\": \"toto\", " + "\"tab\":[5,6,7], "
 				+ "\"nestedObj\":	   	 {\"prenom\":\"titi\"}" + "}" + "]";
-		JsonReader reader = new JsonReader(new StringReader(src));
+		JsonReader reader = new JsonReader(src);
 
 		assertTrue(reader.beginArray().hasNext());
 
@@ -333,7 +333,7 @@ public class JsonReaderTest {
 	@Test
 	public void testSkipValue() throws IOException {
 		String src = "{\"a\":[], \"b\":{}, \"c\": [{\"c\":null, \"d\":121212.02}, 4, null], \"e\":1234, \"end\":\"the end\"}";
-		JsonReader reader = new JsonReader(new StringReader(src));
+		JsonReader reader = new JsonReader(src);
 
 		reader.beginObject();
 
@@ -366,7 +366,7 @@ public class JsonReaderTest {
 	@Test
 	public void testIllegalReadObjectInstedOfArray() throws IOException {
 		String src = "[1,2]";
-		JsonReader reader = new JsonReader(new StringReader(src));
+		JsonReader reader = new JsonReader(src);
 		try {
 			reader.beginObject();
 			fail();
@@ -378,7 +378,7 @@ public class JsonReaderTest {
 	@Test
 	public void testIllegalOperationCallNext() throws IOException {
 		String src = "[1,2]";
-		JsonReader reader = new JsonReader(new StringReader(src));
+		JsonReader reader = new JsonReader(src);
 		try {
 			reader.beginArray();
 			reader.next();
@@ -393,7 +393,7 @@ public class JsonReaderTest {
 	@Test
 	public void testIncompleteSource() throws IOException {
 		String src = "[1,";
-		JsonReader reader = new JsonReader(new StringReader(src));
+		JsonReader reader = new JsonReader(src);
 		try {
 			reader.beginArray();
 			reader.next();
@@ -409,7 +409,7 @@ public class JsonReaderTest {
 		String src = "{\"@class\"	: \"theclass\"" + ",     \"@author\":\"me\""
 				+ ", \"@comment\":\"no comment\"" + ", \"obj\" :      	"
 				+ "			{\"@class\":\"anotherclass\"}}";
-		JsonReader reader = new JsonReader(new StringReader(src));
+		JsonReader reader = new JsonReader(new StringReader(src), false, true);
 		assertTrue(reader.beginObject().hasNext());
 		assertEquals("theclass", reader.metadata("class"));
 		assertEquals("me", reader.metadata("author"));
@@ -427,7 +427,7 @@ public class JsonReaderTest {
 	public void testMultipleCallsTonextObjectMetadata() throws IOException {
 		String src = "{\"@class\"	: \"theclass\"" + ",     \"@author\":\"me\""
 				+ ", \"@comment\":\"no comment\"}";
-		JsonReader reader = new JsonReader(new StringReader(src));
+		JsonReader reader = new JsonReader(new StringReader(src), false, true);
 		assertEquals("theclass", reader.nextObjectMetadata().nextObjectMetadata().metadata("class"));
 		assertEquals("theclass", reader.nextObjectMetadata().metadata("class"));
 		assertEquals("no comment", reader.metadata("comment"));

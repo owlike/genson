@@ -30,7 +30,9 @@ public class BeanMutatorAccessorResolverTest {
 	}
 	
 	private class MyPojo {
+		@SuppressWarnings("unused")
 		private MyProxy proxy;
+		@SuppressWarnings("unused")
 		public String aString;
 	}
 

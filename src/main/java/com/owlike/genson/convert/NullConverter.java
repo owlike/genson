@@ -51,7 +51,7 @@ public class NullConverter implements Converter<Object> {
 		@SuppressWarnings("unchecked")
 		public T deserialize(ObjectReader reader, Context ctx) throws TransformationException,
 				IOException {
-			if (ValueType.NULL.equals(reader.getValueType()))
+			if (ValueType.NULL == reader.getValueType())
 				return (T) nullConverter.deserialize(reader, ctx);
 
 			return wrapped.deserialize(reader, ctx);

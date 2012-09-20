@@ -10,6 +10,8 @@ import java.util.Map;
 
 import com.owlike.genson.Genson;
 
+import static com.owlike.genson.reflect.TypeUtil.*;
+
 /**
  * Abstract implementation of {@link BeanDescriptorProvider} applying the template pattern.
  * Subclasses are not expected to override {@link #provide(Type, Genson)} and
@@ -28,19 +30,14 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 	protected AbstractBeanDescriptorProvider() {
 	}
 
-	public BeanDescriptor<?> provide(Type type, Genson genson) {
-		Class<?> rawType = TypeUtil.getRawClass(type);
-		return provideBeanDescriptor(rawType, genson);
-	}
-
-	public <T> BeanDescriptor<T> provideBeanDescriptor(Class<?> ofClass, Genson genson) {
+	public <T> BeanDescriptor<T> provide(Class<T> ofClass, Type ofType, Genson genson) {
 		Map<String, LinkedList<PropertyMutator<T, ?>>> mutatorsMap = new LinkedHashMap<String, LinkedList<PropertyMutator<T, ?>>>();
 		Map<String, LinkedList<PropertyAccessor<T, ?>>> accessorsMap = new LinkedHashMap<String, LinkedList<PropertyAccessor<T, ?>>>();
 
-		List<BeanCreator<T>> creators = provideBeanCreators(ofClass, genson);
+		List<BeanCreator<T>> creators = provideBeanCreators(ofType, genson);
 
-		provideBeanPropertyAccessors(ofClass, accessorsMap, genson);
-		provideBeanPropertyMutators(ofClass, mutatorsMap, genson);
+		provideBeanPropertyAccessors(ofType, accessorsMap, genson);
+		provideBeanPropertyMutators(ofType, mutatorsMap, genson);
 
 		List<PropertyAccessor<T, ?>> accessors = new ArrayList<PropertyAccessor<T, ?>>(
 				accessorsMap.size());
@@ -48,22 +45,31 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 			PropertyAccessor<T, ?> accessor = checkAndMergeAccessors(entry.getKey(),
 					entry.getValue());
 			// in case of...
-			if (accessor != null)
-				accessors.add(accessor);
+			if (accessor != null) accessors.add(accessor);
 		}
 
 		Map<String, PropertyMutator<T, ?>> mutators = new HashMap<String, PropertyMutator<T, ?>>(
 				mutatorsMap.size());
 		for (Map.Entry<String, LinkedList<PropertyMutator<T, ?>>> entry : mutatorsMap.entrySet()) {
 			PropertyMutator<T, ?> mutator = checkAndMergeMutators(entry.getKey(), entry.getValue());
-			if (mutator != null)
-				mutators.put(mutator.name, mutator);
+			if (mutator != null) mutators.put(mutator.name, mutator);
 		}
 
-		mergeMutatorsWithCreatorProperties(ofClass, mutators, creators);
-		BeanCreator<T> ctr = checkAndMerge(ofClass, creators);
+		mergeMutatorsWithCreatorProperties(ofType, mutators, creators);
+		BeanCreator<T> ctr = checkAndMerge(ofType, creators);
 
-		return create(ofClass, ctr, accessors, mutators);
+		// lets fail fast if the BeanDescriptor has been built for the wrong type.
+		// another option could be to pass in all the methods an additional parameter Class<T> that
+		// would not necessarily correspond to the rawClass of ofType. In fact we authorize that
+		// ofType
+		// rawClass is different from Class<T>, but the BeanDescriptor must match!
+		BeanDescriptor<T> descriptor = create(ofType, ctr, accessors, mutators);
+		if (!ofClass.isAssignableFrom(descriptor.getOfClass()))
+			throw new ClassCastException("Actual implementation of BeanDescriptorProvider "
+					+ getClass()
+					+ " seems to do something wrong. Expected BeanDescriptor for type " + ofClass
+					+ " but provided BeanDescriptor for type " + descriptor.getOfClass());
+		return descriptor;
 	}
 
 	/**
@@ -77,9 +83,10 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 	 * @return an instance of a BeanDescriptor.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	protected <T> BeanDescriptor<T> create(Class<?> ofClass, BeanCreator<T> creator,
+	protected <T> BeanDescriptor<T> create(Type ofType, BeanCreator<T> creator,
 			List<PropertyAccessor<T, ?>> accessors, Map<String, PropertyMutator<T, ?>> mutators) {
-		return new BeanDescriptor(ofClass, accessors, mutators, creator);
+		Class<T> rawClass = (Class<T>) getRawClass(ofType);
+		return new BeanDescriptor(rawClass, rawClass, accessors, mutators, creator);
 	}
 
 	/**
@@ -89,7 +96,7 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 	 * @param genson
 	 * @return a list of BeanCreators, may be empty.
 	 */
-	protected abstract <T> List<BeanCreator<T>> provideBeanCreators(Class<?> ofClass, Genson genson);
+	protected abstract <T> List<BeanCreator<T>> provideBeanCreators(Type ofType, Genson genson);
 
 	/**
 	 * Adds resolved {@link PropertyMutator} to mutatorsMap.
@@ -98,7 +105,7 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 	 * @param mutatorsMap
 	 * @param genson
 	 */
-	protected abstract <T> void provideBeanPropertyMutators(Class<?> ofClass,
+	protected abstract <T> void provideBeanPropertyMutators(Type ofType,
 			Map<String, LinkedList<PropertyMutator<T, ?>>> mutatorsMap, Genson genson);
 
 	/**
@@ -108,7 +115,7 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 	 * @param accessorsMap
 	 * @param genson
 	 */
-	protected abstract <T> void provideBeanPropertyAccessors(Class<?> ofClass,
+	protected abstract <T> void provideBeanPropertyAccessors(Type ofType,
 			Map<String, LinkedList<PropertyAccessor<T, ?>>> accessorsMap, Genson genson);
 
 	/**
@@ -119,8 +126,7 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 	 * @param creators
 	 * @return the creator that will be used by the BeanDescriptor
 	 */
-	protected abstract <T> BeanCreator<T> checkAndMerge(Class<?> ofClass,
-			List<BeanCreator<T>> creators);
+	protected abstract <T> BeanCreator<T> checkAndMerge(Type ofType, List<BeanCreator<T>> creators);
 
 	/**
 	 * Implementations are supposed to merge the {@link PropertyMutator}s from mutators list into a
@@ -140,7 +146,7 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 	 * @param mutators
 	 * @param creators
 	 */
-	protected abstract <T> void mergeMutatorsWithCreatorProperties(Class<?> tClass,
+	protected abstract <T> void mergeMutatorsWithCreatorProperties(Type ofType,
 			Map<String, PropertyMutator<T, ?>> mutators, List<BeanCreator<T>> creators);
 
 	/**

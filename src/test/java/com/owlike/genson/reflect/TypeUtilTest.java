@@ -1,8 +1,10 @@
 package com.owlike.genson.reflect;
 
+import java.io.IOException;
+import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
+import java.net.URL;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -10,13 +12,33 @@ import java.util.Map;
 import org.junit.Test;
 
 import com.owlike.genson.GenericType;
+import com.owlike.genson.TransformationException;
 
-import static com.google.gson.internal.$Gson$Types.*;
 import static com.owlike.genson.reflect.TypeUtil.*;
 
 import static org.junit.Assert.*;
 
 public class TypeUtilTest {
+	
+	@Test public void testParameterizedTypeResolution() throws SecurityException, NoSuchFieldException, TransformationException, IOException {
+		Field g = O.class.getDeclaredField("g");
+		Type gt = g.getGenericType();
+		Type expGt = expandType(gt, O.class);
+		Type t = Generic.class.getDeclaredField("t").getGenericType();
+		Type expT = expandType(t, expGt);
+		assertEquals(URL.class, expT);
+	}
+	
+	private class Generic<T> {
+		@SuppressWarnings("unused")
+		T t;
+	}
+	
+	private class O {
+		@SuppressWarnings("unused")
+		Generic<URL> g;
+	}
+	
 	@SuppressWarnings("rawtypes")
 	@Test public void testGenericType() {
 		assertTrue(match(new GenericType<List<Number>>(){}.getType(), tListE, true));

@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.owlike.genson.Context;
@@ -121,22 +122,32 @@ public final class DefaultConverters {
 
 		public Object deserialize(ObjectReader reader, Context ctx) throws TransformationException,
 				IOException {
+			List<E> list = new ArrayList<E>();
 			reader.beginArray();
-			int size = 10;
-			Object array = Array.newInstance(eClass, size);
-			int idx = 0;
 			for (; reader.hasNext();) {
 				reader.next();
-				if (idx >= size) {
-					size = size * 2 + 1;
-					array = expandArray(array, idx, size);
-				}
-				Array.set(array, idx++, elementConverter.deserialize(reader, ctx));
+				list.add(elementConverter.deserialize(reader, ctx));
 			}
 			reader.endArray();
-			if (idx < size) {
-				array = expandArray(array, idx, idx);
-			}
+
+			int size = list.size();
+			Object array = Array.newInstance(eClass, size);
+			for (int i = 0; i < size; i++)
+				Array.set(array, i, list.get(i));
+			// int idx = 0;
+			// for (; reader.hasNext();) {
+			// reader.next();
+			// if (idx >= size) {
+			// size = size * 2 + 1;
+			// array = expandArray(array, idx, size);
+			// }
+			// Array.set(array, idx++, elementConverter.deserialize(reader, ctx));
+			// }
+			// reader.endArray();
+			// if (idx < size) {
+			// array = expandArray(array, idx, idx);
+			// }
+
 			return array;
 		}
 
@@ -329,14 +340,10 @@ public final class DefaultConverters {
 		public Converter<?> create(Type type, Genson genson) {
 			Class<?> rawClass = TypeUtil.getRawClass(type);
 			if (rawClass.isPrimitive()) {
-				if (rawClass.equals(boolean.class))
-					return booleanConverter.instance;
-				if (rawClass.equals(int.class))
-					return intConverter.instance;
-				if (rawClass.equals(double.class))
-					return doubleConverter.instance;
-				if (rawClass.equals(long.class))
-					return longConverter.instance;
+				if (rawClass.equals(boolean.class)) return booleanConverter.instance;
+				if (rawClass.equals(int.class)) return intConverter.instance;
+				if (rawClass.equals(double.class)) return doubleConverter.instance;
+				if (rawClass.equals(long.class)) return longConverter.instance;
 			}
 			return null;
 		}
@@ -488,8 +495,7 @@ public final class DefaultConverters {
 		}
 
 		public DateConverter(DateFormat dateFormat) {
-			if (dateFormat == null)
-				dateFormat = SimpleDateFormat.getDateInstance();
+			if (dateFormat == null) dateFormat = SimpleDateFormat.getDateInstance();
 			this.dateFormat = dateFormat;
 		}
 
@@ -552,7 +558,7 @@ public final class DefaultConverters {
 			return null;
 		}
 	};
-	
+
 	@HandleClassMetadata
 	@WithoutBeanView
 	public static class EnumConverter<T extends Enum<T>> implements Converter<T> {
@@ -586,13 +592,15 @@ public final class DefaultConverters {
 					rawClass) : null;
 		}
 	};
-	
+
 	@HandleClassMetadata
 	@WithoutBeanView
 	public static class URLConverter implements Converter<URL> {
 		public final static URLConverter instance = new URLConverter();
-		private URLConverter() {}
-		
+
+		private URLConverter() {
+		}
+
 		public URL deserialize(ObjectReader reader, Context ctx) throws TransformationException,
 				IOException {
 			return new URL(reader.valueAsString());
@@ -603,12 +611,15 @@ public final class DefaultConverters {
 			writer.writeValue(object.toExternalForm());
 		}
 	}
-	
+
 	@HandleClassMetadata
 	@WithoutBeanView
 	public static class URIConverter implements Converter<URI> {
 		public final static URIConverter instance = new URIConverter();
-		private URIConverter() {}
+
+		private URIConverter() {
+		}
+
 		public void serialize(URI object, ObjectWriter writer, Context ctx)
 				throws TransformationException, IOException {
 			writer.writeUnsafeValue(object.toString());
@@ -619,14 +630,15 @@ public final class DefaultConverters {
 			return URI.create(reader.valueAsString());
 		}
 	}
-	
+
 	@HandleClassMetadata
 	@WithoutBeanView
 	public static class BigDecimalConverter implements Converter<BigDecimal> {
 		public final static BigDecimalConverter instance = new BigDecimalConverter();
-		
-		private BigDecimalConverter() {}
-		
+
+		private BigDecimalConverter() {
+		}
+
 		@Override
 		public BigDecimal deserialize(ObjectReader reader, Context ctx)
 				throws TransformationException, IOException {
@@ -639,14 +651,15 @@ public final class DefaultConverters {
 			writer.writeValue(object);
 		}
 	}
-	
+
 	@HandleClassMetadata
 	@WithoutBeanView
 	public static class BigIntegerConverter implements Converter<BigInteger> {
 		public final static BigIntegerConverter instance = new BigIntegerConverter();
-		
-		private BigIntegerConverter() {}
-		
+
+		private BigIntegerConverter() {
+		}
+
 		@Override
 		public BigInteger deserialize(ObjectReader reader, Context ctx)
 				throws TransformationException, IOException {
@@ -659,14 +672,15 @@ public final class DefaultConverters {
 			writer.writeValue(object);
 		}
 	}
-	
+
 	@HandleClassMetadata
 	@WithoutBeanView
 	public static class TimestampConverter implements Converter<Timestamp> {
 		public final static TimestampConverter instance = new TimestampConverter();
-		
-		private TimestampConverter() {}
-		
+
+		private TimestampConverter() {
+		}
+
 		@Override
 		public Timestamp deserialize(ObjectReader reader, Context ctx)
 				throws TransformationException, IOException {

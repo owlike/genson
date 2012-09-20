@@ -10,9 +10,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.owlike.genson.TransformationRuntimeException;
+import static com.owlike.genson.stream.ValueType.*;
 
 /*
  * TODO handle rows/cols for more precise exceptions (pretty printing)
+ * TODO search for optimization points
  */
 public class JsonReader implements ObjectReader {
 	protected final static String NULL_VALUE = "null";
@@ -26,6 +28,24 @@ public class JsonReader implements ObjectReader {
 		SKIPPED_TOKENS['\r'] = 1;
 		SKIPPED_TOKENS['\f'] = 1;
 		SKIPPED_TOKENS[' '] = 1;
+	}
+
+	private final static boolean[] _NEXT_TOKEN = new boolean[128];
+	static {
+		_NEXT_TOKEN[','] = true;
+		_NEXT_TOKEN['"'] = true;
+		_NEXT_TOKEN['{'] = true;
+		_NEXT_TOKEN['['] = true;
+		_NEXT_TOKEN['n'] = true;
+		_NEXT_TOKEN['N'] = true;
+		_NEXT_TOKEN['-'] = true;
+		_NEXT_TOKEN['t'] = true;
+		_NEXT_TOKEN['f'] = true;
+		_NEXT_TOKEN['T'] = true;
+		_NEXT_TOKEN['F'] = true;
+
+		for (int i = 48; i < 58; i++)
+			_NEXT_TOKEN[i] = true;
 	}
 
 	/*
@@ -43,14 +63,15 @@ public class JsonReader implements ObjectReader {
 		}
 	}
 
-	private final static int[] _CHAR_TO_INT = new int[58];
+	private final static double[] _POWS = new double[309];
 	static {
-		for (int i = 48; i < 58; i++)
-			_CHAR_TO_INT[i] = i - 48;
+		for (int i = 0; i < _POWS.length; i++)
+			_POWS[i] = Math.pow(10, i);
 	}
 
 	private final Reader reader;
-	private final boolean strictDoubleParse = true;
+	private final boolean strictDoubleParse;
+	private final boolean readMetadata;
 	// TODO recyclebuffer
 	private final char[] _buffer = new char[2048];
 	private int _position;
@@ -68,9 +89,7 @@ public class JsonReader implements ObjectReader {
 	private int _numberLen = 0;
 	private Boolean _booleanValue;
 	private ValueType valueType;
-	private boolean _checkedNext = false;
-	private boolean _hasNext = false;
-	private boolean _first = false;
+	private boolean _first = true;
 	private boolean _metadata_readen = false;
 	private Map<String, String> _metadata = new HashMap<String, String>(5);
 
@@ -80,41 +99,42 @@ public class JsonReader implements ObjectReader {
 	}
 
 	public JsonReader(String source) {
-		this(new StringReader(source));
+		this(new StringReader(source), false, false);
 	}
 
-	public JsonReader(Reader reader) {
+	public JsonReader(Reader reader, boolean strictDoubleParse, boolean readMetadata) {
 		this.reader = reader;
+		this.strictDoubleParse = strictDoubleParse;
+		this.readMetadata = readMetadata;
 		try {
 			char token = (char) readNextToken(false);
 			if ('[' == token)
-				setValueType(ValueType.ARRAY);
+				valueType = ARRAY;
 			else if ('{' == token)
-				setValueType(ValueType.OBJECT);
+				valueType = OBJECT;
 			else {
 				// ok lets try to read next
 				if (_buflen > 0) {
 					try {
-						consumeValue();
+						valueType = consumeValue();
 					} catch (IllegalStateException ise) {
 						try {
 							// we must cheat because consumeString attends the current token to be "
 							// and will increment the cursor
 							_cursor = -1;
 							_position = -1;
-							consumeString('"');
-							_stringValue = new String(_stringBuffer, 0, _stringBufferTail);
-							valueType = ValueType.STRING;
+							_stringValue = consumeString('"');
+							valueType = STRING;
 						} catch (RuntimeException re) {
 							throw ise;
 						}
 					}
-					if (ValueType.valueOf(valueType.name()) == null)
+					if (valueOf(valueType.name()) == null)
 						throw new TransformationRuntimeException(
 								"Failed to instanciate reader, first character was " + (char) token
 										+ " when possible character are [ and {");
 				} else
-					setValueType(ValueType.NULL);
+					valueType = NULL;
 			}
 		} catch (IOException ioe) {
 			throw new TransformationRuntimeException("Failed to instanciate reader!", ioe);
@@ -127,7 +147,7 @@ public class JsonReader implements ObjectReader {
 
 	public ObjectReader beginArray() throws IOException {
 		begin('[', JsonType.ARRAY);
-		valueType = ValueType.ARRAY;
+		valueType = ARRAY;
 		if (_metadata_readen) _metadata.clear();
 		return this;
 	}
@@ -135,9 +155,11 @@ public class JsonReader implements ObjectReader {
 	public ObjectReader beginObject() throws IOException {
 		if (!_metadata_readen) {
 			begin('{', JsonType.OBJECT);
-			valueType = ValueType.OBJECT;
-			_metadata.clear();
-			readMetadata();
+			valueType = OBJECT;
+			if (readMetadata) {
+				_metadata.clear();
+				readMetadata();
+			}
 		}
 		return this;
 	}
@@ -163,102 +185,106 @@ public class JsonReader implements ObjectReader {
 	}
 
 	public String valueAsString() {
-		if (ValueType.STRING.equals(valueType) || ValueType.INTEGER == valueType
-				|| ValueType.DOUBLE == valueType) return _stringValue;
-		if (ValueType.NULL.equals(valueType)) return NULL_VALUE;
-		if (ValueType.BOOLEAN.equals(valueType)) {
+		if (STRING == valueType) return _stringValue;
+		if (INTEGER == valueType) return "" + _intValue;
+		if (DOUBLE == valueType) return "" + _doubleValue;
+		if (NULL == valueType) return NULL_VALUE;
+		if (BOOLEAN == valueType) {
 			return _booleanValue.toString();
 		}
 		throw new IllegalStateException("Readen value can not be converted to String");
 	}
 
 	public int valueAsInt() throws IOException {
-		if (ValueType.INTEGER == valueType) {
+		if (INTEGER == valueType) {
 			int value = (int) _intValue;
-			if (value != _intValue) throwNumberFormatException("an int", "overflowing long value " +_intValue);
+			if (value != _intValue)
+				throwNumberFormatException("an int", "overflowing long value " + _intValue);
 			return value;
-		} else if (ValueType.DOUBLE == valueType) {
+		} else if (DOUBLE == valueType) {
 			int value = (int) _doubleValue;
 			long longValue = (long) _doubleValue;
 			// lets accept only if the integer part is the same and ignore the decimals
 			if (value != longValue) {
-				throwNumberFormatException("an int", "overflowing double value " +_doubleValue);
+				throwNumberFormatException("an int", "overflowing double value " + _doubleValue);
 			}
 			return value;
-		} else if (ValueType.STRING == valueType)
+		} else if (STRING == valueType)
 			return "".equals(_stringValue) ? 0 : Integer.parseInt(_stringValue);
-		else if (ValueType.NULL == valueType) return 0;
-		
+		else if (NULL == valueType) return 0;
+
 		throw new IllegalStateException("Expected a int but value is of type " + valueType);
 	}
 
 	public long valueAsLong() throws IOException {
-		if (ValueType.INTEGER == valueType) {
+		if (INTEGER == valueType) {
 			return _intValue;
-		} else if (ValueType.DOUBLE == valueType) {
+		} else if (DOUBLE == valueType) {
 			if (Long.MIN_VALUE > _doubleValue || _doubleValue > Long.MAX_VALUE) {
 				throwNumberFormatException("a long", "overflowing double value " + _doubleValue);
 			}
 			return (long) _doubleValue;
-		} else if (ValueType.STRING == valueType)
+		} else if (STRING == valueType)
 			return "".equals(_stringValue) ? 0 : Long.parseLong(_stringValue);
-		else if (ValueType.NULL == valueType) return 0l;
+		else if (NULL == valueType) return 0l;
 		throw new IllegalStateException("Expected a long but value is of type " + valueType);
 	}
 
 	public double valueAsDouble() throws IOException {
-		if (ValueType.DOUBLE == valueType) {
+		if (DOUBLE == valueType) {
 			return _doubleValue;
-		} else if (ValueType.INTEGER == valueType) {
+		} else if (INTEGER == valueType) {
 			// for the moment lets do that even if there is some precision loss...
 			return Long.valueOf(_intValue).doubleValue();
-		} else if (ValueType.STRING == valueType)
+		} else if (STRING == valueType)
 			return "".equals(_stringValue) ? 0 : Double.parseDouble(_stringValue);
-		else if (ValueType.NULL == valueType) return 0d;
+		else if (NULL == valueType) return 0d;
 		throw new IllegalStateException("Expected a double but value is of type " + valueType);
 	}
 
 	public short valueAsShort() throws IOException {
-		if (ValueType.INTEGER == valueType) {
+		if (INTEGER == valueType) {
 			short value = (short) _intValue;
-			if (value != _intValue) throwNumberFormatException("a short", "overflowing long value " +_intValue);
+			if (value != _intValue)
+				throwNumberFormatException("a short", "overflowing long value " + _intValue);
 			return value;
-		} else if (ValueType.DOUBLE == valueType) {
+		} else if (DOUBLE == valueType) {
 			short value = (short) _doubleValue;
 			long longValue = (long) _doubleValue;
 			// lets accept only if the integer part is the same and ignore the decimals
 			if (value != longValue) {
-				throwNumberFormatException("a short", "overflowing double value " +_doubleValue);
+				throwNumberFormatException("a short", "overflowing double value " + _doubleValue);
 			}
 			return value;
-		} else if (ValueType.STRING == valueType)
+		} else if (STRING == valueType)
 			return "".equals(_stringValue) ? 0 : Short.parseShort(_stringValue);
-		else if (ValueType.NULL == valueType) return 0;
-		
+		else if (NULL == valueType) return 0;
+
 		throw new IllegalStateException("Expected a short but value is of type " + valueType);
 	}
 
 	public float valueAsFloat() throws IOException {
-		if (ValueType.DOUBLE == valueType) {
-			if (Float.MIN_VALUE > _doubleValue || _doubleValue > Float.MAX_VALUE )
+		if (DOUBLE == valueType) {
+			if (Float.MIN_VALUE > _doubleValue || _doubleValue > Float.MAX_VALUE)
 				throwNumberFormatException("a float", "overflowing double value " + _doubleValue);
 			return (float) _doubleValue;
-		} else if (ValueType.INTEGER == valueType) {
-			// same as for doubles, for the moment lets do that even if there is some precision loss...
+		} else if (INTEGER == valueType) {
+			// same as for doubles, for the moment lets do that even if there is some precision
+			// loss...
 			return Long.valueOf(_intValue).floatValue();
-		} else if (ValueType.STRING == valueType)
+		} else if (STRING == valueType)
 			return "".equals(_stringValue) ? 0 : Float.parseFloat(_stringValue);
-		else if (ValueType.NULL == valueType) return 0f;
+		else if (NULL == valueType) return 0f;
 		throw new IllegalStateException("Expected a float but value is of type " + valueType);
 	}
 
 	public boolean valueAsBoolean() throws IOException {
-		if (ValueType.BOOLEAN.equals(valueType)) {
+		if (BOOLEAN == valueType) {
 			return _booleanValue;
 		}
-		if (ValueType.STRING.equals(valueType))
+		if (STRING == valueType)
 			return "".equals(_stringValue) ? null : Boolean.valueOf(_stringValue);
-		if (ValueType.NULL.equals(valueType)) return false;
+		if (NULL == valueType) return false;
 		throw new IllegalStateException("Readen value is not of type boolean");
 	}
 
@@ -273,13 +299,13 @@ public class JsonReader implements ObjectReader {
 
 	public ObjectReader skipValue() throws IOException {
 
-		if (ValueType.ARRAY == valueType || ValueType.OBJECT == valueType) {
+		if (ARRAY == valueType || OBJECT == valueType) {
 			int balance = 0;
 			do {
-				if (ValueType.ARRAY == valueType) {
+				if (ARRAY == valueType) {
 					beginArray();
 					balance++;
-				} else if (ValueType.OBJECT == valueType) {
+				} else if (OBJECT == valueType) {
 					beginObject();
 					balance++;
 				}
@@ -302,32 +328,20 @@ public class JsonReader implements ObjectReader {
 	}
 
 	public boolean hasNext() throws IOException {
-		if (_checkedNext)
-			return _hasNext;
-		else {
-			int token = readNextToken(false);
-			char ctoken = (char) token;
-			checkIllegalEnd(token);
-			_hasNext = token < 128
-					&& ((ctoken == ',' && !_first) || (_first && ('"' == ctoken || ctoken == '{'
-							|| ctoken == '[' || (token > 47 && token < 58) || ctoken == '-'
-							|| ctoken == 'n' || ctoken == 't' || ctoken == 'f')));
-			_checkedNext = true;
-
-			if (_hasNext && !_first) {
-				_cursor++;
-			}
-
-			return _hasNext;
+		int token = readNextToken(false);
+		if (token == -1) return false;
+		if (token < 128) {
+			if (_first)
+				return _NEXT_TOKEN[token];
+			else if (token == ',') return true;
 		}
+
+		return false;
 	}
 
 	public ValueType next() throws IOException {
 		_metadata_readen = false;
-		_checkedNext = false;
-		_hasNext = false;
 		_first = false;
-		resetNameAndValue();
 
 		char ctoken = (char) readNextToken(false);
 
@@ -335,37 +349,36 @@ public class JsonReader implements ObjectReader {
 			_cursor++;
 			ctoken = (char) readNextToken(false);
 		} else if (JsonType.ARRAY == _ctx.peek()) {
-			if (ctoken == '[') return setValueType(ValueType.ARRAY);
-			if (ctoken == '{') return setValueType(ValueType.OBJECT);
+			if (ctoken == '[') {
+				valueType = ARRAY;
+				return valueType;
+			}
+			if (ctoken == '{') {
+				valueType = OBJECT;
+				return valueType;
+			}
 		}
 
 		if (JsonType.OBJECT == _ctx.peek()) {
-			consumeName(ctoken);
-			currentName = new String(_stringBuffer, 0, _stringBufferTail);
-			_stringBufferTail = 0;
-
+			currentName = consumeName(ctoken);
 			if (readNextToken(true) != ':') newWrongTokenException(":", _cursor - 1);
 		}
 
-		return consumeValue();
+		valueType = consumeValue();
+		return valueType;
 	}
 
 	protected final ValueType consumeValue() throws IOException {
 		char ctoken = (char) readNextToken(false);
-		ValueType valueType = null;
 		if (ctoken == '"') {
-			consumeString(ctoken);
-			_stringValue = new String(_stringBuffer, 0, _stringBufferTail);
-			_stringBufferTail = 0;
-			valueType = ValueType.STRING;
+			_stringValue = consumeString(ctoken);
+			return STRING;
 		} else if (ctoken == '[')
-			return setValueType(ValueType.ARRAY);
+			return ARRAY;
 		else if (ctoken == '{')
-			return setValueType(ValueType.OBJECT);
+			return OBJECT;
 		else
-			valueType = consumeLiteral();
-
-		return setValueType(valueType);
+			return consumeLiteral();
 	}
 
 	protected final void readMetadata() throws IOException {
@@ -378,15 +391,12 @@ public class JsonReader implements ObjectReader {
 			if ('@' == _buffer[_cursor + 1]) {
 				_cursor++;
 				// we cheat here...
-				consumeString(ctoken);
-				String key = new String(_stringBuffer, 0, _stringBufferTail);
-				_stringBufferTail = 0;
+				String key = consumeString(ctoken);
 
 				if (readNextToken(true) != ':') newWrongTokenException(":", _cursor - 1);
 
-				consumeString((char) readNextToken(false));
-				_metadata.put(key, new String(_stringBuffer, 0, _stringBufferTail));
-				_stringBufferTail = 0;
+				String value = consumeString((char) readNextToken(false));
+				_metadata.put(key, value);
 				if (readNextToken(false) == ',') {
 					_cursor++;
 				}
@@ -397,72 +407,91 @@ public class JsonReader implements ObjectReader {
 
 	protected final void begin(int character, JsonType type) throws IOException {
 		int token = readNextToken(true);
-		checkIllegalEnd(token);
+		// seems unecessary as it is done in readNextToken
+		// checkIllegalEnd(token);
 		if (character == token) {
 			_ctx.push(type);
 		} else
 			newWrongTokenException("" + (char) character, _cursor - 1);
 		_first = true;
-		_checkedNext = false;
-		_hasNext = false;
 	}
 
 	protected final void end(int character, JsonType type) throws IOException {
 		int token = readNextToken(true);
-		checkIllegalEnd(token);
+		// seems unecessary as it is done in readNextToken
+		// checkIllegalEnd(token);
 		if (character == token && type == _ctx.peek()) {
 			_ctx.pop();
 		} else
 			newWrongTokenException("" + (char) character, _cursor - 1);
 		_first = false;
-		_checkedNext = false;
-		_hasNext = false;
 	}
 
-	protected final ValueType setValueType(ValueType tokenType) {
-		this.valueType = tokenType;
-		return tokenType;
-	}
-
-	protected final void consumeName(char token) throws IOException {
+	protected final String consumeName(int token) throws IOException {
 		if (token != '"') newMisplacedTokenException(_cursor);
 		_cursor++;
-		for (; _buflen > -1;) {
+		boolean buffered = false;
+		while (true) {
 			fillBuffer(true);
 			int i = _cursor;
 			for (; i < _buflen; i++) {
-				if (_buffer[i] == '"') break;
+				if (_buffer[i] == '"') {
+					if (buffered) {
+						writeToStringBuffer(_buffer, _cursor, i - _cursor);
+						_cursor = i + 1;
+						String name = new String(_stringBuffer, 0, _stringBufferTail);
+						_stringBufferTail = 0;
+						return name;
+					} else {
+						String name = new String(_buffer, _cursor, i - _cursor);
+						_cursor = i + 1;
+						return name;
+					}
+				}
 			}
-
+			
+			buffered = true;
 			writeToStringBuffer(_buffer, _cursor, i - _cursor);
 			_cursor = i + 1;
-			if (i < _buflen && _buffer[i] == '"') return;
 		}
 	}
 
-	protected final void consumeString(char token) throws IOException {
+	protected final String consumeString(int token) throws IOException {
 		if (token != '"') newMisplacedTokenException(_cursor);
 		_cursor++;
-		for (; _buflen > -1;) {
+		boolean buffered = false;
+		while(true) {
 			fillBuffer(true);
 
 			int i = _cursor;
 			for (; i < _buflen;) {
 				if (_buffer[i] == '\\') {
+					buffered = true;
 					writeToStringBuffer(_buffer, _cursor, i - _cursor);
 					_cursor = i + 1;
 					if (_stringBufferLength <= (_stringBufferTail + 1)) expandStringBuffer(16);
 					_stringBuffer[_stringBufferTail++] = readEscaped();
 					i = _cursor;
-				} else if (_buffer[i] == '"')
-					break;
+				} else if (_buffer[i] == '"') {
+					if (buffered) {
+						writeToStringBuffer(_buffer, _cursor, i - _cursor);
+						_cursor = i + 1;
+						String name = new String(_stringBuffer, 0, _stringBufferTail);
+						_stringBufferTail = 0;
+						return name;
+					} else {
+						String name = new String(_buffer, _cursor, i - _cursor);
+						_cursor = i + 1;
+						return name;
+					}
+				}
 				else
 					i++;
 			}
 
+			buffered = true;
 			writeToStringBuffer(_buffer, _cursor, i - _cursor);
 			_cursor = i + 1;
-			if (i < _buflen && _buffer[i] == '"') return;
 		}
 	}
 
@@ -476,59 +505,9 @@ public class JsonReader implements ObjectReader {
 			if (strictDoubleParse) {
 				valueType = consumeStrictNumber();
 			} else {
-				// this part is disabled as the algorithm is wrong for big numbers.
-				int sign = 1;
-				if (token == 45) {
-					_cursor++;
-					sign = -1;
-				}
-				_intValue = consumeInt();
-				if (isEOF()) return ValueType.INTEGER;
-
-				if (_buffer[_cursor] == '.') {
-					_cursor++;
-					_doubleValue = consumeDouble();
-					_doubleValue = sign * (_intValue + _doubleValue / Math.pow(10, _numberLen));
-					valueType = ValueType.DOUBLE;
-				} else {
-					_intValue *= sign;
-					valueType = ValueType.INTEGER;
-				}
-
-				if (isEOF() || ensureBufferHas(2, false) < 0) return valueType;
-
-				char ctoken = _buffer[_cursor];
-				if (ctoken == 'e' || ctoken == 'E') {
-					_cursor++;
-					ctoken = _buffer[_cursor];
-					if (ctoken == '-' || ctoken == '+' || (ctoken > 47 && ctoken < 58)) {
-						if (ctoken == '-' || ctoken == '+') _cursor++;
-						double val = consumeInt();
-						double exp = 0;
-						boolean limit = false;
-						if (ctoken == '-') {
-							if (ValueType.INTEGER.equals(valueType)) {
-								_doubleValue = _intValue;
-								valueType = ValueType.DOUBLE;
-							}
-							exp = 1 / Math.pow(10, val);
-							if (exp == 0) {
-								exp = Math.pow(10, -val + 1);
-								limit = true;
-							}
-						} else {
-							exp = Math.pow(10, val);
-						}
-						if (ValueType.INTEGER.equals(valueType)) {
-							_intValue = (long) (_intValue * exp);
-						} else {
-							_doubleValue = _doubleValue * exp;
-							if (limit) _doubleValue = _doubleValue / 10d;
-						}
-					} else
-						newWrongTokenException("'-' or '+' or '' (same as +)");
-				}
+				return consumeNumber();
 			}
+			// should not come here
 			return valueType;
 		} else {
 			ensureBufferHas(4, true);
@@ -538,7 +517,7 @@ public class JsonReader implements ObjectReader {
 					&& (_buffer[_cursor + 2] == 'L' || _buffer[_cursor + 2] == 'l')
 					&& (_buffer[_cursor + 3] == 'L' || _buffer[_cursor + 3] == 'l')) {
 				_cursor += 4;
-				return ValueType.NULL;
+				return NULL;
 			}
 
 			if ((_buffer[_cursor] == 'T' || _buffer[_cursor] == 't')
@@ -547,7 +526,7 @@ public class JsonReader implements ObjectReader {
 					&& (_buffer[_cursor + 3] == 'E' || _buffer[_cursor + 3] == 'e')) {
 				_booleanValue = true;
 				_cursor += 4;
-				return ValueType.BOOLEAN;
+				return BOOLEAN;
 			}
 			ensureBufferHas(5, true);
 
@@ -558,7 +537,7 @@ public class JsonReader implements ObjectReader {
 					&& (_buffer[_cursor + 4] == 'E' || _buffer[_cursor + 4] == 'e')) {
 				_booleanValue = false;
 				_cursor += 5;
-				return ValueType.BOOLEAN;
+				return BOOLEAN;
 			} else {
 				throw new IllegalStateException("Illegal character around position "
 						+ (_position - valueAsString().length() - _buflen + _cursor)
@@ -568,79 +547,249 @@ public class JsonReader implements ObjectReader {
 		}
 	}
 
-	// unused as consumeDouble implementation is wrong.
-	private final long consumeInt() throws IOException {
-		boolean stop = false;
-		long value = 0;
-		_numberLen = 0;
-		for (; _buflen > -1;) {
-			fillBuffer(true);
-			int i = _cursor;
-			for (; i < _buflen; i++) {
-				if ((_buffer[i] < 48 || _buffer[i] > 57)) {
-					stop = true;
-					break;
-				}
-				_numberLen++;
-				value = 10 * value + _CHAR_TO_INT[_buffer[i]];
+	private ValueType consumeNumber() {
+		int cur;
+		boolean negative;
+		// check the sign
+		if (_buffer[_cursor] == 45) {
+			negative = true;
+			_cursor++;
+			cur = _cursor;
+		} else {
+			negative = false;
+			cur = _cursor;
+		}
+		// just to handle invalid leading 0000
+		for (; cur < _buflen && _buffer[cur] == 48; cur++)
+			;
+		// Careful we consume the '-' here!
+		_cursor = cur;
+
+		int len = Math.min(_buflen, cur + 18);
+		int token;
+
+		long longValue = 0;
+		for (; cur < len; cur++) {
+			token = _buffer[cur];
+			if (token < 48 || token > 57) {
+				break;
 			}
-			_cursor = i;
-			if (stop) {
-				if (_numberLen == 0) newWrongTokenException("numeric value");
-				return value;
+			longValue = 10L * longValue + (token - 48);
+		}
+
+		if (cur < _buflen) {
+			// read the maximum we can to fill the long capacity, at max we can read 1 additional
+			// digit
+			token = _buffer[cur];
+			if (token > 47 && token < 58) {
+				long newLongValue = 10L * longValue + (token - 48);
+				if (newLongValue > longValue) {
+					longValue = newLongValue;
+					cur++;
+				}
+				// else we exceed long capacity, just continue and parse it as a double
+			}
+
+			if (cur < _buflen
+					&& ((token = _buffer[cur]) == 46 || token == 101 || token == 69 || (token > 47 && token < 58))) {
+				token = _buffer[cur];
+				return consumeDouble(cur, longValue, negative);
 			}
 		}
-		return value;
+
+		_intValue = negative ? -longValue : longValue;
+		_numberLen = cur - _cursor;
+		_cursor = cur;
+		return INTEGER;
 	}
 
-	// This method should not be used as the implemented algorithm is false.
-	private final double consumeDouble() throws IOException {
-		boolean stop = false;
-		double value = 0;
-		_numberLen = 0;
-		for (; _buflen > -1;) {
-			fillBuffer(true);
-			int i = _cursor;
-			for (; i < _buflen; i++) {
-				if ((_buffer[i] < 48 || _buffer[i] > 57)) {
-					stop = true;
+	// a custom implementation based on fast path principles
+	private ValueType consumeDouble(int cur, long longValue, boolean negative) {
+		int token;
+
+		// TODO a verifier : on ne veut compter dans les intDigit que ce qui n'est pas pris dans le
+		// longValue, idem pour les decimales??
+		int intDigits = cur - _cursor;
+		int valueDigits = longValue > 0 ? cur - _cursor : 0;
+
+		// ok we have readen as many characters as a long can contain
+		// the next readen characters will serve for the digit count for large integer numbers
+		if (intDigits > 17) {
+			for (; cur < _buflen; cur++) {
+				if (_buffer[cur] < 48 || _buffer[cur] > 57) {
 					break;
 				}
-
-				_numberLen++;
-				value = 10 * value + _CHAR_TO_INT[_buffer[i]];
 			}
-			_cursor = i;
-			if (stop) {
-				if (_numberLen == 0) newWrongTokenException("numeric value");
-				return value;
+			// only if we advanced
+			if (intDigits != (cur - _cursor)) intDigits = (cur - _cursor) - intDigits;
+		} else
+			// TODO check ça m'a l'air bizarre comme cas...
+			intDigits = 0;
+
+		int decimalDigits = 0;
+
+		// next possible case is a dot
+		if (cur < _buflen && _buffer[cur] == 46) {
+			cur++;
+			int start = cur;
+			// if integer part value is zero we could use scientific notation and win in precision
+			if (longValue == 0) {
+				// reset the counter as we don't care of the leading zeros
+				intDigits = 0;
+				// now lets try to read as many consecutive zeros as available
+				for (; cur < _buflen && _buffer[cur] == 48; cur++)
+					;
+			}
+			// ok now we must read again into the longValue
+			int len = Math.min(_buflen, cur + (18 - valueDigits));
+
+			for (; cur < len; cur++) {
+				token = _buffer[cur];
+				if (token < 48 || token > 57) {
+					break;
+				}
+				longValue = 10L * longValue + (token - 48);
+			}
+			decimalDigits = cur - start;
+
+			start = cur;
+			// no need to count digits after the precision we support for decimals
+			// continue reading digits and just ignore the values, we will truncate
+			for (; cur < _buflen; cur++) {
+				if (_buffer[cur] < 48 || _buffer[cur] > 57) {
+					break;
+				}
 			}
 		}
-		return value;
+
+		// now try to read exponent E/e
+		if ((cur + 1) < _buflen && (_buffer[cur] == 101 || _buffer[cur] == 69)) {
+			token = _buffer[++cur];
+			boolean negativeExp;
+			// check the sign
+			if (token == 45) {
+				negativeExp = true;
+				cur++;
+			} else {
+				if (token == 43) cur++;
+				negativeExp = false;
+			}
+			// read the power of ten
+			int powValue = 0;
+			for (; cur < _buflen; cur++) {
+				token = _buffer[cur];
+				if (token < 48 || token > 57) {
+					break;
+				}
+				powValue = 10 * powValue + (token - 48);
+			}
+
+			// depending on the sign put it in the decimal digit counter or integer digit counter
+			if (negativeExp)
+				decimalDigits += powValue;
+			else
+				intDigits += powValue;
+		}
+
+		// and now make the difference so it balances well
+		decimalDigits = intDigits - decimalDigits;
+
+		if (decimalDigits < 0) {
+			/*
+			 * This allows to handle also Double.MIN_VALUE and Double.MIN_NORMAL as
+			 * Double.MIN_NORMAL has 16 decimal digits, 308+16=324, but 10^324 overflows the double
+			 * capacity, its Infinity. So we use this little trick.
+			 */
+			if (decimalDigits < -308) {
+				if (decimalDigits < -325) {
+					_doubleValue = 0;
+				} else {
+					_doubleValue = longValue / _POWS[-decimalDigits - 308];
+					_doubleValue = _doubleValue / _POWS[308];
+				}
+			} else {
+				// better precision than multiplication
+				_doubleValue = longValue / _POWS[-decimalDigits];
+			}
+		} else {
+			if (decimalDigits > 308) {
+				_doubleValue = Double.POSITIVE_INFINITY;
+			} else {
+				// we don't need to apply same technique as before as
+				// 308-16=292 so it's okay :)
+				_doubleValue = longValue * _POWS[decimalDigits];
+			}
+		}
+
+		_doubleValue = negative ? -_doubleValue : _doubleValue;
+		_numberLen = cur - _cursor;
+		_cursor = cur;
+		return DOUBLE;
 	}
 
 	private final ValueType consumeStrictNumber() throws IOException {
-		ValueType type;
+		ValueType type = INTEGER;
 		// ensureBufferHas(32, false);
 		int localCursor;
+		boolean negative;
 		if (_buffer[_cursor] == 45) {
+			negative = true;
 			localCursor = _cursor + 1;
-		} else
+		} else {
+			negative = false;
 			localCursor = _cursor;
+		}
+		int len = Math.min(_buflen, localCursor + 18);
+		int token;
 
-		localCursor = advanceWhileNumeric(localCursor);
-		if (_buffer[localCursor] == '.') {
-			localCursor = advanceWhileNumeric(++localCursor);
-			type = ValueType.DOUBLE;
-		} else
-			type = ValueType.INTEGER;
+		long longValue = 0;
+		for (; localCursor < len; localCursor++) {
+			token = _buffer[localCursor];
+			if (token < 48 || token > 57) {
+				break;
+			}
+			longValue = 10L * longValue + (token - 48);
+		}
+
+		if (localCursor < _buflen) {
+			// read the maximum we can to fill the long capacity, at max we can read 1 additional
+			// digit
+			token = _buffer[localCursor];
+			if (token > 47 && token < 58) {
+				long newLongValue = 10L * longValue + (token - 48);
+				if (newLongValue > longValue) {
+					longValue = newLongValue;
+					localCursor++;
+				}
+				// else we exceed long capacity, just continue and parse it as a double
+			}
+		}
+
+		if (localCursor < _buflen) {
+			// consider all the remaining integer values as part of the double
+			int start = localCursor;
+			for (; localCursor < _buflen; localCursor++) {
+				if (_buffer[localCursor] < 48 || _buffer[localCursor] > 57) {
+					break;
+				}
+			}
+			if (localCursor > start) type = DOUBLE;
+		}
+
+		if (localCursor < _buflen) {
+			// localCursor = advanceWhileNumeric(localCursor);
+			if (_buffer[localCursor] == '.') {
+				localCursor = advanceWhileNumeric(++localCursor);
+				type = DOUBLE;
+			}
+		}
 
 		if (localCursor + 1 < _buflen) {
 			char ctoken = _buffer[localCursor];
 			if (ctoken == 'e' || ctoken == 'E') {
 				ctoken = _buffer[++localCursor];
 				if (ctoken == '-' || ctoken == '+' || (ctoken > 47 && ctoken < 58)) {
-					if (ctoken == '-') type = ValueType.DOUBLE;
+					if (ctoken == '-') type = DOUBLE;
 					localCursor = advanceWhileNumeric(++localCursor);
 				} else
 					newWrongTokenException("'-' or '+' or '' (same as +)");
@@ -648,30 +797,32 @@ public class JsonReader implements ObjectReader {
 		}
 
 		int length = localCursor - _cursor;
-		_stringValue = new String(_buffer, _cursor, length);
 		if (length < 18) {
-			if (type == ValueType.INTEGER) {
+			if (type == INTEGER) {
 				// it is a long, an integer or a short
-				_intValue = Long.parseLong(_stringValue);
+				_intValue = negative ? -longValue : longValue;// Long.parseLong(_stringValue);
 			} else {
+				_stringValue = new String(_buffer, _cursor, length);
 				// ok it is a float or double
 				_doubleValue = Double.parseDouble(_stringValue);
 			}
 		} else {
 			// if length is between 18 and 19 it can still be a long.
-			if (type == ValueType.DOUBLE) {
+			if (type == DOUBLE) {
 				// first let's consider the case where we know that its a double as it should occur
 				// more often
+				_stringValue = new String(_buffer, _cursor, length);
 				_doubleValue = Double.parseDouble(_stringValue);
 			} else {
 				try {
 					// then try to read it as a long
-					_intValue = Long.parseLong(_stringValue);
+					_intValue = negative ? -longValue : longValue;// Long.parseLong(_stringValue);
 				} catch (NumberFormatException nfe) {
 					// ok its length is smaller than 19 but the value is greater than
 					// Long.MAX_VALUE, it is a double
+					_stringValue = new String(_buffer, _cursor, length);
 					_doubleValue = Double.parseDouble(_stringValue);
-					type = ValueType.DOUBLE;
+					type = DOUBLE;
 				}
 			}
 		}
@@ -689,19 +840,10 @@ public class JsonReader implements ObjectReader {
 	}
 
 	protected final int readNextToken(boolean consume) throws IOException {
-		boolean stop = false;
+		if (_cursor >= _buflen) fillBuffer(true);
 
-		for (; _buflen > -1;) {
-			fillBuffer(true);
-
-			for (; _cursor < _buflen; _cursor++) {
-				if (_buffer[_cursor] < 128 && SKIPPED_TOKENS[_buffer[_cursor]] == 0) {
-					stop = true;
-					break;
-				}
-			}
-
-			if (stop) {
+		for (; _cursor < _buflen; _cursor++) {
+			if (_buffer[_cursor] < 128 && SKIPPED_TOKENS[_buffer[_cursor]] == 0) {
 				if (consume) {
 					return _buffer[_cursor++];
 				} else
@@ -709,7 +851,7 @@ public class JsonReader implements ObjectReader {
 			}
 		}
 
-		return -1;
+		return _cursor < _buflen ? _buffer[_cursor] : -1;
 	}
 
 	protected final char readEscaped() throws IOException {
@@ -815,14 +957,6 @@ public class JsonReader implements ObjectReader {
 		return _buflen < 0 || fillBuffer(false) < 0;
 	}
 
-	private final void resetNameAndValue() {
-		_doubleValue = 0;
-		_intValue = 0;
-		_booleanValue = null;
-		currentName = null;
-		_stringValue = null;
-	}
-
 	private final void newWrongTokenException(String awaited) {
 		newWrongTokenException(awaited, _cursor);
 	}
@@ -861,7 +995,7 @@ public class JsonReader implements ObjectReader {
 	}
 
 	private void throwNumberFormatException(String expected, String encoutered) {
-		int pos = (_position - valueAsString().length() - _buflen + _cursor);
+		int pos = (_position - _numberLen - _buflen + _cursor);
 		throw new NumberFormatException("Wrong numeric type at position " + pos + ", expected "
 				+ expected + " but encoutered " + encoutered);
 	}

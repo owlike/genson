@@ -1,5 +1,6 @@
 package com.owlike.genson.reflect;
 
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
@@ -11,9 +12,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.owlike.genson.Context;
 import com.owlike.genson.Deserializer;
 import com.owlike.genson.TransformationException;
 import com.owlike.genson.Wrapper;
+import com.owlike.genson.stream.ObjectReader;
 
 public abstract class BeanCreator<T> extends Wrapper<AnnotatedElement> implements Comparable<BeanCreator<T>> {
 	// The type of object it can create
@@ -185,6 +188,11 @@ public abstract class BeanCreator<T> extends Wrapper<AnnotatedElement> implement
     							+ getClass().getName()
     							+ ", this property exists only as constructor parameter!");
 			}
+		}
+
+		@Override
+		public void deserialize(T into, ObjectReader reader, Context ctx)
+				throws TransformationException, IOException {
 		}
 
 	}

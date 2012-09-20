@@ -1,0 +1,11 @@
+1) clean TypeUtil (remove all inClass methods and favor expandType + the method), 
+	clean the code from those methods as if we use expandType before the method
+	there should be no more any TypeVariables. Authorize Wildcards (as it is now) or expand them to something?
+
+2) Clean/update the javadoc for classes in com.owlike.genson.reflect (Type instead of Class, etc)
+
+3) Remove or do something with the commented code in DefaultConverters (Array, micro bench it), 
+	BeanDescriptor, choose better names for the inClass, type, ofClass etc.
+
+4) Merge the custom double parser method with the Double.parse implementation into a single method, 
+	decide in this method which algorithm should be used. Check whether code needs to be cleaned.

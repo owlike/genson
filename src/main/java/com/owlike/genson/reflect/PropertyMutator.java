@@ -28,11 +28,13 @@ public abstract class PropertyMutator<T, P> extends BeanProperty<T> implements
 		return propertyDeserializer.deserialize(reader, ctx);
 	}
 
-	public void deserialize(T into, ObjectReader reader, Context ctx)
-			throws TransformationException, IOException {
-		P propValue = propertyDeserializer.deserialize(reader, ctx);
-		mutate(into, propValue);
-	}
+	public abstract void deserialize(T into, ObjectReader reader, Context ctx)
+			throws TransformationException, IOException;
+
+	// throws TransformationException, IOException {
+	// P propValue = propertyDeserializer.deserialize(reader, ctx);
+	// mutate(into, propValue);
+	// }
 
 	public abstract void mutate(T target, P value);
 
@@ -48,18 +50,26 @@ public abstract class PropertyMutator<T, P> extends BeanProperty<T> implements
 	public static class MethodMutator<T, P> extends PropertyMutator<T, P> {
 		protected final Method _setter;
 
-		public MethodMutator(String name, Method setter, Class<T> declaringClass,
-				Deserializer<P> propertyDeserializer) {
-			this(name, setter, TypeUtil.expandType(setter.getGenericParameterTypes()[0],
-					declaringClass), declaringClass, propertyDeserializer);
-		}
-
 		public MethodMutator(String name, Method setter, Type type, Class<T> declaringClass,
 				Deserializer<P> propertyDeserializer) {
 			super(name, type, declaringClass, propertyDeserializer);
 			this._setter = setter;
 			if (!_setter.isAccessible()) {
 				_setter.setAccessible(true);
+			}
+		}
+
+		public void deserialize(T into, ObjectReader reader, Context ctx)
+				throws TransformationException, IOException {
+			P propValue = propertyDeserializer.deserialize(reader, ctx);
+			try {
+				_setter.invoke(into, propValue);
+			} catch (IllegalArgumentException e) {
+				throw couldNotMutate(e);
+			} catch (IllegalAccessException e) {
+				throw couldNotMutate(e);
+			} catch (InvocationTargetException e) {
+				throw couldNotMutate(e);
 			}
 		}
 
@@ -90,13 +100,24 @@ public abstract class PropertyMutator<T, P> extends BeanProperty<T> implements
 	public static class FieldMutator<T, P> extends PropertyMutator<T, P> {
 		protected final Field _field;
 
-		public FieldMutator(String name, Field field, Class<T> declaringClass,
+		public FieldMutator(String name, Field field, Type type, Class<T> declaringClass,
 				Deserializer<P> propertyDeserializer) {
-			super(name, TypeUtil.expandType(field.getGenericType(), declaringClass),
-					declaringClass, propertyDeserializer);
+			super(name, type, declaringClass, propertyDeserializer);
 			this._field = field;
 			if (!_field.isAccessible()) {
 				_field.setAccessible(true);
+			}
+		}
+
+		public void deserialize(T into, ObjectReader reader, Context ctx)
+				throws TransformationException, IOException {
+			P propValue = propertyDeserializer.deserialize(reader, ctx);
+			try {
+				_field.set(into, propValue);
+			} catch (IllegalArgumentException e) {
+				throw couldNotMutate(e);
+			} catch (IllegalAccessException e) {
+				throw couldNotMutate(e);
 			}
 		}
 

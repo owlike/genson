@@ -27,7 +27,18 @@ import static org.junit.Assert.*;
 
 public class BeanDescriptorTest {
 	private Genson genson = new Genson();
-	
+
+	@Test
+	public void testFailFastBeanDescriptorWithWrongType() {
+		BeanDescriptorProvider provider = genson.getBeanDescriptorFactory();
+		try {
+			provider.provide(AnotherObject.class, ThatObject.class, genson);
+			fail();
+		} catch (ClassCastException cce) {
+			// OK
+		}
+	}
+
 	private static class ThatObject {
 		@SuppressWarnings("unused")
 		String aString;
@@ -53,8 +64,8 @@ public class BeanDescriptorTest {
 		Genson genson = new Genson.Builder() {
 			@Override
 			protected Factory<Converter<?>> createConverterFactory() {
-				return new BasicConvertersFactory(getSerializersMap(), getDeserializersMap(), getFactories(),
-						getBeanDescriptorProvider());
+				return new BasicConvertersFactory(getSerializersMap(), getDeserializersMap(),
+						getFactories(), getBeanDescriptorProvider());
 			}
 		}.setWithDebugInfoPropertyNameResolver(true).create();
 
@@ -82,8 +93,8 @@ public class BeanDescriptorTest {
 				new BeanMutatorAccessorResolver.StandardMutaAccessorResolver(),
 				new PropertyNameResolver.ConventionalBeanPropertyNameResolver(), true, true, true);
 
-		BeanDescriptor<SpecilizedClass> bd = provider.provideBeanDescriptor(SpecilizedClass.class,
-				new Genson());
+		BeanDescriptor<SpecilizedClass> bd = provider.provide(SpecilizedClass.class,
+				SpecilizedClass.class, new Genson());
 		assertEquals(B.class, getAccessor("t", bd).type);
 		assertEquals(B.class,
 				((GenericArrayType) getAccessor("tArray", bd).type).getGenericComponentType());
@@ -127,57 +138,67 @@ public class BeanDescriptorTest {
 
 	PropertyAccessor<?, ?> getAccessor(String name, BeanDescriptor<?> bd) {
 		for (PropertyAccessor<?, ?> a : bd.accessibleProperties)
-			if (name.equals(a.name))
-				return a;
+			if (name.equals(a.name)) return a;
 		return null;
 	}
 
-	@Test public void testOneCreatorPerClass() {
+	@Test
+	public void testOneCreatorPerClass() {
 		try {
 			genson.provideConverter(MultipleCreator.class);
 			fail();
 		} catch (Exception e) {
 		}
 	}
-	
-	@Test public void testUseExplicitMethodCtr() throws TransformationException, IOException {
+
+	@Test
+	public void testUseExplicitMethodCtr() throws TransformationException, IOException {
 		genson.deserialize("{}", ForceMethodCreator.class);
 		assertTrue(ForceMethodCreator.usedMethod);
 	}
-	
-	@Test public void testUseExplicitConstructorCtr() throws TransformationException, IOException {
+
+	@Test
+	public void testUseExplicitConstructorCtr() throws TransformationException, IOException {
 		genson.deserialize("{}", ForceConstructorCreator.class);
 		assertTrue(ForceConstructorCreator.usedCtr);
 	}
-	
+
 	static class ForceMethodCreator {
 		public static transient boolean usedMethod = false;
+
 		ForceMethodCreator() {
 		}
-		
-		@Creator public static ForceMethodCreator create() {
-			usedMethod = true; 
+
+		@Creator
+		public static ForceMethodCreator create() {
+			usedMethod = true;
 			return new ForceMethodCreator();
 		}
 	}
-	
+
 	static class ForceConstructorCreator {
 		public static transient boolean usedCtr = false;
+
 		ForceConstructorCreator() {
 		}
-		
-		@Creator ForceConstructorCreator(@JsonProperty("i") Integer iii) {
+
+		@Creator
+		ForceConstructorCreator(@JsonProperty("i") Integer iii) {
 			usedCtr = true;
 		}
 	}
-	
+
 	static class MultipleCreator {
-		@Creator MultipleCreator() {} 
-		@Creator public static MultipleCreator create() {
+		@Creator
+		MultipleCreator() {
+		}
+
+		@Creator
+		public static MultipleCreator create() {
 			return null;
 		}
 	}
-	
+
 	public static class B {
 		public String v;
 	}
@@ -206,7 +227,6 @@ public class BeanDescriptorTest {
 
 		@JsonProperty
 		transient int p;
-		@SuppressWarnings("unused")
 		@JsonProperty(serialize = false)
 		private transient int q;
 		@JsonProperty(deserialize = false)

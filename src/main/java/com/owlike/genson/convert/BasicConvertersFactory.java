@@ -24,8 +24,8 @@ import com.owlike.genson.stream.ObjectWriter;
 /**
  * This is the base factory that will create converters based on the default ones and on custom
  * Serializer, Deserializer and Converter. But it also uses factories (default and custom) and
- * {@link com.owlike.genson.reflect.BeanDescriptorProvider BeanDescriptorProvider} that is responsible of
- * creating bean converters.
+ * {@link com.owlike.genson.reflect.BeanDescriptorProvider BeanDescriptorProvider} that is
+ * responsible of creating bean converters.
  * <p>
  * When you ask for a Converter it will
  * <ul>
@@ -74,7 +74,7 @@ public class BasicConvertersFactory implements Factory<Converter<?>> {
 		Serializer<?> serializer = provide(Serializer.class, type, serializersMap, genson);
 		Deserializer<?> deserializer = provide(Deserializer.class, type, deserializersMap, genson);
 		if (serializer instanceof Converter && deserializer instanceof Converter) {
-				converter = (Converter<?>) deserializer;
+			converter = (Converter<?>) deserializer;
 		} else {
 			converter = new DelegatedConverter(serializer, deserializer);
 		}
@@ -84,8 +84,7 @@ public class BasicConvertersFactory implements Factory<Converter<?>> {
 	@SuppressWarnings("unchecked")
 	protected <T> T provide(Class<T> forClass, Type withParameterType,
 			Map<Type, ? extends T> fromTypeMap, Genson genson) {
-		if (fromTypeMap.containsKey(withParameterType))
-			return fromTypeMap.get(withParameterType);
+		if (fromTypeMap.containsKey(withParameterType)) return fromTypeMap.get(withParameterType);
 
 		Type wrappedParameterType = withParameterType;
 		if (withParameterType instanceof Class<?> && ((Class<?>) withParameterType).isPrimitive())
@@ -107,10 +106,11 @@ public class BasicConvertersFactory implements Factory<Converter<?>> {
 			}
 		}
 
-		return (T) beanDescriptorProvider.provide(TypeUtil.getRawClass(withParameterType), genson);
+		return (T) beanDescriptorProvider.provide(TypeUtil.getRawClass(withParameterType),
+				withParameterType, genson);
 	}
 
-	private class DelegatedConverter<T> extends Wrapper<Converter<T>> implements Converter<T>  {
+	private class DelegatedConverter<T> extends Wrapper<Converter<T>> implements Converter<T> {
 		private final Serializer<T> serializer;
 		private final Deserializer<T> deserializer;
 
@@ -132,8 +132,7 @@ public class BasicConvertersFactory implements Factory<Converter<?>> {
 		@Override
 		public <A extends Annotation> A getAnnotation(Class<A> aClass) {
 			A a = null;
-			if (serializer != null)
-				a = toAnnotatedElement(serializer).getAnnotation(aClass);
+			if (serializer != null) a = toAnnotatedElement(serializer).getAnnotation(aClass);
 			if (deserializer != null && a == null)
 				a = toAnnotatedElement(deserializer).getAnnotation(aClass);
 			return a;
@@ -144,10 +143,8 @@ public class BasicConvertersFactory implements Factory<Converter<?>> {
 			if (serializer != null && deserializer != null)
 				return Operations.union(Annotation[].class, toAnnotatedElement(serializer)
 						.getAnnotations(), toAnnotatedElement(deserializer).getAnnotations());
-			if (serializer != null)
-				return toAnnotatedElement(serializer).getAnnotations();
-			if (deserializer != null)
-				return toAnnotatedElement(deserializer).getAnnotations();
+			if (serializer != null) return toAnnotatedElement(serializer).getAnnotations();
+			if (deserializer != null) return toAnnotatedElement(deserializer).getAnnotations();
 
 			return new Annotation[0];
 		}
@@ -158,8 +155,7 @@ public class BasicConvertersFactory implements Factory<Converter<?>> {
 				return Operations.union(Annotation[].class, toAnnotatedElement(serializer)
 						.getDeclaredAnnotations(), toAnnotatedElement(deserializer)
 						.getDeclaredAnnotations());
-			if (serializer != null)
-				return toAnnotatedElement(serializer).getDeclaredAnnotations();
+			if (serializer != null) return toAnnotatedElement(serializer).getDeclaredAnnotations();
 			if (deserializer != null)
 				return toAnnotatedElement(deserializer).getDeclaredAnnotations();
 

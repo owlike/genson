@@ -22,24 +22,26 @@ public class CombinedObjectTest {
 	public void combineMultipleJsonObjectIntoSingleObject() throws TransformationException,
 			IOException {
 		String json = "{\"Person\":{\"id\":\"2\"},\"Dog\":{\"dateOfBirth\":\"2012-08-20 00:00:00\",\"price\" : \"10.00\"}}";
-		Genson genson = new Genson.Builder().withDeserializerFactory(new MyClassConverterFactory()).create();
+		Genson genson = new Genson.Builder().withDeserializerFactory(new MyClassConverterFactory())
+				.create();
 		MyClass myClass = genson.deserialize(json, MyClass.class);
 		assertEquals(Timestamp.valueOf("2012-08-20 00:00:00"), myClass.dogsDateOfBirth);
 		assertEquals("2", myClass.personsId);
 		assertEquals(new BigDecimal("10.00"), myClass.dogsPrice);
 	}
-	
+
 	public static class MyClassConverterFactory implements Factory<Deserializer<MyClass>> {
-		@SuppressWarnings("unchecked")
 		@Override
 		public Deserializer<MyClass> create(Type type, Genson genson) {
-			BeanDescriptor<MyClass> myClassDescriptor = (BeanDescriptor<MyClass>) genson.getBeanDescriptorFactory().provide(MyClass.class, genson);
+			BeanDescriptor<MyClass> myClassDescriptor = (BeanDescriptor<MyClass>) genson
+					.getBeanDescriptorFactory().provide(MyClass.class, MyClass.class, genson);
 			return new MyClassConverter(myClassDescriptor);
 		}
 	}
 
 	public static class MyClassConverter implements Deserializer<MyClass> {
 		BeanDescriptor<MyClass> myClassDescriptor;
+
 		public MyClassConverter(BeanDescriptor<MyClass> myClassDescriptor) {
 			this.myClassDescriptor = myClassDescriptor;
 		}
@@ -63,9 +65,13 @@ public class CombinedObjectTest {
 	}
 
 	public static class MyClass {
-		@JsonProperty("id") private String personsId;
-		@JsonProperty("dateOfBirth") private Timestamp dogsDateOfBirth;
-		@JsonProperty("price") private BigDecimal dogsPrice;
+		@JsonProperty("id")
+		private String personsId;
+		@JsonProperty("dateOfBirth")
+		private Timestamp dogsDateOfBirth;
+		@JsonProperty("price")
+		private BigDecimal dogsPrice;
+
 		public MyClass() {
 		}
 	}

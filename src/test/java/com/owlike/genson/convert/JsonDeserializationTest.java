@@ -58,22 +58,23 @@ public class JsonDeserializationTest {
 		assertTrue(co.getListOfPrimitives().size() == 0);
 		assertNull(co.getArrayOfPrimitives());
 	}
-	
-	@Test public void testDeserializeEmptyJson() throws TransformationException, IOException {
+
+	@Test
+	public void testDeserializeEmptyJson() throws TransformationException, IOException {
 		Integer i = genson.deserialize("\"\"", Integer.class);
 		assertNull(i);
 		i = genson.deserialize("", Integer.class);
 		assertNull(i);
 		i = genson.deserialize("null", Integer.class);
 		assertNull(i);
-		
+
 		int[] arr = genson.deserialize("", int[].class);
 		assertNull(arr);
 		arr = genson.deserialize("null", int[].class);
 		assertNull(arr);
 		arr = genson.deserialize("[]", int[].class);
 		assertNotNull(arr);
-		
+
 		Primitives p = genson.deserialize("", Primitives.class);
 		assertNull(p);
 		p = genson.deserialize("null", Primitives.class);
@@ -84,7 +85,8 @@ public class JsonDeserializationTest {
 
 	@Test
 	public void testJsonNumbersLimit() throws TransformationException, IOException {
-		String src = "[" + String.valueOf(Long.MAX_VALUE) + "," + String.valueOf(Long.MIN_VALUE) + "]";
+		String src = "[" + String.valueOf(Long.MAX_VALUE) + "," + String.valueOf(Long.MIN_VALUE)
+				+ "]";
 		long[] arr = genson.deserialize(src, long[].class);
 		assertTrue(Long.MAX_VALUE == arr[0]);
 		assertTrue(Long.MIN_VALUE == arr[1]);
@@ -158,7 +160,8 @@ public class JsonDeserializationTest {
 		final int age;
 		final BeanWithConstructor other;
 
-		public BeanWithConstructor(@JsonProperty(value = "name") String name, @JsonProperty(value = "age") int age,
+		public BeanWithConstructor(@JsonProperty(value = "name") String name,
+				@JsonProperty(value = "age") int age,
 				@JsonProperty(value = "other") BeanWithConstructor other) {
 			this.name = name;
 			this.age = age;
@@ -174,20 +177,22 @@ public class JsonDeserializationTest {
 	@Test
 	public void testJsonToUntypedList() throws TransformationException, IOException {
 		String src = "[1, 1.1, \"aa\", true, false]";
-		TypeUtil.lookupWithGenerics(Serializer.class, Object.class, DefaultConverters.StringConverter.class, false);
+		TypeUtil.lookupWithGenerics(Serializer.class, Object.class,
+				DefaultConverters.StringConverter.class, false);
 		List<Object> l = genson.deserialize(src, List.class);
 		assertArrayEquals(new Object[] { 1, 1.1, "aa", true, false },
 				l.toArray(new Object[l.size()]));
 	}
-	
-	@Test public void testMultidimensionalArray() throws TransformationException, IOException {
+
+	@Test
+	public void testMultidimensionalArray() throws TransformationException, IOException {
 		String json = "[[\"abc\",[42,24]],[\"def\",[43,34]]]";
 		Object[][] array = genson.deserialize(json, Object[][].class);
 		assertEquals("abc", array[0][0]);
-		assertArrayEquals(new Object[]{42,24}, (Object[]) array[0][1]);
+		assertArrayEquals(new Object[] { 42, 24 }, (Object[]) array[0][1]);
 		assertEquals("def", array[1][0]);
-		assertArrayEquals(new Object[]{43,34}, (Object[]) array[1][1]);
-		
+		assertArrayEquals(new Object[] { 43, 34 }, (Object[]) array[1][1]);
+
 		String json3 = "[[[\"abc\"],[42,24],[\"def\"],[43,34]]]";
 		genson.deserialize(json3, Object[][][].class);
 	}
@@ -199,9 +204,8 @@ public class JsonDeserializationTest {
 		TypeVariableList<Number> tvl = genson.deserialize(src, TypeVariableList.class);
 		assertArrayEquals(tvl.list.toArray(new Number[tvl.list.size()]), new Number[] { 1, 2.3, 5,
 				null });
-		
-		String json =   
-				"[\"hello\",5,{\"name\":\"GREETINGS\",\"source\":\"guest\"}]";
+
+		String json = "[\"hello\",5,{\"name\":\"GREETINGS\",\"source\":\"guest\"}]";
 		Map<String, String> map = new HashMap<String, String>();
 		map.put("name", "GREETINGS");
 		map.put("source", "guest");
@@ -231,7 +235,8 @@ public class JsonDeserializationTest {
 	}
 
 	@Test
-	public void testDeserializeWithConstructorAndFieldsAndSetters() throws TransformationException, IOException {
+	public void testDeserializeWithConstructorAndFieldsAndSetters() throws TransformationException,
+			IOException {
 		String json = "{\"p0\":0,\"p1\":1,\"p2\":2,\"shouldSkipIt\":55, \"nameInJson\": 3}";
 		ClassWithConstructorFieldsAndGetters c = genson.deserialize(json,
 				ClassWithConstructorFieldsAndGetters.class);
@@ -242,7 +247,8 @@ public class JsonDeserializationTest {
 	}
 
 	@Test
-	public void testDeserializeWithConstructorAndMissingFields() throws TransformationException, IOException {
+	public void testDeserializeWithConstructorAndMissingFields() throws TransformationException,
+			IOException {
 		String json = "{\"p0\":0,\"p1\":1, \"nameInJson\": 3}";
 		ClassWithConstructorFieldsAndGetters c = genson.deserialize(json,
 				ClassWithConstructorFieldsAndGetters.class);
@@ -252,9 +258,10 @@ public class JsonDeserializationTest {
 		assertEquals(null, c.p2);
 		assertEquals(new Integer(3), c.hidden);
 	}
-	
+
 	@Test
-	public void testDeserializeWithConstructorMixedAnnotation() throws TransformationException, IOException {
+	public void testDeserializeWithConstructorMixedAnnotation() throws TransformationException,
+			IOException {
 		String json = "{\"p0\":0,\"p1\":1,\"p2\":2,\"shouldSkipIt\":55,   \"nameInJson\":\"125\"}";
 		ClassWithConstructorFieldsAndGetters c = genson.deserialize(json,
 				ClassWithConstructorFieldsAndGetters.class);
@@ -274,9 +281,11 @@ public class JsonDeserializationTest {
 		assertTrue(p instanceof Rectangle);
 	}
 
-	@Test public void testDeserealizeIntoExistingBean() throws IOException, TransformationException {
-		@SuppressWarnings("unchecked")
-		BeanDescriptor<ClassWithConstructorFieldsAndGetters> desc = (BeanDescriptor<ClassWithConstructorFieldsAndGetters>) genson.getBeanDescriptorFactory().provide(ClassWithConstructorFieldsAndGetters.class, genson);
+	@Test
+	public void testDeserealizeIntoExistingBean() throws IOException, TransformationException {
+		BeanDescriptor<ClassWithConstructorFieldsAndGetters> desc = (BeanDescriptor<ClassWithConstructorFieldsAndGetters>) genson
+				.getBeanDescriptorFactory().provide(ClassWithConstructorFieldsAndGetters.class,
+						ClassWithConstructorFieldsAndGetters.class, genson);
 		ClassWithConstructorFieldsAndGetters c = new ClassWithConstructorFieldsAndGetters(1, 2, "3") {
 			@Override
 			public void setP2(Integer p2) {
@@ -291,11 +300,12 @@ public class JsonDeserializationTest {
 		assertEquals(c.p1, new Integer(1));
 		assertEquals(c.p2, new Integer(2));
 	}
-	
-	@Test public void testDeserializeEnum() throws TransformationException, IOException {
+
+	@Test
+	public void testDeserializeEnum() throws TransformationException, IOException {
 		assertEquals(Player.JAVA, genson.deserialize("\"JAVA\"", Player.class));
 	}
-	
+
 	@SuppressWarnings("unused")
 	private static class ClassWithConstructorFieldsAndGetters {
 		final Integer p0;

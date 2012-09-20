@@ -45,12 +45,6 @@ public abstract class PropertyAccessor<T, P> extends BeanProperty<T> implements
 	public static class MethodAccessor<T, P> extends PropertyAccessor<T, P> {
 		protected final Method _getter;
 
-		public MethodAccessor(String name, Method getter, Class<T> declaringClass,
-				Serializer<P> propertySerializer) {
-			this(name, getter, TypeUtil.expandType(getter.getGenericReturnType(), declaringClass),
-					declaringClass, propertySerializer);
-		}
-
 		public MethodAccessor(String name, Method getter, Type type, Class<T> declaringClass,
 				Serializer<P> propertySerializer) {
 			super(name, type, declaringClass, propertySerializer);
@@ -87,11 +81,10 @@ public abstract class PropertyAccessor<T, P> extends BeanProperty<T> implements
 
 	public static class FieldAccessor<T, P> extends PropertyAccessor<T, P> {
 		protected final Field _field;
-		
-		public FieldAccessor(String name, Field field, Class<T> declaringClass,
+
+		public FieldAccessor(String name, Field field, Type type, Class<T> declaringClass,
 				Serializer<P> propertySerializer) {
-			super(name, TypeUtil.expandType(field.getGenericType(), declaringClass),
-					declaringClass, propertySerializer);
+			super(name, type, declaringClass, propertySerializer);
 			this._field = field;
 			if (!_field.isAccessible()) {
 				_field.setAccessible(true);

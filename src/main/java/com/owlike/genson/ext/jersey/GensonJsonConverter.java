@@ -44,7 +44,7 @@ public class GensonJsonConverter implements MessageBodyReader<Object>, MessageBo
 		}
 
 		private final Genson createDefaultInstance() {
-			return new Genson.Builder().setSkipNull(true).setWithBeanViewConverter(true)
+			return new Genson.Builder().setWithBeanViewConverter(true)
 					.setWithDebugInfoPropertyNameResolver(true).create();
 		}
 	}
