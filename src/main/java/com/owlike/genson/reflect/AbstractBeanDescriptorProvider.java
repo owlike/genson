@@ -29,7 +29,18 @@ import static com.owlike.genson.reflect.TypeUtil.*;
 public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorProvider {
 	protected AbstractBeanDescriptorProvider() {
 	}
+	
+	@Override
+	public <T> BeanDescriptor<T> provide(Class<T> ofClass, Genson genson) {
+		return provide(ofClass, ofClass, genson);
+	}
 
+	@Override
+	public BeanDescriptor<?> provide(Type ofType, Genson genson) {
+		return provide(getRawClass(ofType), ofType, genson);
+	}
+	
+	@Override
 	public <T> BeanDescriptor<T> provide(Class<T> ofClass, Type ofType, Genson genson) {
 		Map<String, LinkedList<PropertyMutator<T, ?>>> mutatorsMap = new LinkedHashMap<String, LinkedList<PropertyMutator<T, ?>>>();
 		Map<String, LinkedList<PropertyAccessor<T, ?>>> accessorsMap = new LinkedHashMap<String, LinkedList<PropertyAccessor<T, ?>>>();
@@ -63,7 +74,7 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 		// would not necessarily correspond to the rawClass of ofType. In fact we authorize that
 		// ofType
 		// rawClass is different from Class<T>, but the BeanDescriptor must match!
-		BeanDescriptor<T> descriptor = create(ofType, ctr, accessors, mutators);
+		BeanDescriptor<T> descriptor = create(ofClass, ofType, ctr, accessors, mutators);
 		if (!ofClass.isAssignableFrom(descriptor.getOfClass()))
 			throw new ClassCastException("Actual implementation of BeanDescriptorProvider "
 					+ getClass()
@@ -76,32 +87,31 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 	 * Creates an instance of BeanDescriptor based on the passed arguments. Subclasses can override
 	 * this method to create their own BeanDescriptors.
 	 * 
-	 * @param ofClass
-	 * @param creators
+	 * @param forClass
+	 * @param ofType
+	 * @param creator
 	 * @param accessors
 	 * @param mutators
-	 * @return an instance of a BeanDescriptor.
+	 * @return a instance
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	protected <T> BeanDescriptor<T> create(Type ofType, BeanCreator<T> creator,
+	protected <T> BeanDescriptor<T> create(Class<T> forClass, Type ofType, BeanCreator<T> creator,
 			List<PropertyAccessor<T, ?>> accessors, Map<String, PropertyMutator<T, ?>> mutators) {
-		Class<T> rawClass = (Class<T>) getRawClass(ofType);
-		return new BeanDescriptor(rawClass, rawClass, accessors, mutators, creator);
+		return new BeanDescriptor(forClass, getRawClass(ofType), accessors, mutators, creator);
 	}
 
 	/**
-	 * Provides a list of {@link BeanCreator} for type ofClass.
-	 * 
-	 * @param ofClass
+	 * Provides a list of {@link BeanCreator} for type ofType.
+	 * @param ofType
 	 * @param genson
-	 * @return a list of BeanCreators, may be empty.
+	 * @return
 	 */
 	protected abstract <T> List<BeanCreator<T>> provideBeanCreators(Type ofType, Genson genson);
 
 	/**
 	 * Adds resolved {@link PropertyMutator} to mutatorsMap.
 	 * 
-	 * @param ofClass
+	 * @param ofType
 	 * @param mutatorsMap
 	 * @param genson
 	 */
@@ -111,7 +121,7 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 	/**
 	 * Adds resolved {@link PropertyAccessor} to accessorsMap.
 	 * 
-	 * @param ofClass
+	 * @param ofType
 	 * @param accessorsMap
 	 * @param genson
 	 */
@@ -142,7 +152,7 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 	/**
 	 * Implementations may do additional merge operations based on resolved creators and their
 	 * properties and the resolved mutators.
-	 * 
+	 * @param ofType
 	 * @param mutators
 	 * @param creators
 	 */

@@ -14,7 +14,6 @@ import static com.owlike.genson.stream.ValueType.*;
 
 /*
  * TODO handle rows/cols for more precise exceptions (pretty printing)
- * TODO search for optimization points
  */
 public class JsonReader implements ObjectReader {
 	protected final static String NULL_VALUE = "null";
@@ -72,7 +71,6 @@ public class JsonReader implements ObjectReader {
 	private final Reader reader;
 	private final boolean strictDoubleParse;
 	private final boolean readMetadata;
-	// TODO recyclebuffer
 	private final char[] _buffer = new char[2048];
 	private int _position;
 	private int _cursor;
@@ -84,8 +82,8 @@ public class JsonReader implements ObjectReader {
 
 	private String currentName;
 	private String _stringValue;
-	private long _intValue;
-	private double _doubleValue;
+	protected long _intValue;
+	protected double _doubleValue;
 	private int _numberLen = 0;
 	private Boolean _booleanValue;
 	private ValueType valueType;
@@ -342,7 +340,7 @@ public class JsonReader implements ObjectReader {
 	public ValueType next() throws IOException {
 		_metadata_readen = false;
 		_first = false;
-
+		
 		char ctoken = (char) readNextToken(false);
 
 		if (ctoken == ',') {
@@ -449,7 +447,7 @@ public class JsonReader implements ObjectReader {
 					}
 				}
 			}
-			
+
 			buffered = true;
 			writeToStringBuffer(_buffer, _cursor, i - _cursor);
 			_cursor = i + 1;
@@ -460,7 +458,7 @@ public class JsonReader implements ObjectReader {
 		if (token != '"') newMisplacedTokenException(_cursor);
 		_cursor++;
 		boolean buffered = false;
-		while(true) {
+		while (true) {
 			fillBuffer(true);
 
 			int i = _cursor;
@@ -484,8 +482,7 @@ public class JsonReader implements ObjectReader {
 						_cursor = i + 1;
 						return name;
 					}
-				}
-				else
+				} else
 					i++;
 			}
 
@@ -495,20 +492,17 @@ public class JsonReader implements ObjectReader {
 		}
 	}
 
+	/**
+	 * Reads the next literal value into _booleanValue, _doubleValue or _intValue and returns the
+	 * type of the readed literal, possible values are : INTEGER, DOUBLE, BOOLEAN, NULL. When
+	 * calling this method the _cursor must be positioned on the first character of the value in the
+	 * _buffer, you can ensure that by calling {@link #readNextToken(false)}.
+	 */
 	protected final ValueType consumeLiteral() throws IOException {
-		// fillBuffer(true);
-		ensureBufferHas(_cursor, false);
 		int token = _buffer[_cursor];
 
 		if ((token > 47 && token < 58) || token == 45) {
-			ValueType valueType = null;
-			if (strictDoubleParse) {
-				valueType = consumeStrictNumber();
-			} else {
-				return consumeNumber();
-			}
-			// should not come here
-			return valueType;
+			return consumeNumber();
 		} else {
 			ensureBufferHas(4, true);
 
@@ -547,7 +541,12 @@ public class JsonReader implements ObjectReader {
 		}
 	}
 
-	private ValueType consumeNumber() {
+	private ValueType consumeNumber() throws IOException {
+		// lets fill the buffer and handle differently overflowing values
+		if ((_buflen - _cursor) < 378)
+			ensureBufferHas(_buflen, false);
+		
+		int begin = _cursor;
 		int cur;
 		boolean negative;
 		// check the sign
@@ -562,7 +561,7 @@ public class JsonReader implements ObjectReader {
 		// just to handle invalid leading 0000
 		for (; cur < _buflen && _buffer[cur] == 48; cur++)
 			;
-		// Careful we consume the '-' here!
+		// Careful we consume the '-' here, but also all the leading 0, even if it is of form 0.xxx
 		_cursor = cur;
 
 		int len = Math.min(_buflen, cur + 18);
@@ -589,11 +588,14 @@ public class JsonReader implements ObjectReader {
 				}
 				// else we exceed long capacity, just continue and parse it as a double
 			}
-
+			
 			if (cur < _buflen
 					&& ((token = _buffer[cur]) == 46 || token == 101 || token == 69 || (token > 47 && token < 58))) {
 				token = _buffer[cur];
-				return consumeDouble(cur, longValue, negative);
+				if (strictDoubleParse) {
+					_cursor = begin;
+					return consumeStrictNumber(cur);
+				} else return consumeDouble(cur, longValue, negative);
 			}
 		}
 
@@ -727,60 +729,19 @@ public class JsonReader implements ObjectReader {
 		return DOUBLE;
 	}
 
-	private final ValueType consumeStrictNumber() throws IOException {
-		ValueType type = INTEGER;
-		// ensureBufferHas(32, false);
-		int localCursor;
-		boolean negative;
-		if (_buffer[_cursor] == 45) {
-			negative = true;
-			localCursor = _cursor + 1;
-		} else {
-			negative = false;
-			localCursor = _cursor;
-		}
-		int len = Math.min(_buflen, localCursor + 18);
-		int token;
-
-		long longValue = 0;
-		for (; localCursor < len; localCursor++) {
-			token = _buffer[localCursor];
-			if (token < 48 || token > 57) {
-				break;
-			}
-			longValue = 10L * longValue + (token - 48);
-		}
-
-		if (localCursor < _buflen) {
-			// read the maximum we can to fill the long capacity, at max we can read 1 additional
-			// digit
-			token = _buffer[localCursor];
-			if (token > 47 && token < 58) {
-				long newLongValue = 10L * longValue + (token - 48);
-				if (newLongValue > longValue) {
-					longValue = newLongValue;
-					localCursor++;
-				}
-				// else we exceed long capacity, just continue and parse it as a double
-			}
-		}
-
+	private final ValueType consumeStrictNumber(int localCursor) throws IOException {
 		if (localCursor < _buflen) {
 			// consider all the remaining integer values as part of the double
-			int start = localCursor;
 			for (; localCursor < _buflen; localCursor++) {
 				if (_buffer[localCursor] < 48 || _buffer[localCursor] > 57) {
 					break;
 				}
 			}
-			if (localCursor > start) type = DOUBLE;
 		}
 
 		if (localCursor < _buflen) {
-			// localCursor = advanceWhileNumeric(localCursor);
 			if (_buffer[localCursor] == '.') {
 				localCursor = advanceWhileNumeric(++localCursor);
-				type = DOUBLE;
 			}
 		}
 
@@ -789,45 +750,22 @@ public class JsonReader implements ObjectReader {
 			if (ctoken == 'e' || ctoken == 'E') {
 				ctoken = _buffer[++localCursor];
 				if (ctoken == '-' || ctoken == '+' || (ctoken > 47 && ctoken < 58)) {
-					if (ctoken == '-') type = DOUBLE;
 					localCursor = advanceWhileNumeric(++localCursor);
 				} else
 					newWrongTokenException("'-' or '+' or '' (same as +)");
 			}
 		}
-
-		int length = localCursor - _cursor;
-		if (length < 18) {
-			if (type == INTEGER) {
-				// it is a long, an integer or a short
-				_intValue = negative ? -longValue : longValue;// Long.parseLong(_stringValue);
-			} else {
-				_stringValue = new String(_buffer, _cursor, length);
-				// ok it is a float or double
-				_doubleValue = Double.parseDouble(_stringValue);
-			}
-		} else {
-			// if length is between 18 and 19 it can still be a long.
-			if (type == DOUBLE) {
-				// first let's consider the case where we know that its a double as it should occur
-				// more often
-				_stringValue = new String(_buffer, _cursor, length);
-				_doubleValue = Double.parseDouble(_stringValue);
-			} else {
-				try {
-					// then try to read it as a long
-					_intValue = negative ? -longValue : longValue;// Long.parseLong(_stringValue);
-				} catch (NumberFormatException nfe) {
-					// ok its length is smaller than 19 but the value is greater than
-					// Long.MAX_VALUE, it is a double
-					_stringValue = new String(_buffer, _cursor, length);
-					_doubleValue = Double.parseDouble(_stringValue);
-					type = DOUBLE;
-				}
-			}
+		
+		// it may overflow of the max numeric value we accept to read, it should
+		if (localCursor >= _buflen) {
+			
 		}
+
+		_numberLen = localCursor - _cursor;
+		_stringValue = new String(_buffer, _cursor, _numberLen);
+		_doubleValue = Double.parseDouble(_stringValue);		
 		_cursor = localCursor;
-		return type;
+		return DOUBLE;
 	}
 
 	private int advanceWhileNumeric(int cursor) {
@@ -840,15 +778,19 @@ public class JsonReader implements ObjectReader {
 	}
 
 	protected final int readNextToken(boolean consume) throws IOException {
-		if (_cursor >= _buflen) fillBuffer(true);
+		while (true) {
+			if (_cursor >= _buflen) fillBuffer(true);
 
-		for (; _cursor < _buflen; _cursor++) {
-			if (_buffer[_cursor] < 128 && SKIPPED_TOKENS[_buffer[_cursor]] == 0) {
-				if (consume) {
-					return _buffer[_cursor++];
-				} else
-					return _buffer[_cursor];
+			for (; _cursor < _buflen; _cursor++) {
+				if (_buffer[_cursor] < 128 && SKIPPED_TOKENS[_buffer[_cursor]] == 0) {
+					if (consume) {
+						return _buffer[_cursor++];
+					} else
+						return _buffer[_cursor];
+				}
 			}
+
+			if (_buflen == -1) break;
 		}
 
 		return _cursor < _buflen ? _buffer[_cursor] : -1;

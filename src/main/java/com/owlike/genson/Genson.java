@@ -9,6 +9,9 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -586,6 +589,166 @@ public final class Genson {
 		public Builder withDeserializerFactory(Factory<? extends Deserializer<?>> factory) {
 			converterFactories.add(factory);
 			return this;
+		}
+
+		/**
+		 * Renames all fields named field to toName.
+		 */
+		public Builder rename(String field, String toName) {
+			return rename(field, null, toName, null);
+		}
+
+		/**
+		 * Renames all fields of type fieldOfType to toName.
+		 */
+		public Builder rename(Class<?> fieldOfType, String toName) {
+			return rename(null, null, toName, fieldOfType);
+		}
+
+		/**
+		 * Renames all fields named field declared in class fromClass to toName.
+		 */
+		public Builder rename(String field, Class<?> fromClass, String toName) {
+			return rename(field, fromClass, toName, null);
+		}
+
+		/**
+		 * Renames all fields named field and of type fieldOfType to toName.
+		 */
+		public Builder rename(String field, String toName, Class<?> fieldOfType) {
+			return rename(field, null, toName, fieldOfType);
+		}
+
+		/**
+		 * Renames all fields named field, of type fieldOfType and declared in fromClass to toName.
+		 */
+		public Builder rename(final String field, final Class<?> fromClass, final String toName,
+				final Class<?> ofType) {
+			return with(new PropertyNameResolver() {
+
+				@Override
+				public String resolve(int parameterIdx, Constructor<?> fromConstructor) {
+					return null;
+				}
+
+				@Override
+				public String resolve(int parameterIdx, Method fromMethod) {
+					return null;
+				}
+
+				@Override
+				public String resolve(Field fromField) {
+					return tryToRename(fromField.getName(), fromField.getDeclaringClass(),
+							fromField.getType());
+				}
+
+				@Override
+				public String resolve(Method fromMethod) {
+					String name = fromMethod.getName();
+					if (name.startsWith("is") && name.length() > 2) {
+						return tryToRename(name.substring(2), fromMethod.getDeclaringClass(),
+								fromMethod.getReturnType());
+					}
+					if (name.length() > 3) {
+						if (name.startsWith("get"))
+							return tryToRename(name.substring(3), fromMethod.getDeclaringClass(),
+									fromMethod.getReturnType());
+						if (name.startsWith("set"))
+							return tryToRename(name.substring(3), fromMethod.getDeclaringClass(),
+									fromMethod.getParameterTypes()[0]);
+					}
+					return null;
+				}
+
+				private String tryToRename(String actualName, Class<?> declaringClass,
+						Class<?> propertyType) {
+					if ((field == null || actualName.equalsIgnoreCase(field))
+							&& (fromClass == null || fromClass.isAssignableFrom(declaringClass))
+							&& (ofType == null || ofType.isAssignableFrom(propertyType)))
+						return toName;
+					return null;
+				}
+			});
+		}
+		
+		public Builder exclude(String field) {
+			return filter(field, null, null, true);
+		}
+		
+		public Builder exclude(Class<?> fieldOfType) {
+			return filter(null, null, fieldOfType, true);
+		}
+		
+		public Builder exclude(String field, Class<?> fromClass) {
+			return filter(field, fromClass, null, true);
+		}
+		
+		public Builder exclude(String field, Class<?> fromClass, Class<?> ofType) {
+			return filter(field, fromClass, ofType, true);
+		}
+		
+		public Builder include(String field) {
+			return filter(field, null, null, false);
+		}
+		
+		public Builder include(Class<?> fieldOfType) {
+			return filter(null, null, fieldOfType, false);
+		}
+		
+		public Builder include(String field, Class<?> fromClass) {
+			return filter(field, fromClass, null, false);
+		}
+		
+		public Builder include(String field, Class<?> fromClass, Class<?> ofType) {
+			return filter(field, fromClass, ofType, false);
+		}
+		
+		private Builder filter(final String field, final Class<?> declaringClass, final Class<?> ofType, final boolean exclude) {
+			return with(new BeanMutatorAccessorResolver.BaseResolver() {
+				@Override
+				public Trilean isAccessor(Field field, Class<?> fromClass) {
+					return filter(field.getName(), fromClass, field.getType(), exclude);
+				}
+				
+				@Override
+				public Trilean isMutator(Field field, Class<?> fromClass) {
+					return filter(field.getName(), fromClass, field.getType(), exclude);
+				}
+				
+				@Override
+				public Trilean isAccessor(Method method, Class<?> fromClass) {
+					String name = method.getName();
+					if (name.startsWith("is") && name.length() > 2) {
+						return filter(name.substring(2), method.getDeclaringClass(),
+								method.getReturnType(), exclude);
+					}
+					if (name.length() > 3) {
+						if (name.startsWith("get"))
+							return filter(name.substring(3), method.getDeclaringClass(),
+									method.getReturnType(), exclude);
+					}
+					return Trilean.UNKNOWN;
+				}
+				
+				@Override
+				public Trilean isMutator(Method method, Class<?> fromClass) {
+					String name = method.getName();
+					if (name.length() > 3) {
+						if (name.startsWith("set"))
+							return filter(name.substring(3), method.getDeclaringClass(),
+									method.getParameterTypes()[0], exclude);
+					}
+					return Trilean.UNKNOWN;
+				}
+				
+				private Trilean filter(String actualName, Class<?> fromClass, Class<?> propertyType, boolean exclude) {
+					if ((field == null || actualName.equalsIgnoreCase(field))
+							&& (declaringClass == null || declaringClass.isAssignableFrom(fromClass))
+							&& (ofType == null || ofType.isAssignableFrom(propertyType)))
+						return exclude ? Trilean.FALSE : Trilean.TRUE;
+					return Trilean.UNKNOWN;
+				}
+			});
 		}
 
 		/**

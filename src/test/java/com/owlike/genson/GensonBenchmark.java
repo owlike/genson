@@ -20,34 +20,30 @@ import com.owlike.genson.bean.Primitives;
 
 /*
  ======= Serialization Bench ======
- Genson global serialization time=25.752 s
- Genson avg serialization time=0.51504 ms
+ Genson global serialization time=24.908 s
+ Genson avg serialization time=0.49816 ms
 
- Jackson global serialization time=22.181 s
- Jackson avg serialization time=0.44362 ms
+ Jackson global serialization time=21.549 s
+ Jackson avg serialization time=0.43098 ms
 
- Gson global serialization time=41.22 s
- Gson avg serialization time=0.8244 ms
+ Gson global serialization time=39.688 s
+ Gson avg serialization time=0.79376 ms
 
  ======= Deserialization Bench ======
- Genson fast approximated double parse global deserialization time=17.841 s
- Genson fast approximated double parse avg deserialization time=0.35682 ms
+ Genson global deserialization time=32.985 s
+ Genson avg deserialization time=0.6597 ms
 
- Genson strict double parse global deserialization time=34.893 s
- Genson strict double parse avg deserialization time=0.69786 ms
+ Jackson global deserialization time=31.86 s
+ Jackson avg deserialization time=0.63718 ms
 
- Jackson global deserialization time=32.868 s
- Jackson avg deserialization time=0.65736 ms
-
- Gson global deserialization time=36.555 s
- Gson avg deserialization time=0.7311 ms
+ Gson global deserialization time=35.504 s
+ Gson avg deserialization time=0.71008 ms
 
  =================================
-
  */
 public class GensonBenchmark {
 	final int ITERATION_CNT = 50000;
-	private Genson genson = new Genson.Builder().setStrictDoubleParse(false).create();
+	private Genson genson = new Genson.Builder().setStrictDoubleParse(true).create();
 	private Gson gson = new GsonBuilder().serializeNulls().create();
 	private ObjectMapper om = new ObjectMapper();
 	private Map<String, Object> map;

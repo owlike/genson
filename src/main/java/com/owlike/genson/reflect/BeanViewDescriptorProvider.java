@@ -27,8 +27,10 @@ import com.owlike.genson.reflect.PropertyAccessor.MethodAccessor;
 import com.owlike.genson.reflect.PropertyMutator.MethodMutator;
 
 /**
- * This class constructs BeanDescriptor for the {@link com.owlike.genson.BeanView BeanView}
- * mechanism. You should not extend it as it may change in the future.
+ * This class constructs BeanDescriptors for the {@link com.owlike.genson.BeanView BeanView}
+ * mechanism. This class is mainly intended for internal use. It can be directly used if needed to
+ * get a BeanDescriptor instance for a BeanView (for example if you want to deserialize into an
+ * existing object and apply a BeanView). Extending BeanViewDescriptorProvider should be avoided.
  * 
  * @author eugen
  * 
@@ -81,15 +83,6 @@ public class BeanViewDescriptorProvider extends BaseBeanDescriptorProvider {
 			}
 		}
 		return descriptor;
-	}
-	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	@Override
-	protected <T> BeanDescriptor<T> create(Type ofType, BeanCreator<T> creator,
-			List<PropertyAccessor<T, ?>> accessors, Map<String, PropertyMutator<T, ?>> mutators) {
-		Class<T> parameterizedTypeForBeanView = (Class<T>) getRawClass(expandType(
-				BeanView.class.getTypeParameters()[0], ofType));
-		return new BeanDescriptor(parameterizedTypeForBeanView, getRawClass(ofType), accessors, mutators, creator);
 	}
 
 	private TransformationRuntimeException couldNotInstantiateBeanView(Class<?> beanViewClass,
@@ -152,14 +145,14 @@ public class BeanViewDescriptorProvider extends BaseBeanDescriptorProvider {
 		}
 
 		public Trilean isAccessor(Method method, Class<?> baseClass) {
+			Type expectedType = TypeUtil.lookupGenericType(BeanView.class, baseClass);
+			expectedType = TypeUtil.expandType(expectedType, baseClass);
+			expectedType = TypeUtil.typeOf(0, expectedType);
 			int modifiers = method.getModifiers();
 			return Trilean.valueOf((method.getName().startsWith("get") || (method.getName()
 					.startsWith("is") && (TypeUtil.match(method.getGenericReturnType(),
 					Boolean.class, false) || boolean.class.equals(method.getReturnType()))))
-					&& TypeUtil.match(
-							TypeUtil.typeOf(0,
-									TypeUtil.lookupGenericType(BeanView.class, baseClass)),
-							baseClass, method.getGenericParameterTypes()[0], baseClass, false)
+					&& TypeUtil.match(expectedType, method.getGenericParameterTypes()[0], false)
 					&& Modifier.isPublic(modifiers)
 					&& !Modifier.isAbstract(modifiers)
 					&& !Modifier.isNative(modifiers));
@@ -185,16 +178,14 @@ public class BeanViewDescriptorProvider extends BaseBeanDescriptorProvider {
 		}
 
 		public Trilean isMutator(Method method, Class<?> baseClass) {
+			Type expectedType = TypeUtil.lookupGenericType(BeanView.class, baseClass);
+			expectedType = TypeUtil.expandType(expectedType, baseClass);
+			expectedType = TypeUtil.typeOf(0, expectedType);
 			int modifiers = method.getModifiers();
 			return Trilean.valueOf(method.getName().startsWith("set")
 					&& void.class.equals(method.getReturnType())
 					&& method.getGenericParameterTypes().length == 2
-					&& TypeUtil.match(
-							method.getGenericParameterTypes()[1],
-							TypeUtil.typeOf(
-									0,
-									TypeUtil.lookupGenericType(BeanView.class,
-											method.getDeclaringClass())), false)
+					&& TypeUtil.match(expectedType, method.getGenericParameterTypes()[1], false)
 					&& Modifier.isPublic(modifiers) && !Modifier.isAbstract(modifiers)
 					&& !Modifier.isNative(modifiers));
 		}

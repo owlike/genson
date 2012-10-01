@@ -42,6 +42,8 @@ public class BeanViewConverter<T> extends Wrapper<Converter<T>> implements Conve
 		protected Converter<?> create(Type type, Genson genson, Converter<?> nextConverter) {
 			if (!Wrapper.toAnnotatedElement(nextConverter).isAnnotationPresent(
 					WithoutBeanView.class))
+				// TODO as we link an instance to a type, we may optimize things, but for the moment it is okay
+				// lets see if this feature is used
 				return new BeanViewConverter(type, provider, nextConverter);
 			return nextConverter;
 		}
@@ -60,7 +62,10 @@ public class BeanViewConverter<T> extends Wrapper<Converter<T>> implements Conve
 	protected Class<? extends BeanView<T>> findViewFor(Type type,
 			List<Class<? extends BeanView<?>>> views) {
 		for (Class<? extends BeanView<?>> v : views) {
-			if (TypeUtil.lookupWithGenerics(BeanView.class, type, v, false) != null) {
+			Type searchedType = TypeUtil.lookupGenericType(BeanView.class, v);
+			searchedType = TypeUtil.expandType(searchedType, v);
+			searchedType = TypeUtil.typeOf(0, searchedType);
+			if (TypeUtil.match(type, searchedType, false)) {
 				return (Class<? extends BeanView<T>>) v;
 			}
 		}

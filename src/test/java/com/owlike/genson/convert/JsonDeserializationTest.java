@@ -16,15 +16,12 @@ import org.junit.Test;
 
 import com.owlike.genson.Context;
 import com.owlike.genson.Genson;
-import com.owlike.genson.Serializer;
 import com.owlike.genson.TransformationException;
 import com.owlike.genson.annotation.JsonProperty;
 import com.owlike.genson.bean.ComplexObject;
 import com.owlike.genson.bean.Primitives;
 import com.owlike.genson.bean.Media.Player;
-import com.owlike.genson.convert.DefaultConverters;
 import com.owlike.genson.reflect.BeanDescriptor;
-import com.owlike.genson.reflect.TypeUtil;
 import com.owlike.genson.stream.JsonReader;
 
 public class JsonDeserializationTest {
@@ -177,8 +174,6 @@ public class JsonDeserializationTest {
 	@Test
 	public void testJsonToUntypedList() throws TransformationException, IOException {
 		String src = "[1, 1.1, \"aa\", true, false]";
-		TypeUtil.lookupWithGenerics(Serializer.class, Object.class,
-				DefaultConverters.StringConverter.class, false);
 		List<Object> l = genson.deserialize(src, List.class);
 		assertArrayEquals(new Object[] { 1, 1.1, "aa", true, false },
 				l.toArray(new Object[l.size()]));

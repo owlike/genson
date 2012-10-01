@@ -30,7 +30,23 @@ public class BeanDescriptorTest {
 
 	@Test
 	public void testFailFastBeanDescriptorWithWrongType() {
-		BeanDescriptorProvider provider = genson.getBeanDescriptorFactory();
+		BeanDescriptorProvider provider = new Genson.Builder() {
+			protected BeanDescriptorProvider createBeanDescriptorProvider() {
+				return new BaseBeanDescriptorProvider(getMutatorAccessorResolver(),
+						getPropertyNameResolver(), isUseGettersAndSetters(), isUseFields(), true) {
+					@SuppressWarnings({ "unchecked", "rawtypes" })
+					protected <T> com.owlike.genson.reflect.BeanDescriptor<T> create(
+							java.lang.Class<T> forClass,
+							java.lang.reflect.Type ofType,
+							com.owlike.genson.reflect.BeanCreator<T> creator,
+							java.util.List<com.owlike.genson.reflect.PropertyAccessor<T, ?>> accessors,
+							java.util.Map<String, com.owlike.genson.reflect.PropertyMutator<T, ?>> mutators) {
+						return new BeanDescriptor(ThatObject.class, ThatObject.class, accessors,
+								mutators, creator);
+					}
+				};
+			}
+		}.create().getBeanDescriptorFactory();
 		try {
 			provider.provide(AnotherObject.class, ThatObject.class, genson);
 			fail();

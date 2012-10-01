@@ -1,0 +1,113 @@
+package com.owlike.genson.functional;
+
+import java.io.IOException;
+import java.util.List;
+
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+import com.owlike.genson.Genson;
+import com.owlike.genson.TransformationException;
+import com.owlike.genson.annotation.JsonIgnore;
+
+public class FilteringAndRenamingTest {
+
+	@Test
+	public void testRenameProperty() throws TransformationException, IOException {
+		MyAClass mac = new MyAClass();
+		mac.myname = "toto";
+		String expectedSuccess = "{\"name\":\"toto\"}";
+		String expectedFailure = "{\"myname\":\"toto\"}";
+		
+		String json = new Genson.Builder().rename("myname", "name").create().serialize(mac);
+		assertEquals(expectedSuccess, json);
+		
+		json = new Genson.Builder().rename(String.class, "name").create().serialize(mac);
+		assertEquals(expectedSuccess, json);
+		json = new Genson.Builder().rename(int.class, "name").create().serialize(mac);
+		assertEquals(expectedFailure, json);
+		
+		json = new Genson.Builder().rename("myname", MyAClass.class, "name").create()
+				.serialize(mac);
+		assertEquals(expectedSuccess, json);
+		json = new Genson.Builder().rename("myname", List.class, "name").create().serialize(mac);
+		assertEquals(expectedFailure, json);
+		
+		json = new Genson.Builder().rename("myname", MyAClass.class, "name", String.class).create()
+				.serialize(mac);
+		assertEquals(expectedSuccess, json);
+		json = new Genson.Builder().rename("myname", MyAClass.class, "name", Integer.class)
+				.create().serialize(mac);
+		assertEquals(expectedFailure, json);
+	}
+
+	@Test
+	public void testExcludeProperty() throws TransformationException, IOException {
+		MyAClass mac = new MyAClass();
+		mac.myname = "toto";
+		String expectedSuccess = "{}";
+		String expectedFailure = "{\"myname\":\"toto\"}";
+		
+		String json = new Genson.Builder().exclude("myname").create().serialize(mac);
+		assertEquals(expectedSuccess, json);
+		json = new Genson.Builder().exclude("xxx").create().serialize(mac);
+		assertEquals(expectedFailure, json);
+		
+		json = new Genson.Builder().exclude(String.class).create().serialize(mac);
+		assertEquals(expectedSuccess, json);
+		json = new Genson.Builder().exclude(Integer.class).create().serialize(mac);
+		assertEquals(expectedFailure, json);
+		
+		json = new Genson.Builder().exclude("myname", MyAClass.class).create().serialize(mac);
+		assertEquals(expectedSuccess, json);
+		json = new Genson.Builder().exclude("myname", List.class).create().serialize(mac);
+		assertEquals(expectedFailure, json);
+		
+		json = new Genson.Builder().exclude("myname", MyAClass.class, String.class).create().serialize(mac);
+		assertEquals(expectedSuccess, json);
+		json = new Genson.Builder().exclude("myname", MyAClass.class, Integer.class).create().serialize(mac);
+		assertEquals(expectedFailure, json);
+	}
+	
+	@Test
+	public void testIncludeProperty() throws TransformationException, IOException {
+		ClassWithIncludedProperty mac = new ClassWithIncludedProperty();
+		mac.prop = "toto";
+		String expectedSuccess = "{\"prop\":\"toto\"}";
+		String expectedFailure = "{}";
+		
+		String json = new Genson.Builder().include("prop").create().serialize(mac);
+		assertEquals(expectedSuccess, json);
+		json = new Genson.Builder().include("xxx").create().serialize(mac);
+		assertEquals(expectedFailure, json);
+		
+		json = new Genson.Builder().include(String.class).create().serialize(mac);
+		assertEquals(expectedSuccess, json);
+		
+		json = new Genson.Builder().include("prop", ClassWithIncludedProperty.class).create().serialize(mac);
+		assertEquals(expectedSuccess, json);
+		json = new Genson.Builder().include("prop", MyAClass.class).create().serialize(mac);
+		assertEquals(expectedFailure, json);
+		
+		json = new Genson.Builder().include("prop", ClassWithIncludedProperty.class, String.class).create().serialize(mac);
+		assertEquals(expectedSuccess, json);
+		json = new Genson.Builder().include("prop", ClassWithIncludedProperty.class, Integer.class).create().serialize(mac);
+		assertEquals(expectedFailure, json);
+	}
+	
+	static class ClassWithIncludedProperty {
+		@JsonIgnore private String prop;
+	}
+	
+	static class MyAClass {
+		private String myname;
+
+		public String getMyname() {
+			return myname;
+		}
+
+		public void setMyname(String myname) {
+			this.myname = myname;
+		}
+	}
+}

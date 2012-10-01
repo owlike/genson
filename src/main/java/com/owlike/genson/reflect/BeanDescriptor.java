@@ -15,6 +15,31 @@ import com.owlike.genson.reflect.BeanCreator.BeanCreatorProperty;
 import com.owlike.genson.stream.ObjectReader;
 import com.owlike.genson.stream.ObjectWriter;
 
+/**
+ * BeanDescriptors are used to serialize/deserialize objects based on their fields, methods and
+ * constructors. By default it is supposed to work on JavaBeans, however it can be configured and
+ * extended to support different kind of objects.
+ * 
+ * In most cases BeanDescriptors should not be used directly as it is used internally to support
+ * objects not handled by the default Converters. The most frequent case when you will use directly
+ * a BeanDescriptor is when you want to deserialize into an existing instance. Here is an example :
+ * 
+ * <pre>
+ * Genson genson = new Genson();
+ * BeanDescriptorProvider provider = genson.getBeanDescriptorFactory();
+ * BeanDescriptor&lt;MyClass&gt; descriptor = provider.provide(MyClass.class, genson);
+ * 
+ * MyClass existingInstance = descriptor.deserialize(existingInstance, new JsonReader(&quot;{}&quot;),
+ * 		new Context(genson));
+ * </pre>
+ * 
+ * @see BeanDescriptorProvider
+ * 
+ * @author eugen
+ * 
+ * @param <T>
+ *            type that this BeanDescriptor can serialize and deserialize.
+ */
 public class BeanDescriptor<T> implements Converter<T> {
 	final Class<?> fromDeclaringClass;
 	final Class<T> ofClass;
@@ -30,15 +55,8 @@ public class BeanDescriptor<T> implements Converter<T> {
 		}
 	};
 
-	// private final static Comparator<BeanCreator> _beanCreatorsComparator = new
-	// Comparator<BeanCreator>() {
-	// @Override
-	// public int compare(BeanCreator o1, BeanCreator o2) {
-	// return o1.parameters.size() - o2.parameters.size();
-	// }
-	// };
-
-	public BeanDescriptor(Class<T> forClass, Class<?> fromDeclaringClass, List<PropertyAccessor<T, ?>> readableBps,
+	public BeanDescriptor(Class<T> forClass, Class<?> fromDeclaringClass,
+			List<PropertyAccessor<T, ?>> readableBps,
 			Map<String, PropertyMutator<T, ?>> writableBps, BeanCreator<T> creator) {
 		this.ofClass = forClass;
 		this.fromDeclaringClass = fromDeclaringClass;
@@ -52,22 +70,6 @@ public class BeanDescriptor<T> implements Converter<T> {
 			_noArgCtr = _creator.parameters.size() == 0;
 		else
 			_noArgCtr = false;
-		// if (_creators.size() > 0 && _creators.get(0).parameters.size() == 0) {
-		// // lets look if all properties have a field or method mutator, this means that we can
-		// // use the no arg beancreator (constructor or method) and still set all the properties
-		// boolean ok = true;
-		// // we look if there exists property that is only present as ctr arg, if so we will have
-		// for (PropertyMutator<T, ?> muta : mutableProperties.values())
-		// if (muta instanceof BeanCreatorProperty) {
-		// ok = false;
-		// break;
-		// }
-		// if (ok)
-		// _emptyCtr = _creators.get(0);
-		// else
-		// _emptyCtr = null;
-		// } else
-		// _emptyCtr = null;
 	}
 
 	public boolean isReadable() {

@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.owlike.genson.Context;
@@ -122,32 +121,22 @@ public final class DefaultConverters {
 
 		public Object deserialize(ObjectReader reader, Context ctx) throws TransformationException,
 				IOException {
-			List<E> list = new ArrayList<E>();
 			reader.beginArray();
+			int size = 10;
+			Object array = Array.newInstance(eClass, size);
+			int idx = 0;
 			for (; reader.hasNext();) {
 				reader.next();
-				list.add(elementConverter.deserialize(reader, ctx));
+				if (idx >= size) {
+					size = size * 2 + 1;
+					array = expandArray(array, idx, size);
+				}
+				Array.set(array, idx++, elementConverter.deserialize(reader, ctx));
 			}
 			reader.endArray();
-
-			int size = list.size();
-			Object array = Array.newInstance(eClass, size);
-			for (int i = 0; i < size; i++)
-				Array.set(array, i, list.get(i));
-			// int idx = 0;
-			// for (; reader.hasNext();) {
-			// reader.next();
-			// if (idx >= size) {
-			// size = size * 2 + 1;
-			// array = expandArray(array, idx, size);
-			// }
-			// Array.set(array, idx++, elementConverter.deserialize(reader, ctx));
-			// }
-			// reader.endArray();
-			// if (idx < size) {
-			// array = expandArray(array, idx, idx);
-			// }
-
+			if (idx < size) {
+				array = expandArray(array, idx, idx);
+			}
 			return array;
 		}
 
