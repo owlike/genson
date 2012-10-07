@@ -99,6 +99,7 @@ public final class Genson {
 	private final boolean htmlSafe;
 	private final boolean withClassMetadata;
 	private final boolean strictDoubleParse;
+	private final String indentation;
 
 	/**
 	 * The default constructor will use the default configuration provided by the {@link Builder}.
@@ -107,7 +108,7 @@ public final class Genson {
 	public Genson() {
 		this(_default.converterFactory, _default.beanDescriptorFactory, _default.nullConverter,
 				_default.skipNull, _default.htmlSafe, _default.aliasClassMap,
-				_default.withClassMetadata, _default.strictDoubleParse);
+				_default.withClassMetadata, _default.strictDoubleParse, _default.indentation);
 	}
 
 	/**
@@ -140,10 +141,14 @@ public final class Genson {
 	 *            Double.parse but is a lot faster. If true, Double.parse method will be usead
 	 *            instead. In most cases you should be fine with Genson algorithm, but if for some
 	 *            reason you need to have 100% match with Double.parse, then enable strict parsing.
+	 * @param indentation
+	 *            the characters to use for indentation, for example "  " will use an indentation of
+	 *            two spaces.
 	 */
 	public Genson(Factory<Converter<?>> converterFactory, BeanDescriptorProvider beanDescProvider,
 			Converter<Object> nullConverter, boolean skipNull, boolean htmlSafe,
-			Map<String, Class<?>> classAliases, boolean withClassMetadata, boolean strictDoubleParse) {
+			Map<String, Class<?>> classAliases, boolean withClassMetadata,
+			boolean strictDoubleParse, String indentation) {
 		this.converterFactory = converterFactory;
 		this.beanDescriptorFactory = beanDescProvider;
 		this.nullConverter = nullConverter;
@@ -156,6 +161,7 @@ public final class Genson {
 			classAliasMap.put(entry.getValue(), entry.getKey());
 		}
 		this.strictDoubleParse = strictDoubleParse;
+		this.indentation = indentation;
 	}
 
 	/**
@@ -189,13 +195,14 @@ public final class Genson {
 	 *             if there was a problem during writing of the object to the output.
 	 */
 	public <T> String serialize(T o) throws TransformationException, IOException {
-		JsonWriter writer = new JsonWriter(new StringWriter(), skipNull, htmlSafe);
+		StringWriter sw = new StringWriter();
+		ObjectWriter writer = createWriter(sw);
 		if (o == null)
 			nullConverter.serialize(null, writer, null);
 		else
 			serialize(o, o.getClass(), writer, new Context(this));
 		writer.flush();
-		return writer.unwrap().toString();
+		return sw.toString();
 	}
 
 	/**
@@ -211,13 +218,14 @@ public final class Genson {
 	 */
 	public <T> String serialize(T o, GenericType<T> type) throws TransformationException,
 			IOException {
-		JsonWriter writer = new JsonWriter(new StringWriter(), skipNull, htmlSafe);
+		StringWriter sw = new StringWriter();
+		ObjectWriter writer = createWriter(sw);
 		if (o == null)
 			nullConverter.serialize(null, writer, null);
 		else
 			serialize(o, type.getType(), writer, new Context(this));
 		writer.flush();
-		return writer.unwrap().toString();
+		return sw.toString();
 	}
 
 	/**
@@ -233,13 +241,14 @@ public final class Genson {
 	 */
 	public <T> String serialize(T o, Class<? extends BeanView<?>>... withViews)
 			throws TransformationException, IOException {
-		JsonWriter writer = new JsonWriter(new StringWriter(), skipNull, htmlSafe);
+		StringWriter sw = new StringWriter();
+		ObjectWriter writer = createWriter(sw);
 		if (o == null)
 			nullConverter.serialize(null, writer, null);
 		else
 			serialize(o, o.getClass(), writer, new Context(this, Arrays.asList(withViews)));
 		writer.flush();
-		return writer.unwrap().toString();
+		return sw.toString();
 	}
 
 	/**
@@ -337,7 +346,7 @@ public final class Genson {
 	}
 
 	public ObjectWriter createWriter(OutputStream os) {
-		return new JsonWriter(new OutputStreamWriter(os), skipNull, htmlSafe);
+		return new JsonWriter(new OutputStreamWriter(os), skipNull, htmlSafe, indentation);
 	}
 
 	public ObjectReader createReader(InputStream is) {
@@ -345,7 +354,7 @@ public final class Genson {
 	}
 
 	public ObjectWriter createWriter(Writer writer) {
-		return new JsonWriter(writer, skipNull, htmlSafe);
+		return new JsonWriter(writer, skipNull, htmlSafe, indentation);
 	}
 
 	public ObjectReader createReader(Reader reader) {
@@ -407,6 +416,7 @@ public final class Genson {
 		private boolean useRuntimeTypeForSerialization = false;
 		private boolean withDebugInfoPropertyNameResolver = false;
 		private boolean strictDoubleParse = false;
+		private String indentation = null;
 
 		private PropertyNameResolver propertyNameResolver;
 		private BeanMutatorAccessorResolver mutatorAccessorResolver;
@@ -670,51 +680,52 @@ public final class Genson {
 				}
 			});
 		}
-		
+
 		public Builder exclude(String field) {
 			return filter(field, null, null, true);
 		}
-		
+
 		public Builder exclude(Class<?> fieldOfType) {
 			return filter(null, null, fieldOfType, true);
 		}
-		
+
 		public Builder exclude(String field, Class<?> fromClass) {
 			return filter(field, fromClass, null, true);
 		}
-		
+
 		public Builder exclude(String field, Class<?> fromClass, Class<?> ofType) {
 			return filter(field, fromClass, ofType, true);
 		}
-		
+
 		public Builder include(String field) {
 			return filter(field, null, null, false);
 		}
-		
+
 		public Builder include(Class<?> fieldOfType) {
 			return filter(null, null, fieldOfType, false);
 		}
-		
+
 		public Builder include(String field, Class<?> fromClass) {
 			return filter(field, fromClass, null, false);
 		}
-		
+
 		public Builder include(String field, Class<?> fromClass, Class<?> ofType) {
 			return filter(field, fromClass, ofType, false);
 		}
-		
-		private Builder filter(final String field, final Class<?> declaringClass, final Class<?> ofType, final boolean exclude) {
+
+		private Builder filter(final String field, final Class<?> declaringClass,
+				final Class<?> ofType, final boolean exclude) {
 			return with(new BeanMutatorAccessorResolver.BaseResolver() {
 				@Override
 				public Trilean isAccessor(Field field, Class<?> fromClass) {
 					return filter(field.getName(), fromClass, field.getType(), exclude);
 				}
-				
+
 				@Override
 				public Trilean isMutator(Field field, Class<?> fromClass) {
 					return filter(field.getName(), fromClass, field.getType(), exclude);
 				}
-				
+
 				@Override
 				public Trilean isAccessor(Method method, Class<?> fromClass) {
 					String name = method.getName();
@@ -729,7 +740,7 @@ public final class Genson {
 					}
 					return Trilean.UNKNOWN;
 				}
-				
+
 				@Override
 				public Trilean isMutator(Method method, Class<?> fromClass) {
 					String name = method.getName();
@@ -740,10 +751,12 @@ public final class Genson {
 					}
 					return Trilean.UNKNOWN;
 				}
-				
-				private Trilean filter(String actualName, Class<?> fromClass, Class<?> propertyType, boolean exclude) {
+
+				private Trilean filter(String actualName, Class<?> fromClass,
+						Class<?> propertyType, boolean exclude) {
 					if ((field == null || actualName.equalsIgnoreCase(field))
-							&& (declaringClass == null || declaringClass.isAssignableFrom(fromClass))
+							&& (declaringClass == null || declaringClass
+									.isAssignableFrom(fromClass))
 							&& (ofType == null || ofType.isAssignableFrom(propertyType)))
 						return exclude ? Trilean.FALSE : Trilean.TRUE;
 					return Trilean.UNKNOWN;
@@ -1041,6 +1054,14 @@ public final class Genson {
 			return this;
 		}
 
+		public String getIndentation() {
+			return indentation;
+		}
+
+		public Builder setIndentation(String indentation) {
+			this.indentation = indentation; return this;
+		}
+
 		/**
 		 * Creates an instance of Genson. You may use this method as many times you want. It wont
 		 * change the state of the builder, in sense that the returned instance will have always the
@@ -1124,7 +1145,7 @@ public final class Genson {
 				Map<String, Class<?>> classAliases) {
 			return new Genson(converterFactory, getBeanDescriptorProvider(), getNullConverter(),
 					isSkipNull(), isHtmlSafe(), classAliases, isWithClassMetadata(),
-					isStrictDoubleParse());
+					isStrictDoubleParse(), getIndentation());
 		}
 
 		/**

@@ -76,7 +76,7 @@ public class JsonWriterTest {
 	}
 
 	@Test
-	public void writeMetadataWithBeginObject() throws IOException {
+	public void testWriteMetadataWithBeginObject() throws IOException {
 		String expected = "{\"@doc\":\"My doc\",\"name\":null}";
 		w.beginObject().writeMetadata("doc", "My doc").writeName("name").writeNull().endObject()
 				.flush();
@@ -84,7 +84,7 @@ public class JsonWriterTest {
 	}
 
 	@Test
-	public void writeMetadataWithBeginNextObjectMetadata() throws IOException {
+	public void testWriteMetadataWithBeginNextObjectMetadata() throws IOException {
 		try {
 			w.beginNextObjectMetadata().writeMetadata("doc", "My doc").writeName("name")
 					.writeNull().endObject().flush();
@@ -94,7 +94,7 @@ public class JsonWriterTest {
 	}
 
 	@Test
-	public void writeMetadataWithBeginNextObjectMetadata2() throws IOException {
+	public void testWriteMetadataWithBeginNextObjectMetadata2() throws IOException {
 		String expected = "{\"@doc\":\"My doc\",\"name\":null}";
 		w.beginNextObjectMetadata().writeMetadata("doc", "My doc").beginObject().writeName("name")
 				.writeNull().endObject().flush();
@@ -102,11 +102,25 @@ public class JsonWriterTest {
 	}
 
 	@Test
-	public void writeMetadataWithMultipleBeginNextObjectMetadata() throws IOException {
+	public void testWriteMetadataWithMultipleBeginNextObjectMetadata() throws IOException {
 		String expected = "{\"@doc\":\"My doc\",\"@a\":\"\",\"name\":null}";
 		w.beginNextObjectMetadata().beginNextObjectMetadata().writeMetadata("doc", "My doc")
 				.beginNextObjectMetadata().writeMetadata("a", "").beginObject().writeName("name")
 				.writeNull().endObject().flush();
+		assertEquals(expected, sw.toString());
+	}
+
+	@Test
+	public void testPrettyPrint() throws IOException {
+		String expected = "[\n  2,\n  false,\n  {\n    \"@class\":\"titi\",\n    \"@cc2\":\"iuuiio\",\n    \"name\":\"toto\",\n    \"uu\":null\n  }\n]";
+		StringWriter sw = new StringWriter();
+		JsonWriter writer = new JsonWriter(sw, false, false, "  ");
+		writer.beginArray().writeValue(2).writeValue(false).beginNextObjectMetadata()
+				.writeMetadata("class", "titi").beginObject().writeMetadata("cc2", "iuuiio")
+				.writeName("name").writeValue("toto").writeName("uu").writeNull().endObject()
+				.endArray().flush();
+		writer.flush();
+		writer.close();
 		assertEquals(expected, sw.toString());
 	}
 }

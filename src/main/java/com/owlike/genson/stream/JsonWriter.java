@@ -50,20 +50,22 @@ public class JsonWriter implements ObjectWriter {
 	private final Deque<JsonType> _ctx = new ArrayDeque<JsonType>();
 	private boolean _hasPrevious;
 	private String _name;
+	private final String indentation;
 
 	// TODO recyclebuffer increases a bit performances
 	private final char[] _buffer = new char[1024];
 	private final int _bufferSize = _buffer.length;
 	private int _len = 0;
-
+	
 	public JsonWriter(Writer writer) {
-		this(writer, false, false);
+		this(writer, false, false, null);
 	}
 
-	public JsonWriter(Writer writer, final boolean skipNull, final boolean htmlSafe) {
+	public JsonWriter(Writer writer, final boolean skipNull, final boolean htmlSafe, String indentation) {
 		this.writer = writer;
 		this.skipNull = skipNull;
 		this.htmlSafe = htmlSafe;
+		this.indentation = indentation;
 		_ctx.push(JsonType.EMPTY);
 	}
 
@@ -112,8 +114,15 @@ public class JsonWriter implements ObjectWriter {
 		if (jt != jsonType)
 			throw new IllegalStateException("Expect type " + jsonType.name() + " but was written "
 					+ jt.name() + ", you must call the adequate beginXXX method before endXXX.");
+		
+		if (indentation != null) {
+			_buffer[_len++] = '\n';
+			for (int i = 0; i < _ctx.size()-1; i++) writeToBuffer(indentation, 0);
+		}
+		
 		if ((_len + 1) >= _bufferSize)
 			flushBuffer();
+		
 		_buffer[_len++] = token;
 		_hasPrevious = true;
 		return this;
@@ -129,19 +138,23 @@ public class JsonWriter implements ObjectWriter {
 		// "You have written metadata to the writer but did not call beginObject after it."
 		// + "Metadata is not allowed in array or for literal values.");
 
-		if (_ctx.peek() == JsonType.ARRAY && _hasPrevious) {
-			if ((_len + 1) >= _bufferSize)
-				flushBuffer();
-			_buffer[_len++] = ',';
-		}
-
-		if (_name != null && _ctx.peek() != JsonType.ARRAY) {
+		if (_ctx.peek() == JsonType.ARRAY) {
+			if (_hasPrevious) {
+				if ((_len + 1) >= _bufferSize)
+					flushBuffer();
+				_buffer[_len++] = ',';
+			}
+			indent();
+		} else if (_name != null) {
 			final int l = _name.length();
 			// hum I dont think there may be names with a length near to 1024... we flush only once
 			if ((_len + 4 + l) >= _bufferSize)
 				flushBuffer();
 			if (_hasPrevious)
 				_buffer[_len++] = ',';
+			indent();
+			if ((_len + 3 + l) >= _bufferSize)
+				flushBuffer();
 			_buffer[_len++] = '"';
 			writeToBuffer(_name, 0, l);
 			_buffer[_len++] = '"';
@@ -149,6 +162,16 @@ public class JsonWriter implements ObjectWriter {
 			_name = null;
 		}
 		return this;
+	}
+	
+	protected void indent() throws IOException {
+		if (indentation != null) {
+			if ((_len + 1) >= _bufferSize)
+				flushBuffer();
+			if (_ctx.peek() != JsonType.EMPTY) _buffer[_len++] = '\n';
+			int len = _ctx.peek() == JsonType.METADATA ? _ctx.size() - 2 : _ctx.size() - 1;
+			for (int i = 0; i < len; i++) writeToBuffer(indentation, 0);
+		}
 	}
 
 	public JsonWriter writeName(final String name) throws IOException {
