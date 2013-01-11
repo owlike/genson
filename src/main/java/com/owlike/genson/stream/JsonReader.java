@@ -186,7 +186,7 @@ public class JsonReader implements ObjectReader {
 		if (STRING == valueType) return _stringValue;
 		if (INTEGER == valueType) return "" + _intValue;
 		if (DOUBLE == valueType) return "" + _doubleValue;
-		if (NULL == valueType) return NULL_VALUE;
+		if (NULL == valueType) return null;
 		if (BOOLEAN == valueType) {
 			return _booleanValue.toString();
 		}
@@ -281,7 +281,7 @@ public class JsonReader implements ObjectReader {
 			return _booleanValue;
 		}
 		if (STRING == valueType)
-			return "".equals(_stringValue) ? null : Boolean.valueOf(_stringValue);
+			return Boolean.parseBoolean(_stringValue);
 		if (NULL == valueType) return false;
 		throw new IllegalStateException("Readen value is not of type boolean");
 	}

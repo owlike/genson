@@ -178,7 +178,7 @@ public final class Genson {
 			converter = (Converter<T>) converterFactory.create(forType, this);
 			if (converter == null)
 				throw new TransformationRuntimeException("No converter found for type " + forType);
-			converterCache.put(forType, converter);
+			converterCache.putIfAbsent(forType, converter);
 		}
 		return converter;
 	}
@@ -1293,7 +1293,7 @@ public final class Genson {
 		}
 
 		public final List<Factory<?>> getFactories() {
-			return converterFactories;
+			return Collections.unmodifiableList(converterFactories);
 		}
 	}
 }

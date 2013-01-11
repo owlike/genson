@@ -526,8 +526,6 @@ public final class DefaultConverters {
 
 			public Object deserialize(ObjectReader reader, Context ctx)
 					throws TransformationException, IOException {
-				if (ValueType.OBJECT.equals(reader.getValueType()))
-					return ctx.genson.deserialize(Map.class, reader, ctx);
 				return ctx.genson.deserialize(reader.getValueType().toClass(), reader, ctx);
 			}
 

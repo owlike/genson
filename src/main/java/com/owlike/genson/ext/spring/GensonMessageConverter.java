@@ -1,6 +1,7 @@
 package com.owlike.genson.ext.spring;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
@@ -39,13 +40,19 @@ public class GensonMessageConverter extends AbstractHttpMessageConverter<Object>
 			throws IOException, HttpMessageNotReadableException {
 		MethodParameter mp = ThreadLocalHolder.get("__GENSON$method_param");
 		try {
-			WithBeanView ann = mp != null ? mp.getMethodAnnotation(WithBeanView.class) : null;
+			WithBeanView ann = null;
+			Type type = clazz;
+			if (mp != null) {
+				ann = mp.getMethodAnnotation(WithBeanView.class);
+				type = mp.getGenericParameterType();
+			}
+			
 			if (ann != null)
-				return genson.deserialize(mp.getGenericParameterType(),
+				return genson.deserialize(type,
 						genson.createReader(inputMessage.getBody()),
 						new Context(genson, Arrays.asList(ann.views())));
 			else
-				return genson.deserialize(mp.getGenericParameterType(),
+				return genson.deserialize(type,
 						genson.createReader(inputMessage.getBody()), new Context(genson));
 		} catch (TransformationException e) {
 			throw new IOException("Could not deserialize type " + clazz.getName());

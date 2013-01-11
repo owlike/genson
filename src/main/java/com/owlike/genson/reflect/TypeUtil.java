@@ -102,8 +102,10 @@ public final class TypeUtil {
 				// as it is equivalent to Object.
 				expandedType = wType.getUpperBounds().length > 0 ? expandType(
 						wType.getUpperBounds()[0], rootType) : Object.class;
-			} else
-				throw new IllegalArgumentException("Type " + type + " not supported for expansion!");
+			}
+			
+			if (expandedType == null) throw new IllegalArgumentException("Type " + type + " not supported for expansion!");
+			
 			_cache.put(key, expandedType);
 		}
 

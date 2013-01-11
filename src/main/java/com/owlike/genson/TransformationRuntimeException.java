@@ -7,7 +7,7 @@ package com.owlike.genson;
  * @author eugen
  *
  */
-public class TransformationRuntimeException extends RuntimeException {
+public final class TransformationRuntimeException extends RuntimeException {
 	private static final long serialVersionUID = 3298864591780352514L;
 
 	public TransformationRuntimeException(String message) {
@@ -17,4 +17,6 @@ public class TransformationRuntimeException extends RuntimeException {
 	public TransformationRuntimeException(String message, Throwable cause) {
 		super(message, cause);
 	}
+	
+	
 }

@@ -14,7 +14,10 @@ import com.owlike.genson.stream.ObjectWriter;
 import com.owlike.genson.stream.ValueType;
 
 /**
- * You can also change the way null values are handled by registering your own Converter
+ * The default implementation handles null values by returning null during deserialization and
+ * calling writer.writeNull() during serialization.
+ * 
+ * You can also change the way null values are handled by registering your own Null Converter
  * {@link com.owlike.genson.Genson.Builder#setNullConverter(com.owlike.genson.Converter)
  * Genson.Builder.setNullConverter(org.genson.convert.Converter)}.
  * 
@@ -31,7 +34,8 @@ public class NullConverter implements Converter<Object> {
 		}
 	}
 
-	public static class NullConverterWrapper<T> extends Wrapper<Converter<T>> implements Converter<T> {
+	public static class NullConverterWrapper<T> extends Wrapper<Converter<T>> implements
+			Converter<T> {
 		private final Converter<Object> nullConverter;
 
 		public NullConverterWrapper(Converter<Object> nullConverter, Converter<T> converter) {

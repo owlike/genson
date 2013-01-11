@@ -95,8 +95,30 @@ public class FilteringAndRenamingTest {
 		assertEquals(expectedFailure, json);
 	}
 	
+	@Test public void testExcludePropertyFromSuperClass() throws TransformationException, IOException {
+		AnotherClass mac = new AnotherClass();
+		mac.transientLong = 11;
+		mac.prop2 = "hi";
+		String expectedSuccess = "{\"prop2\":\"hi\"}";
+		
+		String json = new Genson.Builder().exclude("transientLong", ClassWithTransient.class).create().serialize(mac);
+		assertEquals(expectedSuccess, json);
+	}
+	
+	static class AnotherClass extends ClassWithTransient {
+		public String prop2;
+	}
+	
 	static class ClassWithIncludedProperty {
 		@JsonIgnore private String prop;
+	}
+	
+	static class ClassWithTransient {
+		public transient long transientLong;
+		
+		public long getTransientLong() {
+			return transientLong;
+		}
 	}
 	
 	static class MyAClass {

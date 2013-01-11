@@ -25,16 +25,23 @@ public abstract class PropertyMutator<T, P> extends BeanProperty<T> implements
 
 	public P deserialize(ObjectReader reader, Context ctx) throws TransformationException,
 			IOException {
-		return propertyDeserializer.deserialize(reader, ctx);
+		try {
+			return propertyDeserializer.deserialize(reader, ctx);
+		} catch (Throwable th) {
+			throw couldNotDeserialize(th);
+		}
 	}
 
-	public abstract void deserialize(T into, ObjectReader reader, Context ctx)
-			throws TransformationException, IOException;
-
-	// throws TransformationException, IOException {
-	// P propValue = propertyDeserializer.deserialize(reader, ctx);
-	// mutate(into, propValue);
-	// }
+	public void deserialize(T into, ObjectReader reader, Context ctx)
+		throws TransformationException, IOException {
+		P propValue = null;
+		try {
+			propValue = propertyDeserializer.deserialize(reader, ctx);
+		} catch (Throwable th) {
+			throw couldNotDeserialize(th);
+		}
+		mutate(into, propValue);
+	 }
 
 	public abstract void mutate(T target, P value);
 
@@ -46,6 +53,10 @@ public abstract class PropertyMutator<T, P> extends BeanProperty<T> implements
 		return new TransformationRuntimeException("Could not mutate value of property named '"
 				+ name + "' using mutator " + signature(), e);
 	}
+	
+	protected TransformationException couldNotDeserialize(Throwable e) {
+		return new TransformationException("Could not deserialize to property '" + name + "' of class " + declaringClass, e);
+	}
 
 	public static class MethodMutator<T, P> extends PropertyMutator<T, P> {
 		protected final Method _setter;
@@ -56,20 +67,6 @@ public abstract class PropertyMutator<T, P> extends BeanProperty<T> implements
 			this._setter = setter;
 			if (!_setter.isAccessible()) {
 				_setter.setAccessible(true);
-			}
-		}
-
-		public void deserialize(T into, ObjectReader reader, Context ctx)
-				throws TransformationException, IOException {
-			P propValue = propertyDeserializer.deserialize(reader, ctx);
-			try {
-				_setter.invoke(into, propValue);
-			} catch (IllegalArgumentException e) {
-				throw couldNotMutate(e);
-			} catch (IllegalAccessException e) {
-				throw couldNotMutate(e);
-			} catch (InvocationTargetException e) {
-				throw couldNotMutate(e);
 			}
 		}
 
@@ -106,18 +103,6 @@ public abstract class PropertyMutator<T, P> extends BeanProperty<T> implements
 			this._field = field;
 			if (!_field.isAccessible()) {
 				_field.setAccessible(true);
-			}
-		}
-
-		public void deserialize(T into, ObjectReader reader, Context ctx)
-				throws TransformationException, IOException {
-			P propValue = propertyDeserializer.deserialize(reader, ctx);
-			try {
-				_field.set(into, propValue);
-			} catch (IllegalArgumentException e) {
-				throw couldNotMutate(e);
-			} catch (IllegalAccessException e) {
-				throw couldNotMutate(e);
 			}
 		}
 

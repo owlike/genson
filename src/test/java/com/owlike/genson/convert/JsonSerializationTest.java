@@ -18,7 +18,7 @@ import static org.junit.Assert.*;
 
 public class JsonSerializationTest {
 	Genson genson = new Genson();
-
+	
 	@Test
 	public void testJsonPrimitiveObject() throws TransformationException, IOException {
 		Primitives p = createPrimitives();

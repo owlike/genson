@@ -175,7 +175,7 @@ public class JsonDeserializationTest {
 	public void testJsonToUntypedList() throws TransformationException, IOException {
 		String src = "[1, 1.1, \"aa\", true, false]";
 		List<Object> l = genson.deserialize(src, List.class);
-		assertArrayEquals(new Object[] { 1, 1.1, "aa", true, false },
+		assertArrayEquals(new Object[] { 1L, 1.1, "aa", true, false },
 				l.toArray(new Object[l.size()]));
 	}
 
@@ -184,9 +184,9 @@ public class JsonDeserializationTest {
 		String json = "[[\"abc\",[42,24]],[\"def\",[43,34]]]";
 		Object[][] array = genson.deserialize(json, Object[][].class);
 		assertEquals("abc", array[0][0]);
-		assertArrayEquals(new Object[] { 42, 24 }, (Object[]) array[0][1]);
+		assertArrayEquals(new Object[] { 42L, 24L }, (Object[]) array[0][1]);
 		assertEquals("def", array[1][0]);
-		assertArrayEquals(new Object[] { 43, 34 }, (Object[]) array[1][1]);
+		assertArrayEquals(new Object[] { 43L, 34L }, (Object[]) array[1][1]);
 
 		String json3 = "[[[\"abc\"],[42,24],[\"def\"],[43,34]]]";
 		genson.deserialize(json3, Object[][][].class);
@@ -204,7 +204,7 @@ public class JsonDeserializationTest {
 		Map<String, String> map = new HashMap<String, String>();
 		map.put("name", "GREETINGS");
 		map.put("source", "guest");
-		assertEquals(Arrays.asList("hello", 5, map), genson.deserialize(json, Collection.class));
+		assertEquals(Arrays.asList("hello", 5L, map), genson.deserialize(json, Collection.class));
 
 		// doit echouer du a la chaine et que list est de type <E extends Number>
 		src = "{\"list\":[1, 2.3, 5, \"a\"]}";
@@ -220,13 +220,13 @@ public class JsonDeserializationTest {
 	public void testUntypedDeserializationToMap() throws TransformationException, IOException {
 		String src = "{\"key1\": 1, \"key2\": 1.2, \"key3\": true, \"key4\": \"string\", \"key5\": null, \"list\":[1,2.0005,3]}";
 		Map<String, Object> map = genson.deserialize(src, Map.class);
-		assertEquals(map.get("key1"), 1);
+		assertEquals(map.get("key1"), 1L);
 		assertEquals(map.get("key2"), 1.2);
 		assertEquals(map.get("key3"), true);
 		assertEquals(map.get("key4"), "string");
 		assertNull(map.get("key5"));
 		Object[] list = (Object[]) map.get("list");
-		assertArrayEquals(new Number[] { 1, 2.0005, 3 }, list);
+		assertArrayEquals(new Number[] { 1L, 2.0005, 3L }, list);
 	}
 
 	@Test

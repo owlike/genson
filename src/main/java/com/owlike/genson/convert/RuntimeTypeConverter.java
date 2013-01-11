@@ -40,7 +40,7 @@ public class RuntimeTypeConverter<T> extends Wrapper<Converter<T>> implements Co
 
 	public void serialize(T obj, ObjectWriter writer, Context ctx) throws TransformationException,
 			IOException {
-		if (!tClass.equals(obj.getClass()))
+		if (obj != null && !tClass.equals(obj.getClass()))
 			ctx.genson.serialize(obj, obj.getClass(), writer, ctx);
 		else
 			wrapped.serialize(obj, writer, ctx);

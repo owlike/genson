@@ -1,10 +1,12 @@
 package com.owlike.genson.stream;
 
+import java.util.Map;
+
 public enum ValueType {
 	ARRAY(Object[].class),
-	OBJECT(Object.class),
+	OBJECT(Map.class),
 	STRING(String.class),
-	INTEGER(Integer.class),
+	INTEGER(Long.class),
 	DOUBLE(Double.class),
 	BOOLEAN(Boolean.class),
 	NULL(null);

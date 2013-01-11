@@ -190,6 +190,7 @@ public interface ObjectReader extends Closeable {
 	 * @see #valueAsString()
 	 * @return
 	 * @throws IOException
+	 * @throws NumberFormatException
 	 */
 	public int valueAsInt() throws IOException;
 
@@ -197,6 +198,7 @@ public interface ObjectReader extends Closeable {
 	 * @see #valueAsString()
 	 * @return
 	 * @throws IOException
+	 * @throws NumberFormatException
 	 */
 	public long valueAsLong() throws IOException;
 
@@ -204,6 +206,7 @@ public interface ObjectReader extends Closeable {
 	 * @see #valueAsString()
 	 * @return
 	 * @throws IOException
+	 * @throws NumberFormatException
 	 */
 	public double valueAsDouble() throws IOException;
 
@@ -211,6 +214,7 @@ public interface ObjectReader extends Closeable {
 	 * @see #valueAsString()
 	 * @return
 	 * @throws IOException
+	 * @throws NumberFormatException
 	 */
 	public short valueAsShort() throws IOException;
 
@@ -218,6 +222,7 @@ public interface ObjectReader extends Closeable {
 	 * @see #valueAsString()
 	 * @return
 	 * @throws IOException
+	 * @throws NumberFormatException
 	 */
 	public float valueAsFloat() throws IOException;
 
