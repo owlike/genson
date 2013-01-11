@@ -217,7 +217,7 @@ public class JsonReaderTest {
 		reader.next();
 		assertEquals(reader.valueAsString(), "abcde ..u");
 		reader.next();
-		assertEquals(reader.valueAsString(), "null");
+		assertEquals(reader.valueAsString(), null);
 		reader.next();
 		assertEquals(reader.valueAsString(), "12222.0101");
 		reader.next();
@@ -249,7 +249,7 @@ public class JsonReaderTest {
 		assertEquals(reader.valueAsString(), "abcde ..u");
 		reader.next();
 		assertEquals(reader.name(), "c");
-		assertEquals(reader.valueAsString(), "null");
+		assertEquals(reader.valueAsString(), null);
 		reader.next();
 		assertEquals(reader.name(), "d");
 		assertEquals(reader.valueAsString(), "12222.0101");

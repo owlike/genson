@@ -534,7 +534,7 @@ public class JsonReader implements ObjectReader {
 				return BOOLEAN;
 			} else {
 				throw new IllegalStateException("Illegal character around position "
-						+ (_position - valueAsString().length() - _buflen + _cursor)
+						+ (_position - (_buflen - _cursor))
 						+ " awaited for literal (number, boolean or null) but read '"
 						+ _buffer[_cursor] + "'!");
 			}
@@ -906,7 +906,7 @@ public class JsonReader implements ObjectReader {
 	private final void newWrongTokenException(String awaited, int cursor) {
 		// otherwise it fails when an error occurs on first character
 		if (cursor < 0) cursor = 0;
-		int pos = (_position - valueAsString().length() - _buflen + cursor);
+		int pos = _position - (_buflen - cursor);
 		if (pos < 0) pos = 0;
 
 		if (_buflen < 0)
@@ -924,7 +924,7 @@ public class JsonReader implements ObjectReader {
 					"Incomplete data or malformed json : encoutered end of stream.");
 
 		if (cursor < 0) cursor = 0;
-		int pos = (_position - valueAsString().length() - _buflen + cursor);
+		int pos = _position - (_buflen - cursor);
 		if (pos < 0) pos = 0;
 
 		throw new IllegalStateException("Encountred misplaced character '" + _buffer[cursor]
