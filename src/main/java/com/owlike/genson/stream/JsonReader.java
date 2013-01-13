@@ -9,12 +9,8 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.owlike.genson.TransformationRuntimeException;
 import static com.owlike.genson.stream.ValueType.*;
 
-/*
- * TODO handle rows/cols for more precise exceptions (pretty printing)
- */
 public class JsonReader implements ObjectReader {
 	protected final static String NULL_VALUE = "null";
 
@@ -72,7 +68,8 @@ public class JsonReader implements ObjectReader {
 	private final boolean strictDoubleParse;
 	private final boolean readMetadata;
 	private final char[] _buffer = new char[2048];
-	private int _position;
+	private int _col;
+	private int _row;
 	private int _cursor;
 	private int _buflen;
 
@@ -115,27 +112,27 @@ public class JsonReader implements ObjectReader {
 				if (_buflen > 0) {
 					try {
 						valueType = consumeValue();
-					} catch (IllegalStateException ise) {
+					} catch (JsonStreamException jse) {
 						try {
 							// we must cheat because consumeString attends the current token to be "
 							// and will increment the cursor
 							_cursor = -1;
-							_position = -1;
+							_col = -1;
 							_stringValue = consumeString('"');
 							valueType = STRING;
 						} catch (RuntimeException re) {
-							throw ise;
+							throw re;
 						}
 					}
 					if (valueOf(valueType.name()) == null)
-						throw new TransformationRuntimeException(
+						throw new JsonStreamException(
 								"Failed to instanciate reader, first character was " + (char) token
-										+ " when possible character are [ and {");
+										+ " when possible characters are [ and {");
 				} else
 					valueType = NULL;
 			}
 		} catch (IOException ioe) {
-			throw new TransformationRuntimeException("Failed to instanciate reader!", ioe);
+			throw new JsonStreamException("Failed to instanciate reader!", ioe);
 		}
 	}
 
@@ -190,7 +187,7 @@ public class JsonReader implements ObjectReader {
 		if (BOOLEAN == valueType) {
 			return _booleanValue.toString();
 		}
-		throw new IllegalStateException("Readen value can not be converted to String");
+		throw new JsonStreamException("Readen value can not be converted to String");
 	}
 
 	public int valueAsInt() throws IOException {
@@ -211,7 +208,7 @@ public class JsonReader implements ObjectReader {
 			return "".equals(_stringValue) ? 0 : Integer.parseInt(_stringValue);
 		else if (NULL == valueType) return 0;
 
-		throw new IllegalStateException("Expected a int but value is of type " + valueType);
+		throw new JsonStreamException("Expected a int but value is of type " + valueType);
 	}
 
 	public long valueAsLong() throws IOException {
@@ -225,7 +222,7 @@ public class JsonReader implements ObjectReader {
 		} else if (STRING == valueType)
 			return "".equals(_stringValue) ? 0 : Long.parseLong(_stringValue);
 		else if (NULL == valueType) return 0l;
-		throw new IllegalStateException("Expected a long but value is of type " + valueType);
+		throw new JsonStreamException("Expected a long but value is of type " + valueType);
 	}
 
 	public double valueAsDouble() throws IOException {
@@ -237,7 +234,7 @@ public class JsonReader implements ObjectReader {
 		} else if (STRING == valueType)
 			return "".equals(_stringValue) ? 0 : Double.parseDouble(_stringValue);
 		else if (NULL == valueType) return 0d;
-		throw new IllegalStateException("Expected a double but value is of type " + valueType);
+		throw new JsonStreamException("Expected a double but value is of type " + valueType);
 	}
 
 	public short valueAsShort() throws IOException {
@@ -258,7 +255,7 @@ public class JsonReader implements ObjectReader {
 			return "".equals(_stringValue) ? 0 : Short.parseShort(_stringValue);
 		else if (NULL == valueType) return 0;
 
-		throw new IllegalStateException("Expected a short but value is of type " + valueType);
+		throw new JsonStreamException("Expected a short but value is of type " + valueType);
 	}
 
 	public float valueAsFloat() throws IOException {
@@ -273,17 +270,16 @@ public class JsonReader implements ObjectReader {
 		} else if (STRING == valueType)
 			return "".equals(_stringValue) ? 0 : Float.parseFloat(_stringValue);
 		else if (NULL == valueType) return 0f;
-		throw new IllegalStateException("Expected a float but value is of type " + valueType);
+		throw new JsonStreamException("Expected a float but value is of type " + valueType);
 	}
 
 	public boolean valueAsBoolean() throws IOException {
 		if (BOOLEAN == valueType) {
 			return _booleanValue;
 		}
-		if (STRING == valueType)
-			return Boolean.parseBoolean(_stringValue);
+		if (STRING == valueType) return Boolean.parseBoolean(_stringValue);
 		if (NULL == valueType) return false;
-		throw new IllegalStateException("Readen value is not of type boolean");
+		throw new JsonStreamException("Readen value is not of type boolean");
 	}
 
 	public String metadata(String name) throws IOException {
@@ -340,7 +336,7 @@ public class JsonReader implements ObjectReader {
 	public ValueType next() throws IOException {
 		_metadata_readen = false;
 		_first = false;
-		
+
 		char ctoken = (char) readNextToken(false);
 
 		if (ctoken == ',') {
@@ -358,7 +354,7 @@ public class JsonReader implements ObjectReader {
 		}
 
 		if (JsonType.OBJECT == _ctx.peek()) {
-			currentName = consumeName(ctoken);
+			currentName = consumeString(ctoken);
 			if (readNextToken(true) != ':') newWrongTokenException(":", _cursor - 1);
 		}
 
@@ -425,7 +421,7 @@ public class JsonReader implements ObjectReader {
 		_first = false;
 	}
 
-	protected final String consumeName(int token) throws IOException {
+	protected final String consumeName2(int token) throws IOException {
 		if (token != '"') newMisplacedTokenException(_cursor);
 		_cursor++;
 		boolean buffered = false;
@@ -533,19 +529,18 @@ public class JsonReader implements ObjectReader {
 				_cursor += 5;
 				return BOOLEAN;
 			} else {
-				throw new IllegalStateException("Illegal character around position "
-						+ (_position - (_buflen - _cursor))
-						+ " awaited for literal (number, boolean or null) but read '"
-						+ _buffer[_cursor] + "'!");
+				throw new JsonStreamException.Builder().message(
+						"Illegal character around row " + _row + " and column " + (_cursor - _col)
+								+ " awaited for literal (number, boolean or null) but read '"
+								+ _buffer[_cursor] + "'!").create();
 			}
 		}
 	}
 
 	private ValueType consumeNumber() throws IOException {
 		// lets fill the buffer and handle differently overflowing values
-		if ((_buflen - _cursor) < 378)
-			ensureBufferHas(_buflen, false);
-		
+		if ((_buflen - _cursor) < 378) ensureBufferHas(_buflen, false);
+
 		int begin = _cursor;
 		int cur;
 		boolean negative;
@@ -588,14 +583,15 @@ public class JsonReader implements ObjectReader {
 				}
 				// else we exceed long capacity, just continue and parse it as a double
 			}
-			
+
 			if (cur < _buflen
 					&& ((token = _buffer[cur]) == 46 || token == 101 || token == 69 || (token > 47 && token < 58))) {
 				token = _buffer[cur];
 				if (strictDoubleParse) {
 					_cursor = begin;
 					return consumeStrictNumber(cur);
-				} else return consumeDouble(cur, longValue, negative);
+				} else
+					return consumeDouble(cur, longValue, negative);
 			}
 		}
 
@@ -755,15 +751,15 @@ public class JsonReader implements ObjectReader {
 					newWrongTokenException("'-' or '+' or '' (same as +)");
 			}
 		}
-		
+
 		// it may overflow of the max numeric value we accept to read, it should
 		if (localCursor >= _buflen) {
-			
+
 		}
 
 		_numberLen = localCursor - _cursor;
 		_stringValue = new String(_buffer, _cursor, _numberLen);
-		_doubleValue = Double.parseDouble(_stringValue);		
+		_doubleValue = Double.parseDouble(_stringValue);
 		_cursor = localCursor;
 		return DOUBLE;
 	}
@@ -787,6 +783,9 @@ public class JsonReader implements ObjectReader {
 						return _buffer[_cursor++];
 					} else
 						return _buffer[_cursor];
+				} else if (_buffer[_cursor] == '\n') {
+					_row++;
+					_col = _cursor;
 				}
 			}
 
@@ -825,7 +824,7 @@ public class JsonReader implements ObjectReader {
 
 		int value = 0;
 		if (ensureBufferHas(4, false) < 0) {
-			throw new IllegalStateException("Expected 4 hex-digit for character escape sequence!");
+			throw new JsonStreamException("Expected 4 hex-digit for character escape sequence!");
 			// System.arraycopy(buffer, cursor, buffer, 0, buflen-cursor);
 			// buflen = buflen - cursor + reader.read(buffer, buflen-cursor, cursor);
 			// cursor = 0;
@@ -834,7 +833,7 @@ public class JsonReader implements ObjectReader {
 			int ch = _buffer[_cursor++];
 			int digit = (ch > 127) ? -1 : sHexValues[ch];
 			if (digit < 0) {
-				throw new IllegalStateException("Wrong character '" + ch
+				throw new JsonStreamException("Wrong character '" + ch
 						+ "' expected a hex-digit for character escape sequence!");
 			}
 			value = (value << 4) | digit;
@@ -864,7 +863,7 @@ public class JsonReader implements ObjectReader {
 		_buflen = reader.read(_buffer);
 		checkIllegalEnd(_buflen);
 		_cursor = 0;
-		_position += _buflen;
+		_col = 0;
 		return _buflen;
 	}
 
@@ -879,10 +878,10 @@ public class JsonReader implements ObjectReader {
 			int len = reader.read(_buffer, actualLen, _buffer.length - actualLen);
 			if (len < 0) {
 				if (doThrow)
-					throw new IllegalStateException("Encountered end of stream, incomplete json!");
+					throw new JsonStreamException("Encountered end of stream, incomplete json!");
 				else {
 					_buflen = actualLen;
-					_position += actualLen;
+					_col = 0;
 					_cursor = 0;
 					return len;
 				}
@@ -890,7 +889,7 @@ public class JsonReader implements ObjectReader {
 			actualLen += len;
 		}
 		_buflen = actualLen;
-		_position += actualLen;
+		_col = 0;
 		_cursor = 0;
 		return actualLen;
 	}
@@ -906,40 +905,46 @@ public class JsonReader implements ObjectReader {
 	private final void newWrongTokenException(String awaited, int cursor) {
 		// otherwise it fails when an error occurs on first character
 		if (cursor < 0) cursor = 0;
-		int pos = _position - (_buflen - cursor);
+		int pos = cursor - _col;
 		if (pos < 0) pos = 0;
 
 		if (_buflen < 0)
-			throw new IllegalStateException(
+			throw new JsonStreamException(
 					"Incomplete data or malformed json : encoutered end of stream but expected "
 							+ awaited);
 		else
-			throw new IllegalStateException("Illegal character at position " + pos + " expected "
-					+ awaited + " but read '" + _buffer[cursor] + "' !");
+			throw new JsonStreamException.Builder()
+					.message(
+							"Illegal character at row " + _row + " and column " + pos
+									+ " expected " + awaited + " but read '" + _buffer[cursor]
+									+ "' !").locate(_row, pos).create();
 	}
 
 	private final void newMisplacedTokenException(int cursor) {
 		if (_buflen < 0)
-			throw new IllegalStateException(
+			throw new JsonStreamException(
 					"Incomplete data or malformed json : encoutered end of stream.");
 
 		if (cursor < 0) cursor = 0;
-		int pos = _position - (_buflen - cursor);
+		int pos = cursor - _col;
 		if (pos < 0) pos = 0;
 
-		throw new IllegalStateException("Encountred misplaced character '" + _buffer[cursor]
-				+ "' around position " + pos);
+		throw new JsonStreamException.Builder()
+				.message(
+						"Encountred misplaced character '" + _buffer[cursor] + "' around row "
+								+ _row + " and column " + pos).locate(_row, pos).create();
 	}
 
-	private final void checkIllegalEnd(int token) throws IOException {
+	private final void checkIllegalEnd(int token) {
 		if (token == -1 && JsonType.EMPTY != _ctx.peek())
-			throw new IOException("Incomplete data or malformed json : encoutered end of stream!");
+			throw new JsonStreamException(
+					"Incomplete data or malformed json : encoutered end of stream!");
 	}
 
 	private void throwNumberFormatException(String expected, String encoutered) {
-		int pos = (_position - _numberLen - _buflen + _cursor);
-		throw new NumberFormatException("Wrong numeric type at position " + pos + ", expected "
-				+ expected + " but encoutered " + encoutered);
+		int pos = _cursor - _col -_numberLen;
+		throw new NumberFormatException("Wrong numeric type at row " + _row + " and column " + pos
+				+ ", expected " + expected + " but encoutered " + encoutered);
 	}
 
 }

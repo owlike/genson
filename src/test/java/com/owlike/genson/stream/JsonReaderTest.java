@@ -1,5 +1,6 @@
 package com.owlike.genson.stream;
 
+import java.io.CharArrayReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Arrays;
@@ -29,6 +30,106 @@ public class JsonReaderTest {
 	public static Collection<Boolean[]> data() {
 		return Arrays.asList(new Boolean[] { true, true }, new Boolean[] { true, false },
 				new Boolean[] { false, true }, new Boolean[] { false, false });
+	}
+
+	@Test
+	public void testParsingErrorPositionSameRow() throws IOException {
+		@SuppressWarnings("resource")
+		JsonReader reader = new JsonReader(new StringReader("[" + "}"), strictDoubleParse,
+				readMetadata);
+		try {
+			reader.beginArray().endArray();
+			fail();
+		} catch (JsonStreamException e) {
+			assertEquals(0, e.getRow());
+			assertEquals(1, e.getColumn());
+		}
+	}
+
+	@Test
+	public void testParsingErrorPositionDifferentRow() throws IOException {
+		@SuppressWarnings("resource")
+		JsonReader reader = new JsonReader(new StringReader("  [\n\n    \n" + "}"),
+				strictDoubleParse, readMetadata);
+		try {
+			reader.beginArray().endArray();
+			fail();
+		} catch (JsonStreamException e) {
+			assertEquals(3, e.getRow());
+			assertEquals(1, e.getColumn());
+		}
+	}
+
+	@Test
+	public void testParsingErrorPositionDifferentRowWithContent() throws IOException {
+		@SuppressWarnings("resource")
+		JsonReader reader = new JsonReader(new StringReader("  [1, 2\n, \"aa vb\",\n4330833    \n"
+				+ "}"), strictDoubleParse, readMetadata);
+		try {
+			reader.beginArray().endArray();
+			fail();
+		} catch (JsonStreamException e) {
+			assertEquals(0, e.getRow());
+			assertEquals(3, e.getColumn());
+		}
+	}
+
+	// must produce same result as testParsingErrorPositionDifferentRow
+	@Test
+	public void testParsingErrorPositionDifferentRowWithContent2() throws IOException {
+		@SuppressWarnings("resource")
+		JsonReader reader = new JsonReader(new StringReader("  [1, 2\n, \"aa vb\",\n4330833    \n"
+				+ "}"), strictDoubleParse, readMetadata);
+		try {
+			reader.beginArray().next();
+			reader.next();
+			reader.next();
+			reader.next();
+			reader.endArray();
+			fail();
+		} catch (JsonStreamException e) {
+			assertEquals(3, e.getRow());
+			assertEquals(1, e.getColumn());
+		}
+	}
+
+	@Test
+	public void testParsingErrorPositionLargeInput() throws IOException {
+		// 2048 is the buffer size, this will allow us to test position
+		// information for large input that needs to be buffered
+		char[] in = new char[2048 + 7];
+		in[0] = '[';
+		for (int i = 1; i < 2046; i++) in[i] = '1';
+		in[2046] = ',';
+		in[2047] = '\n';
+		in[2048] = '3';
+		in[2049] = '3';
+		in[2050] = ',';
+		in[2051] = '\n';
+		in[2052] = '5';
+		in[2053] = 'x';
+		in[2054] = ']';
+		/* looks like : 
+		 * [11111.....111,
+		 * 3,
+		 * 5x]
+		 */
+		
+		@SuppressWarnings("resource")
+		JsonReader reader = new JsonReader(new CharArrayReader(in), strictDoubleParse, readMetadata);
+		try {
+			System.out.println(in);
+			for (reader.beginArray(); reader.hasNext();) {
+				reader.next();
+				reader.valueAsDouble();
+			}
+			System.out.println(reader.valueAsInt());
+			fail();
+		} catch (JsonStreamException e) {
+			e.printStackTrace();
+			assertEquals(2, e.getRow());
+			assertEquals(1, e.getColumn());
+		}
 	}
 
 	@Test
@@ -389,7 +490,7 @@ public class JsonReaderTest {
 		try {
 			reader.beginObject();
 			fail();
-		} catch (IllegalStateException ise) {
+		} catch (JsonStreamException ise) {
 		}
 		reader.close();
 	}
@@ -404,7 +505,7 @@ public class JsonReaderTest {
 			reader.next();
 			reader.next();
 			fail();
-		} catch (IllegalStateException ise) {
+		} catch (JsonStreamException ise) {
 		}
 		reader.close();
 	}
@@ -418,7 +519,7 @@ public class JsonReaderTest {
 			reader.next();
 			reader.next();
 			fail();
-		} catch (IOException ioe) {
+		} catch (JsonStreamException ioe) {
 		}
 		reader.close();
 	}
@@ -463,18 +564,19 @@ public class JsonReaderTest {
 		try {
 			reader.beginObject();
 			fail();
-		} catch (IllegalStateException ise) {
+		} catch (JsonStreamException ise) {
 		}
 		reader.close();
 	}
-	
-	// TODO this test fails for the moment as we do not handle values that overflow the buffer capacity
+
+	// TODO this test fails for the moment as we do not handle values that overflow the buffer
+	// capacity
 	public void testReadOverflowingExtremlyLongNumber() throws IOException {
 		char[] array = new char[4100];
 		array[0] = '[';
-		array[array.length-1] = ']';
-		for (int i = 1; i < array.length-1; i++) {
-			array[i] = (char) (i%10 + 48);
+		array[array.length - 1] = ']';
+		for (int i = 1; i < array.length - 1; i++) {
+			array[i] = (char) (i % 10 + 48);
 		}
 		String json = new String(array);
 		JsonReader reader = new JsonReader(new StringReader(json), strictDoubleParse, readMetadata);

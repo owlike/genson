@@ -13,6 +13,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -100,6 +101,8 @@ public final class Genson {
 	private final boolean withClassMetadata;
 	private final boolean strictDoubleParse;
 	private final String indentation;
+
+	private final static Charset UTF8_CHARSET = Charset.forName("UTF-8");
 
 	/**
 	 * The default constructor will use the default configuration provided by the {@link Builder}.
@@ -327,6 +330,10 @@ public final class Genson {
 		return deser.deserialize(reader, ctx);
 	}
 
+	/**
+	 * Searches if an alias has been registered for clazz. If not will take the class full name and
+	 * use it as alias. This method never returns null.
+	 */
 	public <T> String aliasFor(Class<T> clazz) {
 		String alias = classAliasMap.get(clazz);
 		if (alias == null) {
@@ -336,6 +343,16 @@ public final class Genson {
 		return alias;
 	}
 
+	/**
+	 * Searches for the class matching this alias, if none will try to use the alias as the class
+	 * name.
+	 * 
+	 * @param alias
+	 * @return The class matching this alias.
+	 * @throws ClassNotFoundException
+	 *             thrown if no class has been registered for this alias and the alias it self does
+	 *             not correspond to the full name of a class.
+	 */
 	public Class<?> classFor(String alias) throws ClassNotFoundException {
 		Class<?> clazz = aliasClassMap.get(alias);
 		if (clazz == null) {
@@ -345,18 +362,47 @@ public final class Genson {
 		return clazz;
 	}
 
+	/**
+	 * Creates a new ObjectWriter with this Genson instance configuration and default encoding to
+	 * UTF8.
+	 */
 	public ObjectWriter createWriter(OutputStream os) {
-		return new JsonWriter(new OutputStreamWriter(os), skipNull, htmlSafe, indentation);
+		return new JsonWriter(new OutputStreamWriter(os, UTF8_CHARSET), skipNull, htmlSafe,
+				indentation);
 	}
 
-	public ObjectReader createReader(InputStream is) {
-		return new JsonReader(new InputStreamReader(is), strictDoubleParse, withClassMetadata);
+	/**
+	 * Creates a new ObjectWriter with this Genson instance configuration.
+	 */
+	public ObjectWriter createWriter(OutputStream os, Charset charset) {
+		return createWriter(new OutputStreamWriter(os, charset));
 	}
 
+	/**
+	 * Creates a new ObjectWriter with this Genson instance configuration.
+	 */
 	public ObjectWriter createWriter(Writer writer) {
 		return new JsonWriter(writer, skipNull, htmlSafe, indentation);
 	}
 
+	/**
+	 * Creates a new ObjectReader with this Genson instance configuration and default encoding to
+	 * UTF8.
+	 */
+	public ObjectReader createReader(InputStream is) {
+		return createReader(is, UTF8_CHARSET);
+	}
+
+	/**
+	 * Creates a new ObjectReader with this Genson instance configuration.
+	 */
+	public ObjectReader createReader(InputStream is, Charset charset) {
+		return createReader(new InputStreamReader(is, charset));
+	}
+
+	/**
+	 * Creates a new ObjectReader with this Genson instance configuration.
+	 */
 	public ObjectReader createReader(Reader reader) {
 		return new JsonReader(reader, strictDoubleParse, withClassMetadata);
 	}
@@ -1059,7 +1105,8 @@ public final class Genson {
 		}
 
 		public Builder setIndentation(String indentation) {
-			this.indentation = indentation; return this;
+			this.indentation = indentation;
+			return this;
 		}
 
 		/**
