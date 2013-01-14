@@ -31,7 +31,7 @@ public class JsonReaderTest {
 		return Arrays.asList(new Boolean[] { true, true }, new Boolean[] { true, false },
 				new Boolean[] { false, true }, new Boolean[] { false, false });
 	}
-
+	
 	@Test
 	public void testParsingErrorPositionSameRow() throws IOException {
 		@SuppressWarnings("resource")
@@ -118,15 +118,13 @@ public class JsonReaderTest {
 		@SuppressWarnings("resource")
 		JsonReader reader = new JsonReader(new CharArrayReader(in), strictDoubleParse, readMetadata);
 		try {
-			System.out.println(in);
 			for (reader.beginArray(); reader.hasNext();) {
 				reader.next();
 				reader.valueAsDouble();
 			}
-			System.out.println(reader.valueAsInt());
+			reader.endArray();
 			fail();
 		} catch (JsonStreamException e) {
-			e.printStackTrace();
 			assertEquals(2, e.getRow());
 			assertEquals(1, e.getColumn());
 		}

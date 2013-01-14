@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.owlike.genson.Operations.checkNotNull;
+
 /**
  * The context class is intended to be a statefull class shared across a single execution. Its main
  * purpose is to hold local data and to pass it to others contributors of the
@@ -42,6 +44,7 @@ public class Context {
 	}
 
 	public Context(Genson genson, List<Class<? extends BeanView<?>>> views) {
+		checkNotNull(genson);
 		this.genson = genson;
 		this.views = views;
 	}
@@ -55,7 +58,7 @@ public class Context {
 		views.add(view);
 		return this;
 	}
-	
+
 	public List<Class<? extends BeanView<?>>> views() {
 		return views;
 	}
@@ -63,13 +66,13 @@ public class Context {
 	/**
 	 * Puts the object o in the current context indexed by key.
 	 * 
-	 * @param key must be not null
+	 * @param key
+	 *            must be not null
 	 * @param o
 	 * @return the old object associated with that key or null.
 	 */
 	public Object store(String key, Object o) {
-		if (key == null)
-			throw new IllegalArgumentException();
+		checkNotNull(key);
 		Object old = _ctxData.get(key);
 		_ctxData.put(key, o);
 		return old;
@@ -80,27 +83,65 @@ public class Context {
 	 * T, however we allow that so the code of the user can be more fluent and freed from a lot of
 	 * casts.
 	 * 
-	 * @param key must be not null
+	 * @param key
+	 *            must be not null
 	 * @return the object associated with key or null
+	 * @deprecated use the type safe method {@link #get(String, Class)} instead.
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T get(String key) {
-		if (key == null)
-			throw new IllegalArgumentException();
-		return (T) _ctxData.get(key);
+		return (T) get(key, Object.class);
+	}
+
+	/**
+	 * Returns the value mapped to key in this context or null. If the value is not of type
+	 * valueType then an exception is thrown.
+	 * 
+	 * @param key
+	 *            must be not null
+	 * @param valueType
+	 *            the type of the value, null not allowed
+	 * @return the mapping for key or null
+	 * @throws ClassCastException
+	 *             if the value mapped to key is not of type valueType.
+	 */
+	public <T> T get(String key, Class<T> valueType) {
+		checkNotNull(key, valueType);
+		return valueType.cast(_ctxData.get(key));
 	}
 
 	/**
 	 * Same as get, but in addition removes the object with the associated key.
 	 * 
-	 * @param key must be not null
+	 * @param key
+	 *            must be not null
 	 * @return
 	 * @see #get(String)
+	 * @deprecated use the type safe method {@link #remove(String, Class)} instead.
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T remove(String key) {
-		if (key == null)
-			throw new IllegalArgumentException();
-		return (T) _ctxData.remove(key);
+		return (T) remove(key, Object.class);
+	}
+
+	/**
+	 * Removes the mapping for this key from the context. If there is no mapping for that key, null
+	 * is returned. If the value mapped to key is not of type valueType an ClassCastException is
+	 * thrown and the mapping is not removed.
+	 * 
+	 * @param key
+	 *            must be not null
+	 * @param valueType
+	 *            the type of the value, null not allowed
+	 * @return
+	 * @throws ClassCastException
+	 *             if the value mapped to key is not of type valueType.
+	 * @see #get(String)
+	 */
+	public <T> T remove(String key, Class<T> valueType) {
+		checkNotNull(key, valueType);
+		T value = valueType.cast(_ctxData.get(key));
+		_ctxData.remove(key);
+		return value;
 	}
 }

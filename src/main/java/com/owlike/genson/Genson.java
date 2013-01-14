@@ -404,6 +404,9 @@ public final class Genson {
 	 * Creates a new ObjectReader with this Genson instance configuration.
 	 */
 	public ObjectReader createReader(Reader reader) {
+		/* TODO withClassMetadata here is wrong, it has nothing to do with metadata feature...
+		 * think how to improve things correctly
+		 */
 		return new JsonReader(reader, strictDoubleParse, withClassMetadata);
 	}
 

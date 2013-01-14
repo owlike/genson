@@ -91,6 +91,7 @@ public interface ObjectReader extends Closeable {
 	 * 
 	 * @return a reference to the reader.
 	 * @throws IOException
+	 * @throws JsonStreamException
 	 */
 	public ObjectReader beginObject() throws IOException;
 
@@ -100,6 +101,7 @@ public interface ObjectReader extends Closeable {
 	 * 
 	 * @return a reference to the reader.
 	 * @throws IOException
+	 * @throws JsonStreamException
 	 */
 	public ObjectReader endObject() throws IOException;
 
@@ -109,6 +111,7 @@ public interface ObjectReader extends Closeable {
 	 * 
 	 * @return a reference to the reader.
 	 * @throws IOException
+	 * @throws JsonStreamException
 	 */
 	public ObjectReader beginArray() throws IOException;
 
@@ -118,6 +121,7 @@ public interface ObjectReader extends Closeable {
 	 * 
 	 * @return a reference to the reader.
 	 * @throws IOException
+	 * @throws JsonStreamException
 	 */
 	public ObjectReader endArray() throws IOException;
 
@@ -129,6 +133,7 @@ public interface ObjectReader extends Closeable {
 	 * 
 	 * @return a reference to the reader.
 	 * @throws IOException
+	 * @throws JsonStreamException
 	 */
 	public ObjectReader nextObjectMetadata() throws IOException;
 
@@ -139,6 +144,7 @@ public interface ObjectReader extends Closeable {
 	 * 
 	 * @return the type of the value, see {@link ValueType} for possible types.
 	 * @throws IOException
+	 * @throws JsonStreamException
 	 */
 	public ValueType next() throws IOException;
 
@@ -146,6 +152,7 @@ public interface ObjectReader extends Closeable {
 	 * 
 	 * @return true if there is a next property or value, false otherwise.
 	 * @throws IOException
+	 * @throws JsonStreamException
 	 */
 	public boolean hasNext() throws IOException;
 
@@ -154,6 +161,7 @@ public interface ObjectReader extends Closeable {
 	 * 
 	 * @return a reference to the reader.
 	 * @throws IOException
+	 * @throws JsonStreamException
 	 */
 	public ObjectReader skipValue() throws IOException;
 
@@ -168,6 +176,7 @@ public interface ObjectReader extends Closeable {
 	 * @param name the name of the metadata to retrieve.
 	 * @return value of metadata with name as key or null if there is no such metadata.
 	 * @throws IOException
+	 * @throws JsonStreamException
 	 */
 	public String metadata(String name) throws IOException;
 

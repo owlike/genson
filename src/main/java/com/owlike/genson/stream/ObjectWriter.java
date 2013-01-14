@@ -86,6 +86,7 @@ public interface ObjectWriter extends Flushable, Closeable {
 	 * 
 	 * @return a reference to this allowing to chain method calls.
 	 * @throws IOException
+	 * @throws JsonStreamException if called endArray instead of endObject for example
 	 */
 	public ObjectWriter endArray() throws IOException;
 
@@ -103,6 +104,7 @@ public interface ObjectWriter extends Flushable, Closeable {
 	 * 
 	 * @return a reference to this allowing to chain method calls.
 	 * @throws IOException
+	 * @throws JsonStreamException if called endObject instead of endArray for example
 	 */
 	public ObjectWriter endObject() throws IOException;
 

@@ -12,7 +12,6 @@ import java.util.Map;
 import static com.owlike.genson.stream.ValueType.*;
 
 public class JsonReader implements ObjectReader {
-	protected final static String NULL_VALUE = "null";
 
 	protected final static int[] SKIPPED_TOKENS;
 	static {
@@ -421,14 +420,15 @@ public class JsonReader implements ObjectReader {
 		_first = false;
 	}
 
-	protected final String consumeName2(int token) throws IOException {
+	protected final String consumeString(int token) throws IOException {
 		if (token != '"') newMisplacedTokenException(_cursor);
 		_cursor++;
 		boolean buffered = false;
 		while (true) {
 			fillBuffer(true);
+
 			int i = _cursor;
-			for (; i < _buflen; i++) {
+			for (; i < _buflen;) {
 				if (_buffer[i] == '"') {
 					if (buffered) {
 						writeToStringBuffer(_buffer, _cursor, i - _cursor);
@@ -441,43 +441,13 @@ public class JsonReader implements ObjectReader {
 						_cursor = i + 1;
 						return name;
 					}
-				}
-			}
-
-			buffered = true;
-			writeToStringBuffer(_buffer, _cursor, i - _cursor);
-			_cursor = i + 1;
-		}
-	}
-
-	protected final String consumeString(int token) throws IOException {
-		if (token != '"') newMisplacedTokenException(_cursor);
-		_cursor++;
-		boolean buffered = false;
-		while (true) {
-			fillBuffer(true);
-
-			int i = _cursor;
-			for (; i < _buflen;) {
-				if (_buffer[i] == '\\') {
+				} else if (_buffer[i] == '\\') {
 					buffered = true;
 					writeToStringBuffer(_buffer, _cursor, i - _cursor);
 					_cursor = i + 1;
 					if (_stringBufferLength <= (_stringBufferTail + 1)) expandStringBuffer(16);
 					_stringBuffer[_stringBufferTail++] = readEscaped();
 					i = _cursor;
-				} else if (_buffer[i] == '"') {
-					if (buffered) {
-						writeToStringBuffer(_buffer, _cursor, i - _cursor);
-						_cursor = i + 1;
-						String name = new String(_stringBuffer, 0, _stringBufferTail);
-						_stringBufferTail = 0;
-						return name;
-					} else {
-						String name = new String(_buffer, _cursor, i - _cursor);
-						_cursor = i + 1;
-						return name;
-					}
 				} else
 					i++;
 			}
@@ -942,7 +912,7 @@ public class JsonReader implements ObjectReader {
 	}
 
 	private void throwNumberFormatException(String expected, String encoutered) {
-		int pos = _cursor - _col -_numberLen;
+		int pos = _cursor - _col - _numberLen;
 		throw new NumberFormatException("Wrong numeric type at row " + _row + " and column " + pos
 				+ ", expected " + expected + " but encoutered " + encoutered);
 	}

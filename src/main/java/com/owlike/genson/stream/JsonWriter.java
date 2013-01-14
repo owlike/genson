@@ -112,7 +112,7 @@ public class JsonWriter implements ObjectWriter {
 	private final JsonWriter end(final JsonType jsonType, final char token) throws IOException {
 		JsonType jt = _ctx.pop();
 		if (jt != jsonType)
-			throw new IllegalStateException("Expect type " + jsonType.name() + " but was written "
+			throw new JsonStreamException("Expect type " + jsonType.name() + " but was written "
 					+ jt.name() + ", you must call the adequate beginXXX method before endXXX.");
 		
 		if (indentation != null) {
