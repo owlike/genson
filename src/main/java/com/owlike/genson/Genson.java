@@ -31,6 +31,7 @@ import com.owlike.genson.convert.ClassMetadataConverter;
 import com.owlike.genson.convert.DefaultConverters;
 import com.owlike.genson.convert.NullConverter;
 import com.owlike.genson.convert.RuntimeTypeConverter;
+import com.owlike.genson.convert.DefaultConverters.DateConverter;
 import com.owlike.genson.reflect.ASMCreatorParameterNameResolver;
 import com.owlike.genson.reflect.BaseBeanDescriptorProvider;
 import com.owlike.genson.reflect.BeanDescriptorProvider;
@@ -457,7 +458,6 @@ public final class Genson {
 		private boolean skipNull = false;
 		private boolean htmlSafe = false;
 		private boolean withClassMetadata = false;
-		private DateFormat dateFormat = null;
 		private boolean throwExcOnNoDebugInfo = false;
 		private boolean useGettersAndSetters = true;
 		private boolean useFields = true;
@@ -475,7 +475,8 @@ public final class Genson {
 
 		private BeanDescriptorProvider beanDescriptorProvider;
 		private Converter<Object> nullConverter;
-
+		private DateConverter defaultDateConverter;
+		
 		// for the moment we don't allow to override
 		private BeanViewDescriptorProvider beanViewDescriptorProvider;
 
@@ -922,10 +923,6 @@ public final class Genson {
 			return this;
 		}
 
-		public DateFormat getDateFormat() {
-			return dateFormat;
-		}
-
 		/**
 		 * Specifies the data format that should be used for java.util.Date serialization and
 		 * deserialization.
@@ -934,7 +931,7 @@ public final class Genson {
 		 * @return a reference to this builder.
 		 */
 		public Builder setDateFormat(DateFormat dateFormat) {
-			this.dateFormat = dateFormat;
+			defaultDateConverter = new DateConverter(dateFormat, false);
 			return this;
 		}
 
@@ -1111,6 +1108,11 @@ public final class Genson {
 			this.indentation = indentation;
 			return this;
 		}
+		
+		public Builder withTimeInMillis(boolean timeInMillis) {
+			defaultDateConverter = new DateConverter(null, timeInMillis);
+			return this;
+		}
 
 		/**
 		 * Creates an instance of Genson. You may use this method as many times you want. It wont
@@ -1273,12 +1275,15 @@ public final class Genson {
 			converters.add(DefaultConverters.DoubleConverter.instance);
 			converters.add(DefaultConverters.LongConverter.instance);
 			converters.add(DefaultConverters.NumberConverter.instance);
-			converters.add(new DefaultConverters.DateConverter(getDateFormat()));
+			if (defaultDateConverter == null)
+				defaultDateConverter = new DefaultConverters.DateConverter();
+			converters.add(defaultDateConverter);
 			converters.add(DefaultConverters.URLConverter.instance);
 			converters.add(DefaultConverters.URIConverter.instance);
 			converters.add(DefaultConverters.TimestampConverter.instance);
 			converters.add(DefaultConverters.BigDecimalConverter.instance);
 			converters.add(DefaultConverters.BigIntegerConverter.instance);
+			converters.add(DefaultConverters.UUIDConverter.instance);
 			return converters;
 		}
 
@@ -1295,6 +1300,7 @@ public final class Genson {
 			factories.add(DefaultConverters.EnumConverterFactory.instance);
 			factories.add(DefaultConverters.PrimitiveConverterFactory.instance);
 			factories.add(DefaultConverters.UntypedConverterFactory.instance);
+			factories.add(new DefaultConverters.CalendarConverterFactory(defaultDateConverter));
 		}
 
 		protected List<Serializer<?>> getDefaultSerializers() {

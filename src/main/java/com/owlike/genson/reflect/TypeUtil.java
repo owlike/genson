@@ -9,7 +9,6 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -52,7 +51,7 @@ public final class TypeUtil {
 	 * Expands type in the type rootType to Class, ParameterizedType or GenericArrayType. Useful for
 	 * generic types. rootType is used to get the specialization information for expansion.
 	 */
-	public final static Type expandType(Type type, Type rootType) {
+	public final static Type expandType(final Type type, final Type rootType) {
 		if (type instanceof ExpandedType || type instanceof Class) return type;
 		TypeAndRootClassKey key = new TypeAndRootClassKey(type, rootType);
 		Type expandedType = _cache.get(key);
@@ -291,7 +290,9 @@ public final class TypeUtil {
 		Class<?> clazz = getRawClass(type);
 		Class<?> oClazz = getRawClass(oType);
 		boolean match = strictMatch ? oClazz.equals(clazz) : oClazz.isAssignableFrom(clazz);
-
+		
+		if (Object.class.equals(oClazz) && !strictMatch) return match;
+		
 		if (clazz.isArray() && !oClazz.isArray()) return match;
 
 		Type[] types = getTypes(type);
@@ -371,15 +372,12 @@ public final class TypeUtil {
 	private static abstract class ExpandedType<T extends Type> {
 		protected final T originalType;
 		protected final Class<?> rootClass;
-		private int hash;
 
 		private ExpandedType(T originalType, Class<?> rootClass) {
 			if (originalType == null || rootClass == null)
 				throw new IllegalArgumentException("Null arg not allowed!");
 			this.originalType = originalType;
 			this.rootClass = rootClass;
-			hash = 31 + rootClass.hashCode();
-			hash = 31 * hash + originalType.hashCode();
 		}
 
 		@SuppressWarnings("unused")
@@ -394,7 +392,7 @@ public final class TypeUtil {
 
 		@Override
 		public int hashCode() {
-			return hash;
+			return originalType.hashCode();
 		}
 
 		@Override
@@ -410,7 +408,7 @@ public final class TypeUtil {
 			}
 			@SuppressWarnings("unchecked")
 			ExpandedType<Type> other = (ExpandedType<Type>) obj;
-			return originalType.equals(other.originalType) && rootClass.equals(other.rootClass);
+			return originalType.equals(other.originalType);
 		}
 	}
 
@@ -427,80 +425,6 @@ public final class TypeUtil {
 
 		public Type getGenericComponentType() {
 			return componentType;
-		}
-	}
-
-	public static ParameterizedType createParameterizedType(Type ofRawType, Type inOwnerType,
-			Type... withActualTypeArguments) {
-		return new ParameterizedTypeImpl(withActualTypeArguments, inOwnerType, ofRawType);
-	}
-
-	private final static class ParameterizedTypeImpl implements ParameterizedType {
-		private final Type[] actualTypeArguments;
-		private final Type ownerType;
-		private final Type rawType;
-		private int hash;
-
-		public ParameterizedTypeImpl(Type[] actualTypeArguments, Type ownerType, Type rawType) {
-			super();
-			if (actualTypeArguments == null || actualTypeArguments.length == 0 || rawType == null)
-				throw new IllegalArgumentException();
-			this.actualTypeArguments = actualTypeArguments;
-			this.ownerType = ownerType;
-			this.rawType = rawType;
-
-			hash = 31 + (ownerType != null ? ownerType.hashCode() : 0);
-			hash = 31 * hash + rawType.hashCode();
-			hash = 31 * hash + Arrays.hashCode(actualTypeArguments);
-		}
-
-		public Type[] getActualTypeArguments() {
-			return actualTypeArguments;
-		}
-
-		public Type getOwnerType() {
-			return ownerType;
-		}
-
-		public Type getRawType() {
-			return rawType;
-		}
-
-		@Override
-		public int hashCode() {
-			return hash;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj) {
-				return true;
-			}
-			if (obj == null) {
-				return false;
-			}
-			if (!(obj instanceof ParameterizedType)) {
-				return false;
-			}
-			ParameterizedType other = (ParameterizedType) obj;
-			if (!Arrays.equals(actualTypeArguments, other.getActualTypeArguments())) {
-				return false;
-			}
-			if (ownerType == null) {
-				if (other.getOwnerType() != null) {
-					return false;
-				}
-			} else if (!ownerType.equals(other.getOwnerType())) {
-				return false;
-			}
-			if (rawType == null) {
-				if (other.getRawType() != null) {
-					return false;
-				}
-			} else if (!rawType.equals(other.getRawType())) {
-				return false;
-			}
-			return true;
 		}
 	}
 

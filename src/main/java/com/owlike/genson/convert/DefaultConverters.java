@@ -13,10 +13,15 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 import com.owlike.genson.Context;
 import com.owlike.genson.Converter;
@@ -43,6 +48,19 @@ import com.owlike.genson.stream.ValueType;
  */
 public final class DefaultConverters {
 	@HandleClassMetadata
+	public static class SetConverter<E> extends CollectionConverter<E> {
+
+		public SetConverter(Class<E> eClass, Converter<E> elementConverter) {
+			super(eClass, elementConverter);
+		}
+
+		@Override
+		protected Collection<E> create() {
+			return new HashSet<E>();
+		}
+	}
+
+	@HandleClassMetadata
 	public static class CollectionConverter<E> implements Converter<Collection<E>> {
 
 		@SuppressWarnings("unused")
@@ -57,7 +75,7 @@ public final class DefaultConverters {
 		public Collection<E> deserialize(ObjectReader reader, Context ctx)
 				throws TransformationException, IOException {
 			reader.beginArray();
-			Collection<E> col = new ArrayList<E>();
+			Collection<E> col = create();
 			for (; reader.hasNext();) {
 				reader.next();
 				E e = elementConverter.deserialize(reader, ctx);
@@ -79,6 +97,10 @@ public final class DefaultConverters {
 		public Converter<E> getElementConverter() {
 			return elementConverter;
 		}
+
+		protected Collection<E> create() {
+			return new ArrayList<E>();
+		}
 	}
 
 	public final static class CollectionConverterFactory implements
@@ -92,8 +114,11 @@ public final class DefaultConverters {
 		public Converter<Collection<?>> create(Type forType, Genson genson) {
 			Converter<?> elementConverter = genson.provideConverter(TypeUtil
 					.getCollectionType(forType));
-			return new CollectionConverter(
-					TypeUtil.getRawClass(TypeUtil.getCollectionType(forType)), elementConverter);
+
+			Class<?> parameterRawClass = TypeUtil.getRawClass(TypeUtil.getCollectionType(forType));
+			if (Set.class.isAssignableFrom(TypeUtil.getRawClass(forType)))
+				return new SetConverter(parameterRawClass, elementConverter);
+			return new CollectionConverter(parameterRawClass, elementConverter);
 		}
 	};
 
@@ -478,19 +503,24 @@ public final class DefaultConverters {
 	@WithoutBeanView
 	public static class DateConverter implements Converter<Date> {
 		private DateFormat dateFormat;
+		private final boolean asTimeInMillis;
 
 		public DateConverter() {
-			this(SimpleDateFormat.getDateInstance());
+			this(SimpleDateFormat.getDateInstance(), false);
 		}
 
-		public DateConverter(DateFormat dateFormat) {
+		public DateConverter(DateFormat dateFormat, boolean asTimeInMillis) {
 			if (dateFormat == null) dateFormat = SimpleDateFormat.getDateInstance();
 			this.dateFormat = dateFormat;
+			this.asTimeInMillis = asTimeInMillis;
 		}
 
 		public void serialize(Date obj, ObjectWriter writer, Context ctx)
 				throws TransformationException, IOException {
-			writer.writeUnsafeValue(format(obj));
+			if (asTimeInMillis)
+				writer.writeValue(obj.getTime());
+			else
+				writer.writeUnsafeValue(format(obj));
 		}
 
 		protected synchronized String format(Date date) {
@@ -500,7 +530,10 @@ public final class DefaultConverters {
 		public Date deserialize(ObjectReader reader, Context ctx) throws TransformationException,
 				IOException {
 			try {
-				return read(reader.valueAsString());
+				if (asTimeInMillis)
+					return new Date(reader.valueAsLong());
+				else
+					return read(reader.valueAsString());
 			} catch (ParseException e) {
 				throw new TransformationException("Could not parse date " + reader.valueAsString(),
 						e);
@@ -679,5 +712,67 @@ public final class DefaultConverters {
 				throws TransformationException, IOException {
 			writer.writeValue(object.toString());
 		}
+	}
+
+	public static class UUIDConverter implements Converter<UUID> {
+		public final static UUIDConverter instance = new UUIDConverter();
+
+		private UUIDConverter() {
+		}
+
+		@Override
+		public void serialize(UUID object, ObjectWriter writer, Context ctx)
+				throws TransformationException, IOException {
+			writer.writeValue(object.toString());
+		}
+
+		@Override
+		public UUID deserialize(ObjectReader reader, Context ctx) throws TransformationException,
+				IOException {
+			return UUID.fromString(reader.valueAsString());
+		}
+
+	}
+
+	public final static class CalendarConverterFactory implements Factory<Converter<Calendar>> {
+		private final CalendarConverter calendarConverter;
+
+		public CalendarConverterFactory(DateConverter dateConverter) {
+			this.calendarConverter = new CalendarConverter(dateConverter);
+		}
+
+		@Override
+		public Converter<Calendar> create(Type type, Genson genson) {
+			if (!Calendar.class.isAssignableFrom(TypeUtil.getRawClass(type)))
+				throw new IllegalStateException(
+						"CalendarConverterFactory create method can be called only for Calendar type and subtypes.");
+			return calendarConverter;
+		}
+	};
+
+	public static class CalendarConverter implements Converter<Calendar> {
+		private final DateConverter dateConverter;
+
+		CalendarConverter(final DateConverter dateConverter) {
+			this.dateConverter = dateConverter;
+		}
+
+		@Override
+		public void serialize(Calendar object, ObjectWriter writer, Context ctx)
+				throws TransformationException, IOException {
+			dateConverter.serialize(object.getTime(), writer, ctx);
+		}
+
+		@Override
+		public Calendar deserialize(ObjectReader reader, Context ctx)
+				throws TransformationException, IOException {
+			Calendar cal = null;
+			if (ValueType.NULL != reader.getValueType()) {
+				cal = new GregorianCalendar();
+				cal.setTime(dateConverter.deserialize(reader, ctx));
+			}
+			return cal;
+		}
+
 	}
 }
