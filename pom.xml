@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.owlike</groupId>
 	<artifactId>genson</artifactId>
-	<version>0.94-SNAPSHOT</version>
+	<version>0.94</version>
 	<packaging>jar</packaging>
 	<name>Genson</name>
 	<description>Genson library</description>
@@ -19,7 +19,7 @@
 		<url>http://genson.googlecode.com/git</url>
 		<connection>scm:git:http://genson.googlecode.com/git</connection>
 		<developerConnection>scm:git:http://genson.googlecode.com/git</developerConnection>
-		<tag>HEAD</tag>
+		<tag>genson-0.94</tag>
 	</scm>
 	<issueManagement>
 		<system>Google Code Issue List</system>
