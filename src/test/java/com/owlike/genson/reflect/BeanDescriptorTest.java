@@ -2,6 +2,7 @@ package com.owlike.genson.reflect;
 
 import java.io.IOException;
 import java.lang.reflect.GenericArrayType;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -32,8 +33,10 @@ public class BeanDescriptorTest {
 	public void testFailFastBeanDescriptorWithWrongType() {
 		BeanDescriptorProvider provider = new Genson.Builder() {
 			protected BeanDescriptorProvider createBeanDescriptorProvider() {
-				return new BaseBeanDescriptorProvider(getMutatorAccessorResolver(),
-						getPropertyNameResolver(), isUseGettersAndSetters(), isUseFields(), true) {
+				return new BaseBeanDescriptorProvider(new BeanPropertyFactory.CompositeFactory(
+						Arrays.asList(new BeanPropertyFactory.StandardFactory())),
+						getMutatorAccessorResolver(), getPropertyNameResolver(),
+						isUseGettersAndSetters(), isUseFields(), true) {
 					@SuppressWarnings({ "unchecked", "rawtypes" })
 					protected <T> com.owlike.genson.reflect.BeanDescriptor<T> create(
 							java.lang.Class<T> forClass,
@@ -106,6 +109,8 @@ public class BeanDescriptorTest {
 	@Test
 	public void genericTypeTest() throws TransformationException, IOException {
 		BaseBeanDescriptorProvider provider = new BaseBeanDescriptorProvider(
+				new BeanPropertyFactory.CompositeFactory(
+						Arrays.asList(new BeanPropertyFactory.StandardFactory())),
 				new BeanMutatorAccessorResolver.StandardMutaAccessorResolver(),
 				new PropertyNameResolver.ConventionalBeanPropertyNameResolver(), true, true, true);
 
@@ -119,7 +124,10 @@ public class BeanDescriptorTest {
 
 	@Test
 	public void jsonWithJsonIgnore() throws SecurityException, NoSuchFieldException {
-		BeanMutatorAccessorResolver strategy = new BeanMutatorAccessorResolver.StandardMutaAccessorResolver();
+		BeanMutatorAccessorResolver strategy = new BeanMutatorAccessorResolver.CompositeResolver(
+				Arrays.asList(new BeanMutatorAccessorResolver.GensonAnnotationsResolver(),
+						new BeanMutatorAccessorResolver.StandardMutaAccessorResolver()));
+
 		assertFalse(strategy.isAccessor(
 				ClassWithIgnoredProperties.class.getDeclaredField("ignore"),
 				ClassWithIgnoredProperties.class).booleanValue());
@@ -137,7 +145,10 @@ public class BeanDescriptorTest {
 
 	@Test
 	public void jsonInclusionWithJsonProperty() throws SecurityException, NoSuchFieldException {
-		BeanMutatorAccessorResolver strategy = new BeanMutatorAccessorResolver.StandardMutaAccessorResolver();
+		BeanMutatorAccessorResolver strategy = new BeanMutatorAccessorResolver.CompositeResolver(
+				Arrays.asList(new BeanMutatorAccessorResolver.GensonAnnotationsResolver(),
+						new BeanMutatorAccessorResolver.StandardMutaAccessorResolver()));
+
 		assertTrue(strategy.isAccessor(ClassWithIgnoredProperties.class.getDeclaredField("p"),
 				ClassWithIgnoredProperties.class).booleanValue());
 		assertTrue(strategy.isMutator(ClassWithIgnoredProperties.class.getDeclaredField("p"),

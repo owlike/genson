@@ -32,10 +32,13 @@ import com.owlike.genson.convert.DefaultConverters;
 import com.owlike.genson.convert.NullConverter;
 import com.owlike.genson.convert.RuntimeTypeConverter;
 import com.owlike.genson.convert.DefaultConverters.DateConverter;
+import com.owlike.genson.ext.ExtensionConfigurer;
+import com.owlike.genson.ext.jaxb.JaxbConfigurer;
 import com.owlike.genson.reflect.ASMCreatorParameterNameResolver;
 import com.owlike.genson.reflect.BaseBeanDescriptorProvider;
 import com.owlike.genson.reflect.BeanDescriptorProvider;
 import com.owlike.genson.reflect.BeanMutatorAccessorResolver;
+import com.owlike.genson.reflect.BeanPropertyFactory;
 import com.owlike.genson.reflect.BeanViewDescriptorProvider;
 import com.owlike.genson.reflect.PropertyNameResolver;
 import com.owlike.genson.reflect.TypeUtil;
@@ -405,8 +408,9 @@ public final class Genson {
 	 * Creates a new ObjectReader with this Genson instance configuration.
 	 */
 	public ObjectReader createReader(Reader reader) {
-		/* TODO withClassMetadata here is wrong, it has nothing to do with metadata feature...
-		 * think how to improve things correctly
+		/*
+		 * TODO withClassMetadata here is wrong, it has nothing to do with metadata feature... think
+		 * how to improve things correctly
 		 */
 		return new JsonReader(reader, strictDoubleParse, withClassMetadata);
 	}
@@ -467,6 +471,8 @@ public final class Genson {
 		private boolean strictDoubleParse = false;
 		private String indentation = null;
 
+		private List<ExtensionConfigurer> _extensions = new ArrayList<ExtensionConfigurer>();
+
 		private PropertyNameResolver propertyNameResolver;
 		private BeanMutatorAccessorResolver mutatorAccessorResolver;
 		private VisibilityFilter propertyFilter;
@@ -476,11 +482,12 @@ public final class Genson {
 		private BeanDescriptorProvider beanDescriptorProvider;
 		private Converter<Object> nullConverter;
 		private DateConverter defaultDateConverter;
-		
+
 		// for the moment we don't allow to override
 		private BeanViewDescriptorProvider beanViewDescriptorProvider;
 
 		private final Map<String, Class<?>> withClassAliases = new HashMap<String, Class<?>>();
+		private final Map<Class<?>, BeanView<?>> registeredViews = new HashMap<Class<?>, BeanView<?>>();
 
 		public Builder() {
 		}
@@ -1108,9 +1115,16 @@ public final class Genson {
 			this.indentation = indentation;
 			return this;
 		}
-		
+
 		public Builder withTimeInMillis(boolean timeInMillis) {
 			defaultDateConverter = new DateConverter(null, timeInMillis);
+			return this;
+		}
+
+		public Builder with(ExtensionConfigurer... extensions) {
+			// TODO enable it in jax-rs provider
+			for (ExtensionConfigurer ext : extensions)
+				_extensions.add(ext);
 			return this;
 		}
 
@@ -1133,7 +1147,8 @@ public final class Genson {
 				List<BeanMutatorAccessorResolver> resolvers = new ArrayList<BeanMutatorAccessorResolver>();
 				resolvers.add(new BeanViewDescriptorProvider.BeanViewMutatorAccessorResolver());
 				resolvers.add(mutatorAccessorResolver);
-				beanViewDescriptorProvider = new BeanViewDescriptorProvider(
+				beanViewDescriptorProvider = new BeanViewDescriptorProvider(registeredViews,
+						createBeanPropertyFactory(),
 						new BeanMutatorAccessorResolver.CompositeResolver(resolvers),
 						getPropertyNameResolver());
 			}
@@ -1209,6 +1224,7 @@ public final class Genson {
 		 *         <strong>ALL</strong> converters</u>.
 		 */
 		protected Factory<Converter<?>> createConverterFactory() {
+			// TODO should it be added to ExtensionConfigurer?
 			ChainedFactory chainHead = new CircularClassReferenceConverterFactory();
 			ChainedFactory chainTail = chainHead;
 			chainTail = chainTail.withNext(new NullConverter.NullConverterFactory()).withNext(
@@ -1234,8 +1250,14 @@ public final class Genson {
 			if (methodFilter == null) methodFilter = VisibilityFilter.PACKAGE_PUBLIC;
 			VisibilityFilter ctrFilter = getFieldFilter();
 			if (ctrFilter == null) ctrFilter = VisibilityFilter.PACKAGE_PUBLIC;
+			resolvers.add(new BeanMutatorAccessorResolver.GensonAnnotationsResolver());
+
+			for (ExtensionConfigurer configurer : _extensions)
+				configurer.registerBeanMutatorAccessorResolvers(resolvers);
+
 			resolvers.add(new BeanMutatorAccessorResolver.StandardMutaAccessorResolver(propFilter,
 					methodFilter, ctrFilter));
+
 			return new BeanMutatorAccessorResolver.CompositeResolver(resolvers);
 		}
 
@@ -1254,6 +1276,10 @@ public final class Genson {
 		protected PropertyNameResolver createPropertyNameResolver() {
 			List<PropertyNameResolver> resolvers = new ArrayList<PropertyNameResolver>();
 			resolvers.add(new PropertyNameResolver.AnnotationPropertyNameResolver());
+
+			for (ExtensionConfigurer configurer : _extensions)
+				configurer.registerPropertyNameResolvers(resolvers);
+
 			resolvers.add(new PropertyNameResolver.ConventionalBeanPropertyNameResolver());
 			if (isWithDebugInfoPropertyNameResolver())
 				resolvers.add(new ASMCreatorParameterNameResolver(isThrowExceptionOnNoDebugInfo()));
@@ -1328,8 +1354,21 @@ public final class Genson {
 		 * @return the BeanDescriptorProvider instance.
 		 */
 		protected BeanDescriptorProvider createBeanDescriptorProvider() {
-			return new BaseBeanDescriptorProvider(getMutatorAccessorResolver(),
-					getPropertyNameResolver(), isUseGettersAndSetters(), isUseFields(), true);
+			return new BaseBeanDescriptorProvider(createBeanPropertyFactory(),
+					getMutatorAccessorResolver(), getPropertyNameResolver(),
+					isUseGettersAndSetters(), isUseFields(), true);
+		}
+
+		protected BeanPropertyFactory createBeanPropertyFactory() {
+			List<BeanPropertyFactory> factories = new ArrayList<BeanPropertyFactory>();
+			for (ExtensionConfigurer configurer : _extensions)
+				configurer.registerBeanPropertyFactories(factories);
+
+			if (withBeanViewConverter)
+				factories.add(new BeanViewDescriptorProvider.BeanViewPropertyFactory(
+						registeredViews));
+			factories.add(new BeanPropertyFactory.StandardFactory());
+			return new BeanPropertyFactory.CompositeFactory(factories);
 		}
 
 		protected final PropertyNameResolver getPropertyNameResolver() {

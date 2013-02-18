@@ -169,11 +169,90 @@ public interface BeanMutatorAccessorResolver {
 		}
 	}
 	
+	public static class GensonAnnotationsResolver implements BeanMutatorAccessorResolver {
+		public Trilean isAccessor(Field field, Class<?> fromClass) {
+			// ok to look for this$ is ugly but it will do the job for the moment
+			if (mustIgnore(field, true) || field.getName().startsWith("this$"))
+				return FALSE;
+			if (mustInclude(field, true))
+				return TRUE;
+			return Trilean.UNKNOWN;
+		}
+
+		public Trilean isAccessor(Method method, Class<?> fromClass) {
+			if (mustIgnore(method, true))
+				return FALSE;
+			if (mustInclude(method, true) && method.getParameterTypes().length == 0)
+				return TRUE;
+
+			return Trilean.UNKNOWN;
+		}
+
+		public Trilean isCreator(Constructor<?> constructor, Class<?> fromClass) {
+			/*
+			 * hum... it depends on different things, such as parameters name resolution, types, etc
+			 * but we are not supposed to handle it here... lets only check visibility and handle it
+			 * in the provider implementations
+			 */
+			if (mustIgnore(constructor, false))
+				return FALSE;
+			return Trilean.UNKNOWN;
+		}
+
+		public Trilean isCreator(Method method, Class<?> fromClass) {
+			if (method.getAnnotation(Creator.class) != null) {
+				if (Modifier.isPublic(method.getModifiers())
+						&& Modifier.isStatic(method.getModifiers()))
+					return TRUE;
+				throw new TransformationRuntimeException("Method " + method.toGenericString()
+						+ " annotated with @Creator must be static!");
+			}
+			return FALSE;
+		}
+
+		public Trilean isMutator(Field field, Class<?> fromClass) {
+			if (mustIgnore(field, false) || field.getName().startsWith("this$"))
+				return FALSE;
+			if (mustInclude(field, false))
+				return TRUE;
+			return Trilean.UNKNOWN;
+		}
+
+		public Trilean isMutator(Method method, Class<?> fromClass) {
+			if (mustIgnore(method, false))
+				return FALSE;
+			if (mustInclude(method, false) && method.getParameterTypes().length == 1)
+				return TRUE;
+
+			return Trilean.UNKNOWN;
+		}
+
+		protected boolean mustIgnore(AccessibleObject property, boolean forSerialization) {
+			JsonIgnore ignore = property.getAnnotation(JsonIgnore.class);
+			if (ignore != null) {
+				if (forSerialization)
+					return !ignore.serialize();
+				else
+					return !ignore.deserialize();
+			}
+			return false;
+		}
+
+		protected boolean mustInclude(AccessibleObject property, boolean forSerialization) {
+			JsonProperty prop = property.getAnnotation(JsonProperty.class);
+			if (prop != null) {
+				if (forSerialization)
+					return prop.serialize();
+				else
+					return prop.deserialize();
+			}
+			return false;
+		}
+	}
+	
 	/**
-	 * Standard implementation of BeanMutatorAccessorResolver. In the future it will probably be
-	 * split into multiple implementations combined into a composite BeanMutatorAccessorResolver.
-	 * Actually this implementation handles filtering by signature convention, visibility and
-	 * annotations.
+	 * Standard implementation of BeanMutatorAccessorResolver. 
+	 * Actually this implementation handles filtering by signature conventions (Java Bean) and visibility.
 	 * 
 	 * @author eugen
 	 * 
@@ -212,11 +291,6 @@ public interface BeanMutatorAccessorResolver {
 		 * Will resolve all public/package and non transient/static fields as accesssors.
 		 */
 		public Trilean isAccessor(Field field, Class<?> fromClass) {
-			// ok to look for this$ is ugly but it will do the job for the moment
-			if (mustIgnore(field, true) || field.getName().startsWith("this$"))
-				return FALSE;
-			if (mustInclude(field, true))
-				return TRUE;
 			return Trilean.valueOf(filedVisibilityFilter.isVisible(field));
 		}
 
@@ -225,11 +299,6 @@ public interface BeanMutatorAccessorResolver {
 		 * accessors.
 		 */
 		public Trilean isAccessor(Method method, Class<?> fromClass) {
-			if (mustIgnore(method, true))
-				return FALSE;
-			if (mustInclude(method, true) && method.getParameterTypes().length == 0)
-				return TRUE;
-
 			String name = method.getName();
 			int len = name.length();
 			if (methodVisibilityFilter.isVisible(method)
@@ -244,70 +313,24 @@ public interface BeanMutatorAccessorResolver {
 		}
 
 		public Trilean isCreator(Constructor<?> constructor, Class<?> fromClass) {
-			/*
-			 * hum... it depends on different things, such as parameters name resolution, types, etc
-			 * but we are not supposed to handle it here... lets only check visibility and handle it
-			 * in the provider implementations
-			 */
-			if (mustIgnore(constructor, false))
-				return FALSE;
 			return Trilean.valueOf(creatorVisibilityFilter.isVisible(constructor));
 		}
 
 		public Trilean isCreator(Method method, Class<?> fromClass) {
-			if (method.getAnnotation(Creator.class) != null) {
-				if (Modifier.isPublic(method.getModifiers())
-						&& Modifier.isStatic(method.getModifiers()))
-					return TRUE;
-				throw new TransformationRuntimeException("Method " + method.toGenericString()
-						+ " annotated with @Creator must be static!");
-			}
 			return FALSE;
 		}
 
 		public Trilean isMutator(Field field, Class<?> fromClass) {
-			if (mustIgnore(field, false) || field.getName().startsWith("this$"))
-				return FALSE;
-			if (mustInclude(field, false))
-				return TRUE;
-			int modifier = field.getModifiers();
-			return Trilean.valueOf(!Modifier.isTransient(modifier) && !Modifier.isStatic(modifier));
+			return Trilean.valueOf(filedVisibilityFilter.isVisible(field));
 		}
 
 		public Trilean isMutator(Method method, Class<?> fromClass) {
-			if (mustIgnore(method, false))
-				return FALSE;
-			if (mustInclude(method, false) && method.getParameterTypes().length == 1)
-				return TRUE;
-
 			if (methodVisibilityFilter.isVisible(method) && method.getName().length() > 3
 					&& method.getName().startsWith("set") && method.getParameterTypes().length == 1
 					&& method.getReturnType() == void.class)
 				return TRUE;
 
 			return FALSE;
-		}
-
-		protected boolean mustIgnore(AccessibleObject property, boolean forSerialization) {
-			JsonIgnore ignore = property.getAnnotation(JsonIgnore.class);
-			if (ignore != null) {
-				if (forSerialization)
-					return !ignore.serialize();
-				else
-					return !ignore.deserialize();
-			}
-			return false;
-		}
-
-		protected boolean mustInclude(AccessibleObject property, boolean forSerialization) {
-			JsonProperty prop = property.getAnnotation(JsonProperty.class);
-			if (prop != null) {
-				if (forSerialization)
-					return prop.serialize();
-				else
-					return prop.deserialize();
-			}
-			return false;
 		}
 	}
 

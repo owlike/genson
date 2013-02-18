@@ -28,8 +28,8 @@ import com.owlike.genson.stream.ObjectReader;
 import com.owlike.genson.stream.ObjectWriter;
 
 @Provider
-@Consumes({ MediaType.APPLICATION_JSON, "text/json" })
-@Produces({ MediaType.APPLICATION_JSON, "text/json" })
+@Consumes({ MediaType.APPLICATION_JSON, "text/json", "application/*+json" })
+@Produces({ MediaType.APPLICATION_JSON, "text/json", "application/*+json" })
 public class GensonJsonConverter implements MessageBodyReader<Object>, MessageBodyWriter<Object> {
 	private static class GensonStandardResolver implements ContextResolver<Genson> {
 		private final Genson genson;
