@@ -38,7 +38,7 @@ public class JaxbConfigurer extends ExtensionConfigurer {
 
 	@Override
 	public void registerBeanPropertyFactories(List<BeanPropertyFactory> factories) {
-		factories.set(0, new JaxbBeanPropertyFactory());
+		factories.add(0, new JaxbBeanPropertyFactory());
 	}
 
 	private class JaxbBeanPropertyFactory implements BeanPropertyFactory {

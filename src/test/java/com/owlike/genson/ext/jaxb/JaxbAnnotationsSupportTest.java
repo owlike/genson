@@ -17,28 +17,20 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 import com.owlike.genson.Genson;
 import com.owlike.genson.TransformationException;
 
 public class JaxbAnnotationsSupportTest {
-	private ObjectMapper om;
 	private Genson genson;
 
 	@Before
 	public void setUp() {
-		om = new ObjectMapper().registerModule(new JaxbAnnotationModule()).configure(
-				SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 		genson = new Genson.Builder().with(new JaxbConfigurer()).create();
 	}
 
 	// @Test
-	public void testXmlAccessorType() throws JsonProcessingException {
+	public void testXmlAccessorType() {
 
-		System.out.println(om.writeValueAsString(new XmlAccessorTypeBean()));
 	}
 
 	@Test
@@ -110,8 +102,7 @@ public class JaxbAnnotationsSupportTest {
 	}
 
 	// @Test
-	public void testXmlElementRef() throws JsonProcessingException {
-		System.out.println(om.writeValueAsString(new XmlElementRefBean()));
+	public void testXmlElementRef() {
 	}
 
 	// @Test
@@ -120,8 +111,7 @@ public class JaxbAnnotationsSupportTest {
 	}
 
 	// @Test
-	public void testXmlJavaTypeAdapter() throws JsonProcessingException {
-		System.out.println(om.writeValueAsString(new XmlJavaTypeAdapterBean()));
+	public void testXmlJavaTypeAdapter() {
 	}
 
 	public static class XmlJavaTypeAdapterBean {
@@ -133,15 +123,11 @@ public class JaxbAnnotationsSupportTest {
 
 		@Override
 		public Integer unmarshal(XmlAccessorTypeBean v) throws Exception {
-			System.out.println("===");
 			return null;
 		}
 
 		@Override
 		public XmlAccessorTypeBean marshal(Integer v) throws Exception {
-			// TODO Auto-generated method stub
-
-			System.out.println("yyyyyyy");
 			return new XmlAccessorTypeBean();
 		}
 

@@ -33,7 +33,6 @@ import com.owlike.genson.convert.NullConverter;
 import com.owlike.genson.convert.RuntimeTypeConverter;
 import com.owlike.genson.convert.DefaultConverters.DateConverter;
 import com.owlike.genson.ext.ExtensionConfigurer;
-import com.owlike.genson.ext.jaxb.JaxbConfigurer;
 import com.owlike.genson.reflect.ASMCreatorParameterNameResolver;
 import com.owlike.genson.reflect.BaseBeanDescriptorProvider;
 import com.owlike.genson.reflect.BeanDescriptorProvider;
