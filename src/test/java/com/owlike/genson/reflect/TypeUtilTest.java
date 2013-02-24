@@ -24,6 +24,7 @@ public class TypeUtilTest {
 
 	@Test public void testCyclicGenericTypes() throws SecurityException, NoSuchFieldException {
 		// bug 2 https://groups.google.com/forum/?fromgroups=#!topic/genson/9rE026i7Vhg
+		Type t = TypeUtil.expandType(Interval.class.getDeclaredField("min").getGenericType(), Interval.class);
 		assertNotNull(TypeUtil.expandType(Interval.class.getDeclaredField("min").getGenericType(), Interval.class));
 	}
 	

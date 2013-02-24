@@ -25,12 +25,16 @@ public class GenericTypesTest {
 	
 	@Test public void testGenericCyclicTypes() throws TransformationException, IOException {
 		String json = "{\"val\" : {\"val\": {\"val\" : {\"str\": \"hey\"}}}}";
+		CyclicGenericType<CyclicGenericType<SubClass>> cyclic1 = genson.deserialize(json, new GenericType<CyclicGenericType<CyclicGenericType<SubClass>>>() {
+		});
+		assertEquals("hey", cyclic1.val.val.val.str);
+		
 		CyclicGenericType<SubClass> cyclic = genson.deserialize(json, new GenericType<CyclicGenericType<SubClass>>() {
 		});
 		assertEquals("hey", cyclic.val.val.val.str);
 	}
 	
-	public static class CyclicGenericType<T extends CyclicGenericType<T>> {
+	public static class CyclicGenericType<T extends CyclicGenericType<? extends T>> {
 		public T val;
 	}
 	
