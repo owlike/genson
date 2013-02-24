@@ -22,6 +22,21 @@ import com.owlike.genson.stream.ObjectWriter;
 
 public class GenericTypesTest {
 	private Genson genson = new Genson();
+	
+	@Test public void testGenericCyclicTypes() throws TransformationException, IOException {
+		String json = "{\"val\" : {\"val\": {\"val\" : {\"str\": \"hey\"}}}}";
+		CyclicGenericType<SubClass> cyclic = genson.deserialize(json, new GenericType<CyclicGenericType<SubClass>>() {
+		});
+		assertEquals("hey", cyclic.val.val.val.str);
+	}
+	
+	public static class CyclicGenericType<T extends CyclicGenericType<T>> {
+		public T val;
+	}
+	
+	public static class SubClass extends CyclicGenericType<SubClass> {
+		public String str;
+	}
 
 	@Test
 	public void testSerializeWithGenericType() throws TransformationException, IOException {

@@ -22,6 +22,15 @@ import static org.junit.Assert.*;
 
 public class TypeUtilTest {
 
+	@Test public void testCyclicGenericTypes() throws SecurityException, NoSuchFieldException {
+		// bug 2 https://groups.google.com/forum/?fromgroups=#!topic/genson/9rE026i7Vhg
+		assertNotNull(TypeUtil.expandType(Interval.class.getDeclaredField("min").getGenericType(), Interval.class));
+	}
+	
+	class Interval<T extends Comparable<T>> {
+	    T min;
+	}
+	
 	@Test
 	public void testGetCollectionTypeParameterizedCollections() {
 		Type setOfArrayListOfIntegerType = new GenericType<Set<ArrayList<Integer>>>() {

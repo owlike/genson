@@ -713,7 +713,7 @@ public final class Genson {
 						if (name.startsWith("get"))
 							return tryToRename(name.substring(3), fromMethod.getDeclaringClass(),
 									fromMethod.getReturnType());
-						if (name.startsWith("set"))
+						if (name.startsWith("set") && fromMethod.getParameterTypes().length == 1)
 							return tryToRename(name.substring(3), fromMethod.getDeclaringClass(),
 									fromMethod.getParameterTypes()[0]);
 					}
@@ -794,7 +794,7 @@ public final class Genson {
 				@Override
 				public Trilean isMutator(Method method, Class<?> fromClass) {
 					String name = method.getName();
-					if (name.length() > 3) {
+					if (name.length() > 3 && method.getParameterTypes().length == 1) {
 						if (name.startsWith("set"))
 							return filter(name.substring(3), method.getDeclaringClass(),
 									method.getParameterTypes()[0], exclude);

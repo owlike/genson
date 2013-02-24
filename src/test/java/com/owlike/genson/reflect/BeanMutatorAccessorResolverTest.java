@@ -12,6 +12,7 @@ import com.owlike.genson.Trilean;
 import static com.owlike.genson.reflect.BeanMutatorAccessorResolver.*;
 
 public class BeanMutatorAccessorResolverTest {
+	
 	@Test
 	public void testCustomResolver() throws SecurityException, NoSuchFieldException {
 		List<BeanMutatorAccessorResolver> resolvers = new ArrayList<BeanMutatorAccessorResolver>();
