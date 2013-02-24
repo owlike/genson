@@ -1,6 +1,6 @@
 package com.owlike.genson.ext.jaxb;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 
@@ -9,6 +9,8 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementRef;
+import javax.xml.bind.annotation.XmlEnum;
+import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
@@ -28,9 +30,17 @@ public class JaxbAnnotationsSupportTest {
 		genson = new Genson.Builder().with(new JaxbConfigurer()).create();
 	}
 
-	// @Test
-	public void testXmlAccessorType() {
-
+	@Test
+	public void testXmlAccessorTypeSerialization() throws TransformationException, IOException {
+		assertEquals("{\"a\":1}", genson.serialize(new XmlAccessorTypeBean()));
+	}
+	
+	@Test
+	public void testXmlAccessorTypeDeserialization() throws TransformationException, IOException {
+		XmlAccessorTypeBean bean = genson.deserialize("{\"a\": 10, \"b\": 5, \"transientField\": 9}", XmlAccessorTypeBean.class);
+		assertEquals(10, bean.a);
+		assertEquals(0, bean.b);
+		assertEquals(2, bean.transientField);
 	}
 
 	@Test
@@ -119,22 +129,23 @@ public class JaxbAnnotationsSupportTest {
 		public int v;
 	}
 
-	public static class MyXmlAdapter extends XmlAdapter<XmlAccessorTypeBean, Integer> {
+	public static class MyXmlAdapter extends XmlAdapter<String, Integer> {
 
 		@Override
-		public Integer unmarshal(XmlAccessorTypeBean v) throws Exception {
-			return null;
+		public Integer unmarshal(String v) throws Exception {
+			return Integer.valueOf(v);
 		}
 
 		@Override
-		public XmlAccessorTypeBean marshal(Integer v) throws Exception {
-			return new XmlAccessorTypeBean();
+		public String marshal(Integer v) throws Exception {
+			return v.toString();
 		}
 
 	}
 
-	public static class XmlEnumValueBean {
-		// @XmlEnumValue()
+	@XmlEnum(Integer.class)
+	public static enum XmlEnumValueBean {
+		 @XmlEnumValue("1") ONE
 	}
 
 	public static class XmlElementRefBean {
@@ -158,7 +169,12 @@ public class JaxbAnnotationsSupportTest {
 	public static class XmlAccessorTypeBean {
 		private int a = 1;
 		private transient int transientField = 2;
+		private transient int b;
 
+		public void setB(int b) {
+			this.b = b;
+		}
+		
 		public int getB() {
 			return 3;
 		}

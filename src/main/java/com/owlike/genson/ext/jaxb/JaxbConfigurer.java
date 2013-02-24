@@ -1,17 +1,25 @@
 package com.owlike.genson.ext.jaxb;
 
+import static com.owlike.genson.reflect.TypeUtil.getRawClass;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 import com.owlike.genson.Genson;
 import com.owlike.genson.Trilean;
@@ -24,8 +32,11 @@ import com.owlike.genson.reflect.PropertyMutator;
 import com.owlike.genson.reflect.PropertyNameResolver;
 import com.owlike.genson.reflect.TypeUtil;
 import com.owlike.genson.reflect.BeanMutatorAccessorResolver.BaseResolver;
+import com.owlike.genson.reflect.VisibilityFilter;
 
 public class JaxbConfigurer extends ExtensionConfigurer {
+	private final Map<Class<? extends XmlAdapter<?, ?>>, XmlAdapter<?, ?>> _xmlAdaptersCache = new HashMap<Class<? extends XmlAdapter<?, ?>>, XmlAdapter<?, ?>>();
+
 	@Override
 	public void registerBeanMutatorAccessorResolvers(List<BeanMutatorAccessorResolver> resolvers) {
 		resolvers.add(new JaxbAnnotationsResolver());
@@ -47,30 +58,59 @@ public class JaxbConfigurer extends ExtensionConfigurer {
 		public <T> PropertyAccessor<T, ?> createAccessor(String name, Field field, Type ofType,
 				Genson genson) {
 			Type newType = getType(field, field.getGenericType(), ofType);
-			if (newType == null) {
-				
+			if (newType != null) {
+				@SuppressWarnings("unchecked")
+				Class<T> ofClass = (Class<T>) getRawClass(ofType);
+				Type expandedType = TypeUtil.expandType(newType, ofType);
+				return new PropertyAccessor.FieldAccessor<T, Object>(name, field, expandedType,
+						ofClass, genson.provideConverter(expandedType));
 			}
-			
+
 			return null;
 		}
 
 		@Override
 		public <T> PropertyAccessor<T, ?> createAccessor(String name, Method method, Type ofType,
 				Genson genson) {
-			// TODO Auto-generated method stub
+			Type newType = getType(method, method.getReturnType(), ofType);
+			if (newType != null) {
+				@SuppressWarnings("unchecked")
+				Class<T> ofClass = (Class<T>) getRawClass(ofType);
+				Type expandedType = TypeUtil.expandType(newType, ofType);
+				return new PropertyAccessor.MethodAccessor<T, Object>(name, method, expandedType,
+						ofClass, genson.provideConverter(expandedType));
+			}
 			return null;
 		}
 
 		@Override
 		public <T> PropertyMutator<T, ?> createMutator(String name, Field field, Type ofType,
 				Genson genson) {
-			// TODO Auto-generated method stub
+			Type newType = getType(field, field.getGenericType(), ofType);
+			if (newType != null) {
+				@SuppressWarnings("unchecked")
+				Class<T> ofClass = (Class<T>) getRawClass(ofType);
+				Type expandedType = TypeUtil.expandType(newType, ofType);
+				return new PropertyMutator.FieldMutator<T, Object>(name, field, expandedType,
+						ofClass, genson.provideConverter(expandedType));
+			}
+
 			return null;
 		}
 
 		@Override
 		public <T> PropertyMutator<T, ?> createMutator(String name, Method method, Type ofType,
 				Genson genson) {
+			if (method.getParameterTypes().length == 1) {
+				Type newType = getType(method, method.getReturnType(), ofType);
+				if (newType != null) {
+					@SuppressWarnings("unchecked")
+					Class<T> ofClass = (Class<T>) getRawClass(ofType);
+					Type expandedType = TypeUtil.expandType(newType, ofType);
+					return new PropertyMutator.MethodMutator<T, Object>(name, method, expandedType,
+							ofClass, genson.provideConverter(expandedType));
+				}
+			}
 			return null;
 		}
 
@@ -89,15 +129,16 @@ public class JaxbConfigurer extends ExtensionConfigurer {
 		private Type getType(AccessibleObject object, Type objectType, Type contextType) {
 			XmlElement el = object.getAnnotation(XmlElement.class);
 			if (el != null && el.type() != XmlElement.DEFAULT.class) {
-				if (TypeUtil.getRawClass(objectType).isAssignableFrom(el.type()))
-						throw new ClassCastException("Inavlid XmlElement annotation, " + objectType + " is not assignable from " + el.type());
+				if (!TypeUtil.getRawClass(objectType).isAssignableFrom(el.type()))
+					throw new ClassCastException("Inavlid XmlElement annotation, " + objectType
+							+ " is not assignable from " + el.type());
 				return el.type();
-			} else return null;
+			} else
+				return null;
 		}
 	}
 
 	private class JaxbNameResolver implements PropertyNameResolver {
-		// WHY???? why not null?!
 		private final static String DEFAULT_NAME = "##default";
 
 		@Override
@@ -136,16 +177,17 @@ public class JaxbConfigurer extends ExtensionConfigurer {
 	private class JaxbAnnotationsResolver extends BaseResolver {
 		@Override
 		public Trilean isAccessor(Field field, Class<?> fromClass) {
+
 			if (ignore(field, field.getType(), fromClass)) return Trilean.FALSE;
 			if (include(field, field.getType(), fromClass)) return Trilean.TRUE;
-			return Trilean.UNKNOWN;
+			return analyzeAccessTypeInfo(field, field, XmlAccessType.FIELD, fromClass);
 		}
 
 		@Override
 		public Trilean isMutator(Field field, Class<?> fromClass) {
 			if (ignore(field, field.getType(), fromClass)) return Trilean.FALSE;
 			if (include(field, field.getType(), fromClass)) return Trilean.TRUE;
-			return Trilean.UNKNOWN;
+			return analyzeAccessTypeInfo(field, field, XmlAccessType.FIELD, fromClass);
 		}
 
 		@Override
@@ -166,7 +208,7 @@ public class JaxbConfigurer extends ExtensionConfigurer {
 					return Trilean.FALSE;
 			}
 
-			return Trilean.UNKNOWN;
+			return analyzeAccessTypeInfo(method, method, XmlAccessType.PROPERTY, fromClass);
 		}
 
 		@Override
@@ -186,12 +228,28 @@ public class JaxbConfigurer extends ExtensionConfigurer {
 						return Trilean.FALSE;
 				}
 			}
+
+			return analyzeAccessTypeInfo(method, method, XmlAccessType.PROPERTY, fromClass);
+		}
+
+		public Trilean analyzeAccessTypeInfo(AccessibleObject property, Member member,
+				XmlAccessType accessType, Class<?> fromClass) {
+			XmlAccessorType xmlAccessTypeAnn = find(XmlAccessorType.class, property, fromClass);
+
+			if (xmlAccessTypeAnn != null) {
+				if (xmlAccessTypeAnn.value() == accessType
+						&& VisibilityFilter.DEFAULT.isVisible(member)) return Trilean.TRUE;
+				if (xmlAccessTypeAnn.value() != accessType
+						&& xmlAccessTypeAnn.value() != XmlAccessType.PUBLIC_MEMBER)
+					return Trilean.FALSE;
+			}
+
 			return Trilean.UNKNOWN;
 		}
 
 		private boolean ignore(AccessibleObject property, Class<?> ofType, Class<?> fromClass) {
-			XmlTransient ann = find(XmlTransient.class, property, ofType);
-			if (ann != null) return true;
+			XmlTransient xmlTransientAnn = find(XmlTransient.class, property, ofType);
+			if (xmlTransientAnn != null) return true;
 
 			return false;
 		}
