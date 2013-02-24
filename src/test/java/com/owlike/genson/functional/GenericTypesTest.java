@@ -25,18 +25,28 @@ public class GenericTypesTest {
 	
 	@Test public void testGenericCyclicTypes() throws TransformationException, IOException {
 		String json = "{\"val\" : {\"val\": {\"val\" : {\"str\": \"hey\"}}}}";
-		CyclicGenericType<CyclicGenericType<SubClass>> cyclic1 = genson.deserialize(json, new GenericType<CyclicGenericType<CyclicGenericType<SubClass>>>() {
-		});
-		assertEquals("hey", cyclic1.val.val.val.str);
-		
-		CyclicGenericType<SubClass> cyclic = genson.deserialize(json, new GenericType<CyclicGenericType<SubClass>>() {
+		CyclicGenericType<CyclicGenericType<SubClass>> cyclic = genson.deserialize(json, new GenericType<CyclicGenericType<CyclicGenericType<SubClass>>>() {
 		});
 		assertEquals("hey", cyclic.val.val.val.str);
+		
+		CyclicGenericType<SubClass> cyclicSubclass = genson.deserialize(json, new GenericType<CyclicGenericType<SubClass>>() {
+		});
+		assertEquals("hey", cyclicSubclass.val.val.val.str);
+		
+		
+		OtherGenericType<CyclicGenericType<SubClass>> differentClasses = genson.deserialize("{\"otherVal\" : {\"val\": {\"val\" : {\"str\": \"hey\"}}}}", new GenericType<OtherGenericType<CyclicGenericType<SubClass>>>() {
+		});
+		assertEquals("hey", differentClasses.otherVal.val.val.str);
 	}
 	
 	public static class CyclicGenericType<T extends CyclicGenericType<? extends T>> {
 		public T val;
 	}
+	
+	public static class OtherGenericType<T extends CyclicGenericType<? extends T>> {
+		public T otherVal;
+	}
+	
 	
 	public static class SubClass extends CyclicGenericType<SubClass> {
 		public String str;
