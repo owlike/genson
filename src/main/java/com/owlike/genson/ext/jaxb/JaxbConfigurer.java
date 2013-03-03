@@ -10,16 +10,13 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 import com.owlike.genson.Genson;
 import com.owlike.genson.Trilean;
@@ -35,7 +32,6 @@ import com.owlike.genson.reflect.BeanMutatorAccessorResolver.BaseResolver;
 import com.owlike.genson.reflect.VisibilityFilter;
 
 public class JaxbConfigurer extends ExtensionConfigurer {
-	private final Map<Class<? extends XmlAdapter<?, ?>>, XmlAdapter<?, ?>> _xmlAdaptersCache = new HashMap<Class<? extends XmlAdapter<?, ?>>, XmlAdapter<?, ?>>();
 
 	@Override
 	public void registerBeanMutatorAccessorResolvers(List<BeanMutatorAccessorResolver> resolvers) {
