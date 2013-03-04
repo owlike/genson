@@ -1,5 +1,6 @@
 package com.owlike.genson.convert;
 
+import java.awt.event.KeyAdapter;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
@@ -36,6 +37,8 @@ import com.owlike.genson.reflect.TypeUtil;
 import com.owlike.genson.stream.ObjectReader;
 import com.owlike.genson.stream.ObjectWriter;
 import com.owlike.genson.stream.ValueType;
+
+import static com.owlike.genson.reflect.TypeUtil.*;
 
 /**
  * This class contains all default converters and their factories. You can read the source code <a
@@ -268,7 +271,7 @@ public final class DefaultConverters {
 				IOException {
 			if (ValueType.STRING.equals(reader.getValueType())) {
 				String value = reader.valueAsString();
-				return "".equals(value) ? null : Long.valueOf(value);
+				return "".equals(value) ? null : Long.parseLong(value);
 			}
 			return reader.valueAsLong();
 		}
@@ -291,7 +294,7 @@ public final class DefaultConverters {
 				IOException {
 			if (ValueType.STRING.equals(reader.getValueType())) {
 				String value = reader.valueAsString();
-				return "".equals(value) ? null : Double.valueOf(value);
+				return "".equals(value) ? null : Double.parseDouble(value);
 			}
 			return reader.valueAsDouble();
 		}
@@ -337,7 +340,7 @@ public final class DefaultConverters {
 				if (longValue <= Integer.MAX_VALUE && longValue >= Integer.MIN_VALUE) {
 					return Integer.valueOf((int) longValue);
 				}
-				return Long.valueOf(value);
+				return Long.parseLong(value);
 			} catch (NumberFormatException nfe) {
 				throw new TransformationRuntimeException("Could not convert input value " + value
 						+ " of type " + valueType.toClass() + " to a Number type.", nfe);
@@ -378,8 +381,7 @@ public final class DefaultConverters {
 
 			public Boolean deserialize(ObjectReader reader, Context ctx)
 					throws TransformationException, IOException {
-				return ValueType.NULL.equals(reader.getValueType()) ? false : reader
-						.valueAsBoolean();
+				return reader.valueAsBoolean();
 			}
 		};
 
@@ -394,12 +396,12 @@ public final class DefaultConverters {
 
 			public void serialize(Integer obj, ObjectWriter writer, Context ctx)
 					throws TransformationException, IOException {
-				writer.writeValue(obj);
+				writer.writeValue(obj.intValue());
 			}
 
 			public Integer deserialize(ObjectReader reader, Context ctx)
 					throws TransformationException, IOException {
-				return ValueType.NULL.equals(reader.getValueType()) ? 0 : reader.valueAsInt();
+				return reader.valueAsInt();
 			}
 		};
 
@@ -414,12 +416,12 @@ public final class DefaultConverters {
 
 			public void serialize(Double obj, ObjectWriter writer, Context ctx)
 					throws TransformationException, IOException {
-				writer.writeValue(obj);
+				writer.writeValue(obj.doubleValue());
 			}
 
 			public Double deserialize(ObjectReader reader, Context ctx)
 					throws TransformationException, IOException {
-				return ValueType.NULL.equals(reader.getValueType()) ? 0d : reader.valueAsDouble();
+				return reader.valueAsDouble();
 			}
 		};
 
@@ -434,55 +436,154 @@ public final class DefaultConverters {
 
 			public void serialize(Long obj, ObjectWriter writer, Context ctx)
 					throws TransformationException, IOException {
-				writer.writeValue(obj);
+				writer.writeValue(obj.longValue());
 			}
 
 			public Long deserialize(ObjectReader reader, Context ctx)
 					throws TransformationException, IOException {
-				return ValueType.NULL.equals(reader.getValueType()) ? 0l : reader.valueAsLong();
+				return reader.valueAsLong();
 			}
 		};
 	};
 
 	@HandleClassMetadata
-	public static class MapConverter<V> implements Converter<Map<String, V>> {
-		private final Class<V> vClass;
+	public static class MapConverter<K, V> implements Converter<Map<K, V>> {
 		private final Converter<V> valueConverter;
-
-		public MapConverter(Class<V> vClass, Converter<V> valueConverter) {
-			this.vClass = vClass;
+		private final KeyAdapter<K> keyAdapter;
+		
+		public MapConverter(KeyAdapter<K> keyAdapter, Converter<V> valueConverter) {
+			this.keyAdapter = keyAdapter;
 			this.valueConverter = valueConverter;
 		}
 
-		public Map<String, V> deserialize(ObjectReader reader, Context ctx)
+		public Map<K, V> deserialize(ObjectReader reader, Context ctx)
 				throws TransformationException, IOException {
 			reader.beginObject();
-			Map<String, V> map = new HashMap<String, V>();
+			Map<K, V> map = new HashMap<K, V>();
 			for (; reader.hasNext();) {
 				reader.next();
-				String name = reader.name();
-				V e = valueConverter.deserialize(reader, ctx);
-				map.put(name, e);
+				map.put(keyAdapter.adapt(reader.name()), valueConverter.deserialize(reader, ctx));
 			}
 			reader.endObject();
 			return map;
 		}
 
-		public void serialize(Map<String, V> obj, ObjectWriter writer, Context ctx)
+		public void serialize(Map<K, V> obj, ObjectWriter writer, Context ctx)
 				throws TransformationException, IOException {
 			writer.beginObject();
-			for (Map.Entry<String, V> entry : obj.entrySet()) {
-				writer.writeName(entry.getKey());
-				V value = entry.getValue();
-				if (value != null) {
-					if (vClass.isInstance(value))
-						valueConverter.serialize(value, writer, ctx);
-					else
-						valueConverter.serialize(value, writer, ctx);
-				} else
-					writer.writeNull();
+			for (Map.Entry<K, V> entry : obj.entrySet()) {
+				writer.writeName(keyAdapter.adapt(entry.getKey()));
+				valueConverter.serialize(entry.getValue(), writer, ctx);
 			}
 			writer.endObject();
+		}
+	}
+	
+	private static abstract class KeyAdapter<K> {
+		public abstract K adapt(String str);
+		public abstract String adapt(K key);
+		
+		public final static KeyAdapter<Object> runtimeAdapter = new KeyAdapter<Object>() {
+			@Override
+			public Object adapt(String str) {
+				// type unknown
+				return str;
+			}
+
+			@Override
+			public String adapt(Object key) {
+				if (key instanceof String) {
+					return (String) key;
+				} else if (key.getClass() == int.class || key instanceof Integer) {
+					return intAdapter.adapt((Integer) key);
+				} else if (key.getClass() == double.class || key instanceof Double) {
+					return doubleAdapter.adapt((Double) key);
+				}
+				// TODO continue for other basic types
+				throw new UnsupportedOperationException();
+			}
+		};
+		
+		public final static KeyAdapter<String> strAdapter = new KeyAdapter<String>() {
+			@Override
+			public String adapt(String key) {
+				return key;
+			}
+		};
+		
+		public final static KeyAdapter<Integer> intAdapter = new KeyAdapter<Integer>() {
+			@Override
+			public Integer adapt(String str) {
+				return Integer.parseInt(str);
+			}
+
+			@Override
+			public String adapt(Integer key) {
+				return key.toString();
+			}
+		};
+		
+		public final static KeyAdapter<Double> doubleAdapter = new KeyAdapter<Double>() {
+			@Override
+			public Double adapt(String str) {
+				return Double.parseDouble(str);
+			}
+
+			@Override
+			public String adapt(Double key) {
+				return key.toString();
+			}
+		};
+	}
+
+	@HandleClassMetadata
+	public static class ComplexMapConverter<K, V> implements Converter<Map<K, V>> {
+		private final Converter<K> keyConverter;
+		private final Converter<V> valueConverter;
+
+		private ComplexMapConverter(Converter<K> keyConverter, Converter<V> valueConverter) {
+			super();
+			this.keyConverter = keyConverter;
+			this.valueConverter = valueConverter;
+		}
+
+		@Override
+		public void serialize(Map<K, V> object, ObjectWriter writer, Context ctx)
+				throws TransformationException, IOException {
+			writer.beginArray();
+			for (Map.Entry<K, V> entry : object.entrySet()) {
+				writer.beginObject().writeName("key");
+				keyConverter.serialize(entry.getKey(), writer, ctx);
+				writer.writeName("value");
+				valueConverter.serialize(entry.getValue(), writer, ctx);
+				writer.endObject();
+			}
+			writer.endArray();
+		}
+
+		@Override
+		public Map<K, V> deserialize(ObjectReader reader, Context ctx)
+				throws TransformationException, IOException {
+			Map<K, V> map = new HashMap<K, V>();
+			reader.beginArray();
+			while (reader.hasNext()) {
+				reader.next();
+				reader.beginObject();
+				K key = null;
+				V value = null;
+				while (reader.hasNext()) {
+					reader.next();
+					if ("key".equals(reader.name())) {
+						key = keyConverter.deserialize(reader, ctx);
+					} else if ("value".equals(reader.name())) {
+						value = valueConverter.deserialize(reader, ctx);
+					}
+				}
+				map.put(key, value);
+				reader.endObject();
+			}
+			reader.endArray();
+			return map;
 		}
 	}
 
@@ -494,8 +595,22 @@ public final class DefaultConverters {
 
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		public Converter<Map<?, ?>> create(Type type, Genson genson) {
-			return new MapConverter(TypeUtil.getRawClass(type), genson.provideConverter(TypeUtil
-					.typeOf(1, type)));
+			// TODO continue with more key adapters
+			Type keyType = typeOf(0, type);
+			Type valueType = typeOf(1, type);
+			Class<?> keyRawClass = getRawClass(keyType);
+			if (Object.class.equals(keyRawClass)) {
+				return new MapConverter(KeyAdapter.runtimeAdapter, genson.provideConverter(valueType));
+			} else if (String.class.equals(keyRawClass)) {
+				return new MapConverter(KeyAdapter.strAdapter, genson.provideConverter(valueType));
+			} else if (int.class.equals(keyRawClass) || Integer.class.equals(keyRawClass)) {
+				return new MapConverter(KeyAdapter.intAdapter, genson.provideConverter(valueType));
+			} else if (double.class.equals(keyRawClass) || Double.class.equals(keyRawClass)) {
+				return new MapConverter(KeyAdapter.doubleAdapter, genson.provideConverter(valueType));
+			} else {
+				return new ComplexMapConverter(genson.provideConverter(keyType),
+						genson.provideConverter(valueType));
+			}
 		}
 	};
 
@@ -773,6 +888,5 @@ public final class DefaultConverters {
 			}
 			return cal;
 		}
-
 	}
 }
