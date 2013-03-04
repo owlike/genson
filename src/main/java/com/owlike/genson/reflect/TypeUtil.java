@@ -17,8 +17,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.owlike.genson.Operations;
 
 /**
- * This class provides utilities to work with java Types. Its main goal is to provide tools for
- * working with generic types.
+ * This class provides utilities to work with java Types. Its main goal is to provide tools for working with generic
+ * types.
  * 
  * @author eugen
  */
@@ -54,11 +54,16 @@ public final class TypeUtil {
 	};
 
 	/**
-	 * Expands type in the type rootType to Class, ParameterizedType or GenericArrayType. Useful for
-	 * generic types. rootType is used to get the specialization information for expansion.
+	 * Expands type in the type rootType to Class, ParameterizedType or GenericArrayType. Useful for generic types.
+	 * rootType is used to get the specialization information for expansion.
 	 */
 	public final static Type expandType(final Type type, final Type rootType) {
-		if (type instanceof ExpandedType || type instanceof Class) return type;
+		/* TODO in case where it is a class we should maybe still try to expand it using rootType information?
+		 * for example if I want to expand Map in rootType context Map<String, Integer>, actually this does not work.
+		 * However such modification should be done with more care. Impacts on typeOf and lookUpGenericType, probably others too.
+		 */
+		if (type instanceof ExpandedType || type instanceof Class)
+			return type;
 		// this allows to handle cyclic generic types (types that refer to them self)
 		if (_circularExpandedType.get().containsKey(type)) {
 			return _circularExpandedType.get().get(type);
@@ -77,8 +82,7 @@ public final class TypeUtil {
 						for (int i = 0; i < len; i++) {
 							expandedArgs[i] = expandType(args[i], rootType);
 						}
-						expandedType = new ExpandedParameterizedType(pType, getRawClass(rootType),
-								expandedArgs);
+						expandedType = new ExpandedParameterizedType(pType, getRawClass(rootType), expandedArgs);
 					} else if (type instanceof TypeVariable) {
 						@SuppressWarnings("unchecked")
 						TypeVariable<GenericDeclaration> tvType = (TypeVariable<GenericDeclaration>) type;
@@ -87,8 +91,8 @@ public final class TypeUtil {
 							Type[] typeArgs = rootPType.getActualTypeArguments();
 							String typeName = tvType.getName();
 							int idx = 0;
-							for (TypeVariable<?> parameter : genericDeclarationToClass(
-									tvType.getGenericDeclaration()).getTypeParameters()) {
+							for (TypeVariable<?> parameter : genericDeclarationToClass(tvType.getGenericDeclaration())
+									.getTypeParameters()) {
 								if (typeName.equals(parameter.getName())) {
 									expandedType = typeArgs[idx];
 									break;
@@ -103,9 +107,9 @@ public final class TypeUtil {
 					} else if (type instanceof GenericArrayType) {
 						GenericArrayType genArrType = (GenericArrayType) type;
 						Type cType = expandType(genArrType.getGenericComponentType(), rootType);
-						if (genArrType.getGenericComponentType() == cType) cType = Object.class;
-						expandedType = new ExpandedGenericArrayType(genArrType, cType,
-								getRawClass(rootType));
+						if (genArrType.getGenericComponentType() == cType)
+							cType = Object.class;
+						expandedType = new ExpandedGenericArrayType(genArrType, cType, getRawClass(rootType));
 					} else if (type instanceof WildcardType) {
 						WildcardType wType = (WildcardType) type;
 						// let's expand wildcards to their upper bound or object if no upper bound
@@ -113,13 +117,12 @@ public final class TypeUtil {
 						// it will simplify things to accept only one upper bound and ignore lower
 						// bounds
 						// as it is equivalent to Object.
-						expandedType = wType.getUpperBounds().length > 0 ? expandType(
-								wType.getUpperBounds()[0], rootType) : Object.class;
+						expandedType = wType.getUpperBounds().length > 0 ? expandType(wType.getUpperBounds()[0], rootType)
+								: Object.class;
 					}
 
 					if (expandedType == null)
-						throw new IllegalArgumentException("Type " + type
-								+ " not supported for expansion!");
+						throw new IllegalArgumentException("Type " + type + " not supported for expansion!");
 
 					_cache.put(key, expandedType);
 				}
@@ -132,9 +135,9 @@ public final class TypeUtil {
 	}
 
 	/**
-	 * Searches for ofClass in the inherited classes and interfaces of inClass. If ofClass has been
-	 * found in the super classes/interfaces of inClass, then the generic type corresponding to
-	 * inClass and its TypeVariables is returned, otherwise null. For example :
+	 * Searches for ofClass in the inherited classes and interfaces of inClass. If ofClass has been found in the super
+	 * classes/interfaces of inClass, then the generic type corresponding to inClass and its TypeVariables is returned,
+	 * otherwise null. For example :
 	 * 
 	 * <pre>
 	 * abstract class MyClass implements Serializer&lt;Number&gt; {
@@ -146,8 +149,10 @@ public final class TypeUtil {
 	 * </pre>
 	 */
 	public final static Type lookupGenericType(Class<?> ofClass, Class<?> inClass) {
-		if (ofClass == null || inClass == null || !ofClass.isAssignableFrom(inClass)) return null;
-		if (ofClass.equals(inClass)) return inClass;
+		if (ofClass == null || inClass == null || !ofClass.isAssignableFrom(inClass))
+			return null;
+		if (ofClass.equals(inClass))
+			return inClass;
 
 		if (ofClass.isInterface()) {
 			// lets look if the interface is directly implemented by fromClass
@@ -159,14 +164,16 @@ public final class TypeUtil {
 					return inClass.getGenericInterfaces()[i];
 				} else {
 					Type superType = lookupGenericType(ofClass, interfaces[i]);
-					if (superType != null) return superType;
+					if (superType != null)
+						return superType;
 				}
 			}
 		}
 
 		// ok it's not one of the directly implemented interfaces, lets try extended class
 		Class<?> superClass = inClass.getSuperclass();
-		if (ofClass.equals(superClass)) return inClass.getGenericSuperclass();
+		if (ofClass.equals(superClass))
+			return inClass.getGenericSuperclass();
 		return lookupGenericType(ofClass, inClass.getSuperclass());
 	}
 
@@ -186,8 +193,7 @@ public final class TypeUtil {
 	/**
 	 * Returns the type of this Collection or Array.
 	 * 
-	 * @throws IllegalArgumentException
-	 *             if type is not a Collection, not a generic array and not a primitive array.
+	 * @throws IllegalArgumentException if type is not a Collection, not a generic array and not a primitive array.
 	 */
 	public final static Type getCollectionType(Type type) {
 		if (type instanceof GenericArrayType) {
@@ -199,8 +205,7 @@ public final class TypeUtil {
 			else if (Collection.class.isAssignableFrom(clazz)) {
 				return Object.class;
 			}
-		} else if (type instanceof ParameterizedType
-				&& Collection.class.isAssignableFrom(getRawClass(type))) {
+		} else if (type instanceof ParameterizedType && Collection.class.isAssignableFrom(getRawClass(type))) {
 			return typeOf(0, type);
 		}
 
@@ -218,11 +223,11 @@ public final class TypeUtil {
 			if (inClass == null)
 				inClass = genericDeclarationToClass(tvType.getGenericDeclaration());
 			expandedType = resolveTypeVariable(tvType, inClass);
-			if (type.equals(expandedType)) expandedType = tvType.getBounds()[0];
+			if (type.equals(expandedType))
+				expandedType = tvType.getBounds()[0];
 		} else if (type instanceof WildcardType) {
 			WildcardType wType = (WildcardType) type;
-			expandedType = wType.getUpperBounds().length > 0 ? expand(wType.getUpperBounds()[0],
-					inClass) : Object.class;
+			expandedType = wType.getUpperBounds().length > 0 ? expand(wType.getUpperBounds()[0], inClass) : Object.class;
 		} else
 			return type;
 
@@ -236,16 +241,15 @@ public final class TypeUtil {
 	 * @param inClass
 	 * @return the resolved type or type if unable to resolve it.
 	 */
-	public final static Type resolveTypeVariable(TypeVariable<? extends GenericDeclaration> type,
-			Class<?> inClass) {
-		return resolveTypeVariable(type, genericDeclarationToClass(type.getGenericDeclaration()),
-				inClass);
+	public final static Type resolveTypeVariable(TypeVariable<? extends GenericDeclaration> type, Class<?> inClass) {
+		return resolveTypeVariable(type, genericDeclarationToClass(type.getGenericDeclaration()), inClass);
 	}
 
 	private final static Type resolveTypeVariable(TypeVariable<? extends GenericDeclaration> type,
 			Class<?> declaringClass, Class<?> inClass) {
 
-		if (inClass == null) return null;
+		if (inClass == null)
+			return null;
 
 		Class<?> superClass = null;
 		Type resolvedType = null;
@@ -279,8 +283,7 @@ public final class TypeUtil {
 				type = (TypeVariable<?>) resolvedType;
 				TypeVariable<?>[] parameters = superClass.getTypeParameters();
 				int positionInClass = 0;
-				for (; positionInClass < parameters.length
-						&& !type.equals(parameters[positionInClass]); positionInClass++) {
+				for (; positionInClass < parameters.length && !type.equals(parameters[positionInClass]); positionInClass++) {
 				}
 
 				// we located the position of the typevariable in the superclass
@@ -302,18 +305,21 @@ public final class TypeUtil {
 	}
 
 	/**
-	 * Deep comparison between type and oType. If parameter strictMatch is true, then type and oType
-	 * will be strictly compared otherwise this method checks whether oType is assignable from type.
+	 * Deep comparison between type and oType. If parameter strictMatch is true, then type and oType will be strictly
+	 * compared otherwise this method checks whether oType is assignable from type.
 	 */
 	public final static boolean match(Type type, Type oType, boolean strictMatch) {
-		if (type == null || oType == null) return type == null && oType == null;
+		if (type == null || oType == null)
+			return type == null && oType == null;
 		Class<?> clazz = getRawClass(type);
 		Class<?> oClazz = getRawClass(oType);
 		boolean match = strictMatch ? oClazz.equals(clazz) : oClazz.isAssignableFrom(clazz);
 
-		if (Object.class.equals(oClazz) && !strictMatch) return match;
+		if (Object.class.equals(oClazz) && !strictMatch)
+			return match;
 
-		if (clazz.isArray() && !oClazz.isArray()) return match;
+		if (clazz.isArray() && !oClazz.isArray())
+			return match;
 
 		Type[] types = getTypes(type);
 		Type[] oTypes = getTypes(oType);
@@ -327,29 +333,31 @@ public final class TypeUtil {
 	}
 
 	/**
-	 * Convenient method that returns the type of the parameter at position parameterIdx in the type
-	 * fromType.
+	 * Convenient method that returns the type of the parameter at position parameterIdx in the type fromType.
 	 * 
-	 * @exception UnsupportedOperationException
-	 *                thrown if fromType is not a Class nor a ParameterizedType.
+	 * @exception UnsupportedOperationException thrown if fromType is not a Class nor a ParameterizedType.
 	 */
 	public final static Type typeOf(int parameterIdx, Type fromType) {
 		if (fromType instanceof Class<?>) {
 			Class<?> tClass = (Class<?>) fromType;
 			TypeVariable<?>[] tvs = tClass.getTypeParameters();
-			if (tvs.length > parameterIdx) return expandType(tvs[parameterIdx], fromType);
+			if (tvs.length > parameterIdx)
+				return expandType(tvs[parameterIdx], fromType);
 		} else if (fromType instanceof ParameterizedType) {
 			ParameterizedType pType = (ParameterizedType) fromType;
 			Type[] ts = pType.getActualTypeArguments();
-			if (ts.length > parameterIdx) return ts[parameterIdx];
-		} else
-			throw new UnsupportedOperationException("Type " + fromType + " not supported!");
-		return null;
+			if (ts.length > parameterIdx)
+				return ts[parameterIdx];
+		}
+		throw new UnsupportedOperationException("Couldn't find parameter at " + parameterIdx + " from type " + fromType
+				+ " , you should first locate the parameterized type, expand it and then use typeOf.");
 	}
 
 	private static Class<?> genericDeclarationToClass(GenericDeclaration declaration) {
-		if (declaration instanceof Class) return (Class<?>) declaration;
-		if (declaration instanceof Method) return ((Method) declaration).getDeclaringClass();
+		if (declaration instanceof Class)
+			return (Class<?>) declaration;
+		if (declaration instanceof Method)
+			return ((Method) declaration).getDeclaringClass();
 		if (declaration instanceof Constructor)
 			return ((Constructor<?>) declaration).getDeclaringClass();
 		throw new UnsupportedOperationException();
@@ -432,14 +440,14 @@ public final class TypeUtil {
 		}
 	}
 
-	private final static class ExpandedGenericArrayType extends ExpandedType<GenericArrayType>
-			implements GenericArrayType {
+	private final static class ExpandedGenericArrayType extends ExpandedType<GenericArrayType> implements
+			GenericArrayType {
 		private final Type componentType;
 
-		public ExpandedGenericArrayType(GenericArrayType originalType, Type componentType,
-				Class<?> rootClass) {
+		public ExpandedGenericArrayType(GenericArrayType originalType, Type componentType, Class<?> rootClass) {
 			super(originalType, rootClass);
-			if (componentType == null) throw new IllegalArgumentException("Null arg not allowed!");
+			if (componentType == null)
+				throw new IllegalArgumentException("Null arg not allowed!");
 			this.componentType = componentType;
 		}
 
@@ -448,14 +456,14 @@ public final class TypeUtil {
 		}
 	}
 
-	private final static class ExpandedParameterizedType extends ExpandedType<ParameterizedType>
-			implements ParameterizedType {
+	private final static class ExpandedParameterizedType extends ExpandedType<ParameterizedType> implements
+			ParameterizedType {
 		private final Type[] typeArgs;
 
-		public ExpandedParameterizedType(ParameterizedType originalType, Class<?> rootClass,
-				Type[] typeArgs) {
+		public ExpandedParameterizedType(ParameterizedType originalType, Class<?> rootClass, Type[] typeArgs) {
 			super(originalType, rootClass);
-			if (typeArgs == null) throw new IllegalArgumentException("Null arg not allowed!");
+			if (typeArgs == null)
+				throw new IllegalArgumentException("Null arg not allowed!");
 			this.typeArgs = typeArgs;
 		}
 
@@ -494,9 +502,12 @@ public final class TypeUtil {
 
 		@Override
 		public boolean equals(Object obj) {
-			if (this == obj) return true;
-			if (obj == null) return false;
-			if (!(obj instanceof TypeAndRootClassKey)) return false;
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (!(obj instanceof TypeAndRootClassKey))
+				return false;
 			TypeAndRootClassKey other = (TypeAndRootClassKey) obj;
 			return rootType.equals(other.rootType) && type.equals(other.type);
 		}

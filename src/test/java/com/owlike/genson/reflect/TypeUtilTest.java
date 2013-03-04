@@ -7,6 +7,7 @@ import java.lang.reflect.Type;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,25 +23,38 @@ import static org.junit.Assert.*;
 
 public class TypeUtilTest {
 
-	@Test public void testCyclicGenericTypes() throws SecurityException, NoSuchFieldException {
+	public static class ParameterizedSuperType extends HashMap<Object, String> {
+
+	}
+
+	@Test
+	public void testTypeOf() {
+		try {
+			typeOf(1, ParameterizedSuperType.class);
+			fail();
+		} catch (UnsupportedOperationException uoe) {
+		}
+		
+		assertEquals(String.class, typeOf(1, expandType(lookupGenericType(Map.class, ParameterizedSuperType.class), ParameterizedSuperType.class)));
+	}
+
+	@Test
+	public void testCyclicGenericTypes() throws SecurityException, NoSuchFieldException {
 		// bug 2 https://groups.google.com/forum/?fromgroups=#!topic/genson/9rE026i7Vhg
 		Type t = TypeUtil.expandType(Interval.class.getDeclaredField("min").getGenericType(), Interval.class);
 		assertNotNull(TypeUtil.expandType(Interval.class.getDeclaredField("min").getGenericType(), Interval.class));
 	}
-	
+
 	class Interval<T extends Comparable<T>> {
-	    T min;
+		T min;
 	}
-	
+
 	@Test
 	public void testGetCollectionTypeParameterizedCollections() {
-		Type setOfArrayListOfIntegerType = new GenericType<Set<ArrayList<Integer>>>() {
-		}.getType();
-		Type arrayListOfIntegerType = new GenericType<ArrayList<Integer>>() {
-		}.getType();
+		Type setOfArrayListOfIntegerType = new GenericType<Set<ArrayList<Integer>>>() {}.getType();
+		Type arrayListOfIntegerType = new GenericType<ArrayList<Integer>>() {}.getType();
 		assertEquals(arrayListOfIntegerType, getCollectionType(setOfArrayListOfIntegerType));
-		assertEquals(Integer.class,
-				getCollectionType(getCollectionType(setOfArrayListOfIntegerType)));
+		assertEquals(Integer.class, getCollectionType(getCollectionType(setOfArrayListOfIntegerType)));
 	}
 
 	@Test
@@ -52,18 +66,16 @@ public class TypeUtilTest {
 
 	@Test
 	public <E> void testGenericDeclarationAsMethod() {
-		assertEquals(Object.class, getRawClass(new GenericType<E>() {
-		}.getType()));
+		assertEquals(Object.class, getRawClass(new GenericType<E>() {}.getType()));
 	}
 
 	@Test
 	public void testGetRawClass() {
 		assertEquals(ParametrizedClass.class, getRawClass(ParametrizedClass.class));
-		assertEquals(Object.class, getRawClass(((ParameterizedType) new GenericType<List<?>>() {
-		}.getType()).getActualTypeArguments()[0]));
+		assertEquals(Object.class,
+				getRawClass(((ParameterizedType) new GenericType<List<?>>() {}.getType()).getActualTypeArguments()[0]));
 		assertEquals(Integer.class,
-				getRawClass(((ParameterizedType) new GenericType<List<Integer>>() {
-				}.getType()).getActualTypeArguments()[0]));
+				getRawClass(((ParameterizedType) new GenericType<List<Integer>>() {}.getType()).getActualTypeArguments()[0]));
 
 		Type typeVar = ((ParameterizedType) tListF).getActualTypeArguments()[0];
 		assertEquals(Object.class, getRawClass(typeVar));
@@ -80,8 +92,7 @@ public class TypeUtilTest {
 		assertEquals(Object.class, expandType(getCollectionType(tListF), ParametrizedClass.class));
 		assertEquals(Object.class, expandType(getCollectionType(tListI), ParametrizedClass.class));
 		assertEquals(Number.class, expandType(getCollectionType(tListIEN), ParametrizedClass.class));
-		ParameterizedType colType = (ParameterizedType) expandType(getCollectionType(tListCN),
-				ParametrizedClass.class);
+		ParameterizedType colType = (ParameterizedType) expandType(getCollectionType(tListCN), ParametrizedClass.class);
 		assertEquals(Collection.class, colType.getRawType());
 	}
 
@@ -109,11 +120,9 @@ public class TypeUtilTest {
 	@SuppressWarnings("rawtypes")
 	@Test
 	public void testGenericType() {
-		assertTrue(match(new GenericType<List<Number>>() {
-		}.getType(), tListE, true));
+		assertTrue(match(new GenericType<List<Number>>() {}.getType(), tListE, true));
 		try {
-			new GenericType() {
-			};
+			new GenericType() {};
 			fail();
 		} catch (RuntimeException re) {
 		}
@@ -121,7 +130,12 @@ public class TypeUtilTest {
 
 	@Test
 	public void testParameterOf() throws SecurityException, NoSuchFieldException {
-		assertNull(typeOf(0, Number.class));
+		try {
+			assertNull(typeOf(0, Number.class));
+			fail();
+		} catch (UnsupportedOperationException uoe) {
+		}
+		
 		assertEquals(Number.class, expand(typeOf(0, tListN), ParametrizedClass.class));
 
 		// doit retourner Number, car dans la declaration de la classe ParametrizedClass, E extends
@@ -148,13 +162,11 @@ public class TypeUtilTest {
 		 */
 		Type wildcardCollectionType = expand(typeOf(0, tListC), ParametrizedClass.class);
 		assertEquals(Collection.class, getRawClass(wildcardCollectionType));
-		assertEquals(Object.class,
-				expand(typeOf(0, wildcardCollectionType), ParametrizedClass.class));
+		assertEquals(Object.class, expand(typeOf(0, wildcardCollectionType), ParametrizedClass.class));
 
 		wildcardCollectionType = expand(typeOf(0, tListCN), ParametrizedClass.class);
 		assertEquals(Collection.class, getRawClass(wildcardCollectionType));
-		assertEquals(Number.class,
-				expand(typeOf(0, wildcardCollectionType), ParametrizedClass.class));
+		assertEquals(Number.class, expand(typeOf(0, wildcardCollectionType), ParametrizedClass.class));
 
 		// equivalent a <?> <Object> et rien
 		assertEquals(Object.class, expand(typeOf(0, List.class), ParametrizedClass.class));

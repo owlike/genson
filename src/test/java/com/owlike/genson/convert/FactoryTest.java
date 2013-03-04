@@ -1,6 +1,7 @@
 package com.owlike.genson.convert;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,6 +30,14 @@ public class FactoryTest {
 	private BasicConvertersFactory factory;
 	private Genson genson;
 
+	@SuppressWarnings("serial")
+	public static class ParameterizedSuperType extends HashMap<Object, String> {
+	}
+	
+	@Test public void testConstructionForTypeWithParameters() {
+		assertNotNull(new Genson().provideConverter(ParameterizedSuperType.class));
+	}
+	
 	@Before
 	public void setUp() {
 
@@ -71,7 +80,7 @@ public class FactoryTest {
 		Converter<Map<String, Object>> cm = (Converter<Map<String, Object>>) factory.create(
 				new GenericType<Map<String, Object>>() {
 				}.getType(), genson);
-		assertEquals(DefaultConverters.MapConverter.class, cm.getClass());
+		assertEquals(DefaultConverters.HashMapConverter.class, cm.getClass());
 	}
 
 	@Test

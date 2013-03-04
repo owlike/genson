@@ -1,6 +1,5 @@
 package com.owlike.genson.convert;
 
-import java.awt.event.KeyAdapter;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
@@ -21,6 +20,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 
@@ -447,7 +447,7 @@ public final class DefaultConverters {
 	};
 
 	@HandleClassMetadata
-	public static class MapConverter<K, V> implements Converter<Map<K, V>> {
+	public static abstract class MapConverter<K, V> implements Converter<Map<K, V>> {
 		private final Converter<V> valueConverter;
 		private final KeyAdapter<K> keyAdapter;
 		
@@ -459,7 +459,7 @@ public final class DefaultConverters {
 		public Map<K, V> deserialize(ObjectReader reader, Context ctx)
 				throws TransformationException, IOException {
 			reader.beginObject();
-			Map<K, V> map = new HashMap<K, V>();
+			Map<K, V> map = create();
 			for (; reader.hasNext();) {
 				reader.next();
 				map.put(keyAdapter.adapt(reader.name()), valueConverter.deserialize(reader, ctx));
@@ -476,6 +476,28 @@ public final class DefaultConverters {
 				valueConverter.serialize(entry.getValue(), writer, ctx);
 			}
 			writer.endObject();
+		}
+		
+		protected abstract Map<K, V> create();
+	}
+	
+	public final static class HashMapConverter<K, V> extends MapConverter<K, V> {
+		public HashMapConverter(KeyAdapter<K> keyAdapter, Converter<V> valueConverter) {
+			super(keyAdapter, valueConverter);
+		}
+		@Override
+		protected Map<K, V> create() {
+			return new HashMap<K, V>();
+		}
+	}
+	
+	public final static class PropertiesConverter extends MapConverter<Object, Object> {
+		public PropertiesConverter(KeyAdapter<Object> keyAdapter, Converter<Object> valueConverter) {
+			super(keyAdapter, valueConverter);
+		}
+		@Override
+		protected Map<Object, Object> create() {
+			return new Properties();
 		}
 	}
 	
@@ -587,26 +609,36 @@ public final class DefaultConverters {
 		}
 	}
 
-	public final static class MapConverterFactory implements Factory<Converter<Map<?, ?>>> {
+	public final static class MapConverterFactory implements Factory<Converter<? extends Map<?, ?>>> {
 		public final static MapConverterFactory instance = new MapConverterFactory();
 
 		private MapConverterFactory() {
 		}
 
 		@SuppressWarnings({ "rawtypes", "unchecked" })
-		public Converter<Map<?, ?>> create(Type type, Genson genson) {
+		public Converter<? extends Map<?, ?>> create(Type type, Genson genson) {
+			if (Properties.class.equals(getRawClass(type))) {
+				return new PropertiesConverter(KeyAdapter.runtimeAdapter, genson.provideConverter(Object.class));
+			}
+			
 			// TODO continue with more key adapters
+			// ok this is a fix but not the cleanest one... we make sure it is a parameterized type
+			// otherwise we search for map impl in its hierarchy
+			if (getRawClass(type).getTypeParameters().length == 0) {
+				type = expandType(lookupGenericType(Map.class, getRawClass(type)), type);
+			}
+			
 			Type keyType = typeOf(0, type);
 			Type valueType = typeOf(1, type);
 			Class<?> keyRawClass = getRawClass(keyType);
 			if (Object.class.equals(keyRawClass)) {
-				return new MapConverter(KeyAdapter.runtimeAdapter, genson.provideConverter(valueType));
+				return new HashMapConverter(KeyAdapter.runtimeAdapter, genson.provideConverter(valueType));
 			} else if (String.class.equals(keyRawClass)) {
-				return new MapConverter(KeyAdapter.strAdapter, genson.provideConverter(valueType));
+				return new HashMapConverter(KeyAdapter.strAdapter, genson.provideConverter(valueType));
 			} else if (int.class.equals(keyRawClass) || Integer.class.equals(keyRawClass)) {
-				return new MapConverter(KeyAdapter.intAdapter, genson.provideConverter(valueType));
+				return new HashMapConverter(KeyAdapter.intAdapter, genson.provideConverter(valueType));
 			} else if (double.class.equals(keyRawClass) || Double.class.equals(keyRawClass)) {
-				return new MapConverter(KeyAdapter.doubleAdapter, genson.provideConverter(valueType));
+				return new HashMapConverter(KeyAdapter.doubleAdapter, genson.provideConverter(valueType));
 			} else {
 				return new ComplexMapConverter(genson.provideConverter(keyType),
 						genson.provideConverter(valueType));

@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
 import java.util.UUID;
 
 import org.junit.Test;
@@ -20,7 +21,14 @@ import com.owlike.genson.TransformationException;
 
 public class DefaultConvertersTest {
 	private Genson genson = new Genson();
-
+	
+	@Test public void testPropertiesConverter() throws TransformationException, IOException {
+		Properties props = new Properties();
+		props.put("key", "value");
+		String json = genson.serialize(props);
+		assertEquals("value", genson.deserialize(json, Properties.class).get("key"));
+	}
+	
 	@Test public void testComplexMapConverter() throws TransformationException, IOException {
 		Map<UUID, List<UUID>> expected = new HashMap<UUID, List<UUID>>();
 		expected.put(UUID.randomUUID(), Arrays.asList(UUID.randomUUID(), UUID.randomUUID()));
