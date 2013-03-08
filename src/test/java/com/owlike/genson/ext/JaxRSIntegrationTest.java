@@ -13,7 +13,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 
-import org.apache.cxf.jaxrs.servlet.CXFNonSpringJaxrsServlet;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -21,7 +20,7 @@ import org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-import com.owlike.genson.ext.jersey.GensonJsonConverter;
+import com.owlike.genson.ext.jaxrs.GensonJsonConverter;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
@@ -50,20 +49,6 @@ public class JaxRSIntegrationTest {
 		resteasy.put("resteasy.scan", "true");
 		resteasy.put("javax.ws.rs.Application", RestEasyApp.class.getName());
 		startServer(HttpServletDispatcher.class, resteasy);
-		try {
-			testIntegration();
-		} finally {
-			stopServer();
-		}
-	}
-	
-	@Test
-	public void testCXFJsonConverter() throws Exception {
-		Map<String, String> cxf = new HashMap<String, String>();
-		cxf.put("javax.ws.rs.Application", RestEasyApp.class.getName());
-		cxf.put("jaxrs.serviceClasses", DummyRessource.class.getName());
-		cxf.put("jaxrs.providers", GensonJsonConverter.class.getName());
-		startServer(CXFNonSpringJaxrsServlet.class, cxf);
 		try {
 			testIntegration();
 		} finally {

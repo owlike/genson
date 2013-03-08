@@ -1,1 +1,1 @@
-com.owlike.genson.ext.jersey.GensonJsonConverter
+com.owlike.genson.ext.jaxrs.GensonJsonConverter

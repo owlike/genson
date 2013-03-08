@@ -1152,13 +1152,20 @@ public final class Genson {
 						getPropertyNameResolver());
 			}
 
-			List<Converter<?>> converters = getDefaultConverters();
+			List<Converter<?>> converters = new ArrayList<Converter<?>>();
+			for (ExtensionConfigurer extension : _extensions) {
+				extension.registerConverters(converters);
+			}
+			converters.addAll(getDefaultConverters());
 			addDefaultSerializers(converters);
 			addDefaultDeserializers(converters);
 			addDefaultSerializers(getDefaultSerializers());
 			addDefaultDeserializers(getDefaultDeserializers());
 
 			List<Factory<? extends Converter<?>>> convFactories = new ArrayList<Factory<? extends Converter<?>>>();
+			for (ExtensionConfigurer extension : _extensions) {
+				extension.registerConverterFactories(convFactories);
+			}
 			addDefaultConverterFactories(convFactories);
 			converterFactories.addAll(convFactories);
 

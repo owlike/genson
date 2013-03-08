@@ -57,6 +57,55 @@ public class JaxbAnnotationsSupportTest {
 		assertEquals(4, bean.c);
 	}
 
+	@Test
+	public void testXmlElementSerialization() throws IOException, TransformationException {
+		assertEquals("{\"b\":0,\"bean\":{\"a\":0},\"c\":0}", genson.serialize(new XmlElementBean()));
+	}
+
+	@Test
+	public void testXmlElementDeserialization() throws TransformationException, IOException {
+		XmlElementBean bean = genson.deserialize("{\"b\":1,\"bean\":{\"a\":2},\"c\":3}",
+				XmlElementBean.class);
+		assertEquals(1, bean.b);
+		assertEquals(2, ((EmptyBean) bean.a).a);
+		assertEquals(3, bean.c);
+	}
+
+	// @Test
+	public void testXmlElementRef() {
+	}
+
+	 @Test
+	public void testXmlEnumValue() throws TransformationException, IOException {
+		String json = genson.serialize(XmlEnumValueBean.ONE);
+		assertEquals("\"1\"", json);
+		assertEquals(XmlEnumValueBean.ONE, genson.deserialize(json, XmlEnumValueBean.class));
+		
+		json = genson.serialize(XmlEnumValueBean.TWO);
+		assertEquals("\"TWO\"", json);
+		assertEquals(XmlEnumValueBean.TWO, genson.deserialize(json, XmlEnumValueBean.class));
+	 }
+
+	// @Test
+	public void testXmlJavaTypeAdapter() {
+	}
+
+	@Test
+	public void testXmlTransientSerialization() throws TransformationException, IOException {
+		XmlTransientContainer container = new XmlTransientContainer();
+		container.bean = new XmlTransientBean();
+		assertEquals("{}", genson.serialize(container));
+	}
+
+	@Test
+	public void testXmlTransientDeserialization() throws TransformationException, IOException {
+		XmlTransientContainer container = genson.deserialize("{\"a\":1,\"b\":2,\"bean\":{}}",
+				XmlTransientContainer.class);
+		assertEquals(0, container.a);
+		assertEquals(0, container.b);
+		assertEquals(null, container.bean);
+	}
+	
 	public static class XmlAttributeBean {
 		@XmlAttribute
 		private int a;
@@ -73,20 +122,6 @@ public class JaxbAnnotationsSupportTest {
 		private void setC(int c) {
 			this.c = c;
 		}
-	}
-
-	@Test
-	public void testXmlElementSerialization() throws IOException, TransformationException {
-		assertEquals("{\"b\":0,\"bean\":{\"a\":0},\"c\":0}", genson.serialize(new XmlElementBean()));
-	}
-
-	@Test
-	public void testXmlElementDeserialization() throws TransformationException, IOException {
-		XmlElementBean bean = genson.deserialize("{\"b\":1,\"bean\":{\"a\":2},\"c\":3}",
-				XmlElementBean.class);
-		assertEquals(1, bean.b);
-		assertEquals(2, ((EmptyBean) bean.a).a);
-		assertEquals(3, bean.c);
 	}
 
 	public static class XmlElementBean {
@@ -111,19 +146,6 @@ public class JaxbAnnotationsSupportTest {
 		public int a;
 	}
 
-	// @Test
-	public void testXmlElementRef() {
-	}
-
-	// @Test
-	public void testXmlEnumValue() {
-		System.out.println("to be done!!!!!!!");
-	}
-
-	// @Test
-	public void testXmlJavaTypeAdapter() {
-	}
-
 	public static class XmlJavaTypeAdapterBean {
 		@XmlJavaTypeAdapter(MyXmlAdapter.class)
 		public int v;
@@ -145,9 +167,11 @@ public class JaxbAnnotationsSupportTest {
 
 	@XmlEnum(Integer.class)
 	public static enum XmlEnumValueBean {
-		 @XmlEnumValue("1") ONE
+		 @XmlEnumValue("1") ONE,
+		 TWO
 	}
 
+	@XmlAccessorType(XmlAccessType.FIELD)
 	public static class XmlElementRefBean {
 		@XmlElementRef
 		private XmlRootElementBean a;
@@ -178,22 +202,6 @@ public class JaxbAnnotationsSupportTest {
 		public int getB() {
 			return 3;
 		}
-	}
-
-	@Test
-	public void testXmlTransientSerialization() throws TransformationException, IOException {
-		XmlTransientContainer container = new XmlTransientContainer();
-		container.bean = new XmlTransientBean();
-		assertEquals("{}", genson.serialize(container));
-	}
-
-	@Test
-	public void testXmlTransientDeserialization() throws TransformationException, IOException {
-		XmlTransientContainer container = genson.deserialize("{\"a\":1,\"b\":2,\"bean\":{}}",
-				XmlTransientContainer.class);
-		assertEquals(0, container.a);
-		assertEquals(0, container.b);
-		assertEquals(null, container.bean);
 	}
 
 	public static class XmlTransientContainer {
