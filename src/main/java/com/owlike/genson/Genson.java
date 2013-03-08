@@ -1284,6 +1284,7 @@ public final class Genson {
 			converters.add(DefaultConverters.BigDecimalConverter.instance);
 			converters.add(DefaultConverters.BigIntegerConverter.instance);
 			converters.add(DefaultConverters.UUIDConverter.instance);
+			converters.add(DefaultConverters.FileConverter.instance);
 			return converters;
 		}
 

@@ -1,5 +1,6 @@
 package com.owlike.genson.convert;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
@@ -19,6 +20,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -491,12 +493,24 @@ public final class DefaultConverters {
 		}
 	}
 	
-	public final static class PropertiesConverter extends MapConverter<Object, Object> {
-		public PropertiesConverter(KeyAdapter<Object> keyAdapter, Converter<Object> valueConverter) {
+	public final static class HashTableConverter<K, V> extends MapConverter<K, V> {
+		public HashTableConverter(KeyAdapter<K> keyAdapter, Converter<V> valueConverter) {
 			super(keyAdapter, valueConverter);
 		}
 		@Override
-		protected Map<Object, Object> create() {
+		protected Map<K, V> create() {
+			return new Hashtable<K, V>();
+		}
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public final static class PropertiesConverter extends MapConverter {
+		@SuppressWarnings("unchecked")
+		public PropertiesConverter(KeyAdapter keyAdapter, Converter valueConverter) {
+			super(keyAdapter, valueConverter);
+		}
+		@Override
+		protected Map create() {
 			return new Properties();
 		}
 	}
@@ -508,21 +522,12 @@ public final class DefaultConverters {
 		public final static KeyAdapter<Object> runtimeAdapter = new KeyAdapter<Object>() {
 			@Override
 			public Object adapt(String str) {
-				// type unknown
 				return str;
 			}
 
 			@Override
 			public String adapt(Object key) {
-				if (key instanceof String) {
-					return (String) key;
-				} else if (key.getClass() == int.class || key instanceof Integer) {
-					return intAdapter.adapt((Integer) key);
-				} else if (key.getClass() == double.class || key instanceof Double) {
-					return doubleAdapter.adapt((Double) key);
-				}
-				// TODO continue for other basic types
-				throw new UnsupportedOperationException();
+				return key.toString();
 			}
 		};
 		
@@ -530,6 +535,18 @@ public final class DefaultConverters {
 			@Override
 			public String adapt(String key) {
 				return key;
+			}
+		};
+		
+		public final static KeyAdapter<Short> shortAdapter = new KeyAdapter<Short>() {
+			@Override
+			public Short adapt(String str) {
+				return Short.parseShort(str);
+			}
+
+			@Override
+			public String adapt(Short key) {
+				return key.toString();
 			}
 		};
 		
@@ -541,6 +558,30 @@ public final class DefaultConverters {
 
 			@Override
 			public String adapt(Integer key) {
+				return key.toString();
+			}
+		};
+		
+		public final static KeyAdapter<Long> longAdapter = new KeyAdapter<Long>() {
+			@Override
+			public Long adapt(String str) {
+				return Long.parseLong(str);
+			}
+
+			@Override
+			public String adapt(Long key) {
+				return key.toString();
+			}
+		};
+		
+		public final static KeyAdapter<Float> floatAdapter = new KeyAdapter<Float>() {
+			@Override
+			public Float adapt(String str) {
+				return Float.parseFloat(str);
+			}
+
+			@Override
+			public String adapt(Float key) {
 				return key.toString();
 			}
 		};
@@ -617,32 +658,46 @@ public final class DefaultConverters {
 
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		public Converter<? extends Map<?, ?>> create(Type type, Genson genson) {
-			if (Properties.class.equals(getRawClass(type))) {
-				return new PropertiesConverter(KeyAdapter.runtimeAdapter, genson.provideConverter(Object.class));
-			}
-			
-			// TODO continue with more key adapters
 			// ok this is a fix but not the cleanest one... we make sure it is a parameterized type
 			// otherwise we search for map impl in its hierarchy
+			Type expandedType = type;
 			if (getRawClass(type).getTypeParameters().length == 0) {
-				type = expandType(lookupGenericType(Map.class, getRawClass(type)), type);
+				expandedType = expandType(lookupGenericType(Map.class, getRawClass(type)), type);
 			}
 			
-			Type keyType = typeOf(0, type);
-			Type valueType = typeOf(1, type);
+			Type keyType = typeOf(0, expandedType);
+			Type valueType = typeOf(1, expandedType);
 			Class<?> keyRawClass = getRawClass(keyType);
 			if (Object.class.equals(keyRawClass)) {
-				return new HashMapConverter(KeyAdapter.runtimeAdapter, genson.provideConverter(valueType));
+				return createConverter(getRawClass(type), KeyAdapter.runtimeAdapter, genson.provideConverter(valueType));
 			} else if (String.class.equals(keyRawClass)) {
-				return new HashMapConverter(KeyAdapter.strAdapter, genson.provideConverter(valueType));
+				return createConverter(getRawClass(type), KeyAdapter.strAdapter, genson.provideConverter(valueType));
 			} else if (int.class.equals(keyRawClass) || Integer.class.equals(keyRawClass)) {
-				return new HashMapConverter(KeyAdapter.intAdapter, genson.provideConverter(valueType));
+				return createConverter(getRawClass(type), KeyAdapter.intAdapter, genson.provideConverter(valueType));
 			} else if (double.class.equals(keyRawClass) || Double.class.equals(keyRawClass)) {
-				return new HashMapConverter(KeyAdapter.doubleAdapter, genson.provideConverter(valueType));
+				return createConverter(getRawClass(type), KeyAdapter.doubleAdapter, genson.provideConverter(valueType));
+			} else if (long.class.equals(keyRawClass) || Long.class.equals(keyRawClass)) {
+				return createConverter(getRawClass(type), KeyAdapter.longAdapter, genson.provideConverter(valueType));
+			} else if (float.class.equals(keyRawClass) || Float.class.equals(keyRawClass)) {
+				return createConverter(getRawClass(type), KeyAdapter.floatAdapter, genson.provideConverter(valueType));
+			} else if (short.class.equals(keyRawClass) || Short.class.equals(keyRawClass)) {
+				return createConverter(getRawClass(type), KeyAdapter.shortAdapter, genson.provideConverter(valueType));
 			} else {
 				return new ComplexMapConverter(genson.provideConverter(keyType),
 						genson.provideConverter(valueType));
 			}
+		}
+		
+		@SuppressWarnings("unchecked")
+		private <K, V> MapConverter<K, V> createConverter(Class<?> typeOfMap, KeyAdapter<K> keyAdapter, Converter<V> valueConverter) {
+			if (Properties.class.equals(typeOfMap)) {
+				return new PropertiesConverter(keyAdapter, valueConverter);
+			}
+			
+			if (Hashtable.class.equals(typeOfMap)) 
+				return new HashTableConverter<K, V>(keyAdapter, valueConverter);
+			
+			return new HashMapConverter<K, V>(keyAdapter, valueConverter);
 		}
 	};
 
@@ -861,6 +916,8 @@ public final class DefaultConverters {
 		}
 	}
 
+	@HandleClassMetadata
+	@WithoutBeanView
 	public static class UUIDConverter implements Converter<UUID> {
 		public final static UUIDConverter instance = new UUIDConverter();
 
@@ -920,5 +977,25 @@ public final class DefaultConverters {
 			}
 			return cal;
 		}
+	}
+	
+	@HandleClassMetadata
+	@WithoutBeanView
+	public final static class FileConverter implements Converter<File> {
+		public final static FileConverter instance = new FileConverter();
+		
+		private FileConverter() {}
+		
+		@Override
+		public void serialize(File object, ObjectWriter writer, Context ctx) throws TransformationException,
+				IOException {
+			writer.writeValue(object.getPath());
+		}
+
+		@Override
+		public File deserialize(ObjectReader reader, Context ctx) throws TransformationException, IOException {
+			return new File(reader.valueAsString());
+		}
+
 	}
 }

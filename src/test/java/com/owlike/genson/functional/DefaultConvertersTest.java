@@ -22,6 +22,21 @@ import com.owlike.genson.TransformationException;
 public class DefaultConvertersTest {
 	private Genson genson = new Genson();
 	
+	@Test public void testMapWithPrimitiveKeys() throws TransformationException, IOException {
+		Map<Long, String> expected = new HashMap<Long, String>();
+		expected.put(5L, "hey");
+		String json = genson.serialize(expected);
+		// due to type erasure we consider keys as strings
+		@SuppressWarnings("rawtypes")
+		Map map = genson.deserialize(json, Map.class);
+		assertNull(map.get(5L));
+		assertNotNull(map.get("5"));
+		
+		// when map type is defined we deserialize to expected primitive types
+		map = genson.deserialize(json, new GenericType<Map<Long, String>>() {});
+		assertEquals(expected.get(5L), map.get(5L));
+	}
+	
 	@Test public void testPropertiesConverter() throws TransformationException, IOException {
 		Properties props = new Properties();
 		props.put("key", "value");
