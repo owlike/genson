@@ -179,7 +179,7 @@ public interface BeanMutatorAccessorResolver {
 	 * 
 	 */
 	public static class StandardMutaAccessorResolver implements BeanMutatorAccessorResolver {
-		private final VisibilityFilter filedVisibilityFilter;
+		private final VisibilityFilter fieldVisibilityFilter;
 		private final VisibilityFilter methodVisibilityFilter;
 		private final VisibilityFilter creatorVisibilityFilter;
 
@@ -203,7 +203,7 @@ public interface BeanMutatorAccessorResolver {
 		public StandardMutaAccessorResolver(VisibilityFilter filedVisibilityFilter,
 				VisibilityFilter methodVisibilityFilter, VisibilityFilter creatorVisibilityFilter) {
 			super();
-			this.filedVisibilityFilter = filedVisibilityFilter;
+			this.fieldVisibilityFilter = filedVisibilityFilter;
 			this.methodVisibilityFilter = methodVisibilityFilter;
 			this.creatorVisibilityFilter = creatorVisibilityFilter;
 		}
@@ -217,7 +217,7 @@ public interface BeanMutatorAccessorResolver {
 				return FALSE;
 			if (mustInclude(field, true))
 				return TRUE;
-			return Trilean.valueOf(filedVisibilityFilter.isVisible(field));
+			return Trilean.valueOf(fieldVisibilityFilter.isVisible(field));
 		}
 
 		/**
@@ -270,8 +270,7 @@ public interface BeanMutatorAccessorResolver {
 				return FALSE;
 			if (mustInclude(field, false))
 				return TRUE;
-			int modifier = field.getModifiers();
-			return Trilean.valueOf(!Modifier.isTransient(modifier) && !Modifier.isStatic(modifier));
+			return Trilean.valueOf(fieldVisibilityFilter.isVisible(field));
 		}
 
 		public Trilean isMutator(Method method, Class<?> fromClass) {
