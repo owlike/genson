@@ -12,12 +12,13 @@ import java.util.Locale;
 
 import static org.junit.Assert.*;
 
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.owlike.genson.BeanView;
 import com.owlike.genson.Context;
 import com.owlike.genson.Converter;
@@ -115,8 +116,8 @@ public class JsonSerDeserSymetricTest {
 
 	public ObjectMapper getMapper() {
 		ObjectMapper mapper = new ObjectMapper();
-		mapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		mapper.configure(DeserializationConfig.Feature.AUTO_DETECT_FIELDS, true);
+		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		mapper.configure(MapperFeature.AUTO_DETECT_FIELDS, true);
 		mapper.setDateFormat(new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", Locale.US));
 		return mapper;
 	}

@@ -23,6 +23,7 @@ import static org.junit.Assert.*;
 
 public class TypeUtilTest {
 
+	@SuppressWarnings("serial")
 	public static class ParameterizedSuperType extends HashMap<Object, String> {
 
 	}
@@ -41,7 +42,6 @@ public class TypeUtilTest {
 	@Test
 	public void testCyclicGenericTypes() throws SecurityException, NoSuchFieldException {
 		// bug 2 https://groups.google.com/forum/?fromgroups=#!topic/genson/9rE026i7Vhg
-		Type t = TypeUtil.expandType(Interval.class.getDeclaredField("min").getGenericType(), Interval.class);
 		assertNotNull(TypeUtil.expandType(Interval.class.getDeclaredField("min").getGenericType(), Interval.class));
 	}
 

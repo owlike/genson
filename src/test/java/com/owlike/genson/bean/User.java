@@ -2,8 +2,7 @@ package com.owlike.genson.bean;
 
 import java.util.Date;
 
-import org.codehaus.jackson.annotate.JsonProperty;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.annotations.SerializedName;
 
 public class User {

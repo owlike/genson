@@ -7,7 +7,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,12 +35,14 @@ import com.owlike.genson.reflect.PropertyMutator.MethodMutator;
  * 
  */
 public class BeanViewDescriptorProvider extends BaseBeanDescriptorProvider {
-	private Map<Class<?>, BeanView<?>> views = new HashMap<Class<?>, BeanView<?>>();
+	
+	private Map<Class<?>, BeanView<?>> views;
 	private Map<Class<?>, BeanDescriptor<?>> descriptors = new ConcurrentHashMap<Class<?>, BeanDescriptor<?>>();
 
-	public BeanViewDescriptorProvider(BeanMutatorAccessorResolver mutatorAccessorResolver,
+	public BeanViewDescriptorProvider(Map<Class<?>, BeanView<?>> views, BeanPropertyFactory propertyFactory, BeanMutatorAccessorResolver mutatorAccessorResolver,
 			PropertyNameResolver nameResolver) {
-		super(mutatorAccessorResolver, nameResolver, true, false, true);
+		super(propertyFactory, mutatorAccessorResolver, nameResolver, true, false, true);
+		this.views = views;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -62,10 +63,12 @@ public class BeanViewDescriptorProvider extends BaseBeanDescriptorProvider {
 			}
 
 			try {
-				Constructor<BeanView<T>> ctr = (Constructor<BeanView<T>>) rawClass
-						.getDeclaredConstructor();
-				if (!ctr.isAccessible()) ctr.setAccessible(true);
-				views.put(rawClass, ctr.newInstance());
+				if (!views.containsKey(rawClass)) {
+					Constructor<BeanView<T>> ctr = (Constructor<BeanView<T>>) rawClass
+							.getDeclaredConstructor();
+					if (!ctr.isAccessible()) ctr.setAccessible(true);
+					views.put(rawClass, ctr.newInstance());
+				}
 				descriptor = super.provide(ofClass, ofType, genson);
 				descriptors.put(rawClass, descriptor);
 			} catch (SecurityException e) {
@@ -105,37 +108,67 @@ public class BeanViewDescriptorProvider extends BaseBeanDescriptorProvider {
 		return creators;
 	}
 
-	@Override
-	protected <T> PropertyAccessor<T, ?> createAccessor(String name, Method method, Type ofType,
-			Genson genson) {
-		// the target bean must be first (and single) parameter for beanview accessors
-		@SuppressWarnings("unchecked")
-		BeanView<T> beanview = (BeanView<T>) views.get(getRawClass(ofType));
-		Type superTypeWithParameter = TypeUtil.lookupGenericType(BeanView.class,
-				beanview.getClass());
-		@SuppressWarnings("unchecked")
-		Class<T> tClass = (Class<T>) TypeUtil.typeOf(0,
-				TypeUtil.expandType(superTypeWithParameter, beanview.getClass()));
-		Type type = TypeUtil.expandType(method.getGenericReturnType(), ofType);
-		return new BeanViewPropertyAccessor<T, Object>(name, method, type, beanview, tClass,
-				genson.provideConverter(type));
-	}
+	public static class BeanViewPropertyFactory implements BeanPropertyFactory {
+		private final Map<Class<?>, BeanView<?>> views;
+		
+		public BeanViewPropertyFactory(Map<Class<?>, BeanView<?>> views) {
+			this.views = views;
+		}
+		
+		public <T> PropertyAccessor<T, ?> createAccessor(String name, Method method, Type ofType,
+				Genson genson) {
+			// the target bean must be first (and single) parameter for beanview accessors
+			@SuppressWarnings("unchecked")
+			BeanView<T> beanview = (BeanView<T>) views.get(getRawClass(ofType));
+			Type superTypeWithParameter = TypeUtil.lookupGenericType(BeanView.class,
+					beanview.getClass());
+			@SuppressWarnings("unchecked")
+			Class<T> tClass = (Class<T>) TypeUtil.typeOf(0,
+					TypeUtil.expandType(superTypeWithParameter, beanview.getClass()));
+			Type type = TypeUtil.expandType(method.getGenericReturnType(), ofType);
+			return new BeanViewPropertyAccessor<T, Object>(name, method, type, beanview, tClass,
+					genson.provideConverter(type));
+		}
+		
+		public <T> PropertyMutator<T, ?> createMutator(String name, Method method, Type ofType,
+				Genson genson) {
+			// the target bean must be second parameter for beanview mutators
+			@SuppressWarnings("unchecked")
+			BeanView<T> beanview = (BeanView<T>) views.get(getRawClass(ofType));
+			Type superTypeWithParameter = TypeUtil.lookupGenericType(BeanView.class,
+					beanview.getClass());
+			@SuppressWarnings("unchecked")
+			Class<T> tClass = (Class<T>) TypeUtil.typeOf(0,
+					TypeUtil.expandType(superTypeWithParameter, beanview.getClass()));
+			Type type = TypeUtil.expandType(method.getGenericParameterTypes()[0], ofType);
 
-	@Override
-	protected <T> PropertyMutator<T, ?> createMutator(String name, Method method, Type ofType,
-			Genson genson) {
-		// the target bean must be second parameter for beanview mutators
-		@SuppressWarnings("unchecked")
-		BeanView<T> beanview = (BeanView<T>) views.get(getRawClass(ofType));
-		Type superTypeWithParameter = TypeUtil.lookupGenericType(BeanView.class,
-				beanview.getClass());
-		@SuppressWarnings("unchecked")
-		Class<T> tClass = (Class<T>) TypeUtil.typeOf(0,
-				TypeUtil.expandType(superTypeWithParameter, beanview.getClass()));
-		Type type = TypeUtil.expandType(method.getGenericParameterTypes()[0], ofType);
+			return new BeanViewPropertyMutator<T, Object>(name, method, type, beanview, tClass,
+					genson.provideConverter(type));
+		}
 
-		return new BeanViewPropertyMutator<T, Object>(name, method, type, beanview, tClass,
-				genson.provideConverter(type));
+		@Override
+		public <T> PropertyAccessor<T, ?> createAccessor(String name, Field field, Type ofType,
+				Genson genson) {
+			return null;
+		}
+
+		@Override
+		public <T> BeanCreator<T> createCreator(Type ofType, Constructor<T> ctr,
+				String[] resolvedNames, Genson genson) {
+			return null;
+		}
+
+		@Override
+		public <T> BeanCreator<T> createCreator(Type ofType, Method method, String[] resolvedNames,
+				Genson genson) {
+			return null;
+		}
+
+		@Override
+		public <T> PropertyMutator<T, ?> createMutator(String name, Field field, Type ofType,
+				Genson genson) {
+			return null;
+		}
 	}
 
 	public static class BeanViewMutatorAccessorResolver implements BeanMutatorAccessorResolver {
@@ -192,7 +225,7 @@ public class BeanViewDescriptorProvider extends BaseBeanDescriptorProvider {
 
 	}
 
-	private class BeanViewPropertyAccessor<T, P> extends MethodAccessor<T, P> {
+	private static class BeanViewPropertyAccessor<T, P> extends MethodAccessor<T, P> {
 		private final BeanView<?> _view;
 
 		public BeanViewPropertyAccessor(String name, Method getter, Type type, BeanView<T> target,
@@ -216,7 +249,7 @@ public class BeanViewDescriptorProvider extends BaseBeanDescriptorProvider {
 		}
 	}
 
-	private class BeanViewPropertyMutator<T, P> extends MethodMutator<T, P> {
+	private static class BeanViewPropertyMutator<T, P> extends MethodMutator<T, P> {
 		private final BeanView<?> _view;
 
 		public BeanViewPropertyMutator(String name, Method setter, Type type, BeanView<T> target,

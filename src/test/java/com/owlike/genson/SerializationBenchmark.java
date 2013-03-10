@@ -5,11 +5,12 @@ import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
 
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.owlike.genson.Genson;
@@ -32,10 +33,6 @@ public class SerializationBenchmark {
 	private Tweet[] tweets;
 	private Feed shortFeed;
 	private Feed longFeed;
-
-	class A {
-		public String s = null;
-	}
 	
 	public SerializationBenchmark() throws TransformationException, IOException {
 		setUp();
@@ -46,8 +43,8 @@ public class SerializationBenchmark {
 				new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", Locale.US)).create();
 		gson = new GsonBuilder().setDateFormat("EEE MMM dd HH:mm:ss Z yyyy").serializeNulls().create();
 		mapper = new ObjectMapper();
-		mapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		mapper.configure(DeserializationConfig.Feature.AUTO_DETECT_FIELDS, true);
+		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		mapper.configure(MapperFeature.AUTO_DETECT_FIELDS, true);
 		mapper.setDateFormat(new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", Locale.US));
 
 		tweets = genson.deserialize(
