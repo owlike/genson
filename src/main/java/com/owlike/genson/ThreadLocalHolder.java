@@ -1,5 +1,7 @@
 package com.owlike.genson;
 
+import static com.owlike.genson.Operations.checkNotNull;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,23 +25,20 @@ public final class ThreadLocalHolder {
 		};
 	};
 	
-	public static void store(String key, Object parameter) {
-		if (key == null)
-		throw new IllegalArgumentException();
-		_data.get().put(key, parameter);
+	public static Object store(String key, Object parameter) {
+		checkNotNull(key);
+		return _data.get().put(key, parameter);
 	}
 	
-	@SuppressWarnings("unchecked")
-	public static <T> T remove(String key) {
-		if (key == null)
-			throw new IllegalArgumentException();
-		return (T) _data.get().remove(key);
+	public static <T> T remove(String key, Class<T> valueType) {
+		checkNotNull(key, valueType);
+		T value = valueType.cast(_data.get().get(key));
+		_data.get().remove(key);
+		return value;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public static <T> T get(String key) {
-		if (key == null)
-			throw new IllegalArgumentException();
-		return (T) _data.get().get(key);
+	public static <T> T get(String key, Class<T> valueType) {
+		checkNotNull(key, valueType);
+		return valueType.cast(_data.get().get(key));
 	}
 }

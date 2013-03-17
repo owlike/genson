@@ -12,18 +12,18 @@ import com.owlike.genson.TransformationException;
 import com.owlike.genson.TransformationRuntimeException;
 import com.owlike.genson.stream.ObjectReader;
 
-public abstract class PropertyMutator<T, P> extends BeanProperty<T> implements
-		Comparable<PropertyMutator<T, ?>> {
+public abstract class PropertyMutator extends BeanProperty implements
+		Comparable<PropertyMutator> {
 	// package visibility for testing
-	final Deserializer<P> propertyDeserializer;
+	final Deserializer<Object> propertyDeserializer;
 
-	protected PropertyMutator(String name, Type type, Class<T> declaringClass,
-			Deserializer<P> propertyDeserializer) {
+	protected PropertyMutator(String name, Type type, Class<?> declaringClass,
+			Deserializer<Object> propertyDeserializer) {
 		super(name, type, declaringClass);
 		this.propertyDeserializer = propertyDeserializer;
 	}
 
-	public P deserialize(ObjectReader reader, Context ctx) throws TransformationException,
+	public Object deserialize(ObjectReader reader, Context ctx) throws TransformationException,
 			IOException {
 		try {
 			return propertyDeserializer.deserialize(reader, ctx);
@@ -32,9 +32,9 @@ public abstract class PropertyMutator<T, P> extends BeanProperty<T> implements
 		}
 	}
 
-	public void deserialize(T into, ObjectReader reader, Context ctx)
+	public void deserialize(Object into, ObjectReader reader, Context ctx)
 		throws TransformationException, IOException {
-		P propValue = null;
+		Object propValue = null;
 		try {
 			propValue = propertyDeserializer.deserialize(reader, ctx);
 		} catch (Throwable th) {
@@ -43,9 +43,9 @@ public abstract class PropertyMutator<T, P> extends BeanProperty<T> implements
 		mutate(into, propValue);
 	 }
 
-	public abstract void mutate(T target, P value);
+	public abstract void mutate(Object target, Object value);
 
-	public int compareTo(PropertyMutator<T, ?> o) {
+	public int compareTo(PropertyMutator o) {
 		return o.priority() - priority();
 	}
 
@@ -58,11 +58,11 @@ public abstract class PropertyMutator<T, P> extends BeanProperty<T> implements
 		return new TransformationException("Could not deserialize to property '" + name + "' of class " + declaringClass, e);
 	}
 
-	public static class MethodMutator<T, P> extends PropertyMutator<T, P> {
+	public static class MethodMutator extends PropertyMutator {
 		protected final Method _setter;
 
-		public MethodMutator(String name, Method setter, Type type, Class<T> declaringClass,
-				Deserializer<P> propertyDeserializer) {
+		public MethodMutator(String name, Method setter, Type type, Class<?> declaringClass,
+				Deserializer<Object> propertyDeserializer) {
 			super(name, type, declaringClass, propertyDeserializer);
 			this._setter = setter;
 			if (!_setter.isAccessible()) {
@@ -71,7 +71,7 @@ public abstract class PropertyMutator<T, P> extends BeanProperty<T> implements
 		}
 
 		@Override
-		public void mutate(T target, P value) {
+		public void mutate(Object target, Object value) {
 			try {
 				_setter.invoke(target, value);
 			} catch (IllegalArgumentException e) {
@@ -94,11 +94,11 @@ public abstract class PropertyMutator<T, P> extends BeanProperty<T> implements
 		}
 	}
 
-	public static class FieldMutator<T, P> extends PropertyMutator<T, P> {
+	public static class FieldMutator extends PropertyMutator {
 		protected final Field _field;
 
-		public FieldMutator(String name, Field field, Type type, Class<T> declaringClass,
-				Deserializer<P> propertyDeserializer) {
+		public FieldMutator(String name, Field field, Type type, Class<?> declaringClass,
+				Deserializer<Object> propertyDeserializer) {
 			super(name, type, declaringClass, propertyDeserializer);
 			this._field = field;
 			if (!_field.isAccessible()) {
@@ -107,7 +107,7 @@ public abstract class PropertyMutator<T, P> extends BeanProperty<T> implements
 		}
 
 		@Override
-		public void mutate(T target, P value) {
+		public void mutate(Object target, Object value) {
 			try {
 				_field.set(target, value);
 			} catch (IllegalArgumentException e) {

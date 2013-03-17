@@ -12,20 +12,20 @@ import com.owlike.genson.TransformationException;
 import com.owlike.genson.TransformationRuntimeException;
 import com.owlike.genson.stream.ObjectWriter;
 
-public abstract class PropertyAccessor<T, P> extends BeanProperty<T> implements
-		Comparable<PropertyAccessor<T, ?>> {
+public abstract class PropertyAccessor extends BeanProperty implements
+		Comparable<PropertyAccessor> {
 	// package visibility for testing
-	final Serializer<P> propertySerializer;
+	final Serializer<Object> propertySerializer;
 
-	protected PropertyAccessor(String name, Type type, Class<T> declaringClass,
-			Serializer<P> propertySerializer) {
+	protected PropertyAccessor(String name, Type type, Class<?> declaringClass,
+			Serializer<Object> propertySerializer) {
 		super(name, type, declaringClass);
 		this.propertySerializer = propertySerializer;
 	}
 
-	public void serialize(T propertySource, ObjectWriter writer, Context ctx)
+	public void serialize(Object propertySource, ObjectWriter writer, Context ctx)
 			throws TransformationException, IOException {
-		P propertyValue = access(propertySource);
+		Object propertyValue = access(propertySource);
 		writer.writeName(name);
 		try {
 			propertySerializer.serialize(propertyValue, writer, ctx);
@@ -34,9 +34,9 @@ public abstract class PropertyAccessor<T, P> extends BeanProperty<T> implements
 		}
 	}
 
-	public abstract P access(final T target);
+	public abstract Object access(final Object target);
 
-	public int compareTo(PropertyAccessor<T, ?> o) {
+	public int compareTo(PropertyAccessor o) {
 		return o.priority() - priority();
 	}
 
@@ -52,11 +52,11 @@ public abstract class PropertyAccessor<T, P> extends BeanProperty<T> implements
 				+ declaringClass.getName(), e);
 	}
 
-	public static class MethodAccessor<T, P> extends PropertyAccessor<T, P> {
+	public static class MethodAccessor extends PropertyAccessor {
 		protected final Method _getter;
 
-		public MethodAccessor(String name, Method getter, Type type, Class<T> declaringClass,
-				Serializer<P> propertySerializer) {
+		public MethodAccessor(String name, Method getter, Type type, Class<?> declaringClass,
+				Serializer<Object> propertySerializer) {
 			super(name, type, declaringClass, propertySerializer);
 			this._getter = getter;
 			if (!_getter.isAccessible()) {
@@ -64,11 +64,10 @@ public abstract class PropertyAccessor<T, P> extends BeanProperty<T> implements
 			}
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
-		public P access(final T target) {
+		public Object access(final Object target) {
 			try {
-				return (P) _getter.invoke(target);
+				return _getter.invoke(target);
 			} catch (IllegalArgumentException e) {
 				throw couldNotAccess(e);
 			} catch (IllegalAccessException e) {
@@ -89,11 +88,11 @@ public abstract class PropertyAccessor<T, P> extends BeanProperty<T> implements
 		}
 	}
 
-	public static class FieldAccessor<T, P> extends PropertyAccessor<T, P> {
+	public static class FieldAccessor extends PropertyAccessor {
 		protected final Field _field;
 
-		public FieldAccessor(String name, Field field, Type type, Class<T> declaringClass,
-				Serializer<P> propertySerializer) {
+		public FieldAccessor(String name, Field field, Type type, Class<?> declaringClass,
+				Serializer<Object> propertySerializer) {
 			super(name, type, declaringClass, propertySerializer);
 			this._field = field;
 			if (!_field.isAccessible()) {
@@ -101,11 +100,10 @@ public abstract class PropertyAccessor<T, P> extends BeanProperty<T> implements
 			}
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
-		public P access(final T target) {
+		public Object access(final Object target) {
 			try {
-				return (P) _field.get(target);
+				return _field.get(target);
 			} catch (IllegalArgumentException e) {
 				throw couldNotAccess(e);
 			} catch (IllegalAccessException e) {

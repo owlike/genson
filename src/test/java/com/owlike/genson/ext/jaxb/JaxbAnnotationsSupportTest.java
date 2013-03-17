@@ -34,10 +34,11 @@ public class JaxbAnnotationsSupportTest {
 	public void testXmlAccessorTypeSerialization() throws TransformationException, IOException {
 		assertEquals("{\"a\":1}", genson.serialize(new XmlAccessorTypeBean()));
 	}
-	
+
 	@Test
 	public void testXmlAccessorTypeDeserialization() throws TransformationException, IOException {
-		XmlAccessorTypeBean bean = genson.deserialize("{\"a\": 10, \"b\": 5, \"transientField\": 9}", XmlAccessorTypeBean.class);
+		XmlAccessorTypeBean bean = genson.deserialize(
+				"{\"a\": 10, \"b\": 5, \"transientField\": 9}", XmlAccessorTypeBean.class);
 		assertEquals(10, bean.a);
 		assertEquals(0, bean.b);
 		assertEquals(2, bean.transientField);
@@ -75,19 +76,20 @@ public class JaxbAnnotationsSupportTest {
 	public void testXmlElementRef() {
 	}
 
-	 @Test
+	@Test
 	public void testXmlEnumValue() throws TransformationException, IOException {
 		String json = genson.serialize(XmlEnumValueBean.ONE);
 		assertEquals("\"1\"", json);
 		assertEquals(XmlEnumValueBean.ONE, genson.deserialize(json, XmlEnumValueBean.class));
-		
+
 		json = genson.serialize(XmlEnumValueBean.TWO);
 		assertEquals("\"TWO\"", json);
 		assertEquals(XmlEnumValueBean.TWO, genson.deserialize(json, XmlEnumValueBean.class));
-	 }
+	}
 
-	// @Test
-	public void testXmlJavaTypeAdapter() {
+	@Test
+	public void testXmlJavaTypeAdapter() throws TransformationException, IOException {
+		System.out.println(genson.serialize(new XmlJavaTypeAdapterBean()));
 	}
 
 	@Test
@@ -105,7 +107,7 @@ public class JaxbAnnotationsSupportTest {
 		assertEquals(0, container.b);
 		assertEquals(null, container.bean);
 	}
-	
+
 	public static class XmlAttributeBean {
 		@XmlAttribute
 		private int a;
@@ -167,8 +169,8 @@ public class JaxbAnnotationsSupportTest {
 
 	@XmlEnum(Integer.class)
 	public static enum XmlEnumValueBean {
-		 @XmlEnumValue("1") ONE,
-		 TWO
+		@XmlEnumValue("1")
+		ONE, TWO
 	}
 
 	@XmlAccessorType(XmlAccessType.FIELD)
@@ -198,7 +200,7 @@ public class JaxbAnnotationsSupportTest {
 		public void setB(int b) {
 			this.b = b;
 		}
-		
+
 		public int getB() {
 			return 3;
 		}

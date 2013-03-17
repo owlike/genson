@@ -123,75 +123,62 @@ public class JaxbConfigurer extends ExtensionConfigurer {
 			public Enum<?> deserialize(ObjectReader reader, Context ctx) throws TransformationException, IOException {
 				return valueToEnum.get(reader.valueAsString());
 			}
-
 		}
 	}
 
 	private class JaxbBeanPropertyFactory implements BeanPropertyFactory {
 
 		@Override
-		public <T> PropertyAccessor<T, ?> createAccessor(String name, Field field, Type ofType, Genson genson) {
+		public PropertyAccessor createAccessor(String name, Field field, Type ofType, Genson genson) {
 			Type newType = getType(field, field.getGenericType(), ofType);
 			if (newType != null) {
-				@SuppressWarnings("unchecked")
-				Class<T> ofClass = (Class<T>) getRawClass(ofType);
-				Type expandedType = TypeUtil.expandType(newType, ofType);
-				return new PropertyAccessor.FieldAccessor<T, Object>(name, field, expandedType, ofClass,
-						genson.provideConverter(expandedType));
+				return new PropertyAccessor.FieldAccessor(name, field, newType, getRawClass(ofType),
+						genson.provideConverter(newType));
 			}
 
 			return null;
 		}
 
 		@Override
-		public <T> PropertyAccessor<T, ?> createAccessor(String name, Method method, Type ofType, Genson genson) {
+		public PropertyAccessor createAccessor(String name, Method method, Type ofType, Genson genson) {
 			Type newType = getType(method, method.getReturnType(), ofType);
 			if (newType != null) {
-				@SuppressWarnings("unchecked")
-				Class<T> ofClass = (Class<T>) getRawClass(ofType);
-				Type expandedType = TypeUtil.expandType(newType, ofType);
-				return new PropertyAccessor.MethodAccessor<T, Object>(name, method, expandedType, ofClass,
-						genson.provideConverter(expandedType));
+				return new PropertyAccessor.MethodAccessor(name, method, newType, getRawClass(ofType),
+						genson.provideConverter(newType));
 			}
 			return null;
 		}
 
 		@Override
-		public <T> PropertyMutator<T, ?> createMutator(String name, Field field, Type ofType, Genson genson) {
+		public PropertyMutator createMutator(String name, Field field, Type ofType, Genson genson) {
 			Type newType = getType(field, field.getGenericType(), ofType);
 			if (newType != null) {
-				@SuppressWarnings("unchecked")
-				Class<T> ofClass = (Class<T>) getRawClass(ofType);
-				Type expandedType = TypeUtil.expandType(newType, ofType);
-				return new PropertyMutator.FieldMutator<T, Object>(name, field, expandedType, ofClass,
-						genson.provideConverter(expandedType));
+				return new PropertyMutator.FieldMutator(name, field, newType, getRawClass(ofType),
+						genson.provideConverter(newType));
 			}
 
 			return null;
 		}
 
 		@Override
-		public <T> PropertyMutator<T, ?> createMutator(String name, Method method, Type ofType, Genson genson) {
+		public PropertyMutator createMutator(String name, Method method, Type ofType, Genson genson) {
 			if (method.getParameterTypes().length == 1) {
 				Type newType = getType(method, method.getReturnType(), ofType);
 				if (newType != null) {
-					@SuppressWarnings("unchecked")
-					Class<T> ofClass = (Class<T>) getRawClass(ofType);
-					Type expandedType = TypeUtil.expandType(newType, ofType);
-					return new PropertyMutator.MethodMutator<T, Object>(name, method, expandedType, ofClass,
-							genson.provideConverter(expandedType));
+					return new PropertyMutator.MethodMutator(name, method, newType, getRawClass(ofType),
+							genson.provideConverter(newType));
 				}
 			}
 			return null;
 		}
 
 		@Override
-		public <T> BeanCreator<T> createCreator(Type ofType, Constructor<T> ctr, String[] resolvedNames, Genson genson) {
+		public BeanCreator createCreator(Type ofType, Constructor<?> ctr, String[] resolvedNames, Genson genson) {
 			return null;
 		}
 
 		@Override
-		public <T> BeanCreator<T> createCreator(Type ofType, Method method, String[] resolvedNames, Genson genson) {
+		public BeanCreator createCreator(Type ofType, Method method, String[] resolvedNames, Genson genson) {
 			return null;
 		}
 

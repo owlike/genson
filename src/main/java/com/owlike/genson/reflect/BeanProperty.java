@@ -5,16 +5,13 @@ import java.lang.reflect.Type;
 /**
  * 
  * @author eugen
- *
- * @param <T> the type in which this BeanProperty is declared.
  */
-public abstract class BeanProperty<T> {
+public abstract class BeanProperty {
 	protected final String name;
 	protected final Type type;
-	protected final Class<T> declaringClass;
+	protected final Class<?> declaringClass;
 	
-	protected BeanProperty(String name, Type type, Class<T> declaringClass) {
-		super();
+	protected BeanProperty(String name, Type type, Class<?> declaringClass) {
 		this.name = name;
 		this.type = type;
 		this.declaringClass = declaringClass;
@@ -24,7 +21,7 @@ public abstract class BeanProperty<T> {
 	 * 
 	 * @return The class in which this property is declared
 	 */
-	public Class<T> getDeclaringClass() {
+	public Class<?> getDeclaringClass() {
 		return declaringClass;
 	}
 	
@@ -43,7 +40,7 @@ public abstract class BeanProperty<T> {
 	/**
 	 * Used to give priority to implementations, for example
 	 * by default a method would have a higher priority than a field because it can do some logic.
-	 * The Greater the priority value is the more important is this BeanProperty. 
+	 * The greater the priority value is the more important is this BeanProperty. 
 	 * @return the priority of this BeanProperty
 	 */
 	public abstract int priority();

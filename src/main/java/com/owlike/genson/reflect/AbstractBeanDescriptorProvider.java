@@ -42,32 +42,32 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 	
 	@Override
 	public <T> BeanDescriptor<T> provide(Class<T> ofClass, Type ofType, Genson genson) {
-		Map<String, LinkedList<PropertyMutator<T, ?>>> mutatorsMap = new LinkedHashMap<String, LinkedList<PropertyMutator<T, ?>>>();
-		Map<String, LinkedList<PropertyAccessor<T, ?>>> accessorsMap = new LinkedHashMap<String, LinkedList<PropertyAccessor<T, ?>>>();
+		Map<String, LinkedList<PropertyMutator>> mutatorsMap = new LinkedHashMap<String, LinkedList<PropertyMutator>>();
+		Map<String, LinkedList<PropertyAccessor>> accessorsMap = new LinkedHashMap<String, LinkedList<PropertyAccessor>>();
 
-		List<BeanCreator<T>> creators = provideBeanCreators(ofType, genson);
+		List<BeanCreator> creators = provideBeanCreators(ofType, genson);
 
 		provideBeanPropertyAccessors(ofType, accessorsMap, genson);
 		provideBeanPropertyMutators(ofType, mutatorsMap, genson);
 
-		List<PropertyAccessor<T, ?>> accessors = new ArrayList<PropertyAccessor<T, ?>>(
+		List<PropertyAccessor> accessors = new ArrayList<PropertyAccessor>(
 				accessorsMap.size());
-		for (Map.Entry<String, LinkedList<PropertyAccessor<T, ?>>> entry : accessorsMap.entrySet()) {
-			PropertyAccessor<T, ?> accessor = checkAndMergeAccessors(entry.getKey(),
+		for (Map.Entry<String, LinkedList<PropertyAccessor>> entry : accessorsMap.entrySet()) {
+			PropertyAccessor accessor = checkAndMergeAccessors(entry.getKey(),
 					entry.getValue());
 			// in case of...
 			if (accessor != null) accessors.add(accessor);
 		}
 
-		Map<String, PropertyMutator<T, ?>> mutators = new HashMap<String, PropertyMutator<T, ?>>(
+		Map<String, PropertyMutator> mutators = new HashMap<String, PropertyMutator>(
 				mutatorsMap.size());
-		for (Map.Entry<String, LinkedList<PropertyMutator<T, ?>>> entry : mutatorsMap.entrySet()) {
-			PropertyMutator<T, ?> mutator = checkAndMergeMutators(entry.getKey(), entry.getValue());
+		for (Map.Entry<String, LinkedList<PropertyMutator>> entry : mutatorsMap.entrySet()) {
+			PropertyMutator mutator = checkAndMergeMutators(entry.getKey(), entry.getValue());
 			if (mutator != null) mutators.put(mutator.name, mutator);
 		}
 
 		mergeMutatorsWithCreatorProperties(ofType, mutators, creators);
-		BeanCreator<T> ctr = checkAndMerge(ofType, creators);
+		BeanCreator ctr = checkAndMerge(ofType, creators);
 
 		// lets fail fast if the BeanDescriptor has been built for the wrong type.
 		// another option could be to pass in all the methods an additional parameter Class<T> that
@@ -94,10 +94,9 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 	 * @param mutators
 	 * @return a instance
 	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	protected <T> BeanDescriptor<T> create(Class<T> forClass, Type ofType, BeanCreator<T> creator,
-			List<PropertyAccessor<T, ?>> accessors, Map<String, PropertyMutator<T, ?>> mutators) {
-		return new BeanDescriptor(forClass, getRawClass(ofType), accessors, mutators, creator);
+	protected <T> BeanDescriptor<T> create(Class<T> forClass, Type ofType, BeanCreator creator,
+			List<PropertyAccessor> accessors, Map<String, PropertyMutator> mutators) {
+		return new BeanDescriptor<T>(forClass, getRawClass(ofType), accessors, mutators, creator);
 	}
 
 	/**
@@ -106,7 +105,7 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 	 * @param genson
 	 * @return
 	 */
-	protected abstract <T> List<BeanCreator<T>> provideBeanCreators(Type ofType, Genson genson);
+	protected abstract List<BeanCreator> provideBeanCreators(Type ofType, Genson genson);
 
 	/**
 	 * Adds resolved {@link PropertyMutator} to mutatorsMap.
@@ -115,8 +114,8 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 	 * @param mutatorsMap
 	 * @param genson
 	 */
-	protected abstract <T> void provideBeanPropertyMutators(Type ofType,
-			Map<String, LinkedList<PropertyMutator<T, ?>>> mutatorsMap, Genson genson);
+	protected abstract void provideBeanPropertyMutators(Type ofType,
+			Map<String, LinkedList<PropertyMutator>> mutatorsMap, Genson genson);
 
 	/**
 	 * Adds resolved {@link PropertyAccessor} to accessorsMap.
@@ -125,8 +124,8 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 	 * @param accessorsMap
 	 * @param genson
 	 */
-	protected abstract <T> void provideBeanPropertyAccessors(Type ofType,
-			Map<String, LinkedList<PropertyAccessor<T, ?>>> accessorsMap, Genson genson);
+	protected abstract void provideBeanPropertyAccessors(Type ofType,
+			Map<String, LinkedList<PropertyAccessor>> accessorsMap, Genson genson);
 
 	/**
 	 * Implementations of this method can do some additional checks on the creators validity or do
@@ -136,7 +135,7 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 	 * @param creators
 	 * @return the creator that will be used by the BeanDescriptor
 	 */
-	protected abstract <T> BeanCreator<T> checkAndMerge(Type ofType, List<BeanCreator<T>> creators);
+	protected abstract BeanCreator checkAndMerge(Type ofType, List<BeanCreator> creators);
 
 	/**
 	 * Implementations are supposed to merge the {@link PropertyMutator}s from mutators list into a
@@ -146,8 +145,8 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 	 * @param mutators
 	 * @return a single PropertyMutator or null.
 	 */
-	protected abstract <T> PropertyMutator<T, ?> checkAndMergeMutators(String name,
-			LinkedList<PropertyMutator<T, ?>> mutators);
+	protected abstract PropertyMutator checkAndMergeMutators(String name,
+			LinkedList<PropertyMutator> mutators);
 
 	/**
 	 * Implementations may do additional merge operations based on resolved creators and their
@@ -156,8 +155,8 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 	 * @param mutators
 	 * @param creators
 	 */
-	protected abstract <T> void mergeMutatorsWithCreatorProperties(Type ofType,
-			Map<String, PropertyMutator<T, ?>> mutators, List<BeanCreator<T>> creators);
+	protected abstract void mergeMutatorsWithCreatorProperties(Type ofType,
+			Map<String, PropertyMutator> mutators, List<BeanCreator> creators);
 
 	/**
 	 * Implementations are supposed to merge the {@link PropertyAccessor}s from accessors list into
@@ -167,6 +166,6 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 	 * @param accessors
 	 * @return
 	 */
-	protected abstract <T> PropertyAccessor<T, ?> checkAndMergeAccessors(String name,
-			LinkedList<PropertyAccessor<T, ?>> accessors);
+	protected abstract PropertyAccessor checkAndMergeAccessors(String name,
+			LinkedList<PropertyAccessor> accessors);
 }

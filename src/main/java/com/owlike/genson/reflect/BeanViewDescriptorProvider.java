@@ -96,14 +96,14 @@ public class BeanViewDescriptorProvider extends BaseBeanDescriptorProvider {
 	}
 
 	@Override
-	public <T> List<BeanCreator<T>> provideBeanCreators(Type ofType, Genson genson) {
-		List<BeanCreator<T>> creators = new ArrayList<BeanCreator<T>>();
+	public List<BeanCreator> provideBeanCreators(Type ofType, Genson genson) {
+		List<BeanCreator> creators = new ArrayList<BeanCreator>();
 		for (Class<?> clazz = getRawClass(ofType); clazz != null && !Object.class.equals(clazz); clazz = clazz
 				.getSuperclass()) {
 			provideMethodCreators(clazz, creators, ofType, genson);
 		}
 		Type viewForType = TypeUtil.expandType(BeanView.class.getTypeParameters()[0], ofType);
-		List<BeanCreator<T>> oCtrs = super.provideBeanCreators(viewForType, genson);
+		List<BeanCreator> oCtrs = super.provideBeanCreators(viewForType, genson);
 		creators.addAll(oCtrs);
 		return creators;
 	}
@@ -115,57 +115,50 @@ public class BeanViewDescriptorProvider extends BaseBeanDescriptorProvider {
 			this.views = views;
 		}
 		
-		public <T> PropertyAccessor<T, ?> createAccessor(String name, Method method, Type ofType,
+		public PropertyAccessor createAccessor(String name, Method method, Type ofType,
 				Genson genson) {
 			// the target bean must be first (and single) parameter for beanview accessors
-			@SuppressWarnings("unchecked")
-			BeanView<T> beanview = (BeanView<T>) views.get(getRawClass(ofType));
+			BeanView<?> beanview = views.get(getRawClass(ofType));
 			Type superTypeWithParameter = TypeUtil.lookupGenericType(BeanView.class,
 					beanview.getClass());
-			@SuppressWarnings("unchecked")
-			Class<T> tClass = (Class<T>) TypeUtil.typeOf(0,
-					TypeUtil.expandType(superTypeWithParameter, beanview.getClass()));
-			Type type = TypeUtil.expandType(method.getGenericReturnType(), ofType);
-			return new BeanViewPropertyAccessor<T, Object>(name, method, type, beanview, tClass,
+			Class<?> tClass = getRawClass(typeOf(0, expandType(superTypeWithParameter, beanview.getClass())));
+			Type type = expandType(method.getGenericReturnType(), ofType);
+			return new BeanViewPropertyAccessor(name, method, type, beanview, tClass,
 					genson.provideConverter(type));
 		}
 		
-		public <T> PropertyMutator<T, ?> createMutator(String name, Method method, Type ofType,
+		public PropertyMutator createMutator(String name, Method method, Type ofType,
 				Genson genson) {
 			// the target bean must be second parameter for beanview mutators
-			@SuppressWarnings("unchecked")
-			BeanView<T> beanview = (BeanView<T>) views.get(getRawClass(ofType));
+			BeanView<?> beanview = views.get(getRawClass(ofType));
 			Type superTypeWithParameter = TypeUtil.lookupGenericType(BeanView.class,
 					beanview.getClass());
-			@SuppressWarnings("unchecked")
-			Class<T> tClass = (Class<T>) TypeUtil.typeOf(0,
-					TypeUtil.expandType(superTypeWithParameter, beanview.getClass()));
-			Type type = TypeUtil.expandType(method.getGenericParameterTypes()[0], ofType);
-
-			return new BeanViewPropertyMutator<T, Object>(name, method, type, beanview, tClass,
+			Class<?> tClass = getRawClass(typeOf(0, expandType(superTypeWithParameter, beanview.getClass())));
+			Type type = expandType(method.getGenericParameterTypes()[0], ofType);
+			return new BeanViewPropertyMutator(name, method, type, beanview, tClass,
 					genson.provideConverter(type));
 		}
 
 		@Override
-		public <T> PropertyAccessor<T, ?> createAccessor(String name, Field field, Type ofType,
+		public PropertyAccessor createAccessor(String name, Field field, Type ofType,
 				Genson genson) {
 			return null;
 		}
 
 		@Override
-		public <T> BeanCreator<T> createCreator(Type ofType, Constructor<T> ctr,
+		public BeanCreator createCreator(Type ofType, Constructor<?> ctr,
 				String[] resolvedNames, Genson genson) {
 			return null;
 		}
 
 		@Override
-		public <T> BeanCreator<T> createCreator(Type ofType, Method method, String[] resolvedNames,
+		public BeanCreator createCreator(Type ofType, Method method, String[] resolvedNames,
 				Genson genson) {
 			return null;
 		}
 
 		@Override
-		public <T> PropertyMutator<T, ?> createMutator(String name, Field field, Type ofType,
+		public PropertyMutator createMutator(String name, Field field, Type ofType,
 				Genson genson) {
 			return null;
 		}
@@ -225,20 +218,19 @@ public class BeanViewDescriptorProvider extends BaseBeanDescriptorProvider {
 
 	}
 
-	private static class BeanViewPropertyAccessor<T, P> extends MethodAccessor<T, P> {
+	private static class BeanViewPropertyAccessor extends MethodAccessor {
 		private final BeanView<?> _view;
 
-		public BeanViewPropertyAccessor(String name, Method getter, Type type, BeanView<T> target,
-				Class<T> tClass, Serializer<P> propertySeriliazer) {
+		public BeanViewPropertyAccessor(String name, Method getter, Type type, BeanView<?> target,
+				Class<?> tClass, Serializer<Object> propertySeriliazer) {
 			super(name, getter, type, tClass, propertySeriliazer);
 			this._view = target;
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
-		public P access(T target) {
+		public Object access(Object target) {
 			try {
-				return (P) _getter.invoke(_view, target);
+				return _getter.invoke(_view, target);
 			} catch (IllegalArgumentException e) {
 				throw couldNotAccess(e);
 			} catch (IllegalAccessException e) {
@@ -249,17 +241,17 @@ public class BeanViewDescriptorProvider extends BaseBeanDescriptorProvider {
 		}
 	}
 
-	private static class BeanViewPropertyMutator<T, P> extends MethodMutator<T, P> {
+	private static class BeanViewPropertyMutator extends MethodMutator {
 		private final BeanView<?> _view;
 
-		public BeanViewPropertyMutator(String name, Method setter, Type type, BeanView<T> target,
-				Class<T> tClass, Deserializer<P> propertyDeserializer) {
+		public BeanViewPropertyMutator(String name, Method setter, Type type, BeanView<?> target,
+				Class<?> tClass, Deserializer<Object> propertyDeserializer) {
 			super(name, setter, type, tClass, propertyDeserializer);
 			this._view = target;
 		}
 
 		@Override
-		public void mutate(T target, P value) {
+		public void mutate(Object target, Object value) {
 			try {
 				_setter.invoke(_view, value, target);
 			} catch (IllegalArgumentException e) {

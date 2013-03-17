@@ -27,7 +27,7 @@ public class ExtendedReqRespBodyMethodProcessor extends RequestResponseBodyMetho
 			ThreadLocalHolder.store("__GENSON$method_param", parameter);
 			object = super.resolveArgument(parameter, mavContainer, webRequest, binderFactory);
 		} finally {
-			ThreadLocalHolder.remove("__GENSON$method_param");
+			ThreadLocalHolder.remove("__GENSON$method_param", MethodParameter.class);
 		}
 
 		return object;
@@ -42,7 +42,7 @@ public class ExtendedReqRespBodyMethodProcessor extends RequestResponseBodyMetho
 			ThreadLocalHolder.store("__GENSON$return_param", returnType);
 			super.handleReturnValue(returnValue, returnType, mavContainer, webRequest);
 		} finally {
-			ThreadLocalHolder.remove("__GENSON$return_param");
+			ThreadLocalHolder.remove("__GENSON$return_param", MethodParameter.class);
 		}
 	}
 }

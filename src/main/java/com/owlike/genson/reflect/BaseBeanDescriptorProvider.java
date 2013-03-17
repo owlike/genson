@@ -32,8 +32,8 @@ import static com.owlike.genson.Trilean.*;
  */
 public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 
-	private final static Comparator<BeanCreator<?>> _beanCreatorsComparator = new Comparator<BeanCreator<?>>() {
-		public int compare(BeanCreator<?> o1, BeanCreator<?> o2) {
+	private final static Comparator<BeanCreator> _beanCreatorsComparator = new Comparator<BeanCreator>() {
+		public int compare(BeanCreator o1, BeanCreator o2) {
 			return o1.parameters.size() - o2.parameters.size();
 		}
 	};
@@ -68,8 +68,8 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 	}
 
 	@Override
-	public <T> List<BeanCreator<T>> provideBeanCreators(Type ofType, Genson genson) {
-		List<BeanCreator<T>> creators = new ArrayList<BeanCreator<T>>();
+	public List<BeanCreator> provideBeanCreators(Type ofType, Genson genson) {
+		List<BeanCreator> creators = new ArrayList<BeanCreator>();
 		Class<?> ofClass = getRawClass(ofType);
 		if (ofClass.isMemberClass() && (ofClass.getModifiers() & Modifier.STATIC) == 0)
 			return creators;
@@ -83,8 +83,8 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 	}
 
 	@Override
-	public <T> void provideBeanPropertyAccessors(Type ofType,
-			Map<String, LinkedList<PropertyAccessor<T, ?>>> accessorsMap, Genson genson) {
+	public void provideBeanPropertyAccessors(Type ofType,
+			Map<String, LinkedList<PropertyAccessor>> accessorsMap, Genson genson) {
 		for (Class<?> clazz = getRawClass(ofType); clazz != null && !Object.class.equals(clazz); clazz = clazz
 				.getSuperclass()) {
 			// first lookup for fields
@@ -95,8 +95,8 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 	}
 
 	@Override
-	public <T> void provideBeanPropertyMutators(Type ofType,
-			Map<String, LinkedList<PropertyMutator<T, ?>>> mutatorsMap, Genson genson) {
+	public void provideBeanPropertyMutators(Type ofType,
+			Map<String, LinkedList<PropertyMutator>> mutatorsMap, Genson genson) {
 		for (Class<?> clazz = getRawClass(ofType); clazz != null && !Object.class.equals(clazz); clazz = clazz
 				.getSuperclass()) {
 			// first lookup for fields
@@ -106,12 +106,11 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 		}
 	}
 
-	protected <T> void provideConstructorCreators(Type ofType, List<BeanCreator<T>> creators,
+	protected void provideConstructorCreators(Type ofType, List<BeanCreator> creators,
 			Genson genson) {
 		Class<?> ofClass = getRawClass(ofType);
-		@SuppressWarnings("unchecked")
-		Constructor<T>[] ctrs = (Constructor<T>[]) ofClass.getDeclaredConstructors();
-		for (Constructor<T> ctr : ctrs) {
+		Constructor<?>[] ctrs = ofClass.getDeclaredConstructors();
+		for (Constructor<?> ctr : ctrs) {
 			if (TRUE == mutatorAccessorResolver.isCreator(ctr, ofClass)) {
 				Type[] parameterTypes = ctr.getGenericParameterTypes();
 				int paramCnt = parameterTypes.length;
@@ -124,7 +123,7 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 				}
 
 				if (idx == paramCnt) {
-					BeanCreator<T> creator =propertyFactory. createCreator(ofType, ctr,
+					BeanCreator creator = propertyFactory.createCreator(ofType, ctr,
 							parameterNames, genson);
 					creators.add(creator);
 				}
@@ -132,7 +131,7 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 		}
 	}
 
-	protected <T> void provideMethodCreators(Class<?> ofClass, List<BeanCreator<T>> creators,
+	protected void provideMethodCreators(Class<?> ofClass, List<BeanCreator> creators,
 			Type ofType, Genson genson) {
 		Method[] ctrs = ofClass.getDeclaredMethods();
 		for (Method ctr : ctrs) {
@@ -148,15 +147,15 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 				}
 
 				if (idx == paramCnt) {
-					BeanCreator<T> creator = propertyFactory.createCreator(ofType, ctr, parameterNames, genson);
+					BeanCreator creator = propertyFactory.createCreator(ofType, ctr, parameterNames, genson);
 					creators.add(creator);
 				}
 			}
 		}
 	}
 
-	protected <T> void provideFieldAccessors(Class<?> ofClass,
-			Map<String, LinkedList<PropertyAccessor<T, ?>>> accessorsMap, Type ofType, Genson genson) {
+	protected void provideFieldAccessors(Class<?> ofClass,
+			Map<String, LinkedList<PropertyAccessor>> accessorsMap, Type ofType, Genson genson) {
 		Field[] fields = ofClass.getDeclaredFields();
 		for (Field field : fields) {
 			if (TRUE == mutatorAccessorResolver.isAccessor(field, getRawClass(ofType))) {
@@ -166,15 +165,15 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 							+ ofClass.getName()
 							+ " has been discovered as accessor but its name couldn't be resolved!");
 				}
-				PropertyAccessor<T, ?> accessor = propertyFactory.createAccessor(name, field,
+				PropertyAccessor accessor = propertyFactory.createAccessor(name, field,
 						ofType, genson);
 				update(accessor, accessorsMap);
 			}
 		}
 	}
 
-	protected <T> void provideMethodAccessors(Class<?> ofClass,
-			Map<String, LinkedList<PropertyAccessor<T, ?>>> accessorsMap, Type ofType, Genson genson) {
+	protected void provideMethodAccessors(Class<?> ofClass,
+			Map<String, LinkedList<PropertyAccessor>> accessorsMap, Type ofType, Genson genson) {
 		Method[] methods = ofClass.getDeclaredMethods();
 		for (Method method : methods) {
 			if (TRUE == mutatorAccessorResolver.isAccessor(method, getRawClass(ofType))) {
@@ -184,14 +183,14 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 							+ ofClass.getName()
 							+ " has been discovered as accessor but its name couldn't be resolved!");
 				}
-				PropertyAccessor<T, ?> accessor = propertyFactory.createAccessor(name, method, ofType, genson);
+				PropertyAccessor accessor = propertyFactory.createAccessor(name, method, ofType, genson);
 				update(accessor, accessorsMap);
 			}
 		}
 	}
 
-	protected <T> void provideFieldMutators(Class<?> ofClass,
-			Map<String, LinkedList<PropertyMutator<T, ?>>> mutatorsMap, Type ofType, Genson genson) {
+	protected void provideFieldMutators(Class<?> ofClass,
+			Map<String, LinkedList<PropertyMutator>> mutatorsMap, Type ofType, Genson genson) {
 		Field[] fields = ofClass.getDeclaredFields();
 		for (Field field : fields) {
 			if (TRUE == mutatorAccessorResolver.isMutator(field, getRawClass(ofType))) {
@@ -202,15 +201,15 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 							+ " has been discovered as mutator but its name couldn't be resolved!");
 				}
 				
-				PropertyMutator<T, ?> mutator = propertyFactory.createMutator(name, field, ofType,
+				PropertyMutator mutator = propertyFactory.createMutator(name, field, ofType,
 						genson);
 				update(mutator, mutatorsMap);
 			}
 		}
 	}
 
-	protected <T> void provideMethodMutators(Class<?> ofClass,
-			Map<String, LinkedList<PropertyMutator<T, ?>>> mutatorsMap, Type ofType, Genson genson) {
+	protected void provideMethodMutators(Class<?> ofClass,
+			Map<String, LinkedList<PropertyMutator>> mutatorsMap, Type ofType, Genson genson) {
 		Method[] methods = ofClass.getDeclaredMethods();
 		for (Method method : methods) {
 			if (TRUE == mutatorAccessorResolver.isMutator(method, getRawClass(ofType))) {
@@ -220,13 +219,13 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 							+ ofClass.getName()
 							+ " has been discovered as mutator but its name couldn't be resolved!");
 				}
-				PropertyMutator<T, ?> mutator = propertyFactory.createMutator(name, method, ofType, genson);
+				PropertyMutator mutator = propertyFactory.createMutator(name, method, ofType, genson);
 				update(mutator, mutatorsMap);
 			}
 		}
 	}
 
-	protected <T extends BeanProperty<?>> void update(T property, Map<String, LinkedList<T>> map) {
+	protected <T extends BeanProperty> void update(T property, Map<String, LinkedList<T>> map) {
 		LinkedList<T> accessors = map.get(property.name);
 		if (accessors == null) {
 			accessors = new LinkedList<T>();
@@ -236,7 +235,7 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 	}
 
 	@Override
-	protected <T> BeanCreator<T> checkAndMerge(Type ofType, List<BeanCreator<T>> creators) {
+	protected BeanCreator checkAndMerge(Type ofType, List<BeanCreator> creators) {
 		Class<?> ofClass = getRawClass(ofType);
 		// hum maybe do not check this case as we may have class that will only be serialized so
 		// they do not need a ctr?
@@ -251,11 +250,11 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 		}
 
 		boolean hasCreatorAnnotation = false;
-		BeanCreator<T> creator = null;
+		BeanCreator creator = null;
 
 		// first lets do some checks
 		for (int i = 0; i < creators.size(); i++) {
-			BeanCreator<T> ctr = creators.get(i);
+			BeanCreator ctr = creators.get(i);
 			if (ctr.isAnnotationPresent(Creator.class)) {
 				if (!hasCreatorAnnotation)
 					hasCreatorAnnotation = true;
@@ -266,7 +265,7 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 		}
 
 		if (hasCreatorAnnotation) {
-			for (BeanCreator<T> ctr : creators)
+			for (BeanCreator ctr : creators)
 				if (ctr.isAnnotationPresent(Creator.class)) return ctr;
 		} else {
 			creator = creators.get(0);
@@ -281,20 +280,20 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 	}
 
 	@Override
-	protected <T> PropertyAccessor<T, ?> checkAndMergeAccessors(String name,
-			LinkedList<PropertyAccessor<T, ?>> accessors) {
-		PropertyAccessor<T, ?> accessor = _mostSpecificPropertyDeclaringClass(name, accessors);
+	protected PropertyAccessor checkAndMergeAccessors(String name,
+			LinkedList<PropertyAccessor> accessors) {
+		PropertyAccessor accessor = _mostSpecificPropertyDeclaringClass(name, accessors);
 		return accessor;
 	}
 
 	@Override
-	protected <T> PropertyMutator<T, ?> checkAndMergeMutators(String name,
-			LinkedList<PropertyMutator<T, ?>> mutators) {
-		PropertyMutator<T, ?> mutator = _mostSpecificPropertyDeclaringClass(name, mutators);
+	protected PropertyMutator checkAndMergeMutators(String name,
+			LinkedList<PropertyMutator> mutators) {
+		PropertyMutator mutator = _mostSpecificPropertyDeclaringClass(name, mutators);
 		return mutator;
 	}
 
-	protected <T extends BeanProperty<?>> T _mostSpecificPropertyDeclaringClass(String name,
+	protected <T extends BeanProperty> T _mostSpecificPropertyDeclaringClass(String name,
 			LinkedList<T> properties) {
 		Iterator<T> it = properties.iterator();
 		T property = it.next();
@@ -325,18 +324,16 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 	 * for property in the ctr props...
 	 */
 	@Override
-	protected <T> void mergeMutatorsWithCreatorProperties(Type ofType,
-			Map<String, PropertyMutator<T, ?>> mutators, List<BeanCreator<T>> creators) {
-		for (BeanCreator<?> creator : creators) {
-			for (Map.Entry<String, ? extends BeanCreatorProperty<?, ?>> entry : creator.parameters
+	protected void mergeMutatorsWithCreatorProperties(Type ofType,
+			Map<String, PropertyMutator> mutators, List<BeanCreator> creators) {
+		for (BeanCreator creator : creators) {
+			for (Map.Entry<String, ? extends BeanCreatorProperty> entry : creator.parameters
 					.entrySet()) {
-				PropertyMutator<T, ?> muta = mutators.get(entry.getKey());
+				PropertyMutator muta = mutators.get(entry.getKey());
 				if (muta == null) {
 					// add to mutators only creator properties that don't exist as standard
 					// mutator (dont exist as field or method, but only as ctr arg)
-					@SuppressWarnings("unchecked")
-					BeanCreatorProperty<T, ?> ctrProperty = (BeanCreatorProperty<T, ?>) entry
-							.getValue();
+					BeanCreatorProperty ctrProperty = entry.getValue();
 					mutators.put(entry.getKey(), ctrProperty);
 					// TODO we should maybe remove the other creators ?
 				}

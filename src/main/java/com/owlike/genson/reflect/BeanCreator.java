@@ -1,6 +1,5 @@
 package com.owlike.genson.reflect;
 
-import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
@@ -12,22 +11,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.owlike.genson.Context;
 import com.owlike.genson.Deserializer;
 import com.owlike.genson.TransformationException;
 import com.owlike.genson.Wrapper;
-import com.owlike.genson.stream.ObjectReader;
 
-public abstract class BeanCreator<T> extends Wrapper<AnnotatedElement> implements Comparable<BeanCreator<T>> {
+public abstract class BeanCreator extends Wrapper<AnnotatedElement> implements Comparable<BeanCreator> {
 	// The type of object it can create
-	protected final Class<T> ofClass;
-	protected final Map<String, BeanCreatorProperty<T, ?>> parameters;
+	protected final Class<?> ofClass;
+	protected final Map<String, BeanCreatorProperty> parameters;
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public BeanCreator(Class<T> ofClass, String[] parameterNames, Type[] types,
-			Annotation[][] anns, Deserializer<?>[] propertiesDeserializers) {
+	public BeanCreator(Class<?> ofClass, String[] parameterNames, Type[] types,
+			Annotation[][] anns, Deserializer<Object>[] propertiesDeserializers) {
 		this.ofClass = ofClass;
-		this.parameters = new HashMap<String, BeanCreatorProperty<T, ?>>(parameterNames.length);
+		this.parameters = new HashMap<String, BeanCreatorProperty>(parameterNames.length);
 		for (int i = 0; i < parameterNames.length; i++) {
 			this.parameters.put(parameterNames[i], new BeanCreatorProperty(parameterNames[i],
 					types[i], i, anns[i], ofClass, this, propertiesDeserializers[i]));
@@ -42,12 +38,12 @@ public abstract class BeanCreator<T> extends Wrapper<AnnotatedElement> implement
 		return cnt;
 	}
 
-	public int compareTo(BeanCreator<T> o) {
+	public int compareTo(BeanCreator o) {
 		int comp = o.priority() - priority();
 		return comp != 0 ? comp : parameters.size() - o.parameters.size();
 	}
 
-	public abstract T create(Object... args) throws TransformationException;
+	public abstract Object create(Object... args) throws TransformationException;
 
 	protected abstract String signature();
 
@@ -58,11 +54,11 @@ public abstract class BeanCreator<T> extends Wrapper<AnnotatedElement> implement
 				+ " using creator " + signature(), e);
 	}
 
-	public static class ConstructorBeanCreator<T> extends BeanCreator<T> {
-		protected final Constructor<T> constructor;
+	public static class ConstructorBeanCreator extends BeanCreator {
+		protected final Constructor<?> constructor;
 
-		public ConstructorBeanCreator(Class<T> ofClass, Constructor<T> constructor,
-				String[] parameterNames, Deserializer<?>[] propertiesDeserializers) {
+		public ConstructorBeanCreator(Class<?> ofClass, Constructor<?> constructor,
+				String[] parameterNames, Deserializer<Object>[] propertiesDeserializers) {
 			super(ofClass, parameterNames, constructor.getGenericParameterTypes(), constructor
 					.getParameterAnnotations(), propertiesDeserializers);
 			this.constructor = constructor;
@@ -72,7 +68,7 @@ public abstract class BeanCreator<T> extends Wrapper<AnnotatedElement> implement
 			decorate(constructor);
 		}
 
-		public T create(Object... args) throws TransformationException {
+		public Object create(Object... args) throws TransformationException {
 			try {
 				return constructor.newInstance(args);
 			} catch (IllegalArgumentException e) {
@@ -97,13 +93,12 @@ public abstract class BeanCreator<T> extends Wrapper<AnnotatedElement> implement
 		}
 	}
 
-	public static class MethodBeanCreator<T> extends BeanCreator<T> {
+	public static class MethodBeanCreator extends BeanCreator {
 		protected final Method _creator;
 
-		@SuppressWarnings("unchecked")
 		public MethodBeanCreator(Method method, String[] parameterNames,
-				Deserializer<?>[] propertiesDeserializers) {
-			super((Class<T>) method.getReturnType(), parameterNames, method
+				Deserializer<Object>[] propertiesDeserializers) {
+			super(method.getReturnType(), parameterNames, method
 					.getGenericParameterTypes(), method.getParameterAnnotations(),
 					propertiesDeserializers);
 			if (!Modifier.isStatic(method.getModifiers()))
@@ -115,7 +110,7 @@ public abstract class BeanCreator<T> extends Wrapper<AnnotatedElement> implement
 			decorate(_creator);
 		}
 
-		public T create(Object... args) throws TransformationException {
+		public Object create(Object... args) throws TransformationException {
 			try {
 				// we will handle only static method creators
 				return ofClass.cast(_creator.invoke(null, args));
@@ -139,21 +134,21 @@ public abstract class BeanCreator<T> extends Wrapper<AnnotatedElement> implement
 		}
 	}
 
-	public static class BeanCreatorProperty<T, P> extends PropertyMutator<T, P> {
+	public static class BeanCreatorProperty extends PropertyMutator {
 		protected final int index;
 		protected final Annotation[] annotations;
-		protected final BeanCreator<T> creator;
+		protected final BeanCreator creator;
 		protected final boolean doThrowMutateException;
 
 		protected BeanCreatorProperty(String name, Type type, int index, Annotation[] annotations,
-				Class<T> declaringClass, BeanCreator<T> creator,
-				Deserializer<P> propertyDeserializer) {
+				Class<?> declaringClass, BeanCreator creator,
+				Deserializer<Object> propertyDeserializer) {
 			this(name, type, index, annotations, declaringClass, creator, propertyDeserializer, false);
 		}
 		
 		protected BeanCreatorProperty(String name, Type type, int index, Annotation[] annotations,
-				Class<T> declaringClass, BeanCreator<T> creator,
-				Deserializer<P> propertyDeserializer, boolean doThrowMutateException) {
+				Class<?> declaringClass, BeanCreator creator,
+				Deserializer<Object> propertyDeserializer, boolean doThrowMutateException) {
 			super(name, type, declaringClass, propertyDeserializer);
 			this.index = index;
 			this.annotations = annotations;
@@ -181,18 +176,13 @@ public abstract class BeanCreator<T> extends Wrapper<AnnotatedElement> implement
 		}
 
 		@Override
-		public void mutate(T target, P value) {
+		public void mutate(Object target, Object value) {
 			if (doThrowMutateException) {
     			throw new IllegalStateException(
     					"Method mutate should not be called on a mutator of type "
     							+ getClass().getName()
     							+ ", this property exists only as constructor parameter!");
 			}
-		}
-
-		@Override
-		public void deserialize(T into, ObjectReader reader, Context ctx)
-				throws TransformationException, IOException {
 		}
 
 	}

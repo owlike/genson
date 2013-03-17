@@ -43,21 +43,21 @@ import com.owlike.genson.stream.ObjectWriter;
 public class BeanDescriptor<T> implements Converter<T> {
 	final Class<?> fromDeclaringClass;
 	final Class<T> ofClass;
-	final Map<String, PropertyMutator<T, ?>> mutableProperties;
-	final List<PropertyAccessor<T, ?>> accessibleProperties;
+	final Map<String, PropertyMutator> mutableProperties;
+	final List<PropertyAccessor> accessibleProperties;
 
-	private final BeanCreator<T> _creator;
+	private final BeanCreator _creator;
 	private final boolean _noArgCtr;
 
-	private final static Comparator<BeanProperty<?>> _readablePropsComparator = new Comparator<BeanProperty<?>>() {
-		public int compare(BeanProperty<?> o1, BeanProperty<?> o2) {
+	private final static Comparator<BeanProperty> _readablePropsComparator = new Comparator<BeanProperty>() {
+		public int compare(BeanProperty o1, BeanProperty o2) {
 			return o1.name.compareToIgnoreCase(o2.name);
 		}
 	};
 
 	public BeanDescriptor(Class<T> forClass, Class<?> fromDeclaringClass,
-			List<PropertyAccessor<T, ?>> readableBps,
-			Map<String, PropertyMutator<T, ?>> writableBps, BeanCreator<T> creator) {
+			List<PropertyAccessor> readableBps,
+			Map<String, PropertyMutator> writableBps, BeanCreator creator) {
 		this.ofClass = forClass;
 		this.fromDeclaringClass = fromDeclaringClass;
 		this._creator = creator;
@@ -83,7 +83,7 @@ public class BeanDescriptor<T> implements Converter<T> {
 	public void serialize(T obj, ObjectWriter writer, Context ctx) throws TransformationException,
 			IOException {
 		writer.beginObject();
-		for (PropertyAccessor<T, ?> accessor : accessibleProperties) {
+		for (PropertyAccessor accessor : accessibleProperties) {
 			accessor.serialize(obj, writer, ctx);
 		}
 		writer.endObject();
@@ -94,7 +94,7 @@ public class BeanDescriptor<T> implements Converter<T> {
 		T bean = null;
 		// optimization for default ctr
 		if (_noArgCtr) {
-			bean = _creator.create();
+			bean = ofClass.cast(_creator.create());
 			deserialize(bean, reader, ctx);
 		} else {
 			if (_creator == null)
@@ -111,7 +111,7 @@ public class BeanDescriptor<T> implements Converter<T> {
 		for (; reader.hasNext();) {
 			reader.next();
 			String propName = reader.name();
-			PropertyMutator<T, ?> mutator = mutableProperties.get(propName);
+			PropertyMutator mutator = mutableProperties.get(propName);
 			if (mutator != null) {
 				mutator.deserialize(into, reader, ctx);
 			} else {
@@ -131,7 +131,7 @@ public class BeanDescriptor<T> implements Converter<T> {
 		for (; reader.hasNext();) {
 			reader.next();
 			String propName = reader.name();
-			PropertyMutator<T, ?> muta = mutableProperties.get(propName);
+			PropertyMutator muta = mutableProperties.get(propName);
 
 			if (muta != null) {
 				Object param = muta.deserialize(reader, ctx);
@@ -151,7 +151,7 @@ public class BeanDescriptor<T> implements Converter<T> {
 		Object[] newValues = new Object[size];
 		// TODO if field for ctr is missing what to do? make it also configurable...?
 		for (int i = 0, j = 0; i < size; i++) {
-			BeanCreatorProperty<T, ?> mp = _creator.parameters.get(names.get(i));
+			BeanCreatorProperty mp = _creator.parameters.get(names.get(i));
 			if (mp != null) {
 				creatorArgs[mp.index] = values.get(i);
 			} else {
@@ -161,10 +161,9 @@ public class BeanDescriptor<T> implements Converter<T> {
 			}
 		}
 
-		T bean = _creator.create(creatorArgs);
+		T bean = ofClass.cast(_creator.create(creatorArgs));
 		for (int i = 0; i < size; i++) {
-			@SuppressWarnings("unchecked")
-			PropertyMutator<T, Object> property = (PropertyMutator<T, Object>) mutableProperties
+			PropertyMutator property = mutableProperties
 					.get(newNames[i]);
 			if (property != null) property.mutate(bean, newValues[i]);
 		}

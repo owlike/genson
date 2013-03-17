@@ -41,9 +41,9 @@ public class BeanDescriptorTest {
 					protected <T> com.owlike.genson.reflect.BeanDescriptor<T> create(
 							java.lang.Class<T> forClass,
 							java.lang.reflect.Type ofType,
-							com.owlike.genson.reflect.BeanCreator<T> creator,
-							java.util.List<com.owlike.genson.reflect.PropertyAccessor<T, ?>> accessors,
-							java.util.Map<String, com.owlike.genson.reflect.PropertyMutator<T, ?>> mutators) {
+							com.owlike.genson.reflect.BeanCreator creator,
+							java.util.List<com.owlike.genson.reflect.PropertyAccessor> accessors,
+							java.util.Map<String, com.owlike.genson.reflect.PropertyMutator> mutators) {
 						return new BeanDescriptor(ThatObject.class, ThatObject.class, accessors,
 								mutators, creator);
 					}
@@ -97,7 +97,8 @@ public class BeanDescriptorTest {
 				pDesc.mutableProperties.get("aPrimitive").propertyDeserializer.getClass());
 		assertEquals(DefaultConverters.CollectionConverter.class,
 				pDesc.mutableProperties.get("listOfDates").propertyDeserializer.getClass());
-		CollectionConverter<Date> listOfDateConverter = (CollectionConverter<Date>) pDesc.mutableProperties
+		@SuppressWarnings("rawtypes")
+		CollectionConverter<Object> listOfDateConverter = (CollectionConverter) pDesc.mutableProperties
 				.get("listOfDates").propertyDeserializer;
 		assertEquals(DefaultConverters.DateConverter.class, listOfDateConverter
 				.getElementConverter().getClass());
@@ -163,8 +164,8 @@ public class BeanDescriptorTest {
 				ClassWithIgnoredProperties.class).booleanValue());
 	}
 
-	PropertyAccessor<?, ?> getAccessor(String name, BeanDescriptor<?> bd) {
-		for (PropertyAccessor<?, ?> a : bd.accessibleProperties)
+	PropertyAccessor getAccessor(String name, BeanDescriptor<?> bd) {
+		for (PropertyAccessor a : bd.accessibleProperties)
 			if (name.equals(a.name)) return a;
 		return null;
 	}
