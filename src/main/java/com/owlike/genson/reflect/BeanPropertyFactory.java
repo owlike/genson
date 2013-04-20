@@ -9,7 +9,6 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.owlike.genson.Converter;
 import com.owlike.genson.Genson;
 
 public interface BeanPropertyFactory {
@@ -54,8 +53,8 @@ public interface BeanPropertyFactory {
 		}
 
 		@Override
-		public BeanCreator createCreator(Type ofType, Constructor<?> ctr,
-				String[] resolvedNames, Genson genson) {
+		public BeanCreator createCreator(Type ofType, Constructor<?> ctr, String[] resolvedNames,
+				Genson genson) {
 			for (BeanPropertyFactory factory : factories) {
 				BeanCreator creator = factory.createCreator(ofType, ctr, resolvedNames, genson);
 				if (creator != null) return creator;
@@ -67,8 +66,7 @@ public interface BeanPropertyFactory {
 		public BeanCreator createCreator(Type ofType, Method method, String[] resolvedNames,
 				Genson genson) {
 			for (BeanPropertyFactory factory : factories) {
-				BeanCreator creator = factory.createCreator(ofType, method, resolvedNames,
-						genson);
+				BeanCreator creator = factory.createCreator(ofType, method, resolvedNames, genson);
 				if (creator != null) return creator;
 			}
 			throw new RuntimeException("Failed to create a BeanCreator for method " + method);
@@ -97,51 +95,48 @@ public interface BeanPropertyFactory {
 		public PropertyAccessor createAccessor(String name, Field field, Type ofType, Genson genson) {
 			Class<?> ofClass = getRawClass(ofType);
 			Type expandedType = TypeUtil.expandType(field.getGenericType(), ofType);
-			return new PropertyAccessor.FieldAccessor(name, field, expandedType, ofClass,
-					genson.provideConverter(expandedType));
+			return new PropertyAccessor.FieldAccessor(name, field, expandedType, ofClass);
 		}
 
 		public PropertyAccessor createAccessor(String name, Method method, Type ofType,
 				Genson genson) {
 			Type expandedType = TypeUtil.expandType(method.getGenericReturnType(), ofType);
 			return new PropertyAccessor.MethodAccessor(name, method, expandedType,
-					getRawClass(ofType), genson.provideConverter(expandedType));
+					getRawClass(ofType));
 		}
 
 		public PropertyMutator createMutator(String name, Field field, Type ofType, Genson genson) {
 			Class<?> ofClass = getRawClass(ofType);
 			Type expandedType = TypeUtil.expandType(field.getGenericType(), ofType);
-			return new PropertyMutator.FieldMutator(name, field, expandedType, ofClass,
-					genson.provideConverter(expandedType));
+			return new PropertyMutator.FieldMutator(name, field, expandedType, ofClass);
 		}
 
 		public PropertyMutator createMutator(String name, Method method, Type ofType, Genson genson) {
 			Type expandedType = TypeUtil.expandType(method.getGenericParameterTypes()[0], ofType);
 			return new PropertyMutator.MethodMutator(name, method, expandedType,
-					getRawClass(ofType), genson.provideConverter(expandedType));
+					getRawClass(ofType));
 		}
 
 		// ofClass is not necessarily of same type as method return type, as ofClass corresponds to
 		// the declaring class!
 		public BeanCreator createCreator(Type ofType, Method method, String[] resolvedNames,
 				Genson genson) {
-			return new BeanCreator.MethodBeanCreator(method, resolvedNames,
-					resolveConverters(method.getGenericParameterTypes(), ofType, genson));
+			return new BeanCreator.MethodBeanCreator(method, resolvedNames, expandTypes(
+					method.getGenericParameterTypes(), ofType));
 		}
 
-		public BeanCreator createCreator(Type ofType, Constructor<?> ctr,
-				String[] resolvedNames, Genson genson) {
+		public BeanCreator createCreator(Type ofType, Constructor<?> ctr, String[] resolvedNames,
+				Genson genson) {
 			return new BeanCreator.ConstructorBeanCreator(getRawClass(ofType), ctr, resolvedNames,
-					resolveConverters(ctr.getGenericParameterTypes(), ofType, genson));
+					expandTypes(ctr.getGenericParameterTypes(), ofType));
 		}
 
-		@SuppressWarnings("unchecked")
-		private Converter<Object>[] resolveConverters(Type[] types, Type ofType, Genson genson) {
-			Converter<?>[] converters = new Converter<?>[types.length];
-			for (int i = 0; i < types.length; i++) {
-				converters[i] = genson.provideConverter(TypeUtil.expandType(types[i], ofType));
+		public Type[] expandTypes(Type[] typesToExpand, Type inContext) {
+			Type[] expandedTypes = new Type[typesToExpand.length];
+			for (int i = 0; i < typesToExpand.length; i++) {
+				expandedTypes[i] = TypeUtil.expandType(typesToExpand[i], inContext);
 			}
-			return (Converter<Object>[]) converters;
+			return expandedTypes;
 		}
 	}
 }

@@ -1,6 +1,7 @@
 package com.owlike.genson.reflect;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -14,13 +15,10 @@ import com.owlike.genson.stream.ObjectWriter;
 
 public abstract class PropertyAccessor extends BeanProperty implements
 		Comparable<PropertyAccessor> {
-	// package visibility for testing
-	final Serializer<Object> propertySerializer;
+	Serializer<Object> propertySerializer;
 
-	protected PropertyAccessor(String name, Type type, Class<?> declaringClass,
-			Serializer<Object> propertySerializer) {
-		super(name, type, declaringClass);
-		this.propertySerializer = propertySerializer;
+	protected PropertyAccessor(String name, Type type, Class<?> declaringClass, Annotation[] annotations) {
+		super(name, type, declaringClass, annotations);
 	}
 
 	public void serialize(Object propertySource, ObjectWriter writer, Context ctx)
@@ -55,9 +53,8 @@ public abstract class PropertyAccessor extends BeanProperty implements
 	public static class MethodAccessor extends PropertyAccessor {
 		protected final Method _getter;
 
-		public MethodAccessor(String name, Method getter, Type type, Class<?> declaringClass,
-				Serializer<Object> propertySerializer) {
-			super(name, type, declaringClass, propertySerializer);
+		public MethodAccessor(String name, Method getter, Type type, Class<?> declaringClass) {
+			super(name, type, declaringClass, getter.getAnnotations());
 			this._getter = getter;
 			if (!_getter.isAccessible()) {
 				_getter.setAccessible(true);
@@ -78,12 +75,12 @@ public abstract class PropertyAccessor extends BeanProperty implements
 		}
 
 		@Override
-		public String signature() {
+		String signature() {
 			return _getter.toGenericString();
 		}
 
 		@Override
-		public int priority() {
+		int priority() {
 			return 100;
 		}
 	}
@@ -91,9 +88,8 @@ public abstract class PropertyAccessor extends BeanProperty implements
 	public static class FieldAccessor extends PropertyAccessor {
 		protected final Field _field;
 
-		public FieldAccessor(String name, Field field, Type type, Class<?> declaringClass,
-				Serializer<Object> propertySerializer) {
-			super(name, type, declaringClass, propertySerializer);
+		public FieldAccessor(String name, Field field, Type type, Class<?> declaringClass) {
+			super(name, type, declaringClass, field.getAnnotations());
 			this._field = field;
 			if (!_field.isAccessible()) {
 				_field.setAccessible(true);

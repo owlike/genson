@@ -3,12 +3,17 @@ package com.owlike.genson.reflect;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.owlike.genson.Converter;
+import com.owlike.genson.Factory;
 import com.owlike.genson.Genson;
+import com.owlike.genson.ThreadLocalHolder;
+import com.owlike.genson.internal.ContextualFactory;
 
 import static com.owlike.genson.reflect.TypeUtil.*;
 
@@ -27,9 +32,59 @@ import static com.owlike.genson.reflect.TypeUtil.*;
  * 
  */
 public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorProvider {
-	protected AbstractBeanDescriptorProvider() {
+	final static String CONTEXT_KEY = "__GENSON$CREATION_CONTEXT";
+
+	public final static class ContextualConverterFactory {
+		private final List<? extends ContextualFactory<?>> contextualFactories;
+
+		public ContextualConverterFactory(List<? extends ContextualFactory<?>> contextualFactories) {
+			this.contextualFactories = contextualFactories != null ? new ArrayList<ContextualFactory<?>>(
+					contextualFactories) : new ArrayList<ContextualFactory<?>>();
+		}
+
+		Converter<?> provide(BeanProperty property, Genson genson) {
+			Type type = property.getType();
+			for (Iterator<? extends ContextualFactory<?>> it = contextualFactories.iterator(); it
+					.hasNext();) {
+				ContextualFactory<?> factory = it.next();
+				Converter<?> object = null;
+				Type factoryType = lookupGenericType(ContextualFactory.class, factory.getClass());
+				factoryType = expandType(factoryType, factory.getClass());
+				Type factoryParameter = typeOf(0, factoryType);
+
+				if (type instanceof Class<?> && ((Class<?>) type).isPrimitive())
+					type = wrap((Class<?>) type);
+
+				if (match(type, factoryParameter, false)
+						&& (object = factory.create(property, genson)) != null) {
+					return object;
+				}
+			}
+			return null;
+		}
 	}
-	
+
+	public final static class ContextualFactoryDecorator implements Factory<Converter<?>> {
+		private final Factory<Converter<?>> delegatedConverter;
+
+		public ContextualFactoryDecorator(Factory<Converter<?>> delegatedConverter) {
+			this.delegatedConverter = delegatedConverter;
+		}
+
+		@Override
+		public Converter<?> create(Type type, Genson genson) {
+			Converter<?> converter = ThreadLocalHolder.get(CONTEXT_KEY, Converter.class);
+			if (converter != null) return converter;
+			return delegatedConverter.create(type, genson);
+		}
+	}
+
+	private final ContextualConverterFactory contextualConverterFactory;
+
+	protected AbstractBeanDescriptorProvider(ContextualConverterFactory contextualConverterFactory) {
+		this.contextualConverterFactory = contextualConverterFactory;
+	}
+
 	@Override
 	public <T> BeanDescriptor<T> provide(Class<T> ofClass, Genson genson) {
 		return provide(ofClass, ofClass, genson);
@@ -39,7 +94,7 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 	public BeanDescriptor<?> provide(Type ofType, Genson genson) {
 		return provide(getRawClass(ofType), ofType, genson);
 	}
-	
+
 	@Override
 	public <T> BeanDescriptor<T> provide(Class<T> ofClass, Type ofType, Genson genson) {
 		Map<String, LinkedList<PropertyMutator>> mutatorsMap = new LinkedHashMap<String, LinkedList<PropertyMutator>>();
@@ -50,11 +105,9 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 		provideBeanPropertyAccessors(ofType, accessorsMap, genson);
 		provideBeanPropertyMutators(ofType, mutatorsMap, genson);
 
-		List<PropertyAccessor> accessors = new ArrayList<PropertyAccessor>(
-				accessorsMap.size());
+		List<PropertyAccessor> accessors = new ArrayList<PropertyAccessor>(accessorsMap.size());
 		for (Map.Entry<String, LinkedList<PropertyAccessor>> entry : accessorsMap.entrySet()) {
-			PropertyAccessor accessor = checkAndMergeAccessors(entry.getKey(),
-					entry.getValue());
+			PropertyAccessor accessor = checkAndMergeAccessors(entry.getKey(), entry.getValue());
 			// in case of...
 			if (accessor != null) accessors.add(accessor);
 		}
@@ -69,6 +122,23 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 		mergeMutatorsWithCreatorProperties(ofType, mutators, creators);
 		BeanCreator ctr = checkAndMerge(ofType, creators);
 
+		// 1 - prepare the converters for the accessors
+		for (PropertyAccessor accessor : accessors) {
+			accessor.propertySerializer = provide(accessor, genson);
+		}
+
+		// 2 - prepare the mutators
+		for (PropertyMutator mutator : mutators.values()) {
+			mutator.propertyDeserializer = provide(mutator, genson);
+		}
+
+		// 3 - prepare the converters for creator parameters
+		if (ctr != null) {
+			for (PropertyMutator mutator : ctr.parameters.values()) {
+				mutator.propertyDeserializer = provide(mutator, genson);
+			}
+		}
+
 		// lets fail fast if the BeanDescriptor has been built for the wrong type.
 		// another option could be to pass in all the methods an additional parameter Class<T> that
 		// would not necessarily correspond to the rawClass of ofType. In fact we authorize that
@@ -81,6 +151,30 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 					+ " seems to do something wrong. Expected BeanDescriptor for type " + ofClass
 					+ " but provided BeanDescriptor for type " + descriptor.getOfClass());
 		return descriptor;
+	}
+
+	private Converter<Object> provide(BeanProperty property, Genson genson) {
+		// contextual converters must not be retrieved from cache nor stored in cache, by first
+		// trying to create it and reusing it during the
+		// call to genson.provideConverter we avoid retrieving it from cache, and by setting
+		// DO_NOT_CACHE_CONVERTER to true we tell genson not to store
+		// this converter in cache
+
+		@SuppressWarnings("unchecked")
+		Converter<Object> converter = (Converter<Object>) contextualConverterFactory.provide(
+				property, genson);
+		if (converter != null) {
+			ThreadLocalHolder.store("__GENOSN$DO_NOT_CACHE_CONVERTER", true);
+			ThreadLocalHolder.store(CONTEXT_KEY, converter);
+		}
+		try {
+			return genson.provideConverter(property.type);
+		} finally {
+			if (converter != null) {
+				ThreadLocalHolder.remove("__GENOSN$DO_NOT_CACHE_CONVERTER", Boolean.class);
+				ThreadLocalHolder.remove(CONTEXT_KEY, Converter.class);
+			}
+		}
 	}
 
 	/**
@@ -101,6 +195,7 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 
 	/**
 	 * Provides a list of {@link BeanCreator} for type ofType.
+	 * 
 	 * @param ofType
 	 * @param genson
 	 * @return
@@ -151,6 +246,7 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 	/**
 	 * Implementations may do additional merge operations based on resolved creators and their
 	 * properties and the resolved mutators.
+	 * 
 	 * @param ofType
 	 * @param mutators
 	 * @param creators

@@ -1,6 +1,7 @@
 package com.owlike.genson.reflect;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -14,13 +15,10 @@ import com.owlike.genson.stream.ObjectReader;
 
 public abstract class PropertyMutator extends BeanProperty implements
 		Comparable<PropertyMutator> {
-	// package visibility for testing
-	final Deserializer<Object> propertyDeserializer;
+	Deserializer<Object> propertyDeserializer;
 
-	protected PropertyMutator(String name, Type type, Class<?> declaringClass,
-			Deserializer<Object> propertyDeserializer) {
-		super(name, type, declaringClass);
-		this.propertyDeserializer = propertyDeserializer;
+	protected PropertyMutator(String name, Type type, Class<?> declaringClass, Annotation[] annotations) {
+		super(name, type, declaringClass, annotations);
 	}
 
 	public Object deserialize(ObjectReader reader, Context ctx) throws TransformationException,
@@ -61,9 +59,8 @@ public abstract class PropertyMutator extends BeanProperty implements
 	public static class MethodMutator extends PropertyMutator {
 		protected final Method _setter;
 
-		public MethodMutator(String name, Method setter, Type type, Class<?> declaringClass,
-				Deserializer<Object> propertyDeserializer) {
-			super(name, type, declaringClass, propertyDeserializer);
+		public MethodMutator(String name, Method setter, Type type, Class<?> declaringClass) {
+			super(name, type, declaringClass, setter.getAnnotations());
 			this._setter = setter;
 			if (!_setter.isAccessible()) {
 				_setter.setAccessible(true);
@@ -97,9 +94,8 @@ public abstract class PropertyMutator extends BeanProperty implements
 	public static class FieldMutator extends PropertyMutator {
 		protected final Field _field;
 
-		public FieldMutator(String name, Field field, Type type, Class<?> declaringClass,
-				Deserializer<Object> propertyDeserializer) {
-			super(name, type, declaringClass, propertyDeserializer);
+		public FieldMutator(String name, Field field, Type type, Class<?> declaringClass) {
+			super(name, type, declaringClass, field.getAnnotations());
 			this._field = field;
 			if (!_field.isAccessible()) {
 				_field.setAccessible(true);

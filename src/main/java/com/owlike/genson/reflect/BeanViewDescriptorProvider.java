@@ -16,9 +16,7 @@ import static com.owlike.genson.Trilean.TRUE;
 import static com.owlike.genson.reflect.TypeUtil.*;
 
 import com.owlike.genson.BeanView;
-import com.owlike.genson.Deserializer;
 import com.owlike.genson.Genson;
-import com.owlike.genson.Serializer;
 import com.owlike.genson.TransformationRuntimeException;
 import com.owlike.genson.Trilean;
 import com.owlike.genson.annotation.Creator;
@@ -35,13 +33,15 @@ import com.owlike.genson.reflect.PropertyMutator.MethodMutator;
  * 
  */
 public class BeanViewDescriptorProvider extends BaseBeanDescriptorProvider {
-	
+
 	private Map<Class<?>, BeanView<?>> views;
 	private Map<Class<?>, BeanDescriptor<?>> descriptors = new ConcurrentHashMap<Class<?>, BeanDescriptor<?>>();
 
-	public BeanViewDescriptorProvider(Map<Class<?>, BeanView<?>> views, BeanPropertyFactory propertyFactory, BeanMutatorAccessorResolver mutatorAccessorResolver,
-			PropertyNameResolver nameResolver) {
-		super(propertyFactory, mutatorAccessorResolver, nameResolver, true, false, true);
+	public BeanViewDescriptorProvider(ContextualConverterFactory ctxConverterFactory,
+			Map<Class<?>, BeanView<?>> views, BeanPropertyFactory propertyFactory,
+			BeanMutatorAccessorResolver mutatorAccessorResolver, PropertyNameResolver nameResolver) {
+		super(ctxConverterFactory, propertyFactory, mutatorAccessorResolver, nameResolver, true,
+				false, true);
 		this.views = views;
 	}
 
@@ -110,44 +110,42 @@ public class BeanViewDescriptorProvider extends BaseBeanDescriptorProvider {
 
 	public static class BeanViewPropertyFactory implements BeanPropertyFactory {
 		private final Map<Class<?>, BeanView<?>> views;
-		
+
 		public BeanViewPropertyFactory(Map<Class<?>, BeanView<?>> views) {
 			this.views = views;
 		}
-		
+
 		public PropertyAccessor createAccessor(String name, Method method, Type ofType,
 				Genson genson) {
 			// the target bean must be first (and single) parameter for beanview accessors
 			BeanView<?> beanview = views.get(getRawClass(ofType));
 			Type superTypeWithParameter = TypeUtil.lookupGenericType(BeanView.class,
 					beanview.getClass());
-			Class<?> tClass = getRawClass(typeOf(0, expandType(superTypeWithParameter, beanview.getClass())));
+			Class<?> tClass = getRawClass(typeOf(0,
+					expandType(superTypeWithParameter, beanview.getClass())));
 			Type type = expandType(method.getGenericReturnType(), ofType);
-			return new BeanViewPropertyAccessor(name, method, type, beanview, tClass,
-					genson.provideConverter(type));
+			return new BeanViewPropertyAccessor(name, method, type, beanview, tClass);
 		}
-		
-		public PropertyMutator createMutator(String name, Method method, Type ofType,
-				Genson genson) {
+
+		public PropertyMutator createMutator(String name, Method method, Type ofType, Genson genson) {
 			// the target bean must be second parameter for beanview mutators
 			BeanView<?> beanview = views.get(getRawClass(ofType));
 			Type superTypeWithParameter = TypeUtil.lookupGenericType(BeanView.class,
 					beanview.getClass());
-			Class<?> tClass = getRawClass(typeOf(0, expandType(superTypeWithParameter, beanview.getClass())));
+			Class<?> tClass = getRawClass(typeOf(0,
+					expandType(superTypeWithParameter, beanview.getClass())));
 			Type type = expandType(method.getGenericParameterTypes()[0], ofType);
-			return new BeanViewPropertyMutator(name, method, type, beanview, tClass,
-					genson.provideConverter(type));
+			return new BeanViewPropertyMutator(name, method, type, beanview, tClass);
 		}
 
 		@Override
-		public PropertyAccessor createAccessor(String name, Field field, Type ofType,
-				Genson genson) {
+		public PropertyAccessor createAccessor(String name, Field field, Type ofType, Genson genson) {
 			return null;
 		}
 
 		@Override
-		public BeanCreator createCreator(Type ofType, Constructor<?> ctr,
-				String[] resolvedNames, Genson genson) {
+		public BeanCreator createCreator(Type ofType, Constructor<?> ctr, String[] resolvedNames,
+				Genson genson) {
 			return null;
 		}
 
@@ -158,8 +156,7 @@ public class BeanViewDescriptorProvider extends BaseBeanDescriptorProvider {
 		}
 
 		@Override
-		public PropertyMutator createMutator(String name, Field field, Type ofType,
-				Genson genson) {
+		public PropertyMutator createMutator(String name, Field field, Type ofType, Genson genson) {
 			return null;
 		}
 	}
@@ -222,8 +219,8 @@ public class BeanViewDescriptorProvider extends BaseBeanDescriptorProvider {
 		private final BeanView<?> _view;
 
 		public BeanViewPropertyAccessor(String name, Method getter, Type type, BeanView<?> target,
-				Class<?> tClass, Serializer<Object> propertySeriliazer) {
-			super(name, getter, type, tClass, propertySeriliazer);
+				Class<?> tClass) {
+			super(name, getter, type, tClass);
 			this._view = target;
 		}
 
@@ -245,8 +242,8 @@ public class BeanViewDescriptorProvider extends BaseBeanDescriptorProvider {
 		private final BeanView<?> _view;
 
 		public BeanViewPropertyMutator(String name, Method setter, Type type, BeanView<?> target,
-				Class<?> tClass, Deserializer<Object> propertyDeserializer) {
-			super(name, setter, type, tClass, propertyDeserializer);
+				Class<?> tClass) {
+			super(name, setter, type, tClass);
 			this._view = target;
 		}
 

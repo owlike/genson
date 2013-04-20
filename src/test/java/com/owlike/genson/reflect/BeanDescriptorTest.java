@@ -18,6 +18,7 @@ import com.owlike.genson.annotation.JsonProperty;
 import com.owlike.genson.convert.BasicConvertersFactory;
 import com.owlike.genson.convert.DefaultConverters;
 import com.owlike.genson.convert.DefaultConverters.CollectionConverter;
+import com.owlike.genson.reflect.AbstractBeanDescriptorProvider.ContextualConverterFactory;
 import com.owlike.genson.reflect.BaseBeanDescriptorProvider;
 import com.owlike.genson.reflect.BeanDescriptor;
 import com.owlike.genson.reflect.BeanMutatorAccessorResolver;
@@ -33,8 +34,9 @@ public class BeanDescriptorTest {
 	public void testFailFastBeanDescriptorWithWrongType() {
 		BeanDescriptorProvider provider = new Genson.Builder() {
 			protected BeanDescriptorProvider createBeanDescriptorProvider() {
-				return new BaseBeanDescriptorProvider(new BeanPropertyFactory.CompositeFactory(
-						Arrays.asList(new BeanPropertyFactory.StandardFactory())),
+				return new BaseBeanDescriptorProvider(new ContextualConverterFactory(null),
+						new BeanPropertyFactory.CompositeFactory(Arrays
+								.asList(new BeanPropertyFactory.StandardFactory())),
 						getMutatorAccessorResolver(), getPropertyNameResolver(),
 						isUseGettersAndSetters(), isUseFields(), true) {
 					@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -83,8 +85,9 @@ public class BeanDescriptorTest {
 		Genson genson = new Genson.Builder() {
 			@Override
 			protected Factory<Converter<?>> createConverterFactory() {
-				return new BasicConvertersFactory(getSerializersMap(), getDeserializersMap(),
-						getFactories(), getBeanDescriptorProvider());
+				return new BasicConvertersFactory(
+						getSerializersMap(), getDeserializersMap(), getFactories(),
+						getBeanDescriptorProvider());
 			}
 		}.setWithDebugInfoPropertyNameResolver(true).create();
 
@@ -110,7 +113,7 @@ public class BeanDescriptorTest {
 	@Test
 	public void genericTypeTest() throws TransformationException, IOException {
 		BaseBeanDescriptorProvider provider = new BaseBeanDescriptorProvider(
-				new BeanPropertyFactory.CompositeFactory(
+				new ContextualConverterFactory(null), new BeanPropertyFactory.CompositeFactory(
 						Arrays.asList(new BeanPropertyFactory.StandardFactory())),
 				new BeanMutatorAccessorResolver.StandardMutaAccessorResolver(),
 				new PropertyNameResolver.ConventionalBeanPropertyNameResolver(), true, true, true);

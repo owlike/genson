@@ -89,7 +89,7 @@ public class JaxbAnnotationsSupportTest {
 
 	@Test
 	public void testXmlJavaTypeAdapter() throws TransformationException, IOException {
-		System.out.println(genson.serialize(new XmlJavaTypeAdapterBean()));
+		assertEquals("{\"v\":\"0\"}", genson.serialize(new XmlJavaTypeAdapterBean()));
 	}
 
 	@Test

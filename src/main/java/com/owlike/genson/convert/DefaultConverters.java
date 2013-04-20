@@ -17,10 +17,12 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -34,7 +36,10 @@ import com.owlike.genson.TransformationException;
 import com.owlike.genson.TransformationRuntimeException;
 import com.owlike.genson.annotation.HandleClassMetadata;
 import com.owlike.genson.annotation.HandleNull;
+import com.owlike.genson.annotation.JsonDateFormat;
 import com.owlike.genson.annotation.WithoutBeanView;
+import com.owlike.genson.internal.ContextualFactory;
+import com.owlike.genson.reflect.BeanProperty;
 import com.owlike.genson.reflect.TypeUtil;
 import com.owlike.genson.stream.ObjectReader;
 import com.owlike.genson.stream.ObjectWriter;
@@ -52,6 +57,9 @@ import static com.owlike.genson.reflect.TypeUtil.*;
  * 
  */
 public final class DefaultConverters {
+	private DefaultConverters() {
+	}
+
 	@HandleClassMetadata
 	public static class SetConverter<E> extends CollectionConverter<E> {
 
@@ -62,6 +70,21 @@ public final class DefaultConverters {
 		@Override
 		protected Collection<E> create() {
 			return new HashSet<E>();
+		}
+	}
+
+	public static class EnumSetConverter<E> extends CollectionConverter<E> {
+		private final Class<E> eClass;
+
+		public EnumSetConverter(Class<E> eClass, Converter<E> elementConverter) {
+			super(eClass, elementConverter);
+			this.eClass = eClass;
+		}
+
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		@Override
+		protected Collection<E> create() {
+			return EnumSet.noneOf((Class) eClass);
 		}
 	}
 
@@ -121,6 +144,8 @@ public final class DefaultConverters {
 					.getCollectionType(forType));
 
 			Class<?> parameterRawClass = TypeUtil.getRawClass(TypeUtil.getCollectionType(forType));
+			if (EnumSet.class.isAssignableFrom(getRawClass(forType)) && parameterRawClass.isEnum())
+				return new EnumSetConverter(parameterRawClass, elementConverter);
 			if (Set.class.isAssignableFrom(TypeUtil.getRawClass(forType)))
 				return new SetConverter(parameterRawClass, elementConverter);
 			return new CollectionConverter(parameterRawClass, elementConverter);
@@ -452,7 +477,7 @@ public final class DefaultConverters {
 	public static abstract class MapConverter<K, V> implements Converter<Map<K, V>> {
 		private final Converter<V> valueConverter;
 		private final KeyAdapter<K> keyAdapter;
-		
+
 		public MapConverter(KeyAdapter<K> keyAdapter, Converter<V> valueConverter) {
 			this.keyAdapter = keyAdapter;
 			this.valueConverter = valueConverter;
@@ -479,46 +504,50 @@ public final class DefaultConverters {
 			}
 			writer.endObject();
 		}
-		
+
 		protected abstract Map<K, V> create();
 	}
-	
+
 	public final static class HashMapConverter<K, V> extends MapConverter<K, V> {
 		public HashMapConverter(KeyAdapter<K> keyAdapter, Converter<V> valueConverter) {
 			super(keyAdapter, valueConverter);
 		}
+
 		@Override
 		protected Map<K, V> create() {
 			return new HashMap<K, V>();
 		}
 	}
-	
+
 	public final static class HashTableConverter<K, V> extends MapConverter<K, V> {
 		public HashTableConverter(KeyAdapter<K> keyAdapter, Converter<V> valueConverter) {
 			super(keyAdapter, valueConverter);
 		}
+
 		@Override
 		protected Map<K, V> create() {
 			return new Hashtable<K, V>();
 		}
 	}
-	
+
 	@SuppressWarnings("rawtypes")
 	public final static class PropertiesConverter extends MapConverter {
 		@SuppressWarnings("unchecked")
 		public PropertiesConverter(KeyAdapter keyAdapter, Converter valueConverter) {
 			super(keyAdapter, valueConverter);
 		}
+
 		@Override
 		protected Map create() {
 			return new Properties();
 		}
 	}
-	
+
 	private static abstract class KeyAdapter<K> {
 		public abstract K adapt(String str);
+
 		public abstract String adapt(K key);
-		
+
 		public final static KeyAdapter<Object> runtimeAdapter = new KeyAdapter<Object>() {
 			@Override
 			public Object adapt(String str) {
@@ -530,14 +559,14 @@ public final class DefaultConverters {
 				return key.toString();
 			}
 		};
-		
+
 		public final static KeyAdapter<String> strAdapter = new KeyAdapter<String>() {
 			@Override
 			public String adapt(String key) {
 				return key;
 			}
 		};
-		
+
 		public final static KeyAdapter<Short> shortAdapter = new KeyAdapter<Short>() {
 			@Override
 			public Short adapt(String str) {
@@ -549,7 +578,7 @@ public final class DefaultConverters {
 				return key.toString();
 			}
 		};
-		
+
 		public final static KeyAdapter<Integer> intAdapter = new KeyAdapter<Integer>() {
 			@Override
 			public Integer adapt(String str) {
@@ -561,7 +590,7 @@ public final class DefaultConverters {
 				return key.toString();
 			}
 		};
-		
+
 		public final static KeyAdapter<Long> longAdapter = new KeyAdapter<Long>() {
 			@Override
 			public Long adapt(String str) {
@@ -573,7 +602,7 @@ public final class DefaultConverters {
 				return key.toString();
 			}
 		};
-		
+
 		public final static KeyAdapter<Float> floatAdapter = new KeyAdapter<Float>() {
 			@Override
 			public Float adapt(String str) {
@@ -585,7 +614,7 @@ public final class DefaultConverters {
 				return key.toString();
 			}
 		};
-		
+
 		public final static KeyAdapter<Double> doubleAdapter = new KeyAdapter<Double>() {
 			@Override
 			public Double adapt(String str) {
@@ -650,7 +679,8 @@ public final class DefaultConverters {
 		}
 	}
 
-	public final static class MapConverterFactory implements Factory<Converter<? extends Map<?, ?>>> {
+	public final static class MapConverterFactory implements
+			Factory<Converter<? extends Map<?, ?>>> {
 		public final static MapConverterFactory instance = new MapConverterFactory();
 
 		private MapConverterFactory() {
@@ -664,42 +694,69 @@ public final class DefaultConverters {
 			if (getRawClass(type).getTypeParameters().length == 0) {
 				expandedType = expandType(lookupGenericType(Map.class, getRawClass(type)), type);
 			}
-			
+
 			Type keyType = typeOf(0, expandedType);
 			Type valueType = typeOf(1, expandedType);
 			Class<?> keyRawClass = getRawClass(keyType);
 			if (Object.class.equals(keyRawClass)) {
-				return createConverter(getRawClass(type), KeyAdapter.runtimeAdapter, genson.provideConverter(valueType));
+				return createConverter(getRawClass(type), KeyAdapter.runtimeAdapter,
+						genson.provideConverter(valueType));
 			} else if (String.class.equals(keyRawClass)) {
-				return createConverter(getRawClass(type), KeyAdapter.strAdapter, genson.provideConverter(valueType));
+				return createConverter(getRawClass(type), KeyAdapter.strAdapter,
+						genson.provideConverter(valueType));
 			} else if (int.class.equals(keyRawClass) || Integer.class.equals(keyRawClass)) {
-				return createConverter(getRawClass(type), KeyAdapter.intAdapter, genson.provideConverter(valueType));
+				return createConverter(getRawClass(type), KeyAdapter.intAdapter,
+						genson.provideConverter(valueType));
 			} else if (double.class.equals(keyRawClass) || Double.class.equals(keyRawClass)) {
-				return createConverter(getRawClass(type), KeyAdapter.doubleAdapter, genson.provideConverter(valueType));
+				return createConverter(getRawClass(type), KeyAdapter.doubleAdapter,
+						genson.provideConverter(valueType));
 			} else if (long.class.equals(keyRawClass) || Long.class.equals(keyRawClass)) {
-				return createConverter(getRawClass(type), KeyAdapter.longAdapter, genson.provideConverter(valueType));
+				return createConverter(getRawClass(type), KeyAdapter.longAdapter,
+						genson.provideConverter(valueType));
 			} else if (float.class.equals(keyRawClass) || Float.class.equals(keyRawClass)) {
-				return createConverter(getRawClass(type), KeyAdapter.floatAdapter, genson.provideConverter(valueType));
+				return createConverter(getRawClass(type), KeyAdapter.floatAdapter,
+						genson.provideConverter(valueType));
 			} else if (short.class.equals(keyRawClass) || Short.class.equals(keyRawClass)) {
-				return createConverter(getRawClass(type), KeyAdapter.shortAdapter, genson.provideConverter(valueType));
+				return createConverter(getRawClass(type), KeyAdapter.shortAdapter,
+						genson.provideConverter(valueType));
 			} else {
 				return new ComplexMapConverter(genson.provideConverter(keyType),
 						genson.provideConverter(valueType));
 			}
 		}
-		
+
 		@SuppressWarnings("unchecked")
-		private <K, V> MapConverter<K, V> createConverter(Class<?> typeOfMap, KeyAdapter<K> keyAdapter, Converter<V> valueConverter) {
+		private <K, V> MapConverter<K, V> createConverter(Class<?> typeOfMap,
+				KeyAdapter<K> keyAdapter, Converter<V> valueConverter) {
 			if (Properties.class.equals(typeOfMap)) {
 				return new PropertiesConverter(keyAdapter, valueConverter);
 			}
-			
-			if (Hashtable.class.equals(typeOfMap)) 
+
+			if (Hashtable.class.equals(typeOfMap))
 				return new HashTableConverter<K, V>(keyAdapter, valueConverter);
-			
+
 			return new HashMapConverter<K, V>(keyAdapter, valueConverter);
 		}
 	};
+
+	@SuppressWarnings("rawtypes")
+	public static class DateContextualFactory implements ContextualFactory {
+		@Override
+		public Converter create(BeanProperty property, Genson genson) {
+			JsonDateFormat ann = property.getAnnotation(JsonDateFormat.class);
+			if (ann != null) {
+				Locale locale = ann.locale().isEmpty() ? Locale.getDefault() : new Locale(
+						ann.locale());
+				SimpleDateFormat dateFormat = new SimpleDateFormat(ann.value(), locale);
+				if (Date.class.isAssignableFrom(property.getRawClass()))
+					return new DateConverter(dateFormat, ann.asTimeInMillis());
+				if (Calendar.class.isAssignableFrom(property.getRawClass()))
+					return new CalendarConverter(
+							new DateConverter(dateFormat, ann.asTimeInMillis()));
+			}
+			return null;
+		}
+	}
 
 	@HandleClassMetadata
 	@WithoutBeanView
@@ -978,22 +1035,24 @@ public final class DefaultConverters {
 			return cal;
 		}
 	}
-	
+
 	@HandleClassMetadata
 	@WithoutBeanView
 	public final static class FileConverter implements Converter<File> {
 		public final static FileConverter instance = new FileConverter();
-		
-		private FileConverter() {}
-		
+
+		private FileConverter() {
+		}
+
 		@Override
-		public void serialize(File object, ObjectWriter writer, Context ctx) throws TransformationException,
-				IOException {
+		public void serialize(File object, ObjectWriter writer, Context ctx)
+				throws TransformationException, IOException {
 			writer.writeValue(object.getPath());
 		}
 
 		@Override
-		public File deserialize(ObjectReader reader, Context ctx) throws TransformationException, IOException {
+		public File deserialize(ObjectReader reader, Context ctx) throws TransformationException,
+				IOException {
 			return new File(reader.valueAsString());
 		}
 

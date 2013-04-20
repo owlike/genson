@@ -33,10 +33,13 @@ import com.owlike.genson.convert.NullConverter;
 import com.owlike.genson.convert.RuntimeTypeConverter;
 import com.owlike.genson.convert.DefaultConverters.DateConverter;
 import com.owlike.genson.ext.ExtensionConfigurer;
+import com.owlike.genson.internal.ContextualFactory;
 import com.owlike.genson.reflect.ASMCreatorParameterNameResolver;
 import com.owlike.genson.reflect.BaseBeanDescriptorProvider;
 import com.owlike.genson.reflect.BeanDescriptorProvider;
 import com.owlike.genson.reflect.BeanMutatorAccessorResolver;
+import com.owlike.genson.reflect.AbstractBeanDescriptorProvider.ContextualConverterFactory;
+import com.owlike.genson.reflect.AbstractBeanDescriptorProvider.ContextualFactoryDecorator;
 import com.owlike.genson.reflect.BeanPropertyFactory;
 import com.owlike.genson.reflect.BeanViewDescriptorProvider;
 import com.owlike.genson.reflect.PropertyNameResolver;
@@ -184,7 +187,8 @@ public final class Genson {
 			converter = (Converter<T>) converterFactory.create(forType, this);
 			if (converter == null)
 				throw new TransformationRuntimeException("No converter found for type " + forType);
-			converterCache.putIfAbsent(forType, converter);
+			if (!Boolean.TRUE.equals(ThreadLocalHolder.get("__GENOSN$DO_NOT_CACHE_CONVERTER",
+					Boolean.class))) converterCache.putIfAbsent(forType, converter);
 		}
 		return converter;
 	}
@@ -457,6 +461,7 @@ public final class Genson {
 		private final Map<Type, Serializer<?>> serializersMap = new HashMap<Type, Serializer<?>>();
 		private final Map<Type, Deserializer<?>> deserializersMap = new HashMap<Type, Deserializer<?>>();
 		private final List<Factory<?>> converterFactories = new ArrayList<Factory<?>>();
+		private final List<ContextualFactory<?>> contextualFactories = new ArrayList<ContextualFactory<?>>();
 
 		private boolean skipNull = false;
 		private boolean htmlSafe = false;
@@ -654,6 +659,11 @@ public final class Genson {
 		 */
 		public Builder withDeserializerFactory(Factory<? extends Deserializer<?>> factory) {
 			converterFactories.add(factory);
+			return this;
+		}
+
+		public Builder withContextualFactory(ContextualFactory<?>... factories) {
+			contextualFactories.addAll(Arrays.asList(factories));
 			return this;
 		}
 
@@ -1139,18 +1149,6 @@ public final class Genson {
 			if (mutatorAccessorResolver == null)
 				mutatorAccessorResolver = createBeanMutatorAccessorResolver();
 
-			beanDescriptorProvider = createBeanDescriptorProvider();
-
-			if (withBeanViewConverter) {
-				List<BeanMutatorAccessorResolver> resolvers = new ArrayList<BeanMutatorAccessorResolver>();
-				resolvers.add(new BeanViewDescriptorProvider.BeanViewMutatorAccessorResolver());
-				resolvers.add(mutatorAccessorResolver);
-				beanViewDescriptorProvider = new BeanViewDescriptorProvider(registeredViews,
-						createBeanPropertyFactory(),
-						new BeanMutatorAccessorResolver.CompositeResolver(resolvers),
-						getPropertyNameResolver());
-			}
-
 			List<Converter<?>> converters = new ArrayList<Converter<?>>();
 			for (ExtensionConfigurer extension : _extensions) {
 				extension.registerConverters(converters);
@@ -1161,6 +1159,9 @@ public final class Genson {
 			addDefaultSerializers(getDefaultSerializers());
 			addDefaultDeserializers(getDefaultDeserializers());
 
+			// we create temporary lists to hold the default and extension instances in order to
+			// prevent modification
+			// of user registered ones as the lists passed to the extensions are modifiable
 			List<Factory<? extends Converter<?>>> convFactories = new ArrayList<Factory<? extends Converter<?>>>();
 			for (ExtensionConfigurer extension : _extensions) {
 				extension.registerConverterFactories(convFactories);
@@ -1175,6 +1176,26 @@ public final class Genson {
 			List<Factory<? extends Deserializer<?>>> deserializerFactories = new ArrayList<Factory<? extends Deserializer<?>>>();
 			addDefaultDeserializerFactories(deserializerFactories);
 			converterFactories.addAll(deserializerFactories);
+
+			List<ContextualFactory<?>> defaultContextualFactories = new ArrayList<ContextualFactory<?>>();
+			for (ExtensionConfigurer extension : _extensions) {
+				extension.registerContextualFactories(defaultContextualFactories);
+			}
+			addDefaultContextualFactories(defaultContextualFactories);
+			contextualFactories.addAll(defaultContextualFactories);
+
+			beanDescriptorProvider = createBeanDescriptorProvider();
+
+			if (withBeanViewConverter) {
+				List<BeanMutatorAccessorResolver> resolvers = new ArrayList<BeanMutatorAccessorResolver>();
+				resolvers.add(new BeanViewDescriptorProvider.BeanViewMutatorAccessorResolver());
+				resolvers.add(mutatorAccessorResolver);
+				beanViewDescriptorProvider = new BeanViewDescriptorProvider(
+						new ContextualConverterFactory(contextualFactories), registeredViews,
+						createBeanPropertyFactory(),
+						new BeanMutatorAccessorResolver.CompositeResolver(resolvers),
+						getPropertyNameResolver());
+			}
 
 			return create(createConverterFactory(), withClassAliases);
 		}
@@ -1232,17 +1253,25 @@ public final class Genson {
 			// TODO should it be added to ExtensionConfigurer?
 			ChainedFactory chainHead = new CircularClassReferenceConverterFactory();
 			ChainedFactory chainTail = chainHead;
-			chainTail = chainTail.withNext(new NullConverter.NullConverterFactory()).withNext(
-					new ClassMetadataConverter.ClassMetadataConverterFactory());
+
+			chainTail = chainTail.withNext(new NullConverter.NullConverterFactory());
+
 			if (isUseRuntimeTypeForSerialization())
 				chainTail = chainTail
 						.withNext(new RuntimeTypeConverter.RuntimeTypeConverterFactory());
+
+			chainTail = chainTail
+					.withNext(new ClassMetadataConverter.ClassMetadataConverterFactory());
+
 			if (isWithBeanViewConverter())
 				chainTail = chainTail.withNext(new BeanViewConverter.BeanViewConverterFactory(
 						getBeanViewDescriptorProvider()));
 
-			chainTail.withNext(new BasicConvertersFactory(getSerializersMap(),
-					getDeserializersMap(), getFactories(), getBeanDescriptorProvider()));
+			ContextualFactoryDecorator ctxFactoryDecorator = new ContextualFactoryDecorator(
+					new BasicConvertersFactory(getSerializersMap(), getDeserializersMap(),
+							getFactories(), getBeanDescriptorProvider()));
+
+			chainTail.withNext(ctxFactoryDecorator);
 
 			return chainHead;
 		}
@@ -1335,6 +1364,10 @@ public final class Genson {
 			factories.add(new DefaultConverters.CalendarConverterFactory(defaultDateConverter));
 		}
 
+		protected void addDefaultContextualFactories(List<ContextualFactory<?>> factories) {
+			factories.add(new DefaultConverters.DateContextualFactory());
+		}
+
 		protected List<Serializer<?>> getDefaultSerializers() {
 			return null;
 		}
@@ -1360,7 +1393,8 @@ public final class Genson {
 		 * @return the BeanDescriptorProvider instance.
 		 */
 		protected BeanDescriptorProvider createBeanDescriptorProvider() {
-			return new BaseBeanDescriptorProvider(createBeanPropertyFactory(),
+			return new BaseBeanDescriptorProvider(new ContextualConverterFactory(
+					contextualFactories), createBeanPropertyFactory(),
 					getMutatorAccessorResolver(), getPropertyNameResolver(),
 					isUseGettersAndSetters(), isUseFields(), true);
 		}

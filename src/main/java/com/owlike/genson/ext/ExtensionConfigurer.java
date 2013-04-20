@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.owlike.genson.Converter;
 import com.owlike.genson.Factory;
+import com.owlike.genson.internal.ContextualFactory;
 import com.owlike.genson.reflect.BeanMutatorAccessorResolver;
 import com.owlike.genson.reflect.BeanPropertyFactory;
 import com.owlike.genson.reflect.PropertyNameResolver;
@@ -22,5 +23,8 @@ public abstract class ExtensionConfigurer {
 	}
 
 	public void registerBeanPropertyFactories(List<BeanPropertyFactory> factories) {
+	}
+	
+	public void registerContextualFactories(List<ContextualFactory<?>> factories) {
 	}
 }

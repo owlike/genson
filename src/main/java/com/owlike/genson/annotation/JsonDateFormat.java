@@ -21,7 +21,10 @@ import java.text.SimpleDateFormat;
 @Inherited
 @Documented
 public @interface JsonDateFormat {
-	String pattern();
-	boolean asLong() default false;
+	/**
+	 * The pattern to use.
+	 */
+	String value() default "";
+	boolean asTimeInMillis() default false;
 	String locale() default "";
 }

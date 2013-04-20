@@ -45,10 +45,11 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 	protected final boolean useFields;
 	protected final boolean favorEmptyCreators;
 
-	public BaseBeanDescriptorProvider(BeanPropertyFactory propertyFactory, BeanMutatorAccessorResolver mutatorAccessorResolver,
-			PropertyNameResolver nameResolver, boolean useGettersAndSetters, boolean useFields,
-			boolean favorEmptyCreators) {
-		super();
+	public BaseBeanDescriptorProvider(ContextualConverterFactory ctxConverterFactory, BeanPropertyFactory propertyFactory,
+			BeanMutatorAccessorResolver mutatorAccessorResolver, PropertyNameResolver nameResolver,
+			boolean useGettersAndSetters, boolean useFields, boolean favorEmptyCreators) {
+		super(ctxConverterFactory);
+		
 		if (mutatorAccessorResolver == null)
 			throw new IllegalArgumentException("mutatorAccessorResolver must be not null!");
 		if (nameResolver == null)
@@ -106,8 +107,7 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 		}
 	}
 
-	protected void provideConstructorCreators(Type ofType, List<BeanCreator> creators,
-			Genson genson) {
+	protected void provideConstructorCreators(Type ofType, List<BeanCreator> creators, Genson genson) {
 		Class<?> ofClass = getRawClass(ofType);
 		Constructor<?>[] ctrs = ofClass.getDeclaredConstructors();
 		for (Constructor<?> ctr : ctrs) {
@@ -131,8 +131,8 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 		}
 	}
 
-	protected void provideMethodCreators(Class<?> ofClass, List<BeanCreator> creators,
-			Type ofType, Genson genson) {
+	protected void provideMethodCreators(Class<?> ofClass, List<BeanCreator> creators, Type ofType,
+			Genson genson) {
 		Method[] ctrs = ofClass.getDeclaredMethods();
 		for (Method ctr : ctrs) {
 			if (TRUE == mutatorAccessorResolver.isCreator(ctr, getRawClass(ofType))) {
@@ -147,7 +147,8 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 				}
 
 				if (idx == paramCnt) {
-					BeanCreator creator = propertyFactory.createCreator(ofType, ctr, parameterNames, genson);
+					BeanCreator creator = propertyFactory.createCreator(ofType, ctr,
+							parameterNames, genson);
 					creators.add(creator);
 				}
 			}
@@ -165,8 +166,8 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 							+ ofClass.getName()
 							+ " has been discovered as accessor but its name couldn't be resolved!");
 				}
-				PropertyAccessor accessor = propertyFactory.createAccessor(name, field,
-						ofType, genson);
+				PropertyAccessor accessor = propertyFactory.createAccessor(name, field, ofType,
+						genson);
 				update(accessor, accessorsMap);
 			}
 		}
@@ -183,7 +184,8 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 							+ ofClass.getName()
 							+ " has been discovered as accessor but its name couldn't be resolved!");
 				}
-				PropertyAccessor accessor = propertyFactory.createAccessor(name, method, ofType, genson);
+				PropertyAccessor accessor = propertyFactory.createAccessor(name, method, ofType,
+						genson);
 				update(accessor, accessorsMap);
 			}
 		}
@@ -200,9 +202,9 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 							+ ofClass.getName()
 							+ " has been discovered as mutator but its name couldn't be resolved!");
 				}
-				
-				PropertyMutator mutator = propertyFactory.createMutator(name, field, ofType,
-						genson);
+
+				PropertyMutator mutator = propertyFactory
+						.createMutator(name, field, ofType, genson);
 				update(mutator, mutatorsMap);
 			}
 		}
@@ -219,7 +221,8 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 							+ ofClass.getName()
 							+ " has been discovered as mutator but its name couldn't be resolved!");
 				}
-				PropertyMutator mutator = propertyFactory.createMutator(name, method, ofType, genson);
+				PropertyMutator mutator = propertyFactory.createMutator(name, method, ofType,
+						genson);
 				update(mutator, mutatorsMap);
 			}
 		}
