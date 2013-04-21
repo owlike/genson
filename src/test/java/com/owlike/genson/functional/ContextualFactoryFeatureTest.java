@@ -26,32 +26,46 @@ public class ContextualFactoryFeatureTest {
 		bean.date = new Date();
 
 		String json = genson.serialize(bean);
-		
+
 		SimpleDateFormat dateFormat = new SimpleDateFormat("dd/mm/yyyy");
-		assertEquals("{\"date\":\"" + dateFormat.format(bean.date)
-				+ "\",\"milis\":" + bean.milis.getTime() + "}", json);
-		
+		assertEquals(
+				"{\"date\":\"" + dateFormat.format(bean.date) + "\",\"milis\":"
+						+ bean.milis.getTime() + "}", json);
+
 		ABean bean2 = genson.deserialize(json, ABean.class);
 		assertEquals(bean.milis, bean2.milis);
 		assertEquals(dateFormat.format(bean.date), dateFormat.format(bean2.date));
 	}
 
-	@Test public void testPropertyConverter() throws TransformationException, IOException {
+	@Test
+	public void testPropertyConverter() throws TransformationException, IOException {
 		assertEquals("{\"value\":1}", genson.serialize(new BBean()));
 		assertEquals("1", genson.deserialize("{\"value\":1}", BBean.class).value);
 	}
-	
+
+	@Test(expected = ClassCastException.class)
+	public void testExceptionWhenPropertyTypeDoesNotMatch() throws TransformationException,
+			IOException {
+		genson.serialize(new ExceptionBean());
+	}
+
 	static class ABean {
 		@JsonDateFormat(asTimeInMillis = true)
 		public Date milis;
 		@JsonDateFormat("dd/mm/yyyy")
 		public Date date;
 	}
-	
-	static class BBean {
-		@JsonConverter(DummyConverter.class) String value = "foo";
+
+	static class ExceptionBean {
+		@JsonConverter(DummyConverter.class)
+		Object value;
 	}
-	
+
+	static class BBean {
+		@JsonConverter(DummyConverter.class)
+		String value = "foo";
+	}
+
 	public static class DummyConverter implements Converter<String> {
 		@Override
 		public void serialize(String object, ObjectWriter writer, Context ctx)
@@ -64,6 +78,6 @@ public class ContextualFactoryFeatureTest {
 				IOException {
 			return reader.valueAsString();
 		}
-		
+
 	}
 }

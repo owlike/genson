@@ -10,7 +10,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +26,10 @@ import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.Duration;
+import javax.xml.datatype.XMLGregorianCalendar;
 
 import com.owlike.genson.Context;
 import com.owlike.genson.Converter;
@@ -33,7 +40,8 @@ import com.owlike.genson.TransformationRuntimeException;
 import com.owlike.genson.Trilean;
 import com.owlike.genson.annotation.HandleClassMetadata;
 import com.owlike.genson.annotation.WithoutBeanView;
-import com.owlike.genson.ext.ExtensionConfigurer;
+import com.owlike.genson.convert.DefaultConverters.DateConverter;
+import com.owlike.genson.ext.GensonExtension;
 import com.owlike.genson.internal.ContextualFactory;
 import com.owlike.genson.reflect.BeanCreator;
 import com.owlike.genson.reflect.BeanMutatorAccessorResolver;
@@ -48,8 +56,24 @@ import com.owlike.genson.reflect.VisibilityFilter;
 import com.owlike.genson.stream.ObjectReader;
 import com.owlike.genson.stream.ObjectWriter;
 
-public class JaxbConfigurer extends ExtensionConfigurer {
-
+public class JAXBExtension extends GensonExtension {
+	private final DatatypeFactory dateFactory;
+	
+	public JAXBExtension() {
+		try {
+			dateFactory = DatatypeFactory.newInstance();
+        } catch (DatatypeConfigurationException dce) {
+            throw new IllegalStateException(
+                "Could not obtain an instance of DatatypeFactory.", dce);
+        }
+	}
+	
+	@Override
+	public void registerConverters(List<Converter<?>> converters) {
+		converters.add(new XMLGregorianCalendarConverter());
+		converters.add(new DurationConveter());
+	}
+	
 	@Override
 	public void registerBeanMutatorAccessorResolvers(List<BeanMutatorAccessorResolver> resolvers) {
 		resolvers.add(new JaxbAnnotationsResolver());
@@ -74,6 +98,47 @@ public class JaxbConfigurer extends ExtensionConfigurer {
 	public void registerContextualFactories(List<ContextualFactory<?>> factories) {
 		factories.add(new XmlTypeAdapterFactory());
 	}
+	
+	private class DurationConveter implements Converter<Duration> {
+		@Override
+		public void serialize(Duration object, ObjectWriter writer, Context ctx)
+				throws TransformationException, IOException {
+			writer.writeValue(object.toString());
+		}
+		
+		@Override
+		public Duration deserialize(ObjectReader reader, Context ctx)
+				throws TransformationException, IOException {
+			return dateFactory.newDuration(reader.valueAsString());
+		}
+	}
+	
+	@HandleClassMetadata
+	@WithoutBeanView
+	private class XMLGregorianCalendarConverter implements Converter<XMLGregorianCalendar> {
+		private final DateConverter converter = new DateConverter();
+		private final SimpleDateFormat dateFormat = new SimpleDateFormat("YYYY-MM-DDThh:mm:ssZ");
+		
+		@Override
+		public void serialize(XMLGregorianCalendar object, ObjectWriter writer, Context ctx)
+				throws TransformationException, IOException {
+			converter.serialize(object.toGregorianCalendar().getTime(), writer, ctx);
+		}
+
+		@Override
+		public synchronized XMLGregorianCalendar deserialize(ObjectReader reader, Context ctx)
+				throws TransformationException, IOException {
+			GregorianCalendar cal = new GregorianCalendar();
+			try {
+				cal.setTime(dateFormat.parse(reader.valueAsString()));
+			} catch (ParseException e) {
+				throw new TransformationRuntimeException("Could not parse date " + reader.valueAsString(), e);
+			}
+			
+			return dateFactory.newXMLGregorianCalendar(cal);
+		}
+		
+	}
 
 	private class XmlTypeAdapterFactory implements ContextualFactory<Object> {
 		@Override
@@ -85,18 +150,19 @@ public class JaxbConfigurer extends ExtensionConfigurer {
 				@SuppressWarnings("unchecked")
 				Class<? extends XmlAdapter<Object, Object>> adapterClass = (Class<? extends XmlAdapter<Object, Object>>) ann
 						.value();
-				Type adapterExpandedType = expandType(lookupGenericType(XmlAdapter.class, adapterClass), adapterClass);
+				Type adapterExpandedType = expandType(
+						lookupGenericType(XmlAdapter.class, adapterClass), adapterClass);
 				Type adaptedType = typeOf(0, adapterExpandedType);
 				Type originalType = typeOf(1, adapterExpandedType);
-				
-				Class<?> boundClass = getRawClass(property.getType());
-				if (boundClass.isPrimitive())
-					boundClass = wrap(boundClass);
-				
+				Type propertyType = property.getType();
+
+				if (getRawClass(propertyType).isPrimitive()) propertyType = wrap(getRawClass(propertyType));
+
 				// checking type consistency
-				if (!boundClass.isAssignableFrom(getRawClass(originalType)))
-					throw new ClassCastException("The type of the property " + property.getName()
-							+ " declared in " + property.getDeclaringClass() + " is not assignable from the BoundType of XmlAdpater " + adapterClass);
+				if (!match(propertyType, originalType, false))
+					throw new ClassCastException("The BoundType of XMLAdapter " + adapterClass
+							+ " is not assignable from property " + property.getName()
+							+ " declared in " + property.getDeclaringClass());
 
 				try {
 					XmlAdapter<Object, Object> adapter = adapterClass.newInstance();
@@ -113,17 +179,17 @@ public class JaxbConfigurer extends ExtensionConfigurer {
 			}
 			return converter;
 		}
-		
+
 		private class AdaptedConverter implements Converter<Object> {
 			private final XmlAdapter<Object, Object> adapter;
 			private final Converter<Object> converter;
-			
+
 			public AdaptedConverter(XmlAdapter<Object, Object> adapter, Converter<Object> converter) {
 				super();
 				this.adapter = adapter;
 				this.converter = converter;
 			}
-			
+
 			@Override
 			public Object deserialize(ObjectReader reader, Context ctx)
 					throws TransformationException, IOException {
@@ -131,10 +197,11 @@ public class JaxbConfigurer extends ExtensionConfigurer {
 				try {
 					return adapter.unmarshal(value);
 				} catch (Exception e) {
-					throw new TransformationException("Could not unmarshal object using adapter " + adapter.getClass());
+					throw new TransformationException("Could not unmarshal object using adapter "
+							+ adapter.getClass());
 				}
 			}
-			
+
 			@Override
 			public void serialize(Object object, ObjectWriter writer, Context ctx)
 					throws TransformationException, IOException {
@@ -142,7 +209,8 @@ public class JaxbConfigurer extends ExtensionConfigurer {
 				try {
 					adaptedValue = adapter.marshal(object);
 				} catch (Exception e) {
-					throw new TransformationException("Could not marshal object using adapter " + adapter.getClass());
+					throw new TransformationException("Could not marshal object using adapter "
+							+ adapter.getClass());
 				}
 				converter.serialize(adaptedValue, writer, ctx);
 			}

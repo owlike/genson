@@ -1068,6 +1068,18 @@ public final class DefaultConverters {
 		public Converter<Object> create(BeanProperty property, Genson genson) {
 			JsonConverter ann = property.getAnnotation(JsonConverter.class);
 			if (ann != null) {
+				Type converterExpandedType = expandType(lookupGenericType(Converter.class, ann.value()), ann.value());
+				Type converterPropertyType = typeOf(0, converterExpandedType);
+				
+				Class<?> propertyClass = property.getRawClass();
+				if (propertyClass.isPrimitive())
+					propertyClass = wrap(propertyClass);
+				
+				// checking type consistency
+				if (!match(propertyClass, converterPropertyType, false))
+					throw new ClassCastException("The type defined in "+ ann.value().getName() +" is not assignale from property " + property.getName()
+							+ " declared in " + property.getDeclaringClass());
+
 				try {
 					Constructor<?> ctr = ann.value().getConstructor();
 					if (!ctr.isAccessible()) ctr.setAccessible(true);

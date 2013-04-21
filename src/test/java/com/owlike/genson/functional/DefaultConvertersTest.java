@@ -103,7 +103,7 @@ public class DefaultConvertersTest {
 
 	@Test
 	public void testCalendarConverter() throws TransformationException, IOException {
-		Genson genson = new Genson.Builder().withTimeInMillis(true).create();
+		Genson genson = new Genson.Builder().useTimeInMillis(true).create();
 		Calendar cal = Calendar.getInstance();
 		String json = genson.serialize(cal);
 		Calendar cal2 = genson.deserialize(json, Calendar.class);

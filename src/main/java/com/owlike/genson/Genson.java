@@ -32,7 +32,7 @@ import com.owlike.genson.convert.DefaultConverters;
 import com.owlike.genson.convert.NullConverter;
 import com.owlike.genson.convert.RuntimeTypeConverter;
 import com.owlike.genson.convert.DefaultConverters.DateConverter;
-import com.owlike.genson.ext.ExtensionConfigurer;
+import com.owlike.genson.ext.GensonExtension;
 import com.owlike.genson.internal.ContextualFactory;
 import com.owlike.genson.reflect.ASMCreatorParameterNameResolver;
 import com.owlike.genson.reflect.BaseBeanDescriptorProvider;
@@ -475,7 +475,7 @@ public final class Genson {
 		private boolean strictDoubleParse = false;
 		private String indentation = null;
 
-		private List<ExtensionConfigurer> _extensions = new ArrayList<ExtensionConfigurer>();
+		private List<GensonExtension> _extensions = new ArrayList<GensonExtension>();
 
 		private PropertyNameResolver propertyNameResolver;
 		private BeanMutatorAccessorResolver mutatorAccessorResolver;
@@ -1125,13 +1125,13 @@ public final class Genson {
 			return this;
 		}
 
-		public Builder withTimeInMillis(boolean timeInMillis) {
+		public Builder useTimeInMillis(boolean timeInMillis) {
 			defaultDateConverter = new DateConverter(null, timeInMillis);
 			return this;
 		}
 
-		public Builder with(ExtensionConfigurer... extensions) {
-			for (ExtensionConfigurer ext : extensions)
+		public Builder with(GensonExtension... extensions) {
+			for (GensonExtension ext : extensions)
 				_extensions.add(ext);
 			return this;
 		}
@@ -1150,7 +1150,7 @@ public final class Genson {
 				mutatorAccessorResolver = createBeanMutatorAccessorResolver();
 
 			List<Converter<?>> converters = new ArrayList<Converter<?>>();
-			for (ExtensionConfigurer extension : _extensions) {
+			for (GensonExtension extension : _extensions) {
 				extension.registerConverters(converters);
 			}
 			converters.addAll(getDefaultConverters());
@@ -1163,7 +1163,7 @@ public final class Genson {
 			// prevent modification
 			// of user registered ones as the lists passed to the extensions are modifiable
 			List<Factory<? extends Converter<?>>> convFactories = new ArrayList<Factory<? extends Converter<?>>>();
-			for (ExtensionConfigurer extension : _extensions) {
+			for (GensonExtension extension : _extensions) {
 				extension.registerConverterFactories(convFactories);
 			}
 			addDefaultConverterFactories(convFactories);
@@ -1178,7 +1178,7 @@ public final class Genson {
 			converterFactories.addAll(deserializerFactories);
 
 			List<ContextualFactory<?>> defaultContextualFactories = new ArrayList<ContextualFactory<?>>();
-			for (ExtensionConfigurer extension : _extensions) {
+			for (GensonExtension extension : _extensions) {
 				extension.registerContextualFactories(defaultContextualFactories);
 			}
 			addDefaultContextualFactories(defaultContextualFactories);
@@ -1286,7 +1286,7 @@ public final class Genson {
 			if (ctrFilter == null) ctrFilter = VisibilityFilter.PACKAGE_PUBLIC;
 			resolvers.add(new BeanMutatorAccessorResolver.GensonAnnotationsResolver());
 
-			for (ExtensionConfigurer configurer : _extensions)
+			for (GensonExtension configurer : _extensions)
 				configurer.registerBeanMutatorAccessorResolvers(resolvers);
 
 			resolvers.add(new BeanMutatorAccessorResolver.StandardMutaAccessorResolver(propFilter,
@@ -1311,7 +1311,7 @@ public final class Genson {
 			List<PropertyNameResolver> resolvers = new ArrayList<PropertyNameResolver>();
 			resolvers.add(new PropertyNameResolver.AnnotationPropertyNameResolver());
 
-			for (ExtensionConfigurer configurer : _extensions)
+			for (GensonExtension configurer : _extensions)
 				configurer.registerPropertyNameResolvers(resolvers);
 
 			resolvers.add(new PropertyNameResolver.ConventionalBeanPropertyNameResolver());
@@ -1402,7 +1402,7 @@ public final class Genson {
 
 		protected BeanPropertyFactory createBeanPropertyFactory() {
 			List<BeanPropertyFactory> factories = new ArrayList<BeanPropertyFactory>();
-			for (ExtensionConfigurer configurer : _extensions)
+			for (GensonExtension configurer : _extensions)
 				configurer.registerBeanPropertyFactories(factories);
 
 			if (withBeanViewConverter)

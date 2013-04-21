@@ -9,7 +9,7 @@ import com.owlike.genson.reflect.BeanMutatorAccessorResolver;
 import com.owlike.genson.reflect.BeanPropertyFactory;
 import com.owlike.genson.reflect.PropertyNameResolver;
 
-public abstract class ExtensionConfigurer {
+public abstract class GensonExtension {
 	public void registerBeanMutatorAccessorResolvers(List<BeanMutatorAccessorResolver> resolvers) {
 	}
 
