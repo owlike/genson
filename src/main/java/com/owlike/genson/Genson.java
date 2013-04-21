@@ -1366,6 +1366,7 @@ public final class Genson {
 
 		protected void addDefaultContextualFactories(List<ContextualFactory<?>> factories) {
 			factories.add(new DefaultConverters.DateContextualFactory());
+			factories.add(new DefaultConverters.PropertyConverterFactory());
 		}
 
 		protected List<Serializer<?>> getDefaultSerializers() {

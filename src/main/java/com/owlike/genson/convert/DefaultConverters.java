@@ -3,7 +3,9 @@ package com.owlike.genson.convert;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -36,6 +38,7 @@ import com.owlike.genson.TransformationException;
 import com.owlike.genson.TransformationRuntimeException;
 import com.owlike.genson.annotation.HandleClassMetadata;
 import com.owlike.genson.annotation.HandleNull;
+import com.owlike.genson.annotation.JsonConverter;
 import com.owlike.genson.annotation.JsonDateFormat;
 import com.owlike.genson.annotation.WithoutBeanView;
 import com.owlike.genson.internal.ContextualFactory;
@@ -1056,5 +1059,37 @@ public final class DefaultConverters {
 			return new File(reader.valueAsString());
 		}
 
+	}
+	
+	public final static class PropertyConverterFactory implements ContextualFactory<Object> {
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public Converter<Object> create(BeanProperty property, Genson genson) {
+			JsonConverter ann = property.getAnnotation(JsonConverter.class);
+			if (ann != null) {
+				try {
+					Constructor<?> ctr = ann.value().getConstructor();
+					if (!ctr.isAccessible()) ctr.setAccessible(true);
+					return (Converter<Object>) ctr.newInstance();
+					
+					// OMG...
+				} catch (InstantiationException e) {
+					throw new RuntimeException(e);
+				} catch (IllegalAccessException e) {
+					throw new RuntimeException(e);
+				} catch (SecurityException e) {
+					throw new RuntimeException(e);
+				} catch (NoSuchMethodException e) {
+					throw new RuntimeException(e);
+				} catch (IllegalArgumentException e) {
+					throw new RuntimeException(e);
+				} catch (InvocationTargetException e) {
+					throw new RuntimeException(e);
+				}
+			}
+			return null;
+		}
+		
 	}
 }
