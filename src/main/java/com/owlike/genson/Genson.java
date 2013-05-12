@@ -462,7 +462,8 @@ public final class Genson {
 		private final Map<Type, Deserializer<?>> deserializersMap = new HashMap<Type, Deserializer<?>>();
 		private final List<Factory<?>> converterFactories = new ArrayList<Factory<?>>();
 		private final List<ContextualFactory<?>> contextualFactories = new ArrayList<ContextualFactory<?>>();
-
+		private final List<BeanPropertyFactory> beanPropertyFactories = new ArrayList<BeanPropertyFactory>();
+		
 		private boolean skipNull = false;
 		private boolean htmlSafe = false;
 		private boolean withClassMetadata = false;
@@ -662,11 +663,24 @@ public final class Genson {
 			return this;
 		}
 
+		/**
+		 * ContextualFactory is actually in a beta status (thus in internal package), it will not be removed, but for sure it will
+		 * move in another package and might be refactored.
+		 */
 		public Builder withContextualFactory(ContextualFactory<?>... factories) {
 			contextualFactories.addAll(Arrays.asList(factories));
 			return this;
 		}
 
+		/**
+		 * Allows you to register new BeanPropertyFactory responsible of creating BeanProperty accessors, mutators and BeanCreators.
+		 * This is a very low level feature, you probably don't need it.
+		 */
+		public Builder withBeanPropertyFactory(BeanPropertyFactory... factories) {
+			beanPropertyFactories.addAll(Arrays.asList(factories));
+			return this;
+		}
+		
 		/**
 		 * Renames all fields named field to toName.
 		 */
@@ -1131,8 +1145,7 @@ public final class Genson {
 		}
 
 		public Builder with(GensonExtension... extensions) {
-			for (GensonExtension ext : extensions)
-				_extensions.add(ext);
+			for (GensonExtension ext : extensions) _extensions.add(ext);
 			return this;
 		}
 
@@ -1144,16 +1157,14 @@ public final class Genson {
 		 * @return a new instance of Genson built for the current configuration.
 		 */
 		public Genson create() {
+			for (GensonExtension extension : _extensions) extension.configure(this);
+			
 			if (nullConverter == null) nullConverter = new NullConverter();
 			if (propertyNameResolver == null) propertyNameResolver = createPropertyNameResolver();
 			if (mutatorAccessorResolver == null)
 				mutatorAccessorResolver = createBeanMutatorAccessorResolver();
 
-			List<Converter<?>> converters = new ArrayList<Converter<?>>();
-			for (GensonExtension extension : _extensions) {
-				extension.registerConverters(converters);
-			}
-			converters.addAll(getDefaultConverters());
+			List<Converter<?>> converters = getDefaultConverters();
 			addDefaultSerializers(converters);
 			addDefaultDeserializers(converters);
 			addDefaultSerializers(getDefaultSerializers());
@@ -1163,9 +1174,6 @@ public final class Genson {
 			// prevent modification
 			// of user registered ones as the lists passed to the extensions are modifiable
 			List<Factory<? extends Converter<?>>> convFactories = new ArrayList<Factory<? extends Converter<?>>>();
-			for (GensonExtension extension : _extensions) {
-				extension.registerConverterFactories(convFactories);
-			}
 			addDefaultConverterFactories(convFactories);
 			converterFactories.addAll(convFactories);
 
@@ -1178,9 +1186,6 @@ public final class Genson {
 			converterFactories.addAll(deserializerFactories);
 
 			List<ContextualFactory<?>> defaultContextualFactories = new ArrayList<ContextualFactory<?>>();
-			for (GensonExtension extension : _extensions) {
-				extension.registerContextualFactories(defaultContextualFactories);
-			}
 			addDefaultContextualFactories(defaultContextualFactories);
 			contextualFactories.addAll(defaultContextualFactories);
 
@@ -1250,7 +1255,6 @@ public final class Genson {
 		 *         <strong>ALL</strong> converters</u>.
 		 */
 		protected Factory<Converter<?>> createConverterFactory() {
-			// TODO should it be added to ExtensionConfigurer?
 			ChainedFactory chainHead = new CircularClassReferenceConverterFactory();
 			ChainedFactory chainTail = chainHead;
 
@@ -1286,9 +1290,6 @@ public final class Genson {
 			if (ctrFilter == null) ctrFilter = VisibilityFilter.PACKAGE_PUBLIC;
 			resolvers.add(new BeanMutatorAccessorResolver.GensonAnnotationsResolver());
 
-			for (GensonExtension configurer : _extensions)
-				configurer.registerBeanMutatorAccessorResolvers(resolvers);
-
 			resolvers.add(new BeanMutatorAccessorResolver.StandardMutaAccessorResolver(propFilter,
 					methodFilter, ctrFilter));
 
@@ -1310,10 +1311,6 @@ public final class Genson {
 		protected PropertyNameResolver createPropertyNameResolver() {
 			List<PropertyNameResolver> resolvers = new ArrayList<PropertyNameResolver>();
 			resolvers.add(new PropertyNameResolver.AnnotationPropertyNameResolver());
-
-			for (GensonExtension configurer : _extensions)
-				configurer.registerPropertyNameResolvers(resolvers);
-
 			resolvers.add(new PropertyNameResolver.ConventionalBeanPropertyNameResolver());
 			if (isWithDebugInfoPropertyNameResolver())
 				resolvers.add(new ASMCreatorParameterNameResolver(isThrowExceptionOnNoDebugInfo()));
@@ -1401,15 +1398,11 @@ public final class Genson {
 		}
 
 		protected BeanPropertyFactory createBeanPropertyFactory() {
-			List<BeanPropertyFactory> factories = new ArrayList<BeanPropertyFactory>();
-			for (GensonExtension configurer : _extensions)
-				configurer.registerBeanPropertyFactories(factories);
-
 			if (withBeanViewConverter)
-				factories.add(new BeanViewDescriptorProvider.BeanViewPropertyFactory(
+				beanPropertyFactories.add(new BeanViewDescriptorProvider.BeanViewPropertyFactory(
 						registeredViews));
-			factories.add(new BeanPropertyFactory.StandardFactory());
-			return new BeanPropertyFactory.CompositeFactory(factories);
+			beanPropertyFactories.add(new BeanPropertyFactory.StandardFactory());
+			return new BeanPropertyFactory.CompositeFactory(beanPropertyFactories);
 		}
 
 		protected final PropertyNameResolver getPropertyNameResolver() {

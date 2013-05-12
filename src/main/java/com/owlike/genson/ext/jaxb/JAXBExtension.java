@@ -15,7 +15,6 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -38,13 +37,13 @@ import com.owlike.genson.Genson;
 import com.owlike.genson.TransformationException;
 import com.owlike.genson.TransformationRuntimeException;
 import com.owlike.genson.Trilean;
+import com.owlike.genson.Genson.Builder;
 import com.owlike.genson.annotation.HandleClassMetadata;
 import com.owlike.genson.annotation.WithoutBeanView;
 import com.owlike.genson.convert.DefaultConverters.DateConverter;
 import com.owlike.genson.ext.GensonExtension;
 import com.owlike.genson.internal.ContextualFactory;
 import com.owlike.genson.reflect.BeanCreator;
-import com.owlike.genson.reflect.BeanMutatorAccessorResolver;
 import com.owlike.genson.reflect.BeanProperty;
 import com.owlike.genson.reflect.BeanPropertyFactory;
 import com.owlike.genson.reflect.PropertyAccessor;
@@ -58,67 +57,45 @@ import com.owlike.genson.stream.ObjectWriter;
 
 public class JAXBExtension extends GensonExtension {
 	private final DatatypeFactory dateFactory;
-	
+
 	public JAXBExtension() {
 		try {
 			dateFactory = DatatypeFactory.newInstance();
-        } catch (DatatypeConfigurationException dce) {
-            throw new IllegalStateException(
-                "Could not obtain an instance of DatatypeFactory.", dce);
-        }
-	}
-	
-	@Override
-	public void registerConverters(List<Converter<?>> converters) {
-		converters.add(new XMLGregorianCalendarConverter());
-		converters.add(new DurationConveter());
-	}
-	
-	@Override
-	public void registerBeanMutatorAccessorResolvers(List<BeanMutatorAccessorResolver> resolvers) {
-		resolvers.add(new JaxbAnnotationsResolver());
+		} catch (DatatypeConfigurationException dce) {
+			throw new IllegalStateException("Could not obtain an instance of DatatypeFactory.", dce);
+		}
 	}
 
 	@Override
-	public void registerPropertyNameResolvers(List<PropertyNameResolver> resolvers) {
-		resolvers.add(new JaxbNameResolver());
+	public void configure(Builder builder) {
+		builder.withConverters(new XMLGregorianCalendarConverter(), new DurationConveter())
+				.with(new JaxbAnnotationsResolver())
+				.with(new JaxbNameResolver())
+				.withConverterFactory(new EnumConverterFactory())
+				.withBeanPropertyFactory(new JaxbBeanPropertyFactory())
+				.withContextualFactory(new XmlTypeAdapterFactory());
 	}
 
-	@Override
-	public void registerBeanPropertyFactories(List<BeanPropertyFactory> factories) {
-		factories.add(0, new JaxbBeanPropertyFactory());
-	}
-
-	@Override
-	public void registerConverterFactories(List<Factory<? extends Converter<?>>> factories) {
-		factories.add(new EnumConverterFactory());
-	}
-
-	@Override
-	public void registerContextualFactories(List<ContextualFactory<?>> factories) {
-		factories.add(new XmlTypeAdapterFactory());
-	}
-	
 	private class DurationConveter implements Converter<Duration> {
 		@Override
 		public void serialize(Duration object, ObjectWriter writer, Context ctx)
 				throws TransformationException, IOException {
 			writer.writeValue(object.toString());
 		}
-		
+
 		@Override
 		public Duration deserialize(ObjectReader reader, Context ctx)
 				throws TransformationException, IOException {
 			return dateFactory.newDuration(reader.valueAsString());
 		}
 	}
-	
+
 	@HandleClassMetadata
 	@WithoutBeanView
 	private class XMLGregorianCalendarConverter implements Converter<XMLGregorianCalendar> {
 		private final DateConverter converter = new DateConverter();
-		private final SimpleDateFormat dateFormat = new SimpleDateFormat("YYYY-MM-DDThh:mm:ssZ");
-		
+		private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-DD'T'hh:mm:ssZ");
+
 		@Override
 		public void serialize(XMLGregorianCalendar object, ObjectWriter writer, Context ctx)
 				throws TransformationException, IOException {
@@ -132,12 +109,13 @@ public class JAXBExtension extends GensonExtension {
 			try {
 				cal.setTime(dateFormat.parse(reader.valueAsString()));
 			} catch (ParseException e) {
-				throw new TransformationRuntimeException("Could not parse date " + reader.valueAsString(), e);
+				throw new TransformationRuntimeException("Could not parse date "
+						+ reader.valueAsString(), e);
 			}
-			
+
 			return dateFactory.newXMLGregorianCalendar(cal);
 		}
-		
+
 	}
 
 	private class XmlTypeAdapterFactory implements ContextualFactory<Object> {
@@ -156,7 +134,8 @@ public class JAXBExtension extends GensonExtension {
 				Type originalType = typeOf(1, adapterExpandedType);
 				Type propertyType = property.getType();
 
-				if (getRawClass(propertyType).isPrimitive()) propertyType = wrap(getRawClass(propertyType));
+				if (getRawClass(propertyType).isPrimitive())
+					propertyType = wrap(getRawClass(propertyType));
 
 				// checking type consistency
 				if (!match(propertyType, originalType, false))

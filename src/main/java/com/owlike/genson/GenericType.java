@@ -49,7 +49,7 @@ public abstract class GenericType<T> {
 	}
 
 	private final static Map<Type, GenericType<?>> _genericTypesCache = new ConcurrentHashMap<Type, GenericType<?>>();
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("unchecked") // TODO useless and ugly change it
 	public static <T> GenericType<T> genericTypeFor(Class<T> rawClass, Type type) {
 		Class<?> typeRawClass = TypeUtil.getRawClass(type);
 		if (!rawClass.equals(typeRawClass))
