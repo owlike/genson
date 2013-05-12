@@ -106,6 +106,7 @@ public final class Genson {
 	private final boolean skipNull;
 	private final boolean htmlSafe;
 	private final boolean withClassMetadata;
+	private final boolean withMetadata;
 	private final boolean strictDoubleParse;
 	private final boolean indent;
 
@@ -118,7 +119,8 @@ public final class Genson {
 	public Genson() {
 		this(_default.converterFactory, _default.beanDescriptorFactory, _default.nullConverter,
 				_default.skipNull, _default.htmlSafe, _default.aliasClassMap,
-				_default.withClassMetadata, _default.strictDoubleParse, _default.indent);
+				_default.withClassMetadata, _default.strictDoubleParse, _default.indent,
+				_default.withMetadata);
 	}
 
 	/**
@@ -153,11 +155,14 @@ public final class Genson {
 	 *            reason you need to have 100% match with Double.parse, then enable strict parsing.
 	 * @param indent
 	 *            true if outputed json must be indented (pretty printed).
+	 * @param withMetadata
+	 *            true if ObjectReader instances must be configured with metadata feature enabled.
+	 *            if withClassMetadata is true withMetadata will be automatically true.
 	 */
 	public Genson(Factory<Converter<?>> converterFactory, BeanDescriptorProvider beanDescProvider,
 			Converter<Object> nullConverter, boolean skipNull, boolean htmlSafe,
 			Map<String, Class<?>> classAliases, boolean withClassMetadata,
-			boolean strictDoubleParse, boolean indent) {
+			boolean strictDoubleParse, boolean indent, boolean withMetadata) {
 		this.converterFactory = converterFactory;
 		this.beanDescriptorFactory = beanDescProvider;
 		this.nullConverter = nullConverter;
@@ -171,6 +176,7 @@ public final class Genson {
 		}
 		this.strictDoubleParse = strictDoubleParse;
 		this.indent = indent;
+		this.withMetadata = withClassMetadata||withMetadata;
 	}
 
 	/**
@@ -442,11 +448,7 @@ public final class Genson {
 	 * Creates a new ObjectReader with this Genson instance configuration.
 	 */
 	public ObjectReader createReader(Reader reader) {
-		/*
-		 * TODO withClassMetadata here is wrong, it has nothing to do with metadata feature... think
-		 * how to improve things correctly
-		 */
-		return new JsonReader(reader, strictDoubleParse, withClassMetadata);
+		return new JsonReader(reader, strictDoubleParse, withMetadata);
 	}
 
 	public boolean isSkipNull() {
@@ -506,6 +508,7 @@ public final class Genson {
 		private boolean withDebugInfoPropertyNameResolver = false;
 		private boolean strictDoubleParse = false;
 		private boolean indent = false;
+		private boolean metadata = false;
 
 		private List<GensonExtension> _extensions = new ArrayList<GensonExtension>();
 
@@ -982,6 +985,7 @@ public final class Genson {
 		 */
 		public Builder setWithClassMetadata(boolean withClassMetadata) {
 			this.withClassMetadata = withClassMetadata;
+			this.metadata = withClassMetadata || metadata;
 			return this;
 		}
 
@@ -1177,6 +1181,7 @@ public final class Genson {
 
 		/**
 		 * The value of indentation is ignored, it will always use 2 spaces.
+		 * 
 		 * @deprecated use instead {@link #useIndentation(boolean)}
 		 */
 		public Builder setIndentation(String indentation) {
@@ -1191,15 +1196,29 @@ public final class Genson {
 
 		/**
 		 * Register some genson extensions. For example to enable JAXB support:
+		 * 
 		 * <pre>
-		 * 	builder.with(new JAXBExtension());
+		 * builder.with(new JAXBExtension());
 		 * </pre>
+		 * 
 		 * @see GensonExtension
 		 */
 		public Builder with(GensonExtension... extensions) {
 			for (GensonExtension ext : extensions)
 				_extensions.add(ext);
 			return this;
+		}
+		
+		public Builder useMetadata(boolean metadata) {
+			this.metadata = metadata;
+			return this;
+		}
+		
+		/**
+		 * true if metadata is enabled during parsing.
+		 */
+		public boolean isMetadata() {
+			return metadata;
 		}
 
 		/**
@@ -1297,7 +1316,7 @@ public final class Genson {
 				Map<String, Class<?>> classAliases) {
 			return new Genson(converterFactory, getBeanDescriptorProvider(), getNullConverter(),
 					isSkipNull(), isHtmlSafe(), classAliases, isWithClassMetadata(),
-					isStrictDoubleParse(), isIndented());
+					isStrictDoubleParse(), isIndented(), isMetadata());
 		}
 
 		/**

@@ -83,9 +83,11 @@ public class JsonSerDeserSymetricTest {
 		Genson genson = new Genson.Builder().setWithBeanViewConverter(true)
 				.setWithDebugInfoPropertyNameResolver(true).create();
 
+		@SuppressWarnings("unchecked")
 		String json = genson.serialize(p, ViewOfPerson.class);
 		assertEquals("{\"age\":" + new ViewOfPerson().getAge(p) + ",\"gender\":\"M\",\"name\":\""
 				+ p.name + "\"}", json);
+		@SuppressWarnings("unchecked")
 		Person me = genson.deserialize(json, Person.class, ViewOfPerson.class);
 		assertEquals(p.civility, me.civility);
 		assertEquals(p.name, me.name);

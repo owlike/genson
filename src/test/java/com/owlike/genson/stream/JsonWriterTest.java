@@ -75,12 +75,32 @@ public class JsonWriterTest {
 		assertEquals(sw.toString(), value);
 	}
 
+	@Test(expected = JsonStreamException.class)
+	public void testExpectNameInObject() throws IOException {
+		w.beginObject().beginArray();
+	}
+
 	@Test
 	public void testWriteMetadataWithBeginObject() throws IOException {
 		String expected = "{\"@doc\":\"My doc\",\"name\":null}";
 		w.beginObject().writeMetadata("doc", "My doc").writeName("name").writeNull().endObject()
 				.flush();
 		assertEquals(expected, sw.toString());
+	}
+
+	@Test
+	public void testArrayMetadataMustSkipSilently() throws IOException {
+		w.beginNextObjectMetadata().writeMetadata("key", "value").beginArray();
+		assertTrue(w._metadata.isEmpty());
+		assertEquals(JsonType.ARRAY, w._ctx.pop());
+		assertEquals(JsonType.EMPTY, w._ctx.pop());
+	}
+
+	@Test
+	public void testLiteralMetadataMustSkipSilentlyInArray() throws IOException {
+		w.beginArray().beginNextObjectMetadata().writeMetadata("a", "ooooo").writeValue(true)
+				.beginObject().endObject().endArray().flush();
+		assertEquals("[true,{}]", sw.toString());
 	}
 
 	@Test
