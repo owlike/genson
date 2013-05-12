@@ -2,8 +2,6 @@ package com.owlike.genson;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import com.owlike.genson.reflect.TypeUtil;
 
@@ -43,27 +41,25 @@ public abstract class GenericType<T> {
 		rawClass = (Class<T>) TypeUtil.getRawClass(type);
 	}
 
-	private GenericType(Class<T> rawClass, Type type) {
-		this.type = type;
+	private GenericType(Class<T> rawClass) {
+		this.type = rawClass;
 		this.rawClass = rawClass;
 	}
-
-	private final static Map<Type, GenericType<?>> _genericTypesCache = new ConcurrentHashMap<Type, GenericType<?>>();
-	@SuppressWarnings("unchecked") // TODO useless and ugly change it
-	public static <T> GenericType<T> genericTypeFor(Class<T> rawClass, Type type) {
-		Class<?> typeRawClass = TypeUtil.getRawClass(type);
-		if (!rawClass.equals(typeRawClass))
-			throw new IllegalArgumentException("Argument rawClass " + rawClass
-					+ " does not match raw class " + typeRawClass + " of argument type " + type);
-		
-		GenericType<T> genericType = (GenericType<T>) _genericTypesCache.get(type);
-		if (genericType == null) {
-			genericType = new GenericType<T>(rawClass, type) {};
-			_genericTypesCache.put(type, genericType);
-		}
-		return genericType;
+	
+	@SuppressWarnings("unchecked")
+	private GenericType(Type type) {
+		this.type = type;
+		this.rawClass = (Class<T>) TypeUtil.getRawClass(type);
 	}
 
+	public static <T> GenericType<T> of(Class<T> rawClass) {
+		return new GenericType<T>(rawClass) {};
+	}
+
+	public static GenericType<Object> of(Type type) {
+		return new GenericType<Object>(type) {};
+	}
+	
 	public Type getType() {
 		return type;
 	}

@@ -33,6 +33,7 @@ import java.util.UUID;
 import com.owlike.genson.Context;
 import com.owlike.genson.Converter;
 import com.owlike.genson.Factory;
+import com.owlike.genson.GenericType;
 import com.owlike.genson.Genson;
 import com.owlike.genson.TransformationException;
 import com.owlike.genson.TransformationRuntimeException;
@@ -821,7 +822,7 @@ public final class DefaultConverters {
 
 			public Object deserialize(ObjectReader reader, Context ctx)
 					throws TransformationException, IOException {
-				return ctx.genson.deserialize(reader.getValueType().toClass(), reader, ctx);
+				return ctx.genson.deserialize(GenericType.of(reader.getValueType().toClass()), reader, ctx);
 			}
 
 			public void serialize(Object obj, ObjectWriter writer, Context ctx)

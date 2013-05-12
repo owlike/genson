@@ -3,7 +3,6 @@ package com.owlike.genson.functional;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,32 +21,35 @@ import com.owlike.genson.stream.ObjectWriter;
 
 public class GenericTypesTest {
 	private Genson genson = new Genson();
-	
-	@Test public void testGenericCyclicTypes() throws TransformationException, IOException {
+
+	@Test
+	public void testGenericCyclicTypes() throws TransformationException, IOException {
 		String json = "{\"val\" : {\"val\": {\"val\" : {\"str\": \"hey\"}}}}";
-		CyclicGenericType<CyclicGenericType<SubClass>> cyclic = genson.deserialize(json, new GenericType<CyclicGenericType<CyclicGenericType<SubClass>>>() {
-		});
+		CyclicGenericType<CyclicGenericType<SubClass>> cyclic = genson.deserialize(json,
+				new GenericType<CyclicGenericType<CyclicGenericType<SubClass>>>() {
+				});
 		assertEquals("hey", cyclic.val.val.val.str);
-		
-		CyclicGenericType<SubClass> cyclicSubclass = genson.deserialize(json, new GenericType<CyclicGenericType<SubClass>>() {
-		});
+
+		CyclicGenericType<SubClass> cyclicSubclass = genson.deserialize(json,
+				new GenericType<CyclicGenericType<SubClass>>() {
+				});
 		assertEquals("hey", cyclicSubclass.val.val.val.str);
-		
-		
-		OtherGenericType<CyclicGenericType<SubClass>> differentClasses = genson.deserialize("{\"otherVal\" : {\"val\": {\"val\" : {\"str\": \"hey\"}}}}", new GenericType<OtherGenericType<CyclicGenericType<SubClass>>>() {
-		});
+
+		OtherGenericType<CyclicGenericType<SubClass>> differentClasses = genson.deserialize(
+				"{\"otherVal\" : {\"val\": {\"val\" : {\"str\": \"hey\"}}}}",
+				new GenericType<OtherGenericType<CyclicGenericType<SubClass>>>() {
+				});
 		assertEquals("hey", differentClasses.otherVal.val.val.str);
 	}
-	
+
 	public static class CyclicGenericType<T extends CyclicGenericType<? extends T>> {
 		public T val;
 	}
-	
+
 	public static class OtherGenericType<T extends CyclicGenericType<? extends T>> {
 		public T otherVal;
 	}
-	
-	
+
 	public static class SubClass extends CyclicGenericType<SubClass> {
 		public String str;
 	}
@@ -73,10 +75,10 @@ public class GenericTypesTest {
 	@Test
 	public void testDeserializeDeepGenericsUsingGenericType() throws TransformationException,
 			IOException {
-		Type type = new GenericType<MyGenericClass<ContainerClass>>() {
-		}.getType();
 		MyGenericClass<ContainerClass> mgc = genson.deserialize(
-				"{\"tField\":{\"urlContainer\":{\"tField\":\"http://www.google.com\"}}}", type);
+				"{\"tField\":{\"urlContainer\":{\"tField\":\"http://www.google.com\"}}}",
+				new GenericType<MyGenericClass<ContainerClass>>() {
+				});
 		assertEquals(ContainerClass.class, mgc.tField.getClass());
 		assertEquals(URL.class, mgc.tField.urlContainer.tField.getClass());
 		assertEquals(new URL("http://www.google.com"), mgc.tField.urlContainer.tField);

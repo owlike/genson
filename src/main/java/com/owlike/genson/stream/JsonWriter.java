@@ -50,7 +50,8 @@ public class JsonWriter implements ObjectWriter {
 	private final Deque<JsonType> _ctx = new ArrayDeque<JsonType>();
 	private boolean _hasPrevious;
 	private String _name;
-	private final String indentation;
+	private final boolean indentation;
+	private final static char[] _indentation = new char[]{' ', ' '};
 
 	// TODO recyclebuffer increases a bit performances
 	private final char[] _buffer = new char[1024];
@@ -58,10 +59,10 @@ public class JsonWriter implements ObjectWriter {
 	private int _len = 0;
 	
 	public JsonWriter(Writer writer) {
-		this(writer, false, false, null);
+		this(writer, false, false, false);
 	}
 
-	public JsonWriter(Writer writer, final boolean skipNull, final boolean htmlSafe, String indentation) {
+	public JsonWriter(Writer writer, final boolean skipNull, final boolean htmlSafe, boolean indentation) {
 		this.writer = writer;
 		this.skipNull = skipNull;
 		this.htmlSafe = htmlSafe;
@@ -115,9 +116,9 @@ public class JsonWriter implements ObjectWriter {
 			throw new JsonStreamException("Expect type " + jsonType.name() + " but was written "
 					+ jt.name() + ", you must call the adequate beginXXX method before endXXX.");
 		
-		if (indentation != null) {
+		if (indentation) {
 			_buffer[_len++] = '\n';
-			for (int i = 0; i < _ctx.size()-1; i++) writeToBuffer(indentation, 0);
+			for (int i = 0; i < _ctx.size()-1; i++) writeToBuffer(_indentation, 0, 2);
 		}
 		
 		if ((_len + 1) >= _bufferSize)
@@ -165,12 +166,12 @@ public class JsonWriter implements ObjectWriter {
 	}
 	
 	protected void indent() throws IOException {
-		if (indentation != null) {
+		if (indentation) {
 			if ((_len + 1) >= _bufferSize)
 				flushBuffer();
 			if (_ctx.peek() != JsonType.EMPTY) _buffer[_len++] = '\n';
 			int len = _ctx.peek() == JsonType.METADATA ? _ctx.size() - 2 : _ctx.size() - 1;
-			for (int i = 0; i < len; i++) writeToBuffer(indentation, 0);
+			for (int i = 0; i < len; i++) writeToBuffer(_indentation, 0, 2);
 		}
 	}
 

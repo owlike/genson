@@ -1,5 +1,6 @@
 package com.owlike.genson;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -106,7 +107,7 @@ public final class Genson {
 	private final boolean htmlSafe;
 	private final boolean withClassMetadata;
 	private final boolean strictDoubleParse;
-	private final String indentation;
+	private final boolean indent;
 
 	private final static Charset UTF8_CHARSET = Charset.forName("UTF-8");
 
@@ -117,7 +118,7 @@ public final class Genson {
 	public Genson() {
 		this(_default.converterFactory, _default.beanDescriptorFactory, _default.nullConverter,
 				_default.skipNull, _default.htmlSafe, _default.aliasClassMap,
-				_default.withClassMetadata, _default.strictDoubleParse, _default.indentation);
+				_default.withClassMetadata, _default.strictDoubleParse, _default.indent);
 	}
 
 	/**
@@ -150,14 +151,13 @@ public final class Genson {
 	 *            Double.parse but is a lot faster. If true, Double.parse method will be usead
 	 *            instead. In most cases you should be fine with Genson algorithm, but if for some
 	 *            reason you need to have 100% match with Double.parse, then enable strict parsing.
-	 * @param indentation
-	 *            the characters to use for indentation, for example "  " will use an indentation of
-	 *            two spaces.
+	 * @param indent
+	 *            true if outputed json must be indented (pretty printed).
 	 */
 	public Genson(Factory<Converter<?>> converterFactory, BeanDescriptorProvider beanDescProvider,
 			Converter<Object> nullConverter, boolean skipNull, boolean htmlSafe,
 			Map<String, Class<?>> classAliases, boolean withClassMetadata,
-			boolean strictDoubleParse, String indentation) {
+			boolean strictDoubleParse, boolean indent) {
 		this.converterFactory = converterFactory;
 		this.beanDescriptorFactory = beanDescProvider;
 		this.nullConverter = nullConverter;
@@ -170,7 +170,7 @@ public final class Genson {
 			classAliasMap.put(entry.getValue(), entry.getKey());
 		}
 		this.strictDoubleParse = strictDoubleParse;
-		this.indentation = indentation;
+		this.indent = indent;
 	}
 
 	/**
@@ -196,7 +196,7 @@ public final class Genson {
 	/**
 	 * Serializes the object into a string.
 	 * 
-	 * @param o
+	 * @param object
 	 *            object to be serialized.
 	 * @return the serialized object as a string.
 	 * @throws TransformationException
@@ -204,13 +204,13 @@ public final class Genson {
 	 * @throws IOException
 	 *             if there was a problem during writing of the object to the output.
 	 */
-	public <T> String serialize(T o) throws TransformationException, IOException {
+	public <T> String serialize(T object) throws TransformationException, IOException {
 		StringWriter sw = new StringWriter();
 		ObjectWriter writer = createWriter(sw);
-		if (o == null)
+		if (object == null)
 			nullConverter.serialize(null, writer, null);
 		else
-			serialize(o, o.getClass(), writer, new Context(this));
+			serialize(object, object.getClass(), writer, new Context(this));
 		writer.flush();
 		return sw.toString();
 	}
@@ -218,7 +218,7 @@ public final class Genson {
 	/**
 	 * Serializes the object using its GenericType instead of using its runtime type.
 	 * 
-	 * @param o
+	 * @param object
 	 *            object to be serialized.
 	 * @param type
 	 *            the type of the object to be serialized.
@@ -226,14 +226,14 @@ public final class Genson {
 	 * @throws TransformationException
 	 * @throws IOException
 	 */
-	public <T> String serialize(T o, GenericType<T> type) throws TransformationException,
+	public <T> String serialize(T object, GenericType<T> type) throws TransformationException,
 			IOException {
 		StringWriter sw = new StringWriter();
 		ObjectWriter writer = createWriter(sw);
-		if (o == null)
+		if (object == null)
 			nullConverter.serialize(null, writer, null);
 		else
-			serialize(o, type.getType(), writer, new Context(this));
+			serialize(object, type.getType(), writer, new Context(this));
 		writer.flush();
 		return sw.toString();
 	}
@@ -242,48 +242,55 @@ public final class Genson {
 	 * Serializes the object using the specified BeanViews.
 	 * 
 	 * @see BeanView
-	 * @param o
+	 * @param object
 	 * @param withViews
 	 *            the BeanViews to apply during this serialization.
 	 * @return
 	 * @throws TransformationException
 	 * @throws IOException
 	 */
-	public <T> String serialize(T o, Class<? extends BeanView<?>>... withViews)
+	public <T> String serialize(T object, Class<? extends BeanView<?>>... withViews)
 			throws TransformationException, IOException {
 		StringWriter sw = new StringWriter();
 		ObjectWriter writer = createWriter(sw);
-		if (o == null)
+		if (object == null)
 			nullConverter.serialize(null, writer, null);
 		else
-			serialize(o, o.getClass(), writer, new Context(this, Arrays.asList(withViews)));
+			serialize(object, object.getClass(), writer,
+					new Context(this, Arrays.asList(withViews)));
 		writer.flush();
 		return sw.toString();
 	}
 
 	/**
-	 * Serializes this object and writes its representation to writer.
+	 * Serializes this object and writes its representation to writer. As you are providing the
+	 * writer instance you also must ensure to call close on it when you are done.
 	 * 
-	 * @param o
+	 * @param object
 	 * @param writer
 	 *            into which to write the serialized object.
 	 * @param withViews
 	 * @throws TransformationException
 	 * @throws IOException
 	 */
-	public <T> void serialize(T o, ObjectWriter writer, Class<? extends BeanView<?>>... withViews)
-			throws TransformationException, IOException {
-		if (o == null)
+	public <T> void serialize(T object, ObjectWriter writer,
+			Class<? extends BeanView<?>>... withViews) throws TransformationException, IOException {
+		if (object == null)
 			nullConverter.serialize(null, writer, null);
 		else
-			serialize(o, o.getClass(), writer, new Context(this, Arrays.asList(withViews)));
+			serialize(object, object.getClass(), writer,
+					new Context(this, Arrays.asList(withViews)));
 		writer.flush();
 	}
 
-	public <T> void serialize(T obj, Type type, ObjectWriter writer, Context ctx)
+	/**
+	 * Serializes this object and writes its representation to writer. As you are providing the
+	 * writer instance you also must ensure to call close on it when you are done.
+	 */
+	public <T> void serialize(T object, Type type, ObjectWriter writer, Context ctx)
 			throws TransformationException, IOException {
 		Serializer<T> ser = provideConverter(type);
-		ser.serialize(obj, writer, ctx);
+		ser.serialize(object, writer, ctx);
 	}
 
 	/**
@@ -299,41 +306,59 @@ public final class Genson {
 	 */
 	public <T> T deserialize(String fromSource, Class<T> toClass) throws TransformationException,
 			IOException {
-		return deserialize(toClass, createReader(new StringReader(fromSource)), new Context(this));
-	}
-
-	public <T> T deserialize(String fromSource, GenericType<T> toType)
-			throws TransformationException, IOException {
-		return deserialize(toType.getType(), createReader(new StringReader(fromSource)),
+		return deserialize(GenericType.of(toClass), createReader(new StringReader(fromSource)),
 				new Context(this));
 	}
 
-	public <T> T deserialize(Reader reader, Type toType) throws TransformationException,
+	/**
+	 * Deserializes to an instance of T. GenericType is useful when you want to deserialize to a
+	 * list or map (or any other type with generics).
+	 * 
+	 * @see GenericType
+	 * 
+	 * @param fromSource
+	 * @param toType
+	 * @return
+	 * @throws TransformationException
+	 * @throws IOException
+	 */
+	public <T> T deserialize(String fromSource, GenericType<T> toType)
+			throws TransformationException, IOException {
+		return deserialize(toType, createReader(new StringReader(fromSource)), new Context(this));
+	}
+
+	public <T> T deserialize(Reader reader, GenericType<T> toType) throws TransformationException,
 			IOException {
 		return deserialize(toType, createReader(reader), new Context(this));
 	}
 
-	public <T> T deserialize(String fromSource, Type toType) throws TransformationException,
+	public <T> T deserialize(Reader reader, Class<T> toType) throws TransformationException,
 			IOException {
-		StringReader reader = new StringReader(fromSource);
-		return deserialize(toType, createReader(reader), new Context(this, null));
+		return deserialize(GenericType.of(toType), createReader(reader), new Context(this));
 	}
 
-	public <T> T deserialize(String fromSource, Type toType,
+	public <T> T deserialize(String fromSource, GenericType<T> toType,
 			Class<? extends BeanView<?>>... withViews) throws TransformationException, IOException {
 		StringReader reader = new StringReader(fromSource);
 		return deserialize(toType, createReader(reader),
 				new Context(this, Arrays.asList(withViews)));
 	}
 
-	public <T> T deserialize(Type type, Reader reader, Class<? extends BeanView<?>>... withViews)
-			throws TransformationException, IOException {
+	public <T> T deserialize(String fromSource, Class<T> toType,
+			Class<? extends BeanView<?>>... withViews) throws TransformationException, IOException {
+		StringReader reader = new StringReader(fromSource);
+		return deserialize(GenericType.of(toType), createReader(reader),
+				new Context(this, Arrays.asList(withViews)));
+	}
+
+	public <T> T deserialize(GenericType<T> type, Reader reader,
+			Class<? extends BeanView<?>>... withViews) throws TransformationException, IOException {
 		return deserialize(type, createReader(reader), new Context(this, Arrays.asList(withViews)));
 	}
 
-	public <T> T deserialize(Type type, ObjectReader reader, Context ctx)
+	public <T> T deserialize(GenericType<T> type, ObjectReader reader, Context ctx)
 			throws TransformationException, IOException {
-		Deserializer<T> deser = provideConverter(type);
+		Deserializer<T> deser = provideConverter(type.getType());
 		return deser.deserialize(reader, ctx);
 	}
 
@@ -374,8 +399,7 @@ public final class Genson {
 	 * UTF8.
 	 */
 	public ObjectWriter createWriter(OutputStream os) {
-		return new JsonWriter(new OutputStreamWriter(os, UTF8_CHARSET), skipNull, htmlSafe,
-				indentation);
+		return new JsonWriter(new OutputStreamWriter(os, UTF8_CHARSET), skipNull, htmlSafe, indent);
 	}
 
 	/**
@@ -389,7 +413,14 @@ public final class Genson {
 	 * Creates a new ObjectWriter with this Genson instance configuration.
 	 */
 	public ObjectWriter createWriter(Writer writer) {
-		return new JsonWriter(writer, skipNull, htmlSafe, indentation);
+		return new JsonWriter(writer, skipNull, htmlSafe, indent);
+	}
+
+	/**
+	 * Creates a new ObjectWriter with this Genson instance configuration.
+	 */
+	public ObjectReader createReader(byte[] in) {
+		return createReader(new ByteArrayInputStream(in));
 	}
 
 	/**
@@ -463,7 +494,7 @@ public final class Genson {
 		private final List<Factory<?>> converterFactories = new ArrayList<Factory<?>>();
 		private final List<ContextualFactory<?>> contextualFactories = new ArrayList<ContextualFactory<?>>();
 		private final List<BeanPropertyFactory> beanPropertyFactories = new ArrayList<BeanPropertyFactory>();
-		
+
 		private boolean skipNull = false;
 		private boolean htmlSafe = false;
 		private boolean withClassMetadata = false;
@@ -474,7 +505,7 @@ public final class Genson {
 		private boolean useRuntimeTypeForSerialization = false;
 		private boolean withDebugInfoPropertyNameResolver = false;
 		private boolean strictDoubleParse = false;
-		private String indentation = null;
+		private boolean indent = false;
 
 		private List<GensonExtension> _extensions = new ArrayList<GensonExtension>();
 
@@ -664,8 +695,8 @@ public final class Genson {
 		}
 
 		/**
-		 * ContextualFactory is actually in a beta status (thus in internal package), it will not be removed, but for sure it will
-		 * move in another package and might be refactored.
+		 * ContextualFactory is actually in a beta status (thus in internal package), it will not be
+		 * removed, but for sure it will move in another package and might be refactored.
 		 */
 		public Builder withContextualFactory(ContextualFactory<?>... factories) {
 			contextualFactories.addAll(Arrays.asList(factories));
@@ -673,14 +704,15 @@ public final class Genson {
 		}
 
 		/**
-		 * Allows you to register new BeanPropertyFactory responsible of creating BeanProperty accessors, mutators and BeanCreators.
-		 * This is a very low level feature, you probably don't need it.
+		 * Allows you to register new BeanPropertyFactory responsible of creating BeanProperty
+		 * accessors, mutators and BeanCreators. This is a very low level feature, you probably
+		 * don't need it.
 		 */
 		public Builder withBeanPropertyFactory(BeanPropertyFactory... factories) {
 			beanPropertyFactories.addAll(Arrays.asList(factories));
 			return this;
 		}
-		
+
 		/**
 		 * Renames all fields named field to toName.
 		 */
@@ -1130,12 +1162,25 @@ public final class Genson {
 			return this;
 		}
 
-		public String getIndentation() {
-			return indentation;
+		public boolean isIndented() {
+			return indent;
 		}
 
+		/**
+		 * If true outputed json will be indented using two spaces, otherwise (by default) all is
+		 * printed on same line.
+		 */
+		public Builder useIndentation(boolean indent) {
+			this.indent = indent;
+			return this;
+		}
+
+		/**
+		 * The value of indentation is ignored, it will always use 2 spaces.
+		 * @deprecated use instead {@link #useIndentation(boolean)}
+		 */
 		public Builder setIndentation(String indentation) {
-			this.indentation = indentation;
+			this.indent = true;
 			return this;
 		}
 
@@ -1144,8 +1189,16 @@ public final class Genson {
 			return this;
 		}
 
+		/**
+		 * Register some genson extensions. For example to enable JAXB support:
+		 * <pre>
+		 * 	builder.with(new JAXBExtension());
+		 * </pre>
+		 * @see GensonExtension
+		 */
 		public Builder with(GensonExtension... extensions) {
-			for (GensonExtension ext : extensions) _extensions.add(ext);
+			for (GensonExtension ext : extensions)
+				_extensions.add(ext);
 			return this;
 		}
 
@@ -1157,8 +1210,9 @@ public final class Genson {
 		 * @return a new instance of Genson built for the current configuration.
 		 */
 		public Genson create() {
-			for (GensonExtension extension : _extensions) extension.configure(this);
-			
+			for (GensonExtension extension : _extensions)
+				extension.configure(this);
+
 			if (nullConverter == null) nullConverter = new NullConverter();
 			if (propertyNameResolver == null) propertyNameResolver = createPropertyNameResolver();
 			if (mutatorAccessorResolver == null)
@@ -1243,7 +1297,7 @@ public final class Genson {
 				Map<String, Class<?>> classAliases) {
 			return new Genson(converterFactory, getBeanDescriptorProvider(), getNullConverter(),
 					isSkipNull(), isHtmlSafe(), classAliases, isWithClassMetadata(),
-					isStrictDoubleParse(), getIndentation());
+					isStrictDoubleParse(), isIndented());
 		}
 
 		/**

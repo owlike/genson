@@ -114,7 +114,7 @@ public class JsonWriterTest {
 	public void testPrettyPrint() throws IOException {
 		String expected = "[\n  2,\n  false,\n  {\n    \"@class\":\"titi\",\n    \"@cc2\":\"iuuiio\",\n    \"name\":\"toto\",\n    \"uu\":null\n  }\n]";
 		StringWriter sw = new StringWriter();
-		JsonWriter writer = new JsonWriter(sw, false, false, "  ");
+		JsonWriter writer = new JsonWriter(sw, false, false, true);
 		writer.beginArray().writeValue(2).writeValue(false).beginNextObjectMetadata()
 				.writeMetadata("class", "titi").beginObject().writeMetadata("cc2", "iuuiio")
 				.writeName("name").writeValue("toto").writeName("uu").writeNull().endObject()

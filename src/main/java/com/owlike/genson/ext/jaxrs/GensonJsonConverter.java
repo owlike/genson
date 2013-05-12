@@ -21,6 +21,7 @@ import javax.ws.rs.ext.Provider;
 import javax.ws.rs.ext.Providers;
 
 import com.owlike.genson.Context;
+import com.owlike.genson.GenericType;
 import com.owlike.genson.Genson;
 import com.owlike.genson.TransformationException;
 import com.owlike.genson.annotation.WithBeanView;
@@ -122,7 +123,7 @@ public class GensonJsonConverter implements MessageBodyReader<Object>, MessageBo
 		try {
 			Genson genson = getInstance(type);
 			ObjectReader reader = genson.createReader(new InputStreamReader(entityStream, "UTF-8"));
-			return genson.deserialize(genericType, reader, createContext(annotations, genson));
+			return genson.deserialize(GenericType.of(genericType), reader, createContext(annotations, genson));
 		} catch (TransformationException e) {
 			throw new WebApplicationException(e);
 		}

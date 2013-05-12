@@ -72,10 +72,6 @@ public class JaxbAnnotationsSupportTest {
 		assertEquals(3, bean.c);
 	}
 
-	// @Test
-	public void testXmlElementRef() {
-	}
-
 	@Test
 	public void testXmlEnumValue() throws TransformationException, IOException {
 		String json = genson.serialize(XmlEnumValueBean.ONE);
@@ -175,6 +171,8 @@ public class JaxbAnnotationsSupportTest {
 
 	@XmlAccessorType(XmlAccessType.FIELD)
 	public static class XmlElementRefBean {
+
+		// TODO not yet implemented, does really someone use such feature in JSON world?
 		@XmlElementRef
 		private XmlRootElementBean a;
 		@XmlElementRef

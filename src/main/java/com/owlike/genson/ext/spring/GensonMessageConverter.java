@@ -14,6 +14,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 
 import com.owlike.genson.Context;
+import com.owlike.genson.GenericType;
 import com.owlike.genson.Genson;
 import com.owlike.genson.ThreadLocalHolder;
 import com.owlike.genson.TransformationException;
@@ -47,12 +48,14 @@ public class GensonMessageConverter extends AbstractHttpMessageConverter<Object>
 				type = mp.getGenericParameterType();
 			}
 			
+			GenericType<?> genericType = GenericType.of(type);
+			
 			if (ann != null)
-				return genson.deserialize(type,
+				return genson.deserialize(genericType,
 						genson.createReader(inputMessage.getBody()),
 						new Context(genson, Arrays.asList(ann.views())));
 			else
-				return genson.deserialize(type,
+				return genson.deserialize(genericType,
 						genson.createReader(inputMessage.getBody()), new Context(genson));
 		} catch (TransformationException e) {
 			throw new IOException("Could not deserialize type " + clazz.getName());

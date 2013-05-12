@@ -33,6 +33,7 @@ import static com.owlike.genson.reflect.TypeUtil.*;
  */
 public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorProvider {
 	final static String CONTEXT_KEY = "__GENSON$CREATION_CONTEXT";
+	final static String DO_NOT_CACHE_CONVERTER_KEY = "__GENOSN$DO_NOT_CACHE_CONVERTER";
 
 	public final static class ContextualConverterFactory {
 		private final List<? extends ContextualFactory<?>> contextualFactories;
@@ -164,14 +165,14 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 		Converter<Object> converter = (Converter<Object>) contextualConverterFactory.provide(
 				property, genson);
 		if (converter != null) {
-			ThreadLocalHolder.store("__GENOSN$DO_NOT_CACHE_CONVERTER", true);
+			ThreadLocalHolder.store(DO_NOT_CACHE_CONVERTER_KEY, true);
 			ThreadLocalHolder.store(CONTEXT_KEY, converter);
 		}
 		try {
 			return genson.provideConverter(property.type);
 		} finally {
 			if (converter != null) {
-				ThreadLocalHolder.remove("__GENOSN$DO_NOT_CACHE_CONVERTER", Boolean.class);
+				ThreadLocalHolder.remove(DO_NOT_CACHE_CONVERTER_KEY, Boolean.class);
 				ThreadLocalHolder.remove(CONTEXT_KEY, Converter.class);
 			}
 		}

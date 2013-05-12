@@ -47,6 +47,8 @@ public class DeserializeBenchmark {
 
 	TypeReference<List<Tweet>> tweetsType = new TypeReference<List<Tweet>>() {};
 	TypeReference<Feed> feedType = new TypeReference<Feed>() {};
+	GenericType<Feed> genericFeedType = new GenericType<Feed>() {};
+	GenericType<List<Tweet>> genericTweetsType = new GenericType<List<Tweet>>() {};
 
 	public DeserializeBenchmark() throws Exception {
 		setUp();
@@ -67,12 +69,12 @@ public class DeserializeBenchmark {
 
 		// warmup
 		jacksonParse(WARMUP_ITER, tweets, tweetsType);
-		gensonParse(WARMUP_ITER, tweets, tweetsType);
+		gensonParse(WARMUP_ITER, tweets, genericTweetsType);
 		gsonParse(WARMUP_ITER, tweets, tweetsType);
 		freeMem();
 		Timer timer = new Timer().start();
 		// genson
-		gensonParse(ITER, tweets, tweetsType);
+		gensonParse(ITER, tweets, genericTweetsType);
 		System.out.println("Genson tweets:" + timer.stop().printS());
 		// jackson
 		freeMem();
@@ -87,11 +89,11 @@ public class DeserializeBenchmark {
 		System.out.println("*****************");
 
 		jacksonParse(WARMUP_ITER, shortReader, feedType);
-		gensonParse(WARMUP_ITER, shortReader, feedType);
+		gensonParse(WARMUP_ITER, shortReader, genericFeedType);
 		gsonParse(WARMUP_ITER, shortReader, feedType);
 		freeMem();
 		timer.start();
-		gensonParse(ITER, shortReader, feedType);
+		gensonParse(ITER, shortReader, genericFeedType);
 		System.out.println("Genson shortReader:" + timer.stop().printS());
 		freeMem();
 		timer.start();
@@ -104,11 +106,11 @@ public class DeserializeBenchmark {
 		System.out.println("*****************");
 
 		jacksonParse(WARMUP_ITER, longReader, feedType);
-		gensonParse(WARMUP_ITER, longReader, feedType);
+		gensonParse(WARMUP_ITER, longReader, genericFeedType);
 		gsonParse(WARMUP_ITER, longReader, feedType);
 		freeMem();
 		timer.start();
-		gensonParse(ITER, longReader, feedType);
+		gensonParse(ITER, longReader, genericFeedType);
 		System.out.println("Genson longReader:" + timer.stop().printS());
 		freeMem();
 		timer.start();
@@ -138,10 +140,10 @@ public class DeserializeBenchmark {
 		}
 	}
 
-	public <T> void gensonParse(int iter, String source, TypeReference<T> type)
+	public <T> void gensonParse(int iter, String source, GenericType<T> type)
 			throws TransformationException, IOException {
 		for (int i = 0; i < iter; i++) {
-			genson.deserialize(source, type.getType());
+			genson.deserialize(source, type);
 		}
 	}
 	
