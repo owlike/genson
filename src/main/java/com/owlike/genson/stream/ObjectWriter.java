@@ -62,7 +62,7 @@ import java.io.IOException;
  * Be careful if you instantiate ObjectWriter your self you are responsible of flushing and closing
  * the stream.
  * 
- * @see JsonWriter 
+ * @see JsonWriter
  * @see ObjectReader
  * @see JsonReader
  * 
@@ -86,7 +86,8 @@ public interface ObjectWriter extends Flushable, Closeable {
 	 * 
 	 * @return a reference to this allowing to chain method calls.
 	 * @throws IOException
-	 * @throws JsonStreamException if called endArray instead of endObject for example
+	 * @throws JsonStreamException
+	 *             if called endArray instead of endObject for example
 	 */
 	public ObjectWriter endArray() throws IOException;
 
@@ -104,7 +105,8 @@ public interface ObjectWriter extends Flushable, Closeable {
 	 * 
 	 * @return a reference to this allowing to chain method calls.
 	 * @throws IOException
-	 * @throws JsonStreamException if called endObject instead of endArray for example
+	 * @throws JsonStreamException
+	 *             if called endObject instead of endArray for example
 	 */
 	public ObjectWriter endObject() throws IOException;
 
@@ -112,7 +114,8 @@ public interface ObjectWriter extends Flushable, Closeable {
 	 * Writes the name of a property. Names can be written only in objects and must be called before
 	 * writing the properties value.
 	 * 
-	 * @param name a non null String
+	 * @param name
+	 *            a non null String
 	 * @return a reference to this, allowing to chain method calls.
 	 * @throws IOException
 	 */
@@ -132,7 +135,8 @@ public interface ObjectWriter extends Flushable, Closeable {
 
 	/**
 	 * 
-	 * @param value not null
+	 * @param value
+	 *            not null
 	 * @return a reference to this, allowing to chain method calls.
 	 * @throws IOException
 	 */
@@ -149,10 +153,19 @@ public interface ObjectWriter extends Flushable, Closeable {
 	public ObjectWriter writeValue(String value) throws IOException;
 
 	/**
+	 * Writes an array of bytes as a base64 encoded string.
+	 * 
+	 * @return a reference to this allowing to chain method calls.
+	 * @throws IOException
+	 */
+	public ObjectWriter writeValue(byte[] value) throws IOException;
+
+	/**
 	 * Writes value as is without any pre-processing, it's faster than {@link #writeValue(String)}
 	 * but should be used only if you know that it is safe.
 	 * 
-	 * @param value not null
+	 * @param value
+	 *            not null
 	 * @return a reference to this allowing to chain method calls.
 	 * @throws IOException
 	 */
@@ -220,8 +233,10 @@ public interface ObjectWriter extends Flushable, Closeable {
 	 * 
 	 * @see #beginNextObjectMetadata()
 	 * 
-	 * @param name of the metadata property, should not start with '@', the library will add it.
-	 * @param value of the metadata property.
+	 * @param name
+	 *            of the metadata property, should not start with '@', the library will add it.
+	 * @param value
+	 *            of the metadata property.
 	 * @return a reference to this allowing to chain method calls.
 	 * @throws IOException
 	 */

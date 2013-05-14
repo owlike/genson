@@ -241,4 +241,6 @@ public interface ObjectReader extends Closeable {
 	 * @throws IOException
 	 */
 	public boolean valueAsBoolean() throws IOException;
+	
+	public byte[] valueAsByteArray() throws IOException;
 }

@@ -183,7 +183,7 @@ public class JsonWriter implements ObjectWriter {
 		}
 		return this;
 	}
-	
+
 	private final void clearMetadata() {
 		if (_ctx.peek() == JsonType.METADATA) {
 			_metadata.clear();
@@ -302,6 +302,13 @@ public class JsonWriter implements ObjectWriter {
 		return this;
 	}
 
+	public ObjectWriter writeValue(byte[] value) throws IOException {
+		final char[] charArray = Base64.encodeToChar(value, false);
+		writeToBuffer(charArray, 0, charArray.length);
+		flush();
+		return this;
+	}
+
 	public JsonWriter writeUnsafeValue(final String value) throws IOException {
 		clearMetadata();
 		beforeValue();
@@ -319,7 +326,7 @@ public class JsonWriter implements ObjectWriter {
 		writeInternalString(value);
 		return this;
 	}
-	
+
 	private final void writeInternalString(final String value) throws IOException {
 		beforeValue();
 		final String[] replacements = htmlSafe ? HTML_SAFE_REPLACEMENT_CHARS : REPLACEMENT_CHARS;
@@ -370,18 +377,14 @@ public class JsonWriter implements ObjectWriter {
 		}
 		return this;
 	}
-	
+
 	/*
-	 * beginNextObjectMetadata
-	 *  write metadata
-	 *  call same beginNextObjectMetadata
-	 *   write some other metadata
-	 *   
-	 *   ctx = METADATA|OBJECT
-	 *   
-	 * if beginObject -> dump all
-	 * else -> erase all
+	 * beginNextObjectMetadata write metadata call same beginNextObjectMetadata write some other
+	 * metadata
 	 * 
+	 * ctx = METADATA|OBJECT
+	 * 
+	 * if beginObject -> dump all else -> erase all
 	 */
 
 	public ObjectWriter beginNextObjectMetadata() throws IOException {

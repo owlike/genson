@@ -22,9 +22,11 @@ import com.owlike.genson.TransformationException;
 
 public class DefaultConvertersTest {
 	private Genson genson = new Genson();
-
-	public static enum Color {
-		blue, red;
+	
+	@Test public void testByteArray() throws TransformationException, IOException {
+		byte[] byteArray = "hey convert me to bytes".getBytes("UTF-8");
+		String json = genson.serialize(byteArray);
+		assertArrayEquals(byteArray, genson.deserialize(json, byte[].class));
 	}
 	
 	@Test public void testEnumSet() throws TransformationException, IOException {
@@ -110,6 +112,10 @@ public class DefaultConvertersTest {
 		assertEquals(cal.getTime(), cal2.getTime());
 	}
 
+	public static enum Color {
+		blue, red;
+	}
+	
 	public static class RootBean {
 		public RootBean bean;
 	}

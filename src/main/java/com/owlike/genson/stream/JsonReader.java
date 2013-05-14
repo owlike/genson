@@ -281,6 +281,13 @@ public class JsonReader implements ObjectReader {
 		throw new JsonStreamException("Readen value is not of type boolean");
 	}
 
+	public byte[] valueAsByteArray() throws IOException {
+		if (STRING == valueType) return Base64.decodeFast(_stringValue);
+		if (NULL == valueType) return null;
+		throw new JsonStreamException("Expected a String to convert to byte array found "
+				+ valueType);
+	}
+
 	public String metadata(String name) throws IOException {
 		if (!_metadata_readen) nextObjectMetadata();
 		return _metadata.get(name);
@@ -425,7 +432,12 @@ public class JsonReader implements ObjectReader {
 		_cursor++;
 		boolean buffered = false;
 		while (true) {
-			fillBuffer(true);
+			if(fillBuffer(true) < 0) {
+				// TODO ugly to copy, by the way ensure we don't have the same problem elsewhere
+				String name = new String(_stringBuffer, 0, _stringBufferTail);
+				_stringBufferTail = 0;
+				return name;
+			}
 
 			int i = _cursor;
 			for (; i < _buflen;) {

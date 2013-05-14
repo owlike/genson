@@ -13,7 +13,7 @@ import com.owlike.genson.Converter;
 import com.owlike.genson.Factory;
 import com.owlike.genson.Genson;
 import com.owlike.genson.ThreadLocalHolder;
-import com.owlike.genson.internal.ContextualFactory;
+import com.owlike.genson.convert.ContextualFactory;
 
 import static com.owlike.genson.reflect.TypeUtil.*;
 

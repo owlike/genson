@@ -42,7 +42,6 @@ import com.owlike.genson.annotation.HandleNull;
 import com.owlike.genson.annotation.JsonConverter;
 import com.owlike.genson.annotation.JsonDateFormat;
 import com.owlike.genson.annotation.WithoutBeanView;
-import com.owlike.genson.internal.ContextualFactory;
 import com.owlike.genson.reflect.BeanProperty;
 import com.owlike.genson.reflect.TypeUtil;
 import com.owlike.genson.stream.ObjectReader;
@@ -206,6 +205,26 @@ public final class DefaultConverters {
 		}
 	}
 
+	public final static class ByteArrayConverter implements Converter<byte[]> {
+		public static final ByteArrayConverter instance = new ByteArrayConverter();
+
+		private ByteArrayConverter() {
+		}
+
+		@Override
+		public void serialize(byte[] object, ObjectWriter writer, Context ctx)
+				throws TransformationException, IOException {
+			writer.writeValue(object);
+		}
+
+		@Override
+		public byte[] deserialize(ObjectReader reader, Context ctx) throws TransformationException,
+				IOException {
+			return reader.valueAsByteArray();
+		}
+
+	}
+
 	public final static class ArrayConverterFactory implements Factory<Converter<Object>> {
 		public final static ArrayConverterFactory instance = new ArrayConverterFactory();
 
@@ -216,10 +235,14 @@ public final class DefaultConverters {
 		public Converter<Object> create(Type forType, Genson genson) {
 			if (forType instanceof GenericArrayType
 					|| (forType instanceof Class<?> && ((Class<?>) forType).isArray())) {
-				Converter<?> elementConverter = genson.provideConverter(TypeUtil
-						.getCollectionType(forType));
-				return new ArrayConverter(
-						TypeUtil.getRawClass(TypeUtil.getCollectionType(forType)), elementConverter);
+				if (byte.class.equals(getCollectionType(forType))) {
+					return (Converter) ByteArrayConverter.instance;
+				} else {
+					Converter<?> elementConverter = genson.provideConverter(TypeUtil
+							.getCollectionType(forType));
+					return new ArrayConverter(TypeUtil.getRawClass(TypeUtil
+							.getCollectionType(forType)), elementConverter);
+				}
 			}
 			return null;
 		}
@@ -822,7 +845,8 @@ public final class DefaultConverters {
 
 			public Object deserialize(ObjectReader reader, Context ctx)
 					throws TransformationException, IOException {
-				return ctx.genson.deserialize(GenericType.of(reader.getValueType().toClass()), reader, ctx);
+				return ctx.genson.deserialize(GenericType.of(reader.getValueType().toClass()),
+						reader, ctx);
 			}
 
 			public void serialize(Object obj, ObjectWriter writer, Context ctx)
@@ -1061,7 +1085,7 @@ public final class DefaultConverters {
 		}
 
 	}
-	
+
 	public final static class PropertyConverterFactory implements ContextualFactory<Object> {
 
 		@SuppressWarnings("unchecked")
@@ -1069,23 +1093,24 @@ public final class DefaultConverters {
 		public Converter<Object> create(BeanProperty property, Genson genson) {
 			JsonConverter ann = property.getAnnotation(JsonConverter.class);
 			if (ann != null) {
-				Type converterExpandedType = expandType(lookupGenericType(Converter.class, ann.value()), ann.value());
+				Type converterExpandedType = expandType(
+						lookupGenericType(Converter.class, ann.value()), ann.value());
 				Type converterPropertyType = typeOf(0, converterExpandedType);
-				
+
 				Class<?> propertyClass = property.getRawClass();
-				if (propertyClass.isPrimitive())
-					propertyClass = wrap(propertyClass);
-				
+				if (propertyClass.isPrimitive()) propertyClass = wrap(propertyClass);
+
 				// checking type consistency
 				if (!match(propertyClass, converterPropertyType, false))
-					throw new ClassCastException("The type defined in "+ ann.value().getName() +" is not assignale from property " + property.getName()
+					throw new ClassCastException("The type defined in " + ann.value().getName()
+							+ " is not assignale from property " + property.getName()
 							+ " declared in " + property.getDeclaringClass());
 
 				try {
 					Constructor<?> ctr = ann.value().getConstructor();
 					if (!ctr.isAccessible()) ctr.setAccessible(true);
 					return (Converter<Object>) ctr.newInstance();
-					
+
 					// OMG...
 				} catch (InstantiationException e) {
 					throw new RuntimeException(e);
@@ -1103,6 +1128,6 @@ public final class DefaultConverters {
 			}
 			return null;
 		}
-		
+
 	}
 }

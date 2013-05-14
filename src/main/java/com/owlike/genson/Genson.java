@@ -29,12 +29,12 @@ import com.owlike.genson.convert.BeanViewConverter;
 import com.owlike.genson.convert.ChainedFactory;
 import com.owlike.genson.convert.CircularClassReferenceConverterFactory;
 import com.owlike.genson.convert.ClassMetadataConverter;
+import com.owlike.genson.convert.ContextualFactory;
 import com.owlike.genson.convert.DefaultConverters;
 import com.owlike.genson.convert.NullConverter;
 import com.owlike.genson.convert.RuntimeTypeConverter;
 import com.owlike.genson.convert.DefaultConverters.DateConverter;
 import com.owlike.genson.ext.GensonExtension;
-import com.owlike.genson.internal.ContextualFactory;
 import com.owlike.genson.reflect.ASMCreatorParameterNameResolver;
 import com.owlike.genson.reflect.BaseBeanDescriptorProvider;
 import com.owlike.genson.reflect.BeanDescriptorProvider;
@@ -176,7 +176,7 @@ public final class Genson {
 		}
 		this.strictDoubleParse = strictDoubleParse;
 		this.indent = indent;
-		this.withMetadata = withClassMetadata||withMetadata;
+		this.withMetadata = withClassMetadata || withMetadata;
 	}
 
 	/**
@@ -698,8 +698,8 @@ public final class Genson {
 		}
 
 		/**
-		 * ContextualFactory is actually in a beta status (thus in internal package), it will not be
-		 * removed, but for sure it will move in another package and might be refactored.
+		 * ContextualFactory is actually in a beta status, it will not be removed, but might be
+		 * refactored.
 		 */
 		public Builder withContextualFactory(ContextualFactory<?>... factories) {
 			contextualFactories.addAll(Arrays.asList(factories));
@@ -1208,12 +1208,12 @@ public final class Genson {
 				_extensions.add(ext);
 			return this;
 		}
-		
+
 		public Builder useMetadata(boolean metadata) {
 			this.metadata = metadata;
 			return this;
 		}
-		
+
 		/**
 		 * true if metadata is enabled during parsing.
 		 */
