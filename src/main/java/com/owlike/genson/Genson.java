@@ -34,7 +34,7 @@ import com.owlike.genson.convert.DefaultConverters;
 import com.owlike.genson.convert.NullConverter;
 import com.owlike.genson.convert.RuntimeTypeConverter;
 import com.owlike.genson.convert.DefaultConverters.DateConverter;
-import com.owlike.genson.ext.GensonExtension;
+import com.owlike.genson.ext.GensonBundle;
 import com.owlike.genson.reflect.ASMCreatorParameterNameResolver;
 import com.owlike.genson.reflect.BaseBeanDescriptorProvider;
 import com.owlike.genson.reflect.BeanDescriptorProvider;
@@ -510,7 +510,7 @@ public final class Genson {
 		private boolean indent = false;
 		private boolean metadata = false;
 
-		private List<GensonExtension> _extensions = new ArrayList<GensonExtension>();
+		private List<GensonBundle> _bundles = new ArrayList<GensonBundle>();
 
 		private PropertyNameResolver propertyNameResolver;
 		private BeanMutatorAccessorResolver mutatorAccessorResolver;
@@ -1195,17 +1195,17 @@ public final class Genson {
 		}
 
 		/**
-		 * Register some genson extensions. For example to enable JAXB support:
+		 * Register some genson bundles. For example to enable JAXB support:
 		 * 
 		 * <pre>
 		 * builder.with(new JAXBExtension());
 		 * </pre>
 		 * 
-		 * @see GensonExtension
+		 * @see GensonBundle
 		 */
-		public Builder with(GensonExtension... extensions) {
-			for (GensonExtension ext : extensions)
-				_extensions.add(ext);
+		public Builder with(GensonBundle... bundles) {
+			for (GensonBundle ext : bundles)
+				_bundles.add(ext);
 			return this;
 		}
 
@@ -1229,8 +1229,8 @@ public final class Genson {
 		 * @return a new instance of Genson built for the current configuration.
 		 */
 		public Genson create() {
-			for (GensonExtension extension : _extensions)
-				extension.configure(this);
+			for (GensonBundle bundle : _bundles)
+				bundle.configure(this);
 
 			if (nullConverter == null) nullConverter = new NullConverter();
 			if (propertyNameResolver == null) propertyNameResolver = createPropertyNameResolver();
@@ -1243,9 +1243,6 @@ public final class Genson {
 			addDefaultSerializers(getDefaultSerializers());
 			addDefaultDeserializers(getDefaultDeserializers());
 
-			// we create temporary lists to hold the default and extension instances in order to
-			// prevent modification
-			// of user registered ones as the lists passed to the extensions are modifiable
 			List<Factory<? extends Converter<?>>> convFactories = new ArrayList<Factory<? extends Converter<?>>>();
 			addDefaultConverterFactories(convFactories);
 			converterFactories.addAll(convFactories);

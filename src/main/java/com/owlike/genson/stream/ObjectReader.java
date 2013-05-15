@@ -242,5 +242,9 @@ public interface ObjectReader extends Closeable {
 	 */
 	public boolean valueAsBoolean() throws IOException;
 	
+	/**
+	 * @return the incoming base64 string converted to a byte array.
+	 * @throws IOException
+	 */
 	public byte[] valueAsByteArray() throws IOException;
 }

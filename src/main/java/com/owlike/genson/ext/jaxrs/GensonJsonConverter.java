@@ -25,7 +25,7 @@ import com.owlike.genson.GenericType;
 import com.owlike.genson.Genson;
 import com.owlike.genson.TransformationException;
 import com.owlike.genson.annotation.WithBeanView;
-import com.owlike.genson.ext.jaxb.JAXBExtension;
+import com.owlike.genson.ext.jaxb.JAXBBundle;
 import com.owlike.genson.stream.ObjectReader;
 import com.owlike.genson.stream.ObjectWriter;
 
@@ -46,7 +46,7 @@ public class GensonJsonConverter implements MessageBodyReader<Object>, MessageBo
 		}
 
 		private final Genson createDefaultInstance() {
-			return new Genson.Builder().with(new JAXBExtension()).setWithBeanViewConverter(true)
+			return new Genson.Builder().with(new JAXBBundle()).setWithBeanViewConverter(true)
 					.setWithDebugInfoPropertyNameResolver(true).create();
 		}
 	}

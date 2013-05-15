@@ -42,7 +42,7 @@ import com.owlike.genson.annotation.HandleClassMetadata;
 import com.owlike.genson.annotation.WithoutBeanView;
 import com.owlike.genson.convert.ContextualFactory;
 import com.owlike.genson.convert.DefaultConverters.DateConverter;
-import com.owlike.genson.ext.GensonExtension;
+import com.owlike.genson.ext.GensonBundle;
 import com.owlike.genson.reflect.BeanCreator;
 import com.owlike.genson.reflect.BeanProperty;
 import com.owlike.genson.reflect.BeanPropertyFactory;
@@ -55,10 +55,10 @@ import com.owlike.genson.reflect.VisibilityFilter;
 import com.owlike.genson.stream.ObjectReader;
 import com.owlike.genson.stream.ObjectWriter;
 
-public class JAXBExtension extends GensonExtension {
+public class JAXBBundle extends GensonBundle {
 	private final DatatypeFactory dateFactory;
 
-	public JAXBExtension() {
+	public JAXBBundle() {
 		try {
 			dateFactory = DatatypeFactory.newInstance();
 		} catch (DatatypeConfigurationException dce) {
