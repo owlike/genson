@@ -52,7 +52,7 @@ public class GensonBenchmark {
 			IOException, TransformationException {
 		GensonBenchmark bench = new GensonBenchmark();
 		bench.setUp();
-//		bench.benchSerialization();
+		bench.benchSerialization();
 		bench.benchDeserialization();
 	}
 

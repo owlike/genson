@@ -55,6 +55,12 @@ import com.owlike.genson.reflect.VisibilityFilter;
 import com.owlike.genson.stream.ObjectReader;
 import com.owlike.genson.stream.ObjectWriter;
 
+/**
+ * Provides support for some JAXB annotations and data types.
+ * 
+ * @author eugen
+ *
+ */
 public class JAXBBundle extends GensonBundle {
 	private final DatatypeFactory dateFactory;
 

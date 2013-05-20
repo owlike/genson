@@ -11,26 +11,26 @@ public class JsonWriter implements ObjectWriter {
 	/*
 	 * TODO try to do something different and faster, optimize writeValue(String)
 	 */
-	private final static String[] REPLACEMENT_CHARS;
-	private final static String[] HTML_SAFE_REPLACEMENT_CHARS;
+	private final static char[][] REPLACEMENT_CHARS;
+	private final static char[][] HTML_SAFE_REPLACEMENT_CHARS;
 	static {
-		REPLACEMENT_CHARS = new String[128];
+		REPLACEMENT_CHARS = new char[128][];
 		for (int i = 0; i <= 0x1f; i++) {
-			REPLACEMENT_CHARS[i] = String.format("\\u%04x", (int) i);
+			REPLACEMENT_CHARS[i] = String.format("\\u%04x", (int) i).toCharArray();
 		}
-		REPLACEMENT_CHARS['"'] = "\\\"";
-		REPLACEMENT_CHARS['\\'] = "\\\\";
-		REPLACEMENT_CHARS['\t'] = "\\t";
-		REPLACEMENT_CHARS['\b'] = "\\b";
-		REPLACEMENT_CHARS['\n'] = "\\n";
-		REPLACEMENT_CHARS['\r'] = "\\r";
-		REPLACEMENT_CHARS['\f'] = "\\f";
+		REPLACEMENT_CHARS['"'] = "\\\"".toCharArray();
+		REPLACEMENT_CHARS['\\'] = "\\\\".toCharArray();
+		REPLACEMENT_CHARS['\t'] = "\\t".toCharArray();
+		REPLACEMENT_CHARS['\b'] = "\\b".toCharArray();
+		REPLACEMENT_CHARS['\n'] = "\\n".toCharArray();
+		REPLACEMENT_CHARS['\r'] = "\\r".toCharArray();
+		REPLACEMENT_CHARS['\f'] = "\\f".toCharArray();
 		HTML_SAFE_REPLACEMENT_CHARS = REPLACEMENT_CHARS.clone();
-		HTML_SAFE_REPLACEMENT_CHARS['\''] = "\\u0027";
-		HTML_SAFE_REPLACEMENT_CHARS['<'] = "\\u003c";
-		HTML_SAFE_REPLACEMENT_CHARS['>'] = "\\u003e";
-		HTML_SAFE_REPLACEMENT_CHARS['&'] = "\\u0026";
-		HTML_SAFE_REPLACEMENT_CHARS['='] = "\\u003d";
+		HTML_SAFE_REPLACEMENT_CHARS['\''] = "\\u0027".toCharArray();
+		HTML_SAFE_REPLACEMENT_CHARS['<'] = "\\u003c".toCharArray();
+		HTML_SAFE_REPLACEMENT_CHARS['>'] = "\\u003e".toCharArray();
+		HTML_SAFE_REPLACEMENT_CHARS['&'] = "\\u0026".toCharArray();
+		HTML_SAFE_REPLACEMENT_CHARS['='] = "\\u003d".toCharArray();
 	}
 
 	private final static char[] _INT_TO_CHARARRAY = new char[10];
@@ -162,7 +162,9 @@ public class JsonWriter implements ObjectWriter {
 		// "You have written metadata to the writer but did not call beginObject after it."
 		// + "Metadata is not allowed in array or for literal values.");
 
-		if (_ctx.peek() == JsonType.ARRAY) {
+		final JsonType enclosingType = _ctx.peek();
+		if (enclosingType == JsonType.ARRAY) {
+			if (_name != null) throw newIllegalKeyValuePairInJsonArray(_name);
 			if (_hasPrevious) {
 				if ((_len + 1) >= _bufferSize) flushBuffer();
 				_buffer[_len++] = ',';
@@ -180,8 +182,22 @@ public class JsonWriter implements ObjectWriter {
 			_buffer[_len++] = '"';
 			_buffer[_len++] = ':';
 			_name = null;
-		}
+		} else if (enclosingType == JsonType.OBJECT) throw newIllegalSingleValueInJsonObject();
+
 		return this;
+	}
+
+	private JsonStreamException newIllegalKeyValuePairInJsonArray(String name) {
+		return new JsonStreamException(
+				"Tried to write key/value pair with key="
+						+ name
+						+ ", Json format does not allow key/value pairs inside arrays, only allowed for Json Objects.");
+	}
+
+	private JsonStreamException newIllegalSingleValueInJsonObject() {
+		return new JsonStreamException(
+				"Tried to write value with no key in a JsonObject, Json format does not allow "
+						+ "values without keys in JsonObjects, authorized only for arrays.");
 	}
 
 	private final void clearMetadata() {
@@ -329,7 +345,7 @@ public class JsonWriter implements ObjectWriter {
 
 	private final void writeInternalString(final String value) throws IOException {
 		beforeValue();
-		final String[] replacements = htmlSafe ? HTML_SAFE_REPLACEMENT_CHARS : REPLACEMENT_CHARS;
+		final char[][] replacements = htmlSafe ? HTML_SAFE_REPLACEMENT_CHARS : REPLACEMENT_CHARS;
 		if ((_len + 1) >= _bufferSize) flushBuffer();
 		_buffer[_len++] = '"';
 		int last = 0;
@@ -337,16 +353,16 @@ public class JsonWriter implements ObjectWriter {
 		final char[] carray = value.toCharArray();
 		for (int i = 0; i < length; i++) {
 			char c = carray[i];
-			String replacement;
+			char[] replacement;
 			if (c < 128) {
 				replacement = replacements[c];
 				if (replacement == null) {
 					continue;
 				}
 			} else if (c == '\u2028') {
-				replacement = "\\u2028";
+				replacement = "\\u2028".toCharArray();
 			} else if (c == '\u2029') {
-				replacement = "\\u2029";
+				replacement = "\\u2029".toCharArray();
 			} else {
 				continue;
 			}
@@ -354,7 +370,7 @@ public class JsonWriter implements ObjectWriter {
 				writeToBuffer(carray, last, i - last);
 			}
 
-			writeToBuffer(replacement, 0, replacement.length());
+			writeToBuffer(replacement, 0, replacement.length);
 			last = i + 1;
 		}
 		if (last < length) {

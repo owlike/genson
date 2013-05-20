@@ -1,6 +1,8 @@
 package com.owlike.genson;
 
 import java.awt.Point;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -8,6 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Locale;
 
 import static org.junit.Assert.*;
@@ -36,7 +39,23 @@ import com.owlike.genson.stream.ObjectWriter;
 
 public class JsonSerDeserSymetricTest {
 	Genson genson = new Genson.Builder().setWithDebugInfoPropertyNameResolver(true).create();
-
+	
+	@Test public void testSerDeserByteArray() throws TransformationException, IOException {
+		Primitives expected = createPrimitives();
+		List<Integer> is = Arrays.asList(1, 2);
+		genson.serialize(is, new GenericType<List<Number>>() {});
+		byte[] json = genson.serializeBytes(expected);
+		Primitives.assertComparePrimitives(expected, genson.deserialize(json, Primitives.class));
+	}
+	
+	@Test public void testSerDeserStream() throws TransformationException, IOException {
+		Primitives expected = createPrimitives();
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		genson.serialize(expected, baos);
+		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+		Primitives.assertComparePrimitives(expected, genson.deserialize(bais, Primitives.class));
+	}
+	
 	@Test
 	public void testJsonComplexObjectSerDeser() throws TransformationException, IOException {
 		ComplexObject coo = new ComplexObject(createPrimitives(), Arrays.asList(createPrimitives(),

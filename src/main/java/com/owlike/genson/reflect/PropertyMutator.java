@@ -46,7 +46,7 @@ public abstract class PropertyMutator extends BeanProperty implements
 	public int compareTo(PropertyMutator o) {
 		return o.priority() - priority();
 	}
-
+	
 	protected TransformationRuntimeException couldNotMutate(Exception e) {
 		return new TransformationRuntimeException("Could not mutate value of property named '"
 				+ name + "' using mutator " + signature(), e);

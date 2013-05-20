@@ -20,6 +20,16 @@ public class JsonWriterTest {
 		w = new JsonWriter(sw);
 	}
 
+	@Test(expected = JsonStreamException.class)
+	public void testPreventInvalidJsonOutputInObject() throws IOException {
+		w.beginObject().writeValue("must fail");
+	}
+	
+	@Test(expected = JsonStreamException.class)
+	public void testPreventInvalidJsonOutputInArray() throws IOException {
+		w.beginArray().writeName("key").writeValue("must fail");
+	}
+
 	@Test
 	public void testRootEmptyArray() throws IOException {
 		w.beginArray().endArray().flush();

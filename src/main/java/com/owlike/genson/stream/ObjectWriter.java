@@ -78,6 +78,8 @@ public interface ObjectWriter extends Flushable, Closeable {
 	 * 
 	 * @return a reference to this allowing to chain method calls.
 	 * @throws IOException
+	 * @throws JsonStreamException
+	 *             if trying to produce invalid json
 	 */
 	public ObjectWriter beginArray() throws IOException;
 
@@ -87,7 +89,7 @@ public interface ObjectWriter extends Flushable, Closeable {
 	 * @return a reference to this allowing to chain method calls.
 	 * @throws IOException
 	 * @throws JsonStreamException
-	 *             if called endArray instead of endObject for example
+	 *             if trying to produce invalid json
 	 */
 	public ObjectWriter endArray() throws IOException;
 
@@ -96,7 +98,8 @@ public interface ObjectWriter extends Flushable, Closeable {
 	 * objects. Don't forget to call endObject.
 	 * 
 	 * @return a reference to this allowing to chain method calls.
-	 * @throws IOException
+	 * @throws JsonStreamException
+	 *             if trying to produce invalid json
 	 */
 	public ObjectWriter beginObject() throws IOException;
 
@@ -106,7 +109,7 @@ public interface ObjectWriter extends Flushable, Closeable {
 	 * @return a reference to this allowing to chain method calls.
 	 * @throws IOException
 	 * @throws JsonStreamException
-	 *             if called endObject instead of endArray for example
+	 *             if trying to produce invalid json
 	 */
 	public ObjectWriter endObject() throws IOException;
 
@@ -118,45 +121,89 @@ public interface ObjectWriter extends Flushable, Closeable {
 	 *            a non null String
 	 * @return a reference to this, allowing to chain method calls.
 	 * @throws IOException
+	 * @throws JsonStreamException
+	 *             if trying to produce invalid json
 	 */
 	public ObjectWriter writeName(String name) throws IOException;
 
+	/**
+	 * Writes a value to the stream. Values can be written in arrays and in objects (after writing
+	 * the name).
+	 * 
+	 * @param value
+	 *            to write.
+	 * @return a reference to this, allowing to chain method calls.
+	 * @throws IOException
+	 * @throws JsonStreamException
+	 *             if trying to produce invalid json
+	 */
 	public ObjectWriter writeValue(int value) throws IOException;
 
+	/**
+	 * See {@link #writeValue(int)}.
+	 * 
+	 * @throws JsonStreamException
+	 *             if trying to produce invalid json
+	 * @see #writeValue(int)
+	 */
 	public ObjectWriter writeValue(double value) throws IOException;
 
+	/**
+	 * See {@link #writeValue(int)}.
+	 * 
+	 * @throws JsonStreamException
+	 *             if trying to produce invalid json
+	 * @see #writeValue(int)
+	 */
 	public ObjectWriter writeValue(long value) throws IOException;
 
+	/**
+	 * See {@link #writeValue(int)}.
+	 * 
+	 * @throws JsonStreamException
+	 *             if trying to produce invalid json
+	 * @see #writeValue(int)
+	 */
 	public ObjectWriter writeValue(short value) throws IOException;
 
+	/**
+	 * @see #writeValue(int)
+	 */
 	public ObjectWriter writeValue(float value) throws IOException;
 
+	/**
+	 * See {@link #writeValue(int)}.
+	 * 
+	 * @throws JsonStreamException
+	 *             if trying to produce invalid json
+	 * @see #writeValue(int)
+	 */
 	public ObjectWriter writeValue(boolean value) throws IOException;
 
 	/**
+	 * See {@link #writeValue(int)}.
 	 * 
-	 * @param value
-	 *            not null
-	 * @return a reference to this, allowing to chain method calls.
-	 * @throws IOException
+	 * @throws JsonStreamException
+	 *             if trying to produce invalid json
+	 * @see #writeValue(int)
 	 */
 	public ObjectWriter writeValue(Number value) throws IOException;
 
 	/**
-	 * Writes value and applies some pre-processing and checks. Use this method if you need to write
-	 * some text.
+	 * See {@link #writeValue(int)}.
 	 * 
-	 * @param value
-	 * @return a reference to this allowing to chain method calls.
-	 * @throws IOException
+	 * @throws JsonStreamException
+	 *             if trying to produce invalid json
+	 * @see #writeValue(int)
 	 */
 	public ObjectWriter writeValue(String value) throws IOException;
 
 	/**
-	 * Writes an array of bytes as a base64 encoded string.
+	 * Writes an array of bytes as a base64 encoded string. See {@link #writeValue(int)}.
 	 * 
-	 * @return a reference to this allowing to chain method calls.
-	 * @throws IOException
+	 * @throws JsonStreamException
+	 *             if trying to produce invalid json
+	 * @see #writeValue(int)
 	 */
 	public ObjectWriter writeValue(byte[] value) throws IOException;
 
@@ -164,10 +211,9 @@ public interface ObjectWriter extends Flushable, Closeable {
 	 * Writes value as is without any pre-processing, it's faster than {@link #writeValue(String)}
 	 * but should be used only if you know that it is safe.
 	 * 
-	 * @param value
-	 *            not null
-	 * @return a reference to this allowing to chain method calls.
-	 * @throws IOException
+	 * @throws JsonStreamException
+	 *             if trying to produce invalid json
+	 * @see #writeValue(int)
 	 */
 	public ObjectWriter writeUnsafeValue(String value) throws IOException;
 
@@ -176,18 +222,13 @@ public interface ObjectWriter extends Flushable, Closeable {
 	 * representation (just skip it or write null, etc).
 	 * 
 	 * @return a reference to this allowing to chain method calls.
+	 * 
+	 * @throws JsonStreamException
+	 *             if trying to produce invalid json
 	 * @throws IOException
+	 * @see #writeValue(int)
 	 */
 	public ObjectWriter writeNull() throws IOException;
-
-	// public ObjectWriter write(String name, boolean value) throws IOException;
-	// public ObjectWriter write(String name, double value) throws IOException;
-	// public ObjectWriter write(String name, long value) throws IOException;
-	// public ObjectWriter write(String name, int value) throws IOException;
-	// public ObjectWriter write(String name, Number value) throws IOException;
-	// public ObjectWriter write(String name, String value) throws IOException;
-	// public ObjectWriter writeUnsafe(String name, String value) throws IOException;
-	// public ObjectWriter writeNull(String name) throws IOException;
 
 	/**
 	 * This method is a kind of cheat as it allows us to start writing metadata and then still be
@@ -195,7 +236,7 @@ public interface ObjectWriter extends Flushable, Closeable {
 	 * to handle a part of the serialization and then let the chain continue. Have a look at <a
 	 * href=
 	 * "http://code.google.com/p/genson/source/browse/src/main/java/com/owlike/genson/convert/ClassMetadataConverter.java"
-	 * >ClassMetadataConverter</a>}
+	 * >ClassMetadataConverter</a>
 	 * 
 	 * @see #writeMetadata(String, String)
 	 * 

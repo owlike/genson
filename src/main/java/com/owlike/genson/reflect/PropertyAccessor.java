@@ -13,11 +13,11 @@ import com.owlike.genson.TransformationException;
 import com.owlike.genson.TransformationRuntimeException;
 import com.owlike.genson.stream.ObjectWriter;
 
-public abstract class PropertyAccessor extends BeanProperty implements
-		Comparable<PropertyAccessor> {
+public abstract class PropertyAccessor extends BeanProperty implements Comparable<PropertyAccessor> {
 	Serializer<Object> propertySerializer;
 
-	protected PropertyAccessor(String name, Type type, Class<?> declaringClass, Annotation[] annotations) {
+	protected PropertyAccessor(String name, Type type, Class<?> declaringClass,
+			Annotation[] annotations) {
 		super(name, type, declaringClass, annotations);
 	}
 
@@ -43,11 +43,10 @@ public abstract class PropertyAccessor extends BeanProperty implements
 				+ name + "' using accessor " + signature() + " from class "
 				+ declaringClass.getName(), e);
 	}
-	
+
 	protected TransformationException couldNotSerialize(Throwable e) {
-		return new TransformationException("Could not serialize property '"
-				+ name + "' from class "
-				+ declaringClass.getName(), e);
+		return new TransformationException("Could not serialize property '" + name
+				+ "' from class " + declaringClass.getName(), e);
 	}
 
 	public static class MethodAccessor extends PropertyAccessor {
