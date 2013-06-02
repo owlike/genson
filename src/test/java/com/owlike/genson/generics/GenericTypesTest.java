@@ -1,4 +1,4 @@
-package com.owlike.genson.functional;
+package com.owlike.genson.generics;
 
 import static org.junit.Assert.*;
 
