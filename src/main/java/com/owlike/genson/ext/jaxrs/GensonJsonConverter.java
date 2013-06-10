@@ -90,7 +90,6 @@ public class GensonJsonConverter implements MessageBodyReader<Object>, MessageBo
 		try {
 			genson.serialize(t, genericType, writer, createContext(annotations, genson));
 			writer.flush();
-			writer.close();
 		} catch (TransformationException e) {
 			throw new WebApplicationException(e);
 		}
