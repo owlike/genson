@@ -309,17 +309,19 @@ public class JsonReader implements ObjectReader {
 					beginObject();
 					balance++;
 				}
-				if (hasNext())
+				
+				while (hasNext()) {
 					next();
-				else {
-					JsonType type = _ctx.peek();
-					if (JsonType.ARRAY == type) {
-						endArray();
-						balance--;
-					} else if (JsonType.OBJECT == type) {
-						endObject();
-						balance--;
-					}
+					skipValue();
+				}
+				
+				JsonType type = _ctx.peek();
+				if (JsonType.ARRAY == type) {
+					endArray();
+					balance--;
+				} else if (JsonType.OBJECT == type) {
+					endObject();
+					balance--;
 				}
 			} while (balance > 0);
 		}

@@ -583,4 +583,9 @@ public class JsonReaderTest {
 		reader.endArray();
 		reader.close();
 	}
+	
+	@Test public void testSkipValueDeepObject() throws IOException {
+	    JsonReader reader = new JsonReader(new StringReader("{\"a\":{}}"), strictDoubleParse, readMetadata);
+	    reader.skipValue();
+	}
 }
