@@ -6,9 +6,11 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 
 import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
 import javax.json.JsonBuilderFactory;
 import javax.json.JsonNumber;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import javax.json.JsonString;
 import javax.json.JsonValue;
 import javax.json.JsonValue.ValueType;
@@ -27,7 +29,7 @@ import com.owlike.genson.stream.ObjectWriter;
 public class JSR353Bundle extends GensonBundle {
     static final JsonBuilderFactory factory = JsonProvider.provider().createBuilderFactory(
             new HashMap<String, String>());
-    
+
     @Override public void configure(Builder builder) {
         builder.withConverterFactory(new Factory<Converter<JsonValue>>() {
             @Override public Converter<JsonValue> create(Type type, Genson genson) {
@@ -37,7 +39,7 @@ public class JSR353Bundle extends GensonBundle {
     }
 
     public class JsonValueConverter implements Converter<JsonValue> {
-        
+
         @Override public void serialize(JsonValue value, ObjectWriter writer, Context ctx)
                 throws TransformationException, IOException {
             ValueType type = value.getValueType();
@@ -56,13 +58,16 @@ public class JSR353Bundle extends GensonBundle {
             }
         }
 
-        private void writeArray(JsonArray array, ObjectWriter writer, Context ctx) throws IOException, TransformationException {
+        private void writeArray(JsonArray array, ObjectWriter writer, Context ctx)
+                throws IOException, TransformationException {
             writer.beginArray();
-            for (JsonValue value : array) serialize(value, writer, ctx);
+            for (JsonValue value : array)
+                serialize(value, writer, ctx);
             writer.endArray();
         }
-        
-        private void writeObject(JsonObject object, ObjectWriter writer, Context ctx) throws IOException, TransformationException {
+
+        private void writeObject(JsonObject object, ObjectWriter writer, Context ctx)
+                throws IOException, TransformationException {
             writer.beginObject();
             for (Entry<String, JsonValue> e : object.entrySet()) {
                 writer.writeName(e.getKey());
@@ -73,8 +78,77 @@ public class JSR353Bundle extends GensonBundle {
 
         @Override public JsonValue deserialize(ObjectReader reader, Context ctx)
                 throws TransformationException, IOException {
-            return null;
+            com.owlike.genson.stream.ValueType type = reader.getValueType();
+            if (com.owlike.genson.stream.ValueType.OBJECT == type) {
+                return deserObject(reader, ctx);
+            } else if (com.owlike.genson.stream.ValueType.ARRAY == type) {
+                return deserArray(reader, ctx);
+            } else {
+                // let's allow using literal JsonValues outside of JsonArray or JsonObject
+                // thus we need this dummy builder to not by pass the creation mechanism
+                if (com.owlike.genson.stream.ValueType.STRING == type) {
+                    return factory.createArrayBuilder().add(reader.valueAsString()).build().get(0);
+                } else if (com.owlike.genson.stream.ValueType.BOOLEAN == type) {
+                    return reader.valueAsBoolean() ? JsonValue.TRUE : JsonValue.FALSE;
+                } else if (com.owlike.genson.stream.ValueType.NULL == type) {
+                    return JsonValue.NULL;
+                } else if (com.owlike.genson.stream.ValueType.INTEGER == type) {
+                    return factory.createArrayBuilder().add(reader.valueAsLong()).build().get(0);
+                } else if (com.owlike.genson.stream.ValueType.DOUBLE == type) {
+                    return factory.createArrayBuilder().add(reader.valueAsDouble()).build().get(0);
+                }
+            }
+            
+            throw new IllegalStateException("Unsupported ValueType " + type);
         }
 
+        public JsonValue deserObject(ObjectReader reader, Context ctx) throws IOException,
+                TransformationException {
+            JsonObjectBuilder builder = factory.createObjectBuilder();
+            reader.beginObject();
+
+            while (reader.hasNext()) {
+                com.owlike.genson.stream.ValueType type = reader.next();
+                String name = reader.name();
+                if (com.owlike.genson.stream.ValueType.STRING == type) {
+                    builder.add(name, reader.valueAsString());
+                } else if (com.owlike.genson.stream.ValueType.BOOLEAN == type) {
+                    builder.add(name, reader.valueAsBoolean());
+                } else if (com.owlike.genson.stream.ValueType.NULL == type) {
+                    builder.addNull(name);
+                } else if (com.owlike.genson.stream.ValueType.INTEGER == type) {
+                    builder.add(name, reader.valueAsLong());
+                } else if (com.owlike.genson.stream.ValueType.DOUBLE == type) {
+                    builder.add(name, reader.valueAsDouble());
+                } else builder.add(name, deserialize(reader, ctx));
+            }
+
+            reader.endObject();
+            return builder.build();
+        }
+
+        public JsonValue deserArray(ObjectReader reader, Context ctx) throws IOException,
+                TransformationException {
+            JsonArrayBuilder builder = factory.createArrayBuilder();
+            reader.beginArray();
+
+            while (reader.hasNext()) {
+                com.owlike.genson.stream.ValueType type = reader.next();
+                if (com.owlike.genson.stream.ValueType.STRING == type) {
+                    builder.add(reader.valueAsString());
+                } else if (com.owlike.genson.stream.ValueType.BOOLEAN == type) {
+                    builder.add(reader.valueAsBoolean());
+                } else if (com.owlike.genson.stream.ValueType.NULL == type) {
+                    builder.addNull();
+                } else if (com.owlike.genson.stream.ValueType.INTEGER == type) {
+                    builder.add(reader.valueAsLong());
+                } else if (com.owlike.genson.stream.ValueType.DOUBLE == type) {
+                    builder.add(reader.valueAsDouble());
+                } else builder.add(deserialize(reader, ctx));
+            }
+            
+            reader.endArray();
+            return builder.build();
+        }
     }
 }
