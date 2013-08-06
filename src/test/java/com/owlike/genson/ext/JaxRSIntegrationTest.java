@@ -31,8 +31,7 @@ import com.sun.jersey.spi.container.servlet.ServletContainer;
 public class JaxRSIntegrationTest {
     private Server server;
 
-    @Test
-    public void testJerseyJsonConverter() throws Exception {
+    @Test public void testJerseyJsonConverter() throws Exception {
         Map<String, String> jerseyParams = new HashMap<String, String>();
         jerseyParams.put("com.sun.jersey.config.property.resourceConfigClass",
                 "com.sun.jersey.api.core.PackagesResourceConfig");
@@ -40,13 +39,13 @@ public class JaxRSIntegrationTest {
         startServer(ServletContainer.class, jerseyParams);
         try {
             testIntegration();
-        } finally {
+        }
+        finally {
             stopServer();
         }
     }
-
-    @Test
-    public void testJerseyJsonPConverter() throws Exception {
+    
+    @Test public void testJerseyJsonPConverter() throws Exception {
         Map<String, String> jerseyParams = new HashMap<String, String>();
         jerseyParams.put("com.sun.jersey.config.property.resourceConfigClass",
                 "com.sun.jersey.api.core.PackagesResourceConfig");
@@ -55,22 +54,23 @@ public class JaxRSIntegrationTest {
         try {
             ClientConfig cfg = new DefaultClientConfig(GensonJsonConverter.class);
             Client client = Client.create(cfg);
-            assertEquals("someCallback([1,2,3])",
-                    client.resource("http://localhost:9999/get").accept("application/x-javascript").get(String.class));
-        } finally {
+            assertEquals("someCallback([1,2,3])", client.resource("http://localhost:9999/get")
+                    .accept("application/x-javascript").get(String.class));
+        }
+        finally {
             stopServer();
         }
     }
 
-    @Test
-    public void testResteasyJsonConverter() throws Exception {
+    @Test public void testResteasyJsonConverter() throws Exception {
         Map<String, String> resteasy = new HashMap<String, String>();
         resteasy.put("resteasy.scan", "true");
         resteasy.put("javax.ws.rs.Application", RestEasyApp.class.getName());
         startServer(HttpServletDispatcher.class, resteasy);
         try {
             testIntegration();
-        } finally {
+        }
+        finally {
             stopServer();
         }
     }
@@ -79,13 +79,15 @@ public class JaxRSIntegrationTest {
         ClientConfig cfg = new DefaultClientConfig(GensonJsonConverter.class);
         Client client = Client.create(cfg);
         @SuppressWarnings("unchecked")
-        Map<String, Long> map = client.resource("http://localhost:9999/get").accept(MediaType.APPLICATION_JSON)
-                .get(Map.class);
+        Map<String, Long> map =
+                client.resource("http://localhost:9999/get").accept(MediaType.APPLICATION_JSON)
+                        .get(Map.class);
         assertEquals(map.get("key1"), new Long(1));
         assertEquals(map.get("key2"), new Long(2));
     }
 
-    private void startServer(Class<? extends Servlet> jaxrsProvider, Map<String, String> initParams) throws Exception {
+    private void startServer(Class<? extends Servlet> jaxrsProvider, Map<String, String> initParams)
+            throws Exception {
         server = new Server(9999);
         ServletHolder servletHolder = new ServletHolder(jaxrsProvider);
         servletHolder.setInitParameters(initParams);
@@ -110,31 +112,42 @@ public class JaxRSIntegrationTest {
             CLASSES = Collections.unmodifiableSet(tmp);
         }
 
-        @Override
-        public Set<Class<?>> getClasses() {
+        @Override public Set<Class<?>> getClasses() {
 
             return CLASSES;
         }
     }
 
-    @Path("/get")
-    public static class DummyRessource {
-        public DummyRessource() {
+    @Path("/get") public static class DummyRessource {
+        public DummyRessource() {}
+
+        @GET @Produces(MediaType.APPLICATION_JSON) public Dummy get() {
+            Dummy dummy = new Dummy();
+            dummy.setKey1(1);
+            dummy.setKey2(2);
+            return dummy;
         }
 
-        @GET
-        @Produces(MediaType.APPLICATION_JSON)
-        public Map<String, Integer> get() {
-            Map<String, Integer> map = new HashMap<String, Integer>();
-            map.put("key1", 1);
-            map.put("key2", 2);
-            return map;
-        }
-
-        @GET
-        @Produces("application/x-javascript")
-        public JSONWithPadding getJSONP() {
+        @GET @Produces("application/x-javascript") public JSONWithPadding getJSONP() {
             return new JSONWithPadding(Arrays.asList(1, 2, 3), "someCallback");
+        }
+    }
+    
+    public static class Dummy {
+        private int key1;
+        private int key2;
+        
+        public int getKey1() {
+            return key1;
+        }
+        public void setKey1(int key1) {
+            this.key1 = key1;
+        }
+        public int getKey2() {
+            return key2;
+        }
+        public void setKey2(int key2) {
+            this.key2 = key2;
         }
     }
 }
