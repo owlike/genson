@@ -151,6 +151,7 @@ public class BeanDescriptor<T> implements Converter<T> {
 		Object[] newValues = new Object[size];
 		// TODO if field for ctr is missing what to do? make it also configurable...?
 		for (int i = 0, j = 0; i < size; i++) {
+		    // FIXME fails if we have multiple times the same name, possible only in @JsonProperty
 			BeanCreatorProperty mp = _creator.parameters.get(names.get(i));
 			if (mp != null) {
 				creatorArgs[mp.index] = values.get(i);
