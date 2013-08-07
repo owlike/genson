@@ -42,6 +42,15 @@ public final class JsonStreamException extends RuntimeException {
 	int getRow() {
 		return row;
 	}
+	
+	public static <T extends Exception> T niceTrace(T exception) {
+	    final StackTraceElement[] stackTrace = exception.getStackTrace();
+        final StackTraceElement[] newStackTrace = new StackTraceElement[stackTrace.length - 1];
+
+        System.arraycopy(stackTrace, 1, newStackTrace, 0, stackTrace.length - 1);
+        exception.setStackTrace(newStackTrace);
+        return exception;
+	}
 
 	static class Builder {
 		private int col;

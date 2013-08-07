@@ -11,5 +11,6 @@ logs/
 work/
 target/
 !.gitignore
+!.gitattributes
 .classpath
 .project
