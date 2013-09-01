@@ -3,6 +3,7 @@ package com.owlike.genson.ext.jsr353;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.json.JsonArray;
@@ -26,6 +27,8 @@ import com.owlike.genson.ext.GensonBundle;
 import com.owlike.genson.stream.ObjectReader;
 import com.owlike.genson.stream.ObjectWriter;
 
+// TODO register a unknown type converter overriding the existing one, would allow to deser to 
+// jsr structures instead of Map and Lists.
 public class JSR353Bundle extends GensonBundle {
     static final JsonBuilderFactory factory = JsonProvider.provider().createBuilderFactory(
             new HashMap<String, String>());
@@ -150,5 +153,16 @@ public class JSR353Bundle extends GensonBundle {
             reader.endArray();
             return builder.build();
         }
+    }
+    
+    static boolean toBoolean(Map<String, ?> config, String key) {
+        if (config.containsKey(key)) {
+            Object value = config.get(key);
+            if (value instanceof Boolean) {
+                return (Boolean) value;
+            } else if (value instanceof String) {
+                return Boolean.parseBoolean((String) value);
+            } else return false;
+        } else return false;
     }
 }

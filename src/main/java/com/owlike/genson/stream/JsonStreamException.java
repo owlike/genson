@@ -33,13 +33,11 @@ public final class JsonStreamException extends RuntimeException {
 		this.row = row;
 	}
 
-	// for testing purpose
-	int getColumn() {
+	public int getColumn() {
 		return column;
 	}
 	
-	// for testing purpose
-	int getRow() {
+	public int getRow() {
 		return row;
 	}
 	

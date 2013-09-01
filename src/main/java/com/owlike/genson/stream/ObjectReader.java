@@ -247,4 +247,10 @@ public interface ObjectReader extends Closeable {
 	 * @throws IOException
 	 */
 	public byte[] valueAsByteArray() throws IOException;
+	
+	public JsonType enclosingType();
+	
+	public int column();
+    
+    public int row();
 }

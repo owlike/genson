@@ -49,7 +49,7 @@ public class JsonWriter implements ObjectWriter {
     private final boolean skipNull;
 
     private final Writer writer;
-    final Deque<JsonType> _ctx = new ArrayDeque<JsonType>();
+    final Deque<JsonType> _ctx = new ArrayDeque<JsonType>(10);
     private boolean _hasPrevious;
     private String _name;
     private final boolean indentation;
@@ -237,6 +237,7 @@ public class JsonWriter implements ObjectWriter {
     }
 
     public JsonWriter writeValue(final double value) throws IOException {
+        checkValidJsonDouble(value);
         clearMetadata();
         beforeValue();
         writeToBuffer(Double.toString(value), 0);
@@ -273,6 +274,7 @@ public class JsonWriter implements ObjectWriter {
     }
 
     public ObjectWriter writeValue(float value) throws IOException {
+        checkValidJsonFloat(value);
         clearMetadata();
         beforeValue();
         writeToBuffer(Float.toString(value), 0);
@@ -309,11 +311,27 @@ public class JsonWriter implements ObjectWriter {
     }
 
     public JsonWriter writeValue(final Number value) throws IOException {
+        checkValidJsonDouble(value);
+        checkValidJsonFloat(value);
         clearMetadata();
         beforeValue();
         writeToBuffer(value.toString(), 0);
         _hasPrevious = true;
         return this;
+    }
+
+    private void checkValidJsonDouble(Number num) {
+        if (num.equals(Double.NaN))
+            throw new NumberFormatException("NaN is not a valid json number.");
+        if (num.equals(Double.NEGATIVE_INFINITY) || num.equals(Double.POSITIVE_INFINITY))
+            throw new NumberFormatException("Infinity is not a valid json number.");
+    }
+
+    private void checkValidJsonFloat(Number num) {
+        if (num.equals(Float.NaN))
+            throw new NumberFormatException("NaN is not a valid json number.");
+        if (num.equals(Float.NEGATIVE_INFINITY) || num.equals(Float.POSITIVE_INFINITY))
+            throw new NumberFormatException("Infinity is not a valid json number.");
     }
 
     public ObjectWriter writeValue(byte[] value) throws IOException {

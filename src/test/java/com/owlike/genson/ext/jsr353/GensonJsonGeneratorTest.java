@@ -1,12 +1,13 @@
 
 package com.owlike.genson.ext.jsr353;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.io.StringWriter;
 
 import javax.json.JsonException;
+import javax.json.stream.JsonGenerationException;
 import javax.json.stream.JsonGenerator;
 
 import org.junit.Before;
@@ -14,7 +15,7 @@ import org.junit.Test;
 
 import com.owlike.genson.stream.JsonWriter;
 
-public class JsonGeneratorTest {
+public class GensonJsonGeneratorTest {
     private JsonGenerator w;
     private StringWriter sw;
     
@@ -101,4 +102,48 @@ public class JsonGeneratorTest {
         writer.close();
         assertEquals(expected, sw.toString());
     }
+    
+    @Test
+    public void testEscapedString() throws Exception {
+        w.writeStartArray().write("\u0000").writeEnd();
+        w.close();
+
+        assertEquals("[\"\\u0000\"]", sw.toString());
+    }
+    
+    @Test(expected=JsonGenerationException.class)
+    public void testGenerationException1() throws Exception {
+        w.writeStartObject().writeStartObject();
+    }
+    
+    @Test(expected=JsonGenerationException.class)
+    public void testGenerationException2() throws Exception {
+        w.writeStartObject().writeStartArray();
+    }
+    
+    @Test
+    public void testGeneratorArrayDouble() throws Exception {
+        w.writeStartArray();
+        try {
+            w.write(Double.NaN);
+            fail("JsonGenerator.write(Double.NaN) should produce NumberFormatException");
+        } catch (NumberFormatException ne) {
+            // expected
+        }
+        try {
+            w.write(Double.POSITIVE_INFINITY);
+            fail("JsonGenerator.write(Double.POSITIVE_INIFINITY) should produce NumberFormatException");
+        } catch (NumberFormatException ne) {
+            // expected
+        }
+        try {
+            w.write(Double.NEGATIVE_INFINITY);
+            fail("JsonGenerator.write(Double.NEGATIVE_INIFINITY) should produce NumberFormatException");
+        } catch (NumberFormatException ne) {
+            // expected
+        }
+        w.writeEnd();
+        w.close();
+    }
+
 }

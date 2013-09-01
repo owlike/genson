@@ -266,6 +266,9 @@ public class GensonJsonGenerator implements JsonGenerator {
         try {
             writer.writeValue(value);
         }
+        catch (NumberFormatException e) {
+            throw e;
+        }
         catch (Exception e) {
             _wrapAndThrow(e);
         }
@@ -294,6 +297,7 @@ public class GensonJsonGenerator implements JsonGenerator {
 
     @Override public void close() {
         try {
+            flush();
             writer.close();
         }
         catch (IOException e) {

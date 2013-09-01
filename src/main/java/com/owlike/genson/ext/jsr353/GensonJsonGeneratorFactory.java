@@ -26,9 +26,9 @@ public class GensonJsonGeneratorFactory implements JsonGeneratorFactory {
     }
 
     public GensonJsonGeneratorFactory(Map<String, ?> config) {
-        prettyPrint = toBoolean(config, JsonGenerator.PRETTY_PRINTING);
-        htmlSafe = toBoolean(config, GensonJsonGenerator.HTML_SAFE);
-        skipNull = toBoolean(config, GensonJsonGenerator.SKIP_NULL);
+        prettyPrint = JSR353Bundle.toBoolean(config, JsonGenerator.PRETTY_PRINTING);
+        htmlSafe = JSR353Bundle.toBoolean(config, GensonJsonGenerator.HTML_SAFE);
+        skipNull = JSR353Bundle.toBoolean(config, GensonJsonGenerator.SKIP_NULL);
     }
 
     @Override public JsonGenerator createGenerator(Writer writer) {
@@ -53,17 +53,8 @@ public class GensonJsonGeneratorFactory implements JsonGeneratorFactory {
     @Override public Map<String, ?> getConfigInUse() {
         Map<String, Boolean> config = new HashMap<String, Boolean>();
         config.put(JsonGenerator.PRETTY_PRINTING, true);
+        config.put(GensonJsonGenerator.HTML_SAFE, true);
+        config.put(GensonJsonGenerator.SKIP_NULL, true);
         return config;
-    }
-
-    private boolean toBoolean(Map<String, ?> config, String key) {
-        if (config.containsKey(key)) {
-            Object value = config.get(key);
-            if (value instanceof Boolean) {
-                return (Boolean) value;
-            } else if (value instanceof String) {
-                return Boolean.parseBoolean((String) value);
-            } else return false;
-        } else return false;
     }
 }

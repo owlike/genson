@@ -4,7 +4,5 @@ public enum JsonType {
 	EMPTY,
 	OBJECT,
 	ARRAY,
-	NAME,
-	STRING,
 	METADATA
 }
