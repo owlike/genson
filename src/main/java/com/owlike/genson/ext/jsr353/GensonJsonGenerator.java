@@ -206,8 +206,8 @@ public class GensonJsonGenerator implements JsonGenerator {
             write(((JsonString) value).getString());
         } else if (javax.json.JsonValue.ValueType.NUMBER == type) {
             JsonNumber num = (JsonNumber) value;
-            if (num.isIntegral()) write(num.bigDecimalValue());
-            else write(num.bigIntegerValueExact());
+            if (num.isIntegral()) write(num.bigIntegerValueExact());
+            else write(num.bigDecimalValue());
         }
         return this;
     }

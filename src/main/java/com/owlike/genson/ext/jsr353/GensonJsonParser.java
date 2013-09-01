@@ -2,8 +2,6 @@ package com.owlike.genson.ext.jsr353;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.ArrayDeque;
-import java.util.Deque;
 
 import javax.json.JsonException;
 import javax.json.stream.JsonLocation;
