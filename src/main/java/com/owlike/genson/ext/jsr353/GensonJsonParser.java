@@ -18,10 +18,9 @@ import static com.owlike.genson.stream.ValueType.*;
 public class GensonJsonParser implements JsonParser {
     public static final String STRICT_DOUBLE_PARSE = "GensonJsonParser.strictDoubleParse";
 
-    private static final int NONE = 0, KEY = 1, VALUE = 2;
+    private boolean parseKey = false;
 
     private final ObjectReader reader;
-    private int evtType = NONE;
 
     public GensonJsonParser(ObjectReader reader) {
         this.reader = reader;
@@ -62,24 +61,24 @@ public class GensonJsonParser implements JsonParser {
             JsonType enclosingType = reader.enclosingType();
 
             // read the value of an object key/value pair
-            if (evtType == KEY) {
-                evtType = NONE;
+            if (parseKey) {
+                parseKey = false;
                 return currentValue(reader.getValueType());
             } else if (reader.hasNext()) {
                 ValueType valueType = reader.next();
 
                 // we are in an object make the pair and keep value evt for next call to next()
                 if (enclosingType == JsonType.OBJECT) {
-                    evtType = KEY;
+                    parseKey = true;
                     return Event.KEY_NAME;
                 } else {
                     // this means it is an array, then just read current value and dont care about
                     // the next evt
-                    evtType = NONE;
+                    parseKey = false;
                     return currentValue(valueType);
                 }
             } else {
-                evtType = NONE;
+                parseKey = false;
                 if (enclosingType == JsonType.OBJECT) {
                     reader.endObject();
                     return Event.END_OBJECT;
@@ -100,7 +99,7 @@ public class GensonJsonParser implements JsonParser {
 
     @Override public String getString() {
         try {
-            if (KEY == evtType) return reader.name();
+            if (parseKey) return reader.name();
             else return reader.valueAsString();
         }
         catch (IOException e) {
