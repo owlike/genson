@@ -19,26 +19,32 @@ import java.util.Map;
  *
  */
 public final class ThreadLocalHolder {
-	private final static ThreadLocal<Map<String, Object>> _data = new ThreadLocal<Map<String, Object>>() {
-		protected java.util.Map<String,Object> initialValue() {
-			return new HashMap<String, Object>();
-		};
-	};
+	private final static ThreadLocal<Map<String, Object>> _data = new ThreadLocal<Map<String, Object>>();
 	
 	public static Object store(String key, Object parameter) {
 		checkNotNull(key);
-		return _data.get().put(key, parameter);
+		return getPutIfMissing().put(key, parameter);
 	}
 	
 	public static <T> T remove(String key, Class<T> valueType) {
 		checkNotNull(key, valueType);
-		T value = valueType.cast(_data.get().get(key));
-		_data.get().remove(key);
+        Map<String, Object> map = getPutIfMissing();
+		T value = valueType.cast(map.get(key));
+        map.remove(key);
 		return value;
 	}
 	
 	public static <T> T get(String key, Class<T> valueType) {
 		checkNotNull(key, valueType);
-		return valueType.cast(_data.get().get(key));
+		return valueType.cast(getPutIfMissing().get(key));
 	}
+
+    private static Map<String, Object> getPutIfMissing() {
+        Map<String, Object> map = _data.get();
+        if (map == null) {
+            map = new HashMap<String, Object>();
+            _data.set(map);
+        }
+        return map;
+    }
 }

@@ -16,10 +16,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized.Parameters;
 
 import java.io.*;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @RunWith(value = org.junit.runners.Parameterized.class) public class GensonJsonParserTest {
     private boolean strictDoubleParse;
@@ -151,7 +148,7 @@ import java.util.Map;
         assertEquals(Event.END_ARRAY, parser.next());
     }
 
-    @Test(expected = JsonException.class) public void testIllegalOperationCallNext()
+    @Test(expected = NoSuchElementException.class) public void testIllegalOperationCallNext()
             throws IOException {
         JsonParser parser = parserFor("[1,2]");
         assertEquals(Event.START_ARRAY, parser.next());

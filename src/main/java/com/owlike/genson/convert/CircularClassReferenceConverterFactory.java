@@ -40,15 +40,17 @@ public class CircularClassReferenceConverterFactory extends ChainedFactory {
 		}
 	}
 	
-	private final static ThreadLocal<Map<Type, CircularConverter<?>>> _circularConverters = new ThreadLocal<Map<Type, CircularConverter<?>>>() {
-		protected Map<Type, CircularConverter<?>> initialValue() {
-			return new HashMap<Type, CircularConverter<?>>();
-		};
-	};
+	private final ThreadLocal<Map<Type, CircularConverter<?>>> _circularConverters = new ThreadLocal<Map<Type, CircularConverter<?>>>();
 	
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Converter<?> create(Type type, Genson genson) {
+        Map<Type, CircularConverter<?>> map = _circularConverters.get();
+        if (map == null) {
+            map = new HashMap<Type, CircularConverter<?>>();
+            _circularConverters.set(map);
+        }
+
     	if (_circularConverters.get().containsKey(type)) {
     		return _circularConverters.get().get(type);
     	} else {

@@ -48,11 +48,7 @@ public final class TypeUtil {
         return wrappedClass == null ? clazz : wrappedClass;
     }
 
-    private final static ThreadLocal<Map<Type, Type>> _circularExpandedType = new ThreadLocal<Map<Type, Type>>() {
-        protected Map<Type, Type> initialValue() {
-            return new HashMap<Type, Type>();
-        };
-    };
+    private final static ThreadLocal<Map<Type, Type>> _circularExpandedType = new ThreadLocal<Map<Type, Type>>();
 
     /**
      * Expands type in the type rootType to Class, ParameterizedType or GenericArrayType. Useful for generic types.
@@ -65,12 +61,19 @@ public final class TypeUtil {
          */
         if (type instanceof ExpandedType || type instanceof Class)
             return type;
+
+        Map<Type, Type> circularTypes = _circularExpandedType.get();
+        if(circularTypes == null) {
+            circularTypes = new HashMap<Type, Type>();
+            _circularExpandedType.set(circularTypes);
+        }
+
         // this allows to handle cyclic generic types (types that refer to them self)
-        if (_circularExpandedType.get().containsKey(type)) {
-            return _circularExpandedType.get().get(type);
+        if (circularTypes.containsKey(type)) {
+            return circularTypes.get(type);
         } else {
             try {
-                _circularExpandedType.get().put(type, getRawClass(type));
+                circularTypes.put(type, getRawClass(type));
                 TypeAndRootClassKey key = new TypeAndRootClassKey(type, rootType);
                 Type expandedType = _cache.get(key);
 
@@ -130,7 +133,7 @@ public final class TypeUtil {
 
                 return expandedType;
             } finally {
-                _circularExpandedType.get().remove(type);
+                circularTypes.remove(type);
             }
         }
     }
