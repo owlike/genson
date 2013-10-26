@@ -1,18 +1,18 @@
 package com.owlike.genson.ext.jsr353;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.json.JsonStructure;
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParserFactory;
 
 import com.owlike.genson.stream.JsonReader;
+import com.owlike.genson.stream.JsonWriter;
 
 public class GensonJsonParserFactory implements JsonParserFactory {
     private final boolean strictDoubleParse;
@@ -37,13 +37,21 @@ public class GensonJsonParserFactory implements JsonParserFactory {
     }
 
     @Override public JsonParser createParser(JsonObject obj) {
-        // TODO hum will do that latter, looks like an extreme case...
-        return null;
+        return parserForJsonStructure(obj);
     }
 
     @Override public JsonParser createParser(JsonArray array) {
-        // TODO hum will do that latter, looks like an extreme case...
-        return null;
+        return parserForJsonStructure(array);
+    }
+
+    // TODO: OK I know pretty slow to do that, but what a pain to also implement this...will do it latter
+    private JsonParser parserForJsonStructure(JsonStructure jsonStructure) {
+        StringWriter sw = new StringWriter();
+        GensonJsonGenerator generator = new GensonJsonGenerator(new JsonWriter(sw));
+        generator.write(jsonStructure);
+        generator.flush();
+
+        return createParser(new StringReader(sw.toString()));
     }
 
     @Override public Map<String, ?> getConfigInUse() {

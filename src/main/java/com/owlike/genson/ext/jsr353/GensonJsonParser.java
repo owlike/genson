@@ -2,6 +2,7 @@ package com.owlike.genson.ext.jsr353;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.NoSuchElementException;
 
 import javax.json.JsonException;
 import javax.json.stream.JsonLocation;
@@ -57,6 +58,8 @@ public class GensonJsonParser implements JsonParser {
     }
 
     @Override public Event next() {
+        if (!hasNext()) throw new NoSuchElementException();
+
         try {
             JsonType enclosingType = reader.enclosingType();
 
@@ -176,7 +179,7 @@ public class GensonJsonParser implements JsonParser {
         return JsonStreamException.niceTrace(newException);
     }
 
-    private class Location implements JsonLocation {
+    static class Location implements JsonLocation {
         final long lineNumber;
         final long columnNumber;
 
