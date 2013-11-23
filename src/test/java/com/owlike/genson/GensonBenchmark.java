@@ -19,26 +19,26 @@ import com.owlike.genson.bean.Primitives;
 
 /*
  ======= Serialization Bench ======
- Genson global serialization time=24.908 s
- Genson avg serialization time=0.49816 ms
+Genson global serialization time=26.181 s
+Genson avg serialization time=0.52362 ms
 
- Jackson global serialization time=21.549 s
- Jackson avg serialization time=0.43098 ms
+Jackson global serialization time=23.091 s
+Jackson avg serialization time=0.46182 ms
 
- Gson global serialization time=39.688 s
- Gson avg serialization time=0.79376 ms
+Gson global serialization time=40.913 s
+Gson avg serialization time=0.81826 ms
 
- ======= Deserialization Bench ======
- Genson global deserialization time=32.985 s
- Genson avg deserialization time=0.6597 ms
+======= Deserialization Bench ======
+Genson global deserialization time=33.973 s
+Genson avg deserialization time=0.67946 ms
 
- Jackson global deserialization time=31.86 s
- Jackson avg deserialization time=0.63718 ms
+Jackson global deserialization time=32.86 s
+Jackson avg deserialization time=0.65718 ms
 
- Gson global deserialization time=35.504 s
- Gson avg deserialization time=0.71008 ms
+Gson global deserialization time=42.768 s
+Gson avg deserialization time=0.85536 ms
 
- =================================
+=================================
  */
 public class GensonBenchmark {
 	final int ITERATION_CNT = 50000;

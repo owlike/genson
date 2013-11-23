@@ -31,6 +31,29 @@ public class JsonReaderTest {
 		return Arrays.asList(new Boolean[] { true, true }, new Boolean[] { true, false },
 				new Boolean[] { false, true }, new Boolean[] { false, false });
 	}
+
+    @Test public void testParseLineComment() throws IOException {
+        JsonReader reader = new JsonReader("// hey \n" +
+                "[ // you, // ! \n " +
+                "1 // aaa \n " +
+                ", /* ooo */ {\"key\": // you \n " +
+                "/*cccc*/ 3 //aaaa\n " +
+                "}/**/] //bb/**/");
+        reader.beginArray().hasNext();
+        reader.next();
+        assertEquals(1, reader.valueAsInt());
+        assertTrue(reader.hasNext());
+        reader.next();
+        reader.beginObject();
+        reader.next();
+        assertEquals("key", reader.name());
+        assertEquals(3, reader.valueAsInt());
+        assertFalse(reader.hasNext());
+        reader.endObject();
+        assertFalse(reader.hasNext());
+        reader.endArray();
+        assertFalse(reader.hasNext());
+    }
 	
 	@Test
 	public void testParsingErrorPositionSameRow() throws IOException {

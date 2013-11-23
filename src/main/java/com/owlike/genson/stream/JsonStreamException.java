@@ -50,6 +50,10 @@ public final class JsonStreamException extends RuntimeException {
         return exception;
 	}
 
+    public JsonStreamException niceTrace() {
+        return niceTrace(this);
+    }
+
 	static class Builder {
 		private int col;
 		private int row;

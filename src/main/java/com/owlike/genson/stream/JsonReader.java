@@ -42,6 +42,9 @@ public class JsonReader implements ObjectReader {
             _NEXT_TOKEN[i] = true;
     }
 
+    private final static char[] _END_OF_LINE = new char[]{'\n'};
+    private final static char[] _END_OF_BLOCK_COMMENT = new char[]{'*', '/'};
+
     /*
      * Recupere dans Jackson
      */
@@ -471,7 +474,7 @@ public class JsonReader implements ObjectReader {
      * Reads the next literal value into _booleanValue, _doubleValue or _intValue and returns the
      * type of the readed literal, possible values are : INTEGER, DOUBLE, BOOLEAN, NULL. When
      * calling this method the _cursor must be positioned on the first character of the value in the
-     * _buffer, you can ensure that by calling {@link #readNextToken(false)}.
+     * _buffer, you can ensure that by calling {@link #readNextToken(boolean)}.
      */
     protected final ValueType consumeLiteral() throws IOException {
         int token = _buffer[_cursor];
@@ -749,10 +752,24 @@ public class JsonReader implements ObjectReader {
             if (_cursor >= _buflen) fillBuffer(true);
 
             for (; _cursor < _buflen; _cursor++) {
-                if (_buffer[_cursor] < 128 && SKIPPED_TOKENS[_buffer[_cursor]] == 0) {
-                    if (consume) {
+                int token = _buffer[_cursor];
+                if (token < 128 && SKIPPED_TOKENS[token] == 0) {
+                    if (token == '/') {
+                        ensureBufferHas(2, true);
+                        if (_buffer[_cursor+1] == '*') {
+                            _cursor += 2;
+                            advanceAfter(_END_OF_BLOCK_COMMENT);
+                        } else if (_buffer[_cursor+1] == '/') {
+                            _cursor += 2;
+                            advanceAfter(_END_OF_LINE);
+                            _row++;
+                            _col = _cursor;
+                        } else newWrongTokenException("start comment // or /*", _cursor);
+                        // don't consume the token
+                        _cursor--;
+                    } else if (consume) {
                         return _buffer[_cursor++];
-                    } else return _buffer[_cursor];
+                    } else return token;
                 } else if (_buffer[_cursor] == '\n') {
                     _row++;
                     _col = _cursor;
@@ -763,6 +780,24 @@ public class JsonReader implements ObjectReader {
         }
 
         return _cursor < _buflen ? _buffer[_cursor] : -1;
+    }
+
+    private final void advanceAfter(char[] str) throws IOException {
+        int strPos = 0;
+        while (true) {
+            if (_cursor >= _buflen) fillBuffer(true);
+
+            for (; _cursor < _buflen && strPos < str.length; _cursor++) {
+                if (_buffer[_cursor] == str[strPos]) {
+                    strPos++;
+                } else strPos = 0;
+            }
+
+            if (strPos == str.length) {
+                return;
+            }
+            if (_buflen == -1) break;
+        }
     }
 
     protected final char readEscaped() throws IOException {
@@ -885,39 +920,39 @@ public class JsonReader implements ObjectReader {
 
         if (_buflen < 0) throw new JsonStreamException(
                 "Incomplete data or malformed json : encoutered end of stream but expected "
-                        + awaited);
+                        + awaited).niceTrace();
         else throw new JsonStreamException.Builder()
                 .message(
                         "Illegal character at row " + _row + " and column " + pos + " expected "
                                 + awaited + " but read '" + _buffer[cursor] + "' !")
-                .locate(_row, pos).create();
+                .locate(_row, pos).create().niceTrace();
     }
 
     private final void newMisplacedTokenException(int cursor) {
         if (_buflen < 0)
-            throw new JsonStreamException(
-                    "Incomplete data or malformed json : encoutered end of stream.");
+            throw JsonStreamException.niceTrace(new JsonStreamException(
+                    "Incomplete data or malformed json : encoutered end of stream."));
 
         if (cursor < 0) cursor = 0;
         int pos = cursor - _col;
         if (pos < 0) pos = 0;
 
-        throw JsonStreamException.niceTrace(new JsonStreamException.Builder()
+        throw new JsonStreamException.Builder()
                 .message(
                         "Encountred misplaced character '" + _buffer[cursor] + "' around row "
-                                + _row + " and column " + pos).locate(_row, pos).create());
+                                + _row + " and column " + pos).locate(_row, pos).create().niceTrace();
     }
 
     private final void checkIllegalEnd(int token) {
         if (token == -1 && JsonType.EMPTY != _ctx.peek())
             throw new JsonStreamException(
-                    "Incomplete data or malformed json : encoutered end of stream!");
+                    "Incomplete data or malformed json : encoutered end of stream!").niceTrace();
     }
 
     private void throwNumberFormatException(String expected, String encoutered) {
         int pos = _cursor - _col - _numberLen;
-        throw new NumberFormatException("Wrong numeric type at row " + _row + " and column " + pos
-                + ", expected " + expected + " but encoutered " + encoutered);
+        throw JsonStreamException.niceTrace(new NumberFormatException("Wrong numeric type at row " + _row + " and column " + pos
+                + ", expected " + expected + " but encoutered " + encoutered));
     }
 
 }
