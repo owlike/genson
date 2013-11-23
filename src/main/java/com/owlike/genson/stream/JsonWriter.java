@@ -55,7 +55,6 @@ public class JsonWriter implements ObjectWriter {
     private final boolean indentation;
     private final static char[] _indentation = new char[] { ' ', ' ' };
 
-    // TODO recyclebuffer increases a bit performances
     private final char[] _buffer = new char[1024];
     private final int _bufferSize = _buffer.length;
     private int _len = 0;
@@ -457,7 +456,7 @@ public class JsonWriter implements ObjectWriter {
     private final void writeToBuffer(final String data, final int offset, final int length)
             throws IOException {
         if (length < _LIMIT_WRITE_TO_BUFFER && length < (_bufferSize - _len)) {
-            data.getChars(offset, length, _buffer, _len);
+            data.getChars(offset, offset+length, _buffer, _len);
             _len += length;
         } else {
             flushBuffer();
