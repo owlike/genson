@@ -52,9 +52,9 @@ public class GensonJsonGeneratorFactory implements JsonGeneratorFactory {
 
     @Override public Map<String, ?> getConfigInUse() {
         Map<String, Boolean> config = new HashMap<String, Boolean>();
-        config.put(JsonGenerator.PRETTY_PRINTING, true);
-        config.put(GensonJsonGenerator.HTML_SAFE, true);
-        config.put(GensonJsonGenerator.SKIP_NULL, true);
+        config.put(JsonGenerator.PRETTY_PRINTING, prettyPrint);
+        config.put(GensonJsonGenerator.HTML_SAFE, htmlSafe);
+        config.put(GensonJsonGenerator.SKIP_NULL, skipNull);
         return config;
     }
 }

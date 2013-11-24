@@ -57,7 +57,7 @@ public class GensonJsonParserFactory implements JsonParserFactory {
 
     @Override public Map<String, ?> getConfigInUse() {
         Map<String, Boolean> config = new HashMap<String, Boolean>();
-        config.put(GensonJsonParser.STRICT_DOUBLE_PARSE, true);
+        config.put(GensonJsonParser.STRICT_DOUBLE_PARSE, strictDoubleParse);
         return config;
     }
 
