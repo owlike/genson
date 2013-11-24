@@ -1,6 +1,7 @@
 package com.owlike.genson.ext.jsr353;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +25,7 @@ import com.owlike.genson.Genson;
 import com.owlike.genson.Genson.Builder;
 import com.owlike.genson.TransformationException;
 import com.owlike.genson.ext.GensonBundle;
+import com.owlike.genson.stream.JsonWriter;
 import com.owlike.genson.stream.ObjectReader;
 import com.owlike.genson.stream.ObjectWriter;
 
@@ -154,7 +156,16 @@ public class JSR353Bundle extends GensonBundle {
             return builder.build();
         }
     }
-    
+
+    static String toString(JsonValue value) {
+        StringWriter sw = new StringWriter();
+        com.owlike.genson.stream.JsonWriter writer = new JsonWriter(sw);
+        GensonJsonGenerator generator = new GensonJsonGenerator(writer);
+        generator.write(value);
+        generator.close();
+        return sw.toString();
+    }
+
     static boolean toBoolean(Map<String, ?> config, String key) {
         if (config.containsKey(key)) {
             Object value = config.get(key);
