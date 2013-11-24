@@ -16,7 +16,7 @@ import org.junit.Test;
 
 import com.owlike.genson.stream.JsonWriter;
 
-public class GensonJsonGeneratorTest {
+public class JsonGeneratorTest {
     private JsonGenerator w;
     private StringWriter sw;
 

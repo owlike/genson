@@ -18,10 +18,10 @@ import org.junit.runners.Parameterized.Parameters;
 import java.io.*;
 import java.util.*;
 
-@RunWith(value = org.junit.runners.Parameterized.class) public class GensonJsonParserTest {
+@RunWith(value = org.junit.runners.Parameterized.class) public class JsonParserTest {
     private boolean strictDoubleParse;
 
-    public GensonJsonParserTest(boolean strictDoubleParse) {
+    public JsonParserTest(boolean strictDoubleParse) {
         this.strictDoubleParse = strictDoubleParse;
     }
 
