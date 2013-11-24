@@ -20,9 +20,9 @@ import com.owlike.genson.stream.JsonStreamException;
 import com.owlike.genson.stream.JsonType;
 import com.owlike.genson.stream.ObjectWriter;
 
-class GensonJsonGenerator implements JsonGenerator {
-    static final String SKIP_NULL = "GensonJsonGenerator.skipNull";
-    static final String HTML_SAFE = "GensonJsonGenerator.htmlSafe";
+public class GensonJsonGenerator implements JsonGenerator {
+    public static final String SKIP_NULL = "GensonJsonGenerator.skipNull";
+    public static final String HTML_SAFE = "GensonJsonGenerator.htmlSafe";
 
     private final ObjectWriter writer;
     private final Deque<JsonType> _ctx = new ArrayDeque<JsonType>();

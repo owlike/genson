@@ -1,17 +1,13 @@
 package com.owlike.genson.ext.jsr353;
 
-import com.owlike.genson.stream.*;
-import com.owlike.genson.stream.JsonWriter;
-
 import javax.json.*;
-import java.io.StringWriter;
 import java.util.*;
 
 class GensonJsonArray extends AbstractList<JsonValue> implements JsonArray {
     private final List<JsonValue> values;
 
     GensonJsonArray(List<JsonValue> values) {
-        this.values = Collections.unmodifiableList(values);
+        this.values = values;
     }
 
     @Override

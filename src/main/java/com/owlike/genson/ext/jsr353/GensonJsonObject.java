@@ -2,7 +2,6 @@ package com.owlike.genson.ext.jsr353;
 
 import javax.json.*;
 import java.util.AbstractMap;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
@@ -10,7 +9,7 @@ class GensonJsonObject extends AbstractMap<String, JsonValue> implements JsonObj
     private final Map<String, JsonValue> values;
 
     GensonJsonObject(Map<String, JsonValue> values) {
-        this.values = Collections.unmodifiableMap(values);
+        this.values = values;
     }
 
     @Override

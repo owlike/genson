@@ -22,7 +22,7 @@ import com.owlike.genson.bean.Tweet;
  * Serialization bench, based on same data as DeserializeBenchmark. Jackson is slightly faster.
  * 
  * @author eugen
- * 
+ *
  */
 public class SerializationBenchmark {
 	private final int ITER = 5000;

@@ -71,14 +71,12 @@ abstract class GensonJsonNumber implements JsonNumber {
 
             IntJsonNumber that = (IntJsonNumber) o;
 
-            if (value != that.value) return false;
-
-            return true;
+            return bigIntegerValue().equals(that.bigIntegerValue());
         }
 
         @Override
         public int hashCode() {
-            return (int) (value ^ (value >>> 32));
+            return bigIntegerValue().hashCode();
         }
 
         @Override
@@ -155,15 +153,12 @@ abstract class GensonJsonNumber implements JsonNumber {
 
             DoubleJsonNumber that = (DoubleJsonNumber) o;
 
-            if (Double.compare(that.value, value) != 0) return false;
-
-            return true;
+            return bigDecimalValue().equals(that.bigDecimalValue());
         }
 
         @Override
         public int hashCode() {
-            long temp = Double.doubleToLongBits(value);
-            return (int) (temp ^ (temp >>> 32));
+            return bigDecimalValue().hashCode();
         }
 
         @Override
