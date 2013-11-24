@@ -24,6 +24,7 @@ public class GensonJsonParserFactory implements JsonParserFactory {
     public GensonJsonParserFactory(Map<String, ?> config) {
         strictDoubleParse = JSR353Bundle.toBoolean(config, GensonJsonParser.STRICT_DOUBLE_PARSE);
     }
+
     @Override public JsonParser createParser(Reader reader) {
         return new GensonJsonParser(new JsonReader(reader, strictDoubleParse, false));
     }
@@ -57,7 +58,7 @@ public class GensonJsonParserFactory implements JsonParserFactory {
     @Override public Map<String, ?> getConfigInUse() {
         Map<String, Boolean> config = new HashMap<String, Boolean>();
         config.put(GensonJsonParser.STRICT_DOUBLE_PARSE, true);
-        return null;
+        return config;
     }
 
 }
