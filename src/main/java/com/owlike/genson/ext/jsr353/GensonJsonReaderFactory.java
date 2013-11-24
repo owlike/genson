@@ -162,7 +162,6 @@ public class GensonJsonReaderFactory implements javax.json.JsonReaderFactory {
 
             @Override
             public void close() {
-                checkNotReadedAndRead();
                 parser.close();
             }
 

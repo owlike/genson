@@ -30,6 +30,7 @@ public class GensonJsonWriterFactory implements JsonWriterFactory {
 
             @Override
             public void writeArray(JsonArray array) {
+                checkWritten();
                 generator.write(array);
             }
 
@@ -47,7 +48,6 @@ public class GensonJsonWriterFactory implements JsonWriterFactory {
 
             @Override
             public void close() {
-                checkWritten();
                 generator.close();
             }
 

@@ -167,6 +167,8 @@ public class JSR353Bundle extends GensonBundle {
     }
 
     static boolean toBoolean(Map<String, ?> config, String key) {
+        if (config == null) return false;
+
         if (config.containsKey(key)) {
             Object value = config.get(key);
             if (value instanceof Boolean) {

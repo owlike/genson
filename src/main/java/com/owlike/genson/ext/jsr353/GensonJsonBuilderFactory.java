@@ -10,7 +10,7 @@ public class GensonJsonBuilderFactory implements JsonBuilderFactory {
     @Override
     public JsonObjectBuilder createObjectBuilder() {
         return new JsonObjectBuilder() {
-            private final Map<String, JsonValue> values = new HashMap<String, JsonValue>();
+            private final Map<String, JsonValue> values = new LinkedHashMap<String, JsonValue>();
 
             @Override
             public JsonObjectBuilder add(String name, JsonValue value) {

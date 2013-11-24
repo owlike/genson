@@ -228,9 +228,8 @@ public class JsonWriter implements ObjectWriter {
         if ((_len + 11) >= _bufferSize) flushBuffer();
         if (value < 0) {
             _buffer[_len++] = '-';
-            value *= -1;
-        }
-        writeInt(value);
+            writeInt(-((long) value));
+        } else writeInt(value);
         _hasPrevious = true;
         return this;
     }
@@ -249,11 +248,15 @@ public class JsonWriter implements ObjectWriter {
         beforeValue();
         // ok so the buffer must always be bigger than the max length of a long
         if ((_len + 21) >= _bufferSize) flushBuffer();
+
+
         if (value < 0) {
-            _buffer[_len++] = '-';
-            value *= -1;
-        }
-        writeInt(value);
+            if (value != Long.MIN_VALUE) {
+                _buffer[_len++] = '-';
+                writeInt(-1 * value);
+            } else writeToBuffer(Long.toString(value), 0);
+        } else writeInt(value);
+
         _hasPrevious = true;
         return this;
     }
