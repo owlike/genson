@@ -10,12 +10,15 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.Collections;
 import java.util.Map;
 
 public class GensonJsonProvider extends JsonProvider {
     private final GensonJsonGeneratorFactory generatorFactory = new GensonJsonGeneratorFactory();
     private final GensonJsonParserFactory parserFactory = new GensonJsonParserFactory();
-    private final GensonJsonReaderFactory readerFactory = new GensonJsonReaderFactory();
+    private final GensonJsonReaderFactory readerFactory = new GensonJsonReaderFactory(
+            Collections.singletonMap(GensonJsonParser.STRICT_DOUBLE_PARSE, true)
+    );
     private final GensonJsonWriterFactory writerFactory = new GensonJsonWriterFactory();
     private final GensonJsonBuilderFactory builderFactory = new GensonJsonBuilderFactory();
 

@@ -562,6 +562,10 @@ public class JsonReader implements ObjectReader {
                     longValue = newLongValue;
                     cur++;
                 }
+                /* TODO we parse here Long.MIN_VALUE as a double, we had also pb in the writer
+                * the solution => instead of doing operations on positive numbers, do the inverse, use negative numbers
+                * as the min negative long holds the - max positive long.
+                */
                 // else we exceed long capacity, just continue and parse it as a double
             }
 
