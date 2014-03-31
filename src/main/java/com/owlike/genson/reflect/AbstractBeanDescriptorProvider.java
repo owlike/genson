@@ -19,9 +19,6 @@ import static com.owlike.genson.reflect.TypeUtil.*;
 
 /**
  * Abstract implementation of {@link BeanDescriptorProvider} applying the template pattern.
- * Subclasses are not expected to override {@link #provide(Type, Genson)} and
- * {@link #provideBeanDescriptor(Class, Genson)} methods. However they may do so if they really need
- * to. Thats why theee methods are not final.
  * 
  * If you wonder how to implement the different abstract methods defined in this class have a look
  * at the <a href=

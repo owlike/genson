@@ -59,7 +59,7 @@ public final class ASMCreatorParameterNameResolver implements PropertyNameResolv
 	protected void read(Class<?> ofClass) {
 		String ofClassName = ofClass.getName();
 		ofClassName = ofClassName.replace('.', '/') + ".class";
-		InputStream is = ASMCreatorParameterNameResolver.class.getClassLoader()
+		InputStream is = ofClass.getClassLoader()
 				.getResourceAsStream(ofClassName);
 
 		ClassReader cr;
@@ -203,7 +203,7 @@ public final class ASMCreatorParameterNameResolver implements PropertyNameResolv
 				return long.class;
 			case Type.OBJECT: {
 				try {
-					return Class.forName(type.getClassName());
+					return Class.forName(type.getClassName(), true, forClass.getClassLoader());
 				} catch (ClassNotFoundException e) {
 					throw new TransformationRuntimeException("Could not found class "
 							+ type.getClassName() + " while searching for constructor "
