@@ -90,40 +90,36 @@ public interface ObjectReader extends Closeable {
 	 * objects contains no more properties.
 	 * 
 	 * @return a reference to the reader.
-	 * @throws IOException
 	 * @throws JsonStreamException
 	 */
-	public ObjectReader beginObject() throws IOException;
+	public ObjectReader beginObject();
 
 	/**
 	 * Ends the object. If you were not in an object or the object contains more data, an exception
 	 * will be thrown.
 	 * 
 	 * @return a reference to the reader.
-	 * @throws IOException
 	 * @throws JsonStreamException
 	 */
-	public ObjectReader endObject() throws IOException;
+	public ObjectReader endObject();
 
 	/**
 	 * Starts reading an array. Arrays contain only values. Call {@link #endArray()} when the array
 	 * contains no more values.
 	 * 
 	 * @return a reference to the reader.
-	 * @throws IOException
 	 * @throws JsonStreamException
 	 */
-	public ObjectReader beginArray() throws IOException;
+	public ObjectReader beginArray();
 
 	/**
 	 * Ends the array. If you were not in an array or the array contains more data, an exception
 	 * will be thrown.
 	 * 
 	 * @return a reference to the reader.
-	 * @throws IOException
 	 * @throws JsonStreamException
 	 */
-	public ObjectReader endArray() throws IOException;
+	public ObjectReader endArray();
 
 	/**
 	 * Will read nexts object metadata. You can call this method as many times as you want, with the
@@ -132,10 +128,9 @@ public interface ObjectReader extends Closeable {
 	 * metadata!).
 	 * 
 	 * @return a reference to the reader.
-	 * @throws IOException
 	 * @throws JsonStreamException
 	 */
-	public ObjectReader nextObjectMetadata() throws IOException;
+	public ObjectReader nextObjectMetadata();
 
 	/**
 	 * If we are in a object it will read the next name/value pair and if we are in an array it will
@@ -143,27 +138,24 @@ public interface ObjectReader extends Closeable {
 	 * next() you must use one of beginXXX methods).
 	 * 
 	 * @return the type of the value, see {@link ValueType} for possible types.
-	 * @throws IOException
 	 * @throws JsonStreamException
 	 */
-	public ValueType next() throws IOException;
+	public ValueType next();
 
 	/**
 	 * 
 	 * @return true if there is a next property or value, false otherwise.
-	 * @throws IOException
 	 * @throws JsonStreamException
 	 */
-	public boolean hasNext() throws IOException;
+	public boolean hasNext();
 
 	/**
 	 * If the value is of complex type it will skip its content.
 	 * 
 	 * @return a reference to the reader.
-	 * @throws IOException
 	 * @throws JsonStreamException
 	 */
-	public ObjectReader skipValue() throws IOException;
+	public ObjectReader skipValue();
 
 	/**
 	 * @return The type of current value.
@@ -175,78 +167,77 @@ public interface ObjectReader extends Closeable {
 	 * 
 	 * @param name the name of the metadata to retrieve.
 	 * @return value of metadata with name as key or null if there is no such metadata.
-	 * @throws IOException
 	 * @throws JsonStreamException
 	 */
-	public String metadata(String name) throws IOException;
+	public String metadata(String name);
 
 	/**
 	 * @return the name of current property, valid only if we are in a object and you called
 	 *         {@link #next()} before.
-	 * @throws IOException
+	 * @throws JsonStreamException
 	 */
-	public String name() throws IOException;
+	public String name();
 
 	/**
 	 * 
 	 * @return the current value as a String. It will try to convert the actual value to String if
 	 *         its not of that type.
-	 * @throws IOException
+	 * @throws JsonStreamException
 	 */
-	public String valueAsString() throws IOException;
+	public String valueAsString();
 
 	/**
 	 * @see #valueAsString()
 	 * @return
-	 * @throws IOException
+	 * @throws JsonStreamException
 	 * @throws NumberFormatException
 	 */
-	public int valueAsInt() throws IOException;
+	public int valueAsInt();
 
 	/**
 	 * @see #valueAsString()
 	 * @return
-	 * @throws IOException
+	 * @throws JsonStreamException
 	 * @throws NumberFormatException
 	 */
-	public long valueAsLong() throws IOException;
+	public long valueAsLong();
 
 	/**
 	 * @see #valueAsString()
 	 * @return
-	 * @throws IOException
+	 * @throws JsonStreamException
 	 * @throws NumberFormatException
 	 */
-	public double valueAsDouble() throws IOException;
+	public double valueAsDouble();
 
 	/**
 	 * @see #valueAsString()
 	 * @return
-	 * @throws IOException
+	 * @throws JsonStreamException
 	 * @throws NumberFormatException
 	 */
-	public short valueAsShort() throws IOException;
+	public short valueAsShort();
 
 	/**
 	 * @see #valueAsString()
 	 * @return
-	 * @throws IOException
+	 * @throws JsonStreamException
 	 * @throws NumberFormatException
 	 */
-	public float valueAsFloat() throws IOException;
+	public float valueAsFloat();
 
 	/**
 	 * @see #valueAsString()
 	 * @return
-	 * @throws IOException
+     * @throws JsonStreamException
 	 */
-	public boolean valueAsBoolean() throws IOException;
+	public boolean valueAsBoolean();
 	
 	/**
 	 * @return the incoming base64 string converted to a byte array.
-	 * @throws IOException
+	 * @throws JsonStreamException
 	 */
-	public byte[] valueAsByteArray() throws IOException;
+	public byte[] valueAsByteArray();
 	
 	public JsonType enclosingType();
 	

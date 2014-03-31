@@ -20,7 +20,7 @@ public class ContextualFactoryFeatureTest {
 	private final Genson genson = new Genson();
 
 	@Test
-	public void testJsonDateFormat() throws TransformationException, IOException {
+	public void testJsonDateFormat() {
 		ABean bean = new ABean();
 		bean.milis = new Date();
 		bean.date = new Date();
@@ -38,14 +38,13 @@ public class ContextualFactoryFeatureTest {
 	}
 
 	@Test
-	public void testPropertyConverter() throws TransformationException, IOException {
+	public void testPropertyConverter() {
 		assertEquals("{\"value\":1}", genson.serialize(new BBean()));
 		assertEquals("1", genson.deserialize("{\"value\":1}", BBean.class).value);
 	}
 
 	@Test(expected = ClassCastException.class)
-	public void testExceptionWhenPropertyTypeDoesNotMatch() throws TransformationException,
-			IOException {
+	public void testExceptionWhenPropertyTypeDoesNotMatch() {
 		genson.serialize(new ExceptionBean());
 	}
 
@@ -68,14 +67,12 @@ public class ContextualFactoryFeatureTest {
 
 	public static class DummyConverter implements Converter<String> {
 		@Override
-		public void serialize(String object, ObjectWriter writer, Context ctx)
-				throws TransformationException, IOException {
+		public void serialize(String object, ObjectWriter writer, Context ctx) {
 			writer.writeValue(1);
 		}
 
 		@Override
-		public String deserialize(ObjectReader reader, Context ctx) throws TransformationException,
-				IOException {
+		public String deserialize(ObjectReader reader, Context ctx) {
 			return reader.valueAsString();
 		}
 

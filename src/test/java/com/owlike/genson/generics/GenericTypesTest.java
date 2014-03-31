@@ -3,6 +3,7 @@ package com.owlike.genson.generics;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,7 +24,7 @@ public class GenericTypesTest {
 	private Genson genson = new Genson();
 
 	@Test
-	public void testGenericCyclicTypes() throws TransformationException, IOException {
+	public void testGenericCyclicTypes() {
 		String json = "{\"val\" : {\"val\": {\"val\" : {\"str\": \"hey\"}}}}";
 		CyclicGenericType<CyclicGenericType<SubClass>> cyclic = genson.deserialize(json,
 				new GenericType<CyclicGenericType<CyclicGenericType<SubClass>>>() {
@@ -55,7 +56,7 @@ public class GenericTypesTest {
 	}
 
 	@Test
-	public void testSerializeWithGenericType() throws TransformationException, IOException {
+	public void testSerializeWithGenericType() throws MalformedURLException {
 		ContainerClass cc = new ContainerClass();
 		cc.urlContainer = new MyGenericClass<URL>();
 		cc.urlContainer.tField = new URL("http://www.google.com");
@@ -65,7 +66,7 @@ public class GenericTypesTest {
 	}
 
 	@Test
-	public void testDeserializeWithGenericType() throws TransformationException, IOException {
+	public void testDeserializeWithGenericType() throws MalformedURLException {
 		ContainerClass cc = genson.deserialize(
 				"{\"urlContainer\":{\"tField\":\"http://www.google.com\"}}", ContainerClass.class);
 		assertEquals(URL.class, cc.urlContainer.tField.getClass());
@@ -73,8 +74,7 @@ public class GenericTypesTest {
 	}
 
 	@Test
-	public void testDeserializeDeepGenericsUsingGenericType() throws TransformationException,
-			IOException {
+	public void testDeserializeDeepGenericsUsingGenericType() throws MalformedURLException {
 		MyGenericClass<ContainerClass> mgc = genson.deserialize(
 				"{\"tField\":{\"urlContainer\":{\"tField\":\"http://www.google.com\"}}}",
 				new GenericType<MyGenericClass<ContainerClass>>() {
@@ -85,7 +85,7 @@ public class GenericTypesTest {
 	}
 
 	@Test
-	public void testMultiLevelGenerics() throws TransformationException, IOException {
+	public void testMultiLevelGenerics() throws IOException {
 		MyContainerPojo pojo = new MyContainerPojo();
 		pojo.a = new MyContainer<GenericTypesTest.MyGenericClass<URL>, URL>();
 		pojo.a.e = new URL("http://google.com");
@@ -100,8 +100,7 @@ public class GenericTypesTest {
 	}
 
 	@Test
-	public void testMultiLevelGenericsWithCustomConverter() throws TransformationException,
-			IOException {
+	public void testMultiLevelGenericsWithCustomConverter() throws IOException {
 		MyContainerPojo pojo = new MyContainerPojo();
 		pojo.a = new MyContainer<GenericTypesTest.MyGenericClass<URL>, URL>();
 		pojo.a.e = new URL("http://google.com");
@@ -122,8 +121,7 @@ public class GenericTypesTest {
 	}
 
 	@Test
-	public void testDeepGenericsWithDefaultCollectionConverters() throws TransformationException,
-			IOException {
+	public void testDeepGenericsWithDefaultCollectionConverters() throws IOException {
 		MyClass mc = new MyClass();
 		// we use URL instead of a plain string or a primitive type, because genson can guess them
 		// so using a complex object can not be tricked
@@ -161,16 +159,14 @@ public class GenericTypesTest {
 		static boolean used;
 
 		@Override
-		public void serialize(MyGenericClass<URL> object, ObjectWriter writer, Context ctx)
-				throws TransformationException, IOException {
+		public void serialize(MyGenericClass<URL> object, ObjectWriter writer, Context ctx) {
 			used = true;
 			writer.beginObject().writeName("tField").writeValue(object.tField.toString())
 					.endObject();
 		}
 
 		@Override
-		public MyGenericClass<URL> deserialize(ObjectReader reader, Context ctx)
-				throws TransformationException, IOException {
+		public MyGenericClass<URL> deserialize(ObjectReader reader, Context ctx) throws Exception {
 			used = true;
 			MyGenericClass<URL> mgc = new MyGenericClass<URL>();
 			reader.beginObject();

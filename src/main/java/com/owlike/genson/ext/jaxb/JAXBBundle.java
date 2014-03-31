@@ -84,12 +84,12 @@ public class JAXBBundle extends GensonBundle {
 
 	private class DurationConveter implements Converter<Duration> {
 		@Override
-		public void serialize(Duration object, ObjectWriter writer, Context ctx) throws IOException {
+		public void serialize(Duration object, ObjectWriter writer, Context ctx) {
 			writer.writeValue(object.toString());
 		}
 
 		@Override
-		public Duration deserialize(ObjectReader reader, Context ctx) throws IOException {
+		public Duration deserialize(ObjectReader reader, Context ctx) {
 			return dateFactory.newDuration(reader.valueAsString());
 		}
 	}
@@ -101,12 +101,12 @@ public class JAXBBundle extends GensonBundle {
 		private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-DD'T'hh:mm:ssZ");
 
 		@Override
-		public void serialize(XMLGregorianCalendar object, ObjectWriter writer, Context ctx) throws IOException {
+		public void serialize(XMLGregorianCalendar object, ObjectWriter writer, Context ctx) {
 			converter.serialize(object.toGregorianCalendar().getTime(), writer, ctx);
 		}
 
 		@Override
-		public synchronized XMLGregorianCalendar deserialize(ObjectReader reader, Context ctx) throws IOException {
+		public synchronized XMLGregorianCalendar deserialize(ObjectReader reader, Context ctx) {
 			GregorianCalendar cal = new GregorianCalendar();
 			try {
 				cal.setTime(dateFormat.parse(reader.valueAsString()));
@@ -172,7 +172,7 @@ public class JAXBBundle extends GensonBundle {
 			}
 
 			@Override
-			public Object deserialize(ObjectReader reader, Context ctx) throws IOException {
+			public Object deserialize(ObjectReader reader, Context ctx) throws Exception {
 				Object value = converter.deserialize(reader, ctx);
 				try {
 					return adapter.unmarshal(value);
@@ -183,7 +183,7 @@ public class JAXBBundle extends GensonBundle {
 			}
 
 			@Override
-			public void serialize(Object object, ObjectWriter writer, Context ctx) throws IOException {
+			public void serialize(Object object, ObjectWriter writer, Context ctx) throws Exception {
 				Object adaptedValue = null;
 				try {
 					adaptedValue = adapter.marshal(object);
@@ -246,12 +246,12 @@ public class JAXBBundle extends GensonBundle {
 			}
 
 			@Override
-			public void serialize(Enum<?> object, ObjectWriter writer, Context ctx) throws IOException {
+			public void serialize(Enum<?> object, ObjectWriter writer, Context ctx) {
 				writer.writeUnsafeValue(enumToValue.get(object));
 			}
 
 			@Override
-			public Enum<?> deserialize(ObjectReader reader, Context ctx) throws IOException {
+			public Enum<?> deserialize(ObjectReader reader, Context ctx) {
 				return valueToEnum.get(reader.valueAsString());
 			}
 		}

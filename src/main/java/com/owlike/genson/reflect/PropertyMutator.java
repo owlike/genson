@@ -18,7 +18,7 @@ public abstract class PropertyMutator extends BeanProperty implements
 		super(name, type, declaringClass, annotations);
 	}
 
-	public Object deserialize(ObjectReader reader, Context ctx) throws IOException {
+	public Object deserialize(ObjectReader reader, Context ctx) {
 		try {
 			return propertyDeserializer.deserialize(reader, ctx);
 		} catch (Throwable th) {
@@ -26,7 +26,7 @@ public abstract class PropertyMutator extends BeanProperty implements
 		}
 	}
 
-	public void deserialize(Object into, ObjectReader reader, Context ctx) throws IOException {
+	public void deserialize(Object into, ObjectReader reader, Context ctx) {
 		Object propValue = null;
 		try {
 			propValue = propertyDeserializer.deserialize(reader, ctx);

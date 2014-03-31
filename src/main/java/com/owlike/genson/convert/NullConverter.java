@@ -43,7 +43,7 @@ public class NullConverter implements Converter<Object> {
 			this.nullConverter = nullConverter;
 		}
 
-		public void serialize(T obj, ObjectWriter writer, Context ctx) throws IOException {
+		public void serialize(T obj, ObjectWriter writer, Context ctx) throws Exception {
 			if (obj == null) {
 				nullConverter.serialize(obj, writer, ctx);
 			} else {
@@ -52,7 +52,7 @@ public class NullConverter implements Converter<Object> {
 		}
 
 		@SuppressWarnings("unchecked")
-		public T deserialize(ObjectReader reader, Context ctx) throws IOException {
+		public T deserialize(ObjectReader reader, Context ctx) throws Exception {
 			if (ValueType.NULL == reader.getValueType())
 				return (T) nullConverter.deserialize(reader, ctx);
 
@@ -63,11 +63,11 @@ public class NullConverter implements Converter<Object> {
 	public NullConverter() {
 	}
 
-	public void serialize(Object obj, ObjectWriter writer, Context ctx) throws IOException {
+	public void serialize(Object obj, ObjectWriter writer, Context ctx) {
 		writer.writeNull();
 	}
 
-	public Object deserialize(ObjectReader reader, Context ctx) throws IOException {
+	public Object deserialize(ObjectReader reader, Context ctx) {
 		return null;
 	}
 }

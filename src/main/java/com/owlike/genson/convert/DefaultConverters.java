@@ -9,6 +9,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.sql.Timestamp;
@@ -30,13 +31,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 
-import com.owlike.genson.Context;
-import com.owlike.genson.Converter;
-import com.owlike.genson.Factory;
-import com.owlike.genson.GenericType;
-import com.owlike.genson.Genson;
-import com.owlike.genson.TransformationException;
-import com.owlike.genson.TransformationRuntimeException;
+import com.owlike.genson.*;
 import com.owlike.genson.annotation.HandleClassMetadata;
 import com.owlike.genson.annotation.HandleNull;
 import com.owlike.genson.annotation.JsonConverter;
@@ -103,7 +98,7 @@ public final class DefaultConverters {
 			this.elementConverter = elementConverter;
 		}
 
-		public Collection<E> deserialize(ObjectReader reader, Context ctx) throws IOException {
+		public Collection<E> deserialize(ObjectReader reader, Context ctx) throws Exception {
 			reader.beginArray();
 			Collection<E> col = create();
 			for (; reader.hasNext();) {
@@ -115,8 +110,7 @@ public final class DefaultConverters {
 			return col;
 		}
 
-		public void serialize(Collection<E> array, ObjectWriter writer, Context ctx)
-				throws IOException {
+		public void serialize(Collection<E> array, ObjectWriter writer, Context ctx) throws Exception {
 			writer.beginArray();
 			for (E e : array) {
 				elementConverter.serialize(e, writer, ctx);
@@ -164,7 +158,7 @@ public final class DefaultConverters {
 			this.elementConverter = elementConverter;
 		}
 
-		public void serialize(Object array, ObjectWriter writer, Context ctx) throws IOException {
+		public void serialize(Object array, ObjectWriter writer, Context ctx) throws Exception {
 			writer.beginArray();
 			int len = Array.getLength(array);
 			for (int i = 0; i < len; i++) {
@@ -175,7 +169,7 @@ public final class DefaultConverters {
 			writer.endArray();
 		}
 
-		public Object deserialize(ObjectReader reader, Context ctx) throws IOException {
+		public Object deserialize(ObjectReader reader, Context ctx) throws Exception {
 			reader.beginArray();
 			int size = 10;
 			Object array = Array.newInstance(eClass, size);
@@ -209,12 +203,12 @@ public final class DefaultConverters {
 		}
 
 		@Override
-		public void serialize(byte[] object, ObjectWriter writer, Context ctx) throws IOException {
+		public void serialize(byte[] object, ObjectWriter writer, Context ctx) {
 			writer.writeValue(object);
 		}
 
 		@Override
-		public byte[] deserialize(ObjectReader reader, Context ctx) throws IOException {
+		public byte[] deserialize(ObjectReader reader, Context ctx) {
 			return reader.valueAsByteArray();
 		}
 
@@ -251,11 +245,11 @@ public final class DefaultConverters {
 		private StringConverter() {
 		}
 
-		public void serialize(String value, ObjectWriter writer, Context ctx) throws IOException {
+		public void serialize(String value, ObjectWriter writer, Context ctx) {
 			writer.writeValue(value);
 		}
 
-		public String deserialize(ObjectReader reader, Context ctx) throws IOException {
+		public String deserialize(ObjectReader reader, Context ctx) {
 			return reader.valueAsString();
 		}
 	};
@@ -268,11 +262,11 @@ public final class DefaultConverters {
 		private BooleanConverter() {
 		}
 
-		public void serialize(Boolean obj, ObjectWriter writer, Context ctx) throws IOException {
+		public void serialize(Boolean obj, ObjectWriter writer, Context ctx) {
 			writer.writeValue(obj.booleanValue());
 		}
 
-		public Boolean deserialize(ObjectReader reader, Context ctx) throws IOException {
+		public Boolean deserialize(ObjectReader reader, Context ctx) {
 			if (ValueType.STRING.equals(reader.getValueType())) {
 				String value = reader.valueAsString();
 				return "".equals(value) ? null : Boolean.valueOf(value);
@@ -289,11 +283,11 @@ public final class DefaultConverters {
 		private IntegerConverter() {
 		}
 
-		public void serialize(Integer obj, ObjectWriter writer, Context ctx) throws IOException {
+		public void serialize(Integer obj, ObjectWriter writer, Context ctx) {
 			writer.writeValue(obj.intValue());
 		}
 
-		public Integer deserialize(ObjectReader reader, Context ctx) throws IOException {
+		public Integer deserialize(ObjectReader reader, Context ctx) {
 			if (ValueType.STRING.equals(reader.getValueType())) {
 				String value = reader.valueAsString();
 				return "".equals(value) ? null : Integer.valueOf(value);
@@ -310,7 +304,7 @@ public final class DefaultConverters {
 		private LongConverter() {
 		}
 
-		public Long deserialize(ObjectReader reader, Context ctx) throws NumberFormatException, IOException {
+		public Long deserialize(ObjectReader reader, Context ctx) {
 			if (ValueType.STRING.equals(reader.getValueType())) {
 				String value = reader.valueAsString();
 				return "".equals(value) ? null : Long.parseLong(value);
@@ -318,7 +312,7 @@ public final class DefaultConverters {
 			return reader.valueAsLong();
 		}
 
-		public void serialize(Long obj, ObjectWriter writer, Context ctx) throws IOException {
+		public void serialize(Long obj, ObjectWriter writer, Context ctx) {
 			writer.writeValue(obj.longValue());
 		}
 	};
@@ -331,7 +325,7 @@ public final class DefaultConverters {
 		private DoubleConverter() {
 		}
 
-		public Double deserialize(ObjectReader reader, Context ctx) throws NumberFormatException, IOException {
+		public Double deserialize(ObjectReader reader, Context ctx) {
 			if (ValueType.STRING.equals(reader.getValueType())) {
 				String value = reader.valueAsString();
 				return "".equals(value) ? null : Double.parseDouble(value);
@@ -339,7 +333,7 @@ public final class DefaultConverters {
 			return reader.valueAsDouble();
 		}
 
-		public void serialize(Double obj, ObjectWriter writer, Context ctx) throws IOException {
+		public void serialize(Double obj, ObjectWriter writer, Context ctx) {
 			writer.writeValue(obj.doubleValue());
 		}
 	};
@@ -352,7 +346,7 @@ public final class DefaultConverters {
 		private NumberConverter() {
 		}
 
-		public Number deserialize(ObjectReader reader, Context ctx) throws IOException {
+		public Number deserialize(ObjectReader reader, Context ctx) {
 			ValueType vt = reader.getValueType();
 			if (ValueType.INTEGER.equals(vt))
 				return reader.valueAsInt();
@@ -364,7 +358,7 @@ public final class DefaultConverters {
 			}
 		}
 
-		public void serialize(Number obj, ObjectWriter writer, Context ctx) throws IOException {
+		public void serialize(Number obj, ObjectWriter writer, Context ctx) {
 			writer.writeValue(obj);
 		}
 
@@ -411,11 +405,11 @@ public final class DefaultConverters {
 			private booleanConverter() {
 			}
 
-			public void serialize(Boolean obj, ObjectWriter writer, Context ctx) throws IOException {
+			public void serialize(Boolean obj, ObjectWriter writer, Context ctx) {
 				writer.writeValue(obj.booleanValue());
 			}
 
-			public Boolean deserialize(ObjectReader reader, Context ctx) throws IOException {
+			public Boolean deserialize(ObjectReader reader, Context ctx) {
 				return reader.valueAsBoolean();
 			}
 		};
@@ -429,11 +423,11 @@ public final class DefaultConverters {
 			private intConverter() {
 			}
 
-			public void serialize(Integer obj, ObjectWriter writer, Context ctx) throws IOException {
+			public void serialize(Integer obj, ObjectWriter writer, Context ctx) {
 				writer.writeValue(obj.intValue());
 			}
 
-            public Integer deserialize(ObjectReader reader, Context ctx) throws IOException {
+            public Integer deserialize(ObjectReader reader, Context ctx) {
 				return reader.valueAsInt();
 			}
 		};
@@ -447,11 +441,11 @@ public final class DefaultConverters {
 			private doubleConverter() {
 			}
 
-			public void serialize(Double obj, ObjectWriter writer, Context ctx) throws IOException {
+			public void serialize(Double obj, ObjectWriter writer, Context ctx) {
 				writer.writeValue(obj.doubleValue());
 			}
 
-			public Double deserialize(ObjectReader reader, Context ctx) throws IOException {
+			public Double deserialize(ObjectReader reader, Context ctx) {
 				return reader.valueAsDouble();
 			}
 		};
@@ -465,11 +459,11 @@ public final class DefaultConverters {
 			private longConverter() {
 			}
 
-			public void serialize(Long obj, ObjectWriter writer, Context ctx) throws IOException {
+			public void serialize(Long obj, ObjectWriter writer, Context ctx) {
 				writer.writeValue(obj.longValue());
 			}
 
-			public Long deserialize(ObjectReader reader, Context ctx) throws IOException {
+			public Long deserialize(ObjectReader reader, Context ctx) {
 				return reader.valueAsLong();
 			}
 		};
@@ -485,7 +479,7 @@ public final class DefaultConverters {
 			this.valueConverter = valueConverter;
 		}
 
-		public Map<K, V> deserialize(ObjectReader reader, Context ctx) throws IOException {
+		public Map<K, V> deserialize(ObjectReader reader, Context ctx) throws Exception {
 			reader.beginObject();
 			Map<K, V> map = create();
 			for (; reader.hasNext();) {
@@ -496,7 +490,7 @@ public final class DefaultConverters {
 			return map;
 		}
 
-		public void serialize(Map<K, V> obj, ObjectWriter writer, Context ctx) throws IOException {
+		public void serialize(Map<K, V> obj, ObjectWriter writer, Context ctx) throws Exception {
 			writer.beginObject();
 			for (Map.Entry<K, V> entry : obj.entrySet()) {
 				writer.writeName(keyAdapter.adapt(entry.getKey()));
@@ -640,7 +634,7 @@ public final class DefaultConverters {
 		}
 
 		@Override
-		public void serialize(Map<K, V> object, ObjectWriter writer, Context ctx) throws IOException {
+		public void serialize(Map<K, V> object, ObjectWriter writer, Context ctx) throws Exception {
 			writer.beginArray();
 			for (Map.Entry<K, V> entry : object.entrySet()) {
 				writer.beginObject().writeName("key");
@@ -653,7 +647,7 @@ public final class DefaultConverters {
 		}
 
 		@Override
-		public Map<K, V> deserialize(ObjectReader reader, Context ctx) throws IOException {
+		public Map<K, V> deserialize(ObjectReader reader, Context ctx) throws Exception {
 			Map<K, V> map = new HashMap<K, V>();
 			reader.beginArray();
 			while (reader.hasNext()) {
@@ -771,7 +765,7 @@ public final class DefaultConverters {
 			this.asTimeInMillis = asTimeInMillis;
 		}
 
-		public void serialize(Date obj, ObjectWriter writer, Context ctx) throws IOException {
+		public void serialize(Date obj, ObjectWriter writer, Context ctx) {
 			if (asTimeInMillis)
 				writer.writeValue(obj.getTime());
 			else
@@ -782,7 +776,7 @@ public final class DefaultConverters {
 			return dateFormat.format(date);
 		}
 
-		public Date deserialize(ObjectReader reader, Context ctx) throws IOException {
+		public Date deserialize(ObjectReader reader, Context ctx) {
 			try {
 				if (asTimeInMillis)
 					return new Date(reader.valueAsLong());
@@ -811,12 +805,12 @@ public final class DefaultConverters {
 			private UntypedConverter() {
 			}
 
-			public Object deserialize(ObjectReader reader, Context ctx) throws IOException {
+			public Object deserialize(ObjectReader reader, Context ctx) {
 				return ctx.genson.deserialize(GenericType.of(reader.getValueType().toClass()),
 						reader, ctx);
 			}
 
-			public void serialize(Object obj, ObjectWriter writer, Context ctx) throws IOException {
+			public void serialize(Object obj, ObjectWriter writer, Context ctx) {
 				if (Object.class.equals(obj.getClass()))
 					throw new UnsupportedOperationException(
 							"Serialization of type Object is not supported by default serializers.");
@@ -841,11 +835,11 @@ public final class DefaultConverters {
 			this.eClass = eClass;
 		}
 
-		public void serialize(T obj, ObjectWriter writer, Context ctx) throws IOException {
+		public void serialize(T obj, ObjectWriter writer, Context ctx) {
 			writer.writeUnsafeValue(obj.name());
 		}
 
-		public T deserialize(ObjectReader reader, Context ctx) throws IOException {
+		public T deserialize(ObjectReader reader, Context ctx) {
 			return Enum.valueOf(eClass, reader.valueAsString());
 		}
 	}
@@ -872,11 +866,15 @@ public final class DefaultConverters {
 		private URLConverter() {
 		}
 
-		public URL deserialize(ObjectReader reader, Context ctx) throws IOException {
-			return new URL(reader.valueAsString());
-		}
+		public URL deserialize(ObjectReader reader, Context ctx) {
+            try {
+                return new URL(reader.valueAsString());
+            } catch (MalformedURLException e) {
+                throw new JsonBindingException("Can not deserializer <" + reader.valueAsString() + "> to URL.");
+            }
+        }
 
-		public void serialize(URL object, ObjectWriter writer, Context ctx) throws IOException {
+		public void serialize(URL object, ObjectWriter writer, Context ctx) {
 			writer.writeValue(object.toExternalForm());
 		}
 	}
@@ -889,11 +887,11 @@ public final class DefaultConverters {
 		private URIConverter() {
 		}
 
-		public void serialize(URI object, ObjectWriter writer, Context ctx) throws IOException {
+		public void serialize(URI object, ObjectWriter writer, Context ctx) {
 			writer.writeUnsafeValue(object.toString());
 		}
 
-		public URI deserialize(ObjectReader reader, Context ctx) throws IOException {
+		public URI deserialize(ObjectReader reader, Context ctx) {
 			return URI.create(reader.valueAsString());
 		}
 	}
@@ -907,12 +905,12 @@ public final class DefaultConverters {
 		}
 
 		@Override
-		public BigDecimal deserialize(ObjectReader reader, Context ctx) throws IOException {
+		public BigDecimal deserialize(ObjectReader reader, Context ctx) {
 			return new BigDecimal(reader.valueAsString());
 		}
 
 		@Override
-		public void serialize(BigDecimal object, ObjectWriter writer, Context ctx) throws IOException {
+		public void serialize(BigDecimal object, ObjectWriter writer, Context ctx) {
 			writer.writeValue(object);
 		}
 	}
@@ -926,12 +924,12 @@ public final class DefaultConverters {
 		}
 
 		@Override
-		public BigInteger deserialize(ObjectReader reader, Context ctx) throws IOException {
+		public BigInteger deserialize(ObjectReader reader, Context ctx) {
 			return new BigInteger(reader.valueAsString());
 		}
 
 		@Override
-		public void serialize(BigInteger object, ObjectWriter writer, Context ctx) throws IOException {
+		public void serialize(BigInteger object, ObjectWriter writer, Context ctx) {
 			writer.writeValue(object);
 		}
 	}
@@ -945,12 +943,12 @@ public final class DefaultConverters {
 		}
 
 		@Override
-		public Timestamp deserialize(ObjectReader reader, Context ctx) throws IOException {
+		public Timestamp deserialize(ObjectReader reader, Context ctx) {
 			return Timestamp.valueOf(reader.valueAsString());
 		}
 
 		@Override
-		public void serialize(Timestamp object, ObjectWriter writer, Context ctx) throws IOException {
+		public void serialize(Timestamp object, ObjectWriter writer, Context ctx) {
 			writer.writeValue(object.toString());
 		}
 	}
@@ -965,12 +963,12 @@ public final class DefaultConverters {
 
 		@Override
 		public void serialize(UUID object, ObjectWriter writer, Context ctx)
-				throws IOException {
+				{
 			writer.writeValue(object.toString());
 		}
 
 		@Override
-		public UUID deserialize(ObjectReader reader, Context ctx) throws IOException {
+		public UUID deserialize(ObjectReader reader, Context ctx) {
 			return UUID.fromString(reader.valueAsString());
 		}
 
@@ -1000,12 +998,12 @@ public final class DefaultConverters {
 		}
 
 		@Override
-		public void serialize(Calendar object, ObjectWriter writer, Context ctx) throws IOException {
+		public void serialize(Calendar object, ObjectWriter writer, Context ctx) {
 			dateConverter.serialize(object.getTime(), writer, ctx);
 		}
 
 		@Override
-		public Calendar deserialize(ObjectReader reader, Context ctx) throws IOException {
+		public Calendar deserialize(ObjectReader reader, Context ctx) {
 			Calendar cal = null;
 			if (ValueType.NULL != reader.getValueType()) {
 				cal = new GregorianCalendar();
@@ -1024,12 +1022,12 @@ public final class DefaultConverters {
 		}
 
 		@Override
-		public void serialize(File object, ObjectWriter writer, Context ctx) throws IOException {
+		public void serialize(File object, ObjectWriter writer, Context ctx) {
 			writer.writeValue(object.getPath());
 		}
 
 		@Override
-		public File deserialize(ObjectReader reader, Context ctx) throws IOException {
+		public File deserialize(ObjectReader reader, Context ctx) {
 			return new File(reader.valueAsString());
 		}
 

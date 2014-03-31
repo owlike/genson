@@ -80,7 +80,7 @@ public class BeanDescriptor<T> implements Converter<T> {
 		return _creator != null;
 	}
 
-	public void serialize(T obj, ObjectWriter writer, Context ctx) throws IOException {
+	public void serialize(T obj, ObjectWriter writer, Context ctx) {
 		writer.beginObject();
 		for (PropertyAccessor accessor : accessibleProperties) {
 			accessor.serialize(obj, writer, ctx);
@@ -88,7 +88,7 @@ public class BeanDescriptor<T> implements Converter<T> {
 		writer.endObject();
 	}
 
-	public T deserialize(ObjectReader reader, Context ctx) throws IOException {
+	public T deserialize(ObjectReader reader, Context ctx) {
 		T bean = null;
 		// optimization for default ctr
 		if (_noArgCtr) {
@@ -103,7 +103,7 @@ public class BeanDescriptor<T> implements Converter<T> {
 		return bean;
 	}
 
-	public void deserialize(T into, ObjectReader reader, Context ctx) throws IOException {
+	public void deserialize(T into, ObjectReader reader, Context ctx) {
 		reader.beginObject();
 		for (; reader.hasNext();) {
 			reader.next();
@@ -119,7 +119,7 @@ public class BeanDescriptor<T> implements Converter<T> {
 		reader.endObject();
 	}
 
-	protected T _deserWithCtrArgs(ObjectReader reader, Context ctx) throws IOException {
+	protected T _deserWithCtrArgs(ObjectReader reader, Context ctx) {
 		List<String> names = new ArrayList<String>();
 		List<Object> values = new ArrayList<Object>();
 

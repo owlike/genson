@@ -20,7 +20,7 @@ public abstract class PropertyAccessor extends BeanProperty implements Comparabl
 		super(name, type, declaringClass, annotations);
 	}
 
-	public void serialize(Object propertySource, ObjectWriter writer, Context ctx) throws IOException {
+	public void serialize(Object propertySource, ObjectWriter writer, Context ctx) {
 		Object propertyValue = access(propertySource);
 		writer.writeName(name);
 		try {

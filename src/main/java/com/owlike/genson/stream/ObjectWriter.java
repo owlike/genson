@@ -69,7 +69,7 @@ import java.io.IOException;
  * @author eugen
  * 
  */
-public interface ObjectWriter extends Flushable, Closeable {
+public interface ObjectWriter {
 
 	/**
 	 * Starts to write an array (use it also for collections). An array is a suite of values that
@@ -77,41 +77,34 @@ public interface ObjectWriter extends Flushable, Closeable {
 	 * endArray().
 	 * 
 	 * @return a reference to this allowing to chain method calls.
-	 * @throws IOException
-	 * @throws JsonStreamException
-	 *             if trying to produce invalid json
+	 * @throws JsonStreamException if trying to produce invalid json
 	 */
-	public ObjectWriter beginArray() throws IOException;
+	public ObjectWriter beginArray();
 
 	/**
 	 * Ends the array, if beginArray was not called, implementations should throw an exception.
 	 * 
 	 * @return a reference to this allowing to chain method calls.
-	 * @throws IOException
-	 * @throws JsonStreamException
-	 *             if trying to produce invalid json
+	 * @throws JsonStreamException if trying to produce invalid json
 	 */
-	public ObjectWriter endArray() throws IOException;
+	public ObjectWriter endArray();
 
 	/**
 	 * Starts a object, objects are a suite of name/value pairs, values may be literals, arrays or
 	 * objects. Don't forget to call endObject.
 	 * 
 	 * @return a reference to this allowing to chain method calls.
-	 * @throws JsonStreamException
-	 *             if trying to produce invalid json
+	 * @throws JsonStreamException if trying to produce invalid json
 	 */
-	public ObjectWriter beginObject() throws IOException;
+	public ObjectWriter beginObject();
 
 	/**
 	 * Ends the object being written, if beginObject was not called an exception will be throwed.
 	 * 
 	 * @return a reference to this allowing to chain method calls.
-	 * @throws IOException
-	 * @throws JsonStreamException
-	 *             if trying to produce invalid json
+	 * @throws JsonStreamException if trying to produce invalid json
 	 */
-	public ObjectWriter endObject() throws IOException;
+	public ObjectWriter endObject();
 
 	/**
 	 * Writes the name of a property. Names can be written only in objects and must be called before
@@ -120,11 +113,9 @@ public interface ObjectWriter extends Flushable, Closeable {
 	 * @param name
 	 *            a non null String
 	 * @return a reference to this, allowing to chain method calls.
-	 * @throws IOException
-	 * @throws JsonStreamException
-	 *             if trying to produce invalid json
+	 * @throws JsonStreamException if trying to produce invalid json
 	 */
-	public ObjectWriter writeName(String name) throws IOException;
+	public ObjectWriter writeName(String name);
 
 	/**
 	 * Writes a value to the stream. Values can be written in arrays and in objects (after writing
@@ -133,89 +124,79 @@ public interface ObjectWriter extends Flushable, Closeable {
 	 * @param value
 	 *            to write.
 	 * @return a reference to this, allowing to chain method calls.
-	 * @throws IOException
-	 * @throws JsonStreamException
-	 *             if trying to produce invalid json
+	 * @throws JsonStreamException if trying to produce invalid json
 	 */
-	public ObjectWriter writeValue(int value) throws IOException;
+	public ObjectWriter writeValue(int value);
 
 	/**
 	 * See {@link #writeValue(int)}.
 	 * 
-	 * @throws JsonStreamException
-	 *             if trying to produce invalid json
+	 * @throws JsonStreamException if trying to produce invalid json
 	 * @see #writeValue(int)
 	 */
-	public ObjectWriter writeValue(double value) throws IOException;
+	public ObjectWriter writeValue(double value);
 
 	/**
 	 * See {@link #writeValue(int)}.
 	 * 
-	 * @throws JsonStreamException
-	 *             if trying to produce invalid json
+	 * @throws JsonStreamException if trying to produce invalid json
 	 * @see #writeValue(int)
 	 */
-	public ObjectWriter writeValue(long value) throws IOException;
+	public ObjectWriter writeValue(long value);
 
 	/**
 	 * See {@link #writeValue(int)}.
 	 * 
-	 * @throws JsonStreamException
-	 *             if trying to produce invalid json
+	 * @throws JsonStreamException if trying to produce invalid json
 	 * @see #writeValue(int)
 	 */
-	public ObjectWriter writeValue(short value) throws IOException;
+	public ObjectWriter writeValue(short value);
 
 	/**
 	 * @see #writeValue(int)
 	 */
-	public ObjectWriter writeValue(float value) throws IOException;
-
-	/**
-	 * See {@link #writeValue(int)}.
-	 * 
-	 * @throws JsonStreamException
-	 *             if trying to produce invalid json
-	 * @see #writeValue(int)
-	 */
-	public ObjectWriter writeValue(boolean value) throws IOException;
+	public ObjectWriter writeValue(float value);
 
 	/**
 	 * See {@link #writeValue(int)}.
 	 * 
-	 * @throws JsonStreamException
-	 *             if trying to produce invalid json
+	 * @throws JsonStreamException if trying to produce invalid json
 	 * @see #writeValue(int)
 	 */
-	public ObjectWriter writeValue(Number value) throws IOException;
+	public ObjectWriter writeValue(boolean value);
 
 	/**
 	 * See {@link #writeValue(int)}.
 	 * 
-	 * @throws JsonStreamException
-	 *             if trying to produce invalid json
+	 * @throws JsonStreamException if trying to produce invalid json
 	 * @see #writeValue(int)
 	 */
-	public ObjectWriter writeValue(String value) throws IOException;
+	public ObjectWriter writeValue(Number value);
+
+	/**
+	 * See {@link #writeValue(int)}.
+	 * 
+	 * @throws JsonStreamException if trying to produce invalid json
+	 * @see #writeValue(int)
+	 */
+	public ObjectWriter writeValue(String value);
 
 	/**
 	 * Writes an array of bytes as a base64 encoded string. See {@link #writeValue(int)}.
 	 * 
-	 * @throws JsonStreamException
-	 *             if trying to produce invalid json
+	 * @throws JsonStreamException if trying to produce invalid json
 	 * @see #writeValue(int)
 	 */
-	public ObjectWriter writeValue(byte[] value) throws IOException;
+	public ObjectWriter writeValue(byte[] value);
 
 	/**
 	 * Writes value as is without any pre-processing, it's faster than {@link #writeValue(String)}
 	 * but should be used only if you know that it is safe.
 	 * 
-	 * @throws JsonStreamException
-	 *             if trying to produce invalid json
+	 * @throws JsonStreamException if trying to produce invalid json
 	 * @see #writeValue(int)
 	 */
-	public ObjectWriter writeUnsafeValue(String value) throws IOException;
+	public ObjectWriter writeUnsafeValue(String value);
 
 	/**
 	 * Must be called when a null value is encountered. Implementations will deal with the null
@@ -223,12 +204,10 @@ public interface ObjectWriter extends Flushable, Closeable {
 	 * 
 	 * @return a reference to this allowing to chain method calls.
 	 * 
-	 * @throws JsonStreamException
-	 *             if trying to produce invalid json
-	 * @throws IOException
+	 * @throws JsonStreamException if trying to produce invalid json
 	 * @see #writeValue(int)
 	 */
-	public ObjectWriter writeNull() throws IOException;
+	public ObjectWriter writeNull();
 
 	/**
 	 * This method is a kind of cheat as it allows us to start writing metadata and then still be
@@ -241,9 +220,9 @@ public interface ObjectWriter extends Flushable, Closeable {
 	 * @see #writeMetadata(String, String)
 	 * 
 	 * @return a reference to this allowing to chain method calls.
-	 * @throws IOException
+	 * @throws JsonStreamException
 	 */
-	public ObjectWriter beginNextObjectMetadata() throws IOException;
+	public ObjectWriter beginNextObjectMetadata();
 
 	/**
 	 * Metadata is a suite of name/value pairs, names will be prepended with '@' (handled by the
@@ -279,7 +258,11 @@ public interface ObjectWriter extends Flushable, Closeable {
 	 * @param value
 	 *            of the metadata property.
 	 * @return a reference to this allowing to chain method calls.
-	 * @throws IOException
+	 * @throws JsonStreamException
 	 */
-	public ObjectWriter writeMetadata(String name, String value) throws IOException;
+	public ObjectWriter writeMetadata(String name, String value);
+
+    public void flush();
+
+    public void close();
 }

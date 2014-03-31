@@ -20,14 +20,14 @@ public class JsonSerializationTest {
 	Genson genson = new Genson();
 	
 	@Test
-	public void testJsonPrimitiveObject() throws TransformationException, IOException {
+	public void testJsonPrimitiveObject() {
 		Primitives p = createPrimitives();
 		String json = genson.serialize(p);
 		assertEquals(p.jsonString(), json);
 	}
 
 	@Test
-	public void testJsonArrayOfPrimitives() throws TransformationException, IOException {
+	public void testJsonArrayOfPrimitives() {
 		String expected = "[\"a\",1,3.2,null,true]";
 		Object[] array = new Object[] { "a", 1, 3.2, null, true };
 		String json = genson.serialize(array);
@@ -35,7 +35,7 @@ public class JsonSerializationTest {
 	}
 
 	@Test
-	public void testJsonArrayOfMixedContent() throws TransformationException, IOException {
+	public void testJsonArrayOfMixedContent() {
 		Primitives p = createPrimitives();
 		p.setIntPrimitive(-88);
 		p.setDoubleObject(null);
@@ -46,7 +46,7 @@ public class JsonSerializationTest {
 	}
 
 	@Test
-	public void testJsonComplexObject() throws TransformationException, IOException {
+	public void testJsonComplexObject() {
 		Primitives p = createPrimitives();
 		List<Primitives> list = Arrays.asList(p, p, p, p, p);
 		ComplexObject co = new ComplexObject(p, list, list.toArray(new Primitives[list.size()]));
@@ -68,7 +68,7 @@ public class JsonSerializationTest {
 	}
 
 	@Test
-	public void testSerializeWithAlias() throws TransformationException, IOException {
+	public void testSerializeWithAlias() {
 		Genson genson = new Genson.Builder().addAlias("ClassWithFieldsAndGetter",
 				ClassWithFieldsAndGetter.class).create();
 		String json = genson.serialize(new ClassWithFieldsAndGetter("a", 0));
@@ -79,7 +79,7 @@ public class JsonSerializationTest {
 				.startsWith("{\"@class\":\"com.owlike.genson.convert.JsonSerializationTest$ClassWithFieldsAndGetter\""));
 	}
 	
-	@Test public void testSerializeEnum() throws TransformationException, IOException {
+	@Test public void testSerializeEnum() {
 		assertEquals("\"JAVA\"", genson.serialize(Player.JAVA));
 	}
 

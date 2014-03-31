@@ -11,7 +11,6 @@ import org.junit.Test;
 import com.owlike.genson.Converter;
 import com.owlike.genson.Factory;
 import com.owlike.genson.Genson;
-import com.owlike.genson.TransformationException;
 import com.owlike.genson.annotation.Creator;
 import com.owlike.genson.annotation.JsonIgnore;
 import com.owlike.genson.annotation.JsonProperty;
@@ -111,7 +110,7 @@ public class BeanDescriptorTest {
 	}
 
 	@Test
-	public void genericTypeTest() throws TransformationException, IOException {
+	public void genericTypeTest() {
 		BaseBeanDescriptorProvider provider = new BaseBeanDescriptorProvider(
 				new ContextualConverterFactory(null), new BeanPropertyFactory.CompositeFactory(
 						Arrays.asList(new BeanPropertyFactory.StandardFactory())),
@@ -183,13 +182,13 @@ public class BeanDescriptorTest {
 	}
 
 	@Test
-	public void testUseExplicitMethodCtr() throws TransformationException, IOException {
+	public void testUseExplicitMethodCtr() {
 		genson.deserialize("{}", ForceMethodCreator.class);
 		assertTrue(ForceMethodCreator.usedMethod);
 	}
 
 	@Test
-	public void testUseExplicitConstructorCtr() throws TransformationException, IOException {
+	public void testUseExplicitConstructorCtr() {
 		genson.deserialize("{}", ForceConstructorCreator.class);
 		assertTrue(ForceConstructorCreator.usedCtr);
 	}

@@ -29,7 +29,7 @@ public class FilteringAndRenamingTest {
 	}
 
 	@Test
-	public void testRenameProperty() throws TransformationException, IOException {
+	public void testRenameProperty() {
 		MyAClass mac = new MyAClass();
 		mac.myname = "toto";
 		String expectedSuccess = "{\"name\":\"toto\"}";
@@ -58,7 +58,7 @@ public class FilteringAndRenamingTest {
 	}
 
 	@Test
-	public void testExcludeProperty() throws TransformationException, IOException {
+	public void testExcludeProperty() {
 		MyAClass mac = new MyAClass();
 		mac.myname = "toto";
 		String expectedSuccess = "{}";
@@ -88,7 +88,7 @@ public class FilteringAndRenamingTest {
 	}
 
 	@Test
-	public void testIncludeProperty() throws TransformationException, IOException {
+	public void testIncludeProperty() {
 		ClassWithIncludedProperty mac = new ClassWithIncludedProperty();
 		mac.prop = "toto";
 		String expectedSuccess = "{\"prop\":\"toto\"}";
@@ -117,7 +117,7 @@ public class FilteringAndRenamingTest {
 	}
 
 	@Test
-	public void testExcludePropertyFromSuperClass() throws TransformationException, IOException {
+	public void testExcludePropertyFromSuperClass() {
 		AnotherClass mac = new AnotherClass();
 		mac.transientLong = 11;
 		mac.prop2 = "hi";

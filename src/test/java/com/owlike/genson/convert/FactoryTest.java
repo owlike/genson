@@ -91,7 +91,7 @@ public class FactoryTest {
 	}
 
 	@Test
-	public void testUnwrapAnnotations() throws TransformationException, IOException {
+	public void testUnwrapAnnotations() throws Exception {
 		Genson genson = new Genson.Builder().withConverters(new ClassMetadataConverter()).create();
 		@SuppressWarnings({ "unchecked", "rawtypes" }) // argh its ugly with those warnings...
 		Wrapper<Converter<A>> wrapper = (Wrapper) genson.provideConverter(A.class);
@@ -106,13 +106,11 @@ public class FactoryTest {
 	static class ClassMetadataConverter implements Converter<A> {
 		static boolean used = false;
 
-		public void serialize(A obj, ObjectWriter writer, Context ctx)
-				throws TransformationException, IOException {
+		public void serialize(A obj, ObjectWriter writer, Context ctx) {
 			used = true;
 		}
 
-		public A deserialize(ObjectReader reader, Context ctx) throws TransformationException,
-				IOException {
+		public A deserialize(ObjectReader reader, Context ctx) {
 			return null;
 		}
 	}

@@ -14,7 +14,7 @@ import java.util.List;
 public class OptionalSerDeserTest {
     private Genson genson = new Genson.Builder().with(new GuavaBundle()).create();
 
-    @Test public void roundTripListOfOptionals() throws IOException, TransformationException {
+    @Test public void roundTripListOfOptionals() {
         List<Optional<String>> expected = Arrays.asList(Optional.<String>absent(), Optional.fromNullable("hey"), Optional.of("you"));
         GenericType<List<Optional<String>>> type = new GenericType<List<Optional<String>>>() {};
         String json = genson.serialize(expected, type);
@@ -22,7 +22,7 @@ public class OptionalSerDeserTest {
         assertEquals(expected, actual);
     }
 
-    @Test public void roundTripPojoWithOptionals() throws IOException, TransformationException {
+    @Test public void roundTripPojoWithOptionals() {
         Pojo expected = new Pojo(Optional.of(1), Optional.<Pojo>absent(), "foo bar");
         String json = genson.serialize(expected);
         Pojo actual = genson.deserialize(json, Pojo.class);

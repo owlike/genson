@@ -21,14 +21,12 @@ import java.lang.reflect.Type;
  * 	}
  * 
  * 	&#064;Override
- * 	public void serialize(T obj, ObjectWriter writer, Context ctx) throws TransformationException,
- * 			IOException {
+ * 	public void serialize(T obj, ObjectWriter writer, Context ctx) {
  * 		writer.writeUnsafeValue(obj.name());
  * 	}
  * 
  * 	&#064;Override
- * 	public T deserialize(ObjectReader reader, Context ctx) throws TransformationException,
- * 			IOException {
+ * 	public T deserialize(ObjectReader reader, Context ctx) {
  * 		return Enum.valueOf(eClass, reader.valueAsString());
  * 	}
  * }
@@ -50,12 +48,7 @@ import java.lang.reflect.Type;
  * </pre>
  * 
  * Note the use of {@link com.owlike.genson.reflect.TypeUtil TypeUtil} class that provides operations to
- * work with generic types. This class will change in the future, especially all methods with a
- * inClass argument (context in which this type was declared) will be removed in favor of using
- * {@link com.owlike.genson.reflect.TypeUtil#expandType(Type, Class) expandType(Type theTypeToExpand, Class
- * inClass)} and then the functional method. For example instead of doing
- * TypeUtil.getCollectionType(myType, declaredInClass) you should do : myType =
- * TypeUtil.expandType(myType, declaredInClass); TypeUtil.getCollectionType(myType);
+ * work with generic types. However this class might change in the future, in order to provide a better API.
  * 
  * @see com.owlike.genson.Converter
  * @see com.owlike.genson.convert.ChainedFactory ChainedFactory

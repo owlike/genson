@@ -16,7 +16,6 @@ import org.junit.Test;
 
 import com.owlike.genson.Context;
 import com.owlike.genson.Genson;
-import com.owlike.genson.TransformationException;
 import com.owlike.genson.annotation.JsonProperty;
 import com.owlike.genson.bean.ComplexObject;
 import com.owlike.genson.bean.Primitives;
@@ -28,26 +27,26 @@ public class JsonDeserializationTest {
 	Genson genson;
 
 	@Before
-	public void init() throws TransformationException, IOException {
+	public void init() {
 		genson = new Genson.Builder().setWithDebugInfoPropertyNameResolver(true).create();
 	}
 
 	@Test
-	public void testJsonEmptyObject() throws TransformationException, IOException {
+	public void testJsonEmptyObject() {
 		String src = "{}";
 		Primitives p = genson.deserialize(src, Primitives.class);
 		assertNull(p.getText());
 	}
 
 	@Test
-	public void testJsonEmptyArray() throws TransformationException, IOException {
+	public void testJsonEmptyArray() {
 		String src = "[]";
 		Integer[] p = genson.deserialize(src, Integer[].class);
 		assertTrue(p.length == 0);
 	}
 
 	@Test
-	public void testJsonComplexObjectEmpty() throws TransformationException, IOException {
+	public void testJsonComplexObjectEmpty() {
 		String src = "{\"primitives\":null,\"listOfPrimitives\":[], \"arrayOfPrimitives\": null}";
 		ComplexObject co = genson.deserialize(src, ComplexObject.class);
 
@@ -57,7 +56,7 @@ public class JsonDeserializationTest {
 	}
 
 	@Test
-	public void testDeserializeEmptyJson() throws TransformationException, IOException {
+	public void testDeserializeEmptyJson() {
 		Integer i = genson.deserialize("\"\"", Integer.class);
 		assertNull(i);
 		i = genson.deserialize("", Integer.class);
@@ -81,7 +80,7 @@ public class JsonDeserializationTest {
 	}
 
 	@Test
-	public void testJsonNumbersLimit() throws TransformationException, IOException {
+	public void testJsonNumbersLimit() {
 		String src = "[" + String.valueOf(Long.MAX_VALUE) + "," + String.valueOf(Long.MIN_VALUE)
 				+ "]";
 		long[] arr = genson.deserialize(src, long[].class);
@@ -95,7 +94,7 @@ public class JsonDeserializationTest {
 	}
 
 	@Test
-	public void testJsonPrimitivesObject() throws TransformationException, IOException {
+	public void testJsonPrimitivesObject() {
 		String src = "{\"intPrimitive\":1, \"integerObject\":7, \"doublePrimitive\":1.01,"
 				+ "\"doubleObject\":2.003,\"text\": \"HEY...YA!\", "
 				+ "\"booleanPrimitive\":true,\"booleanObject\":false}";
@@ -110,7 +109,7 @@ public class JsonDeserializationTest {
 	}
 
 	@Test
-	public void testJsonDoubleArray() throws TransformationException, IOException {
+	public void testJsonDoubleArray() {
 		String src = "[5,      0.006, 9.0E-11 ]";
 		double[] array = genson.deserialize(src, double[].class);
 		assertEquals(array[0], 5, 0);
@@ -119,7 +118,7 @@ public class JsonDeserializationTest {
 	}
 
 	@Test
-	public void testJsonComplexObject() throws TransformationException, IOException {
+	public void testJsonComplexObject() {
 		ComplexObject coo = new ComplexObject(createPrimitives(), Arrays.asList(createPrimitives(),
 				createPrimitives()), new Primitives[] { createPrimitives(), createPrimitives() });
 		ComplexObject co = genson.deserialize(coo.jsonString(), ComplexObject.class);
@@ -127,7 +126,7 @@ public class JsonDeserializationTest {
 	}
 
 	@Test
-	public void testJsonComplexObjectSkipValue() throws TransformationException, IOException {
+	public void testJsonComplexObjectSkipValue() {
 		ComplexObject coo = new ComplexObject(createPrimitives(), Arrays.asList(createPrimitives(),
 				createPrimitives(), createPrimitives(), createPrimitives(), createPrimitives(),
 				createPrimitives()), new Primitives[] { createPrimitives(), createPrimitives() });
@@ -143,7 +142,7 @@ public class JsonDeserializationTest {
 	}
 
 	@Test
-	public void testJsonToBeanWithConstructor() throws TransformationException, IOException {
+	public void testJsonToBeanWithConstructor() {
 		String json = "{\"other\":{\"name\":\"TITI\", \"age\": 13}, \"name\":\"TOTO\", \"age\":26}";
 		BeanWithConstructor bean = genson.deserialize(json, BeanWithConstructor.class);
 		assertEquals(bean.age, 26);
@@ -172,7 +171,7 @@ public class JsonDeserializationTest {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testJsonToUntypedList() throws TransformationException, IOException {
+	public void testJsonToUntypedList() {
 		String src = "[1, 1.1, \"aa\", true, false]";
 		List<Object> l = genson.deserialize(src, List.class);
 		assertArrayEquals(new Object[] { 1L, 1.1, "aa", true, false },
@@ -180,7 +179,7 @@ public class JsonDeserializationTest {
 	}
 
 	@Test
-	public void testMultidimensionalArray() throws TransformationException, IOException {
+	public void testMultidimensionalArray() {
 		String json = "[[\"abc\",[42,24]],[\"def\",[43,34]]]";
 		Object[][] array = genson.deserialize(json, Object[][].class);
 		assertEquals("abc", array[0][0]);
@@ -194,7 +193,7 @@ public class JsonDeserializationTest {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testContentDrivenDeserialization() throws TransformationException, IOException {
+	public void testContentDrivenDeserialization() {
 		String src = "{\"list\":[1, 2.3, 5, null]}";
 		TypeVariableList<Number> tvl = genson.deserialize(src, TypeVariableList.class);
 		assertArrayEquals(tvl.list.toArray(new Number[tvl.list.size()]), new Number[] { 1, 2.3, 5,
@@ -217,7 +216,7 @@ public class JsonDeserializationTest {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testUntypedDeserializationToMap() throws TransformationException, IOException {
+	public void testUntypedDeserializationToMap() {
 		String src = "{\"key1\": 1, \"key2\": 1.2, \"key3\": true, \"key4\": \"string\", \"key5\": null, \"list\":[1,2.0005,3]}";
 		Map<String, Object> map = genson.deserialize(src, Map.class);
 		assertEquals(map.get("key1"), 1L);
@@ -230,8 +229,7 @@ public class JsonDeserializationTest {
 	}
 
 	@Test
-	public void testDeserializeWithConstructorAndFieldsAndSetters() throws TransformationException,
-			IOException {
+	public void testDeserializeWithConstructorAndFieldsAndSetters() {
 		String json = "{\"p0\":0,\"p1\":1,\"p2\":2,\"shouldSkipIt\":55, \"nameInJson\": 3}";
 		ClassWithConstructorFieldsAndGetters c = genson.deserialize(json,
 				ClassWithConstructorFieldsAndGetters.class);
@@ -242,8 +240,7 @@ public class JsonDeserializationTest {
 	}
 
 	@Test
-	public void testDeserializeWithConstructorAndMissingFields() throws TransformationException,
-			IOException {
+	public void testDeserializeWithConstructorAndMissingFields() {
 		String json = "{\"p0\":0,\"p1\":1, \"nameInJson\": 3}";
 		ClassWithConstructorFieldsAndGetters c = genson.deserialize(json,
 				ClassWithConstructorFieldsAndGetters.class);
@@ -255,8 +252,7 @@ public class JsonDeserializationTest {
 	}
 
 	@Test
-	public void testDeserializeWithConstructorMixedAnnotation() throws TransformationException,
-			IOException {
+	public void testDeserializeWithConstructorMixedAnnotation() {
 		String json = "{\"p0\":0,\"p1\":1,\"p2\":2,\"shouldSkipIt\":55,   \"nameInJson\":\"125\"}";
 		ClassWithConstructorFieldsAndGetters c = genson.deserialize(json,
 				ClassWithConstructorFieldsAndGetters.class);
@@ -268,7 +264,7 @@ public class JsonDeserializationTest {
 	}
 
 	@Test
-	public void testDeserializeJsonWithClassAlias() throws TransformationException, IOException {
+	public void testDeserializeJsonWithClassAlias() {
 		Genson genson = new Genson.Builder().addAlias("rect", Rectangle.class).create();
 		Shape p = genson.deserialize("{\"@class\":\"rect\"}", Shape.class);
 		assertTrue(p instanceof Rectangle);
@@ -277,7 +273,7 @@ public class JsonDeserializationTest {
 	}
 
 	@Test
-	public void testDeserealizeIntoExistingBean() throws IOException, TransformationException {
+	public void testDeserealizeIntoExistingBean() {
 		BeanDescriptor<ClassWithConstructorFieldsAndGetters> desc = (BeanDescriptor<ClassWithConstructorFieldsAndGetters>) genson
 				.getBeanDescriptorFactory().provide(ClassWithConstructorFieldsAndGetters.class,
 						ClassWithConstructorFieldsAndGetters.class, genson);
@@ -297,7 +293,7 @@ public class JsonDeserializationTest {
 	}
 
 	@Test
-	public void testDeserializeEnum() throws TransformationException, IOException {
+	public void testDeserializeEnum() {
 		assertEquals(Player.JAVA, genson.deserialize("\"JAVA\"", Player.class));
 	}
 

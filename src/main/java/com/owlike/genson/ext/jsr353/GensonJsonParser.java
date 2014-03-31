@@ -30,16 +30,12 @@ public class GensonJsonParser implements JsonParser {
     @Override public boolean hasNext() {
         try {
             return reader.hasNext() || reader.enclosingType() != JsonType.EMPTY;
-        }
-        catch (IOException e) {
-            throw _wrapException(e);
-        }
-        catch (JsonStreamException e) {
+        } catch (JsonStreamException e) {
             throw _wrapException(e);
         }
     }
 
-    private Event currentValue(ValueType type) throws IOException {
+    private Event currentValue(ValueType type) {
         if (type == ARRAY) {
             reader.beginArray();
             return Event.START_ARRAY;
@@ -91,11 +87,7 @@ public class GensonJsonParser implements JsonParser {
                 }
                 throw new JsonException("Reached end of stream, next should not be called.");
             }
-        }
-        catch (IOException e) {
-            throw _wrapException(e);
-        }
-        catch (JsonStreamException e) {
+        } catch (JsonStreamException e) {
             throw _wrapException(e);
         }
     }
@@ -104,11 +96,7 @@ public class GensonJsonParser implements JsonParser {
         try {
             if (parseKey) return reader.name();
             else return reader.valueAsString();
-        }
-        catch (IOException e) {
-            throw _wrapException(e);
-        }
-        catch (JsonStreamException e) {
+        } catch (JsonStreamException e) {
             throw _wrapException(e);
         }
     }
@@ -120,11 +108,7 @@ public class GensonJsonParser implements JsonParser {
     @Override public int getInt() {
         try {
             return reader.valueAsInt();
-        }
-        catch (IOException e) {
-            throw _wrapException(e);
-        }
-        catch (JsonStreamException e) {
+        } catch (JsonStreamException e) {
             throw _wrapException(e);
         }
     }
@@ -132,11 +116,7 @@ public class GensonJsonParser implements JsonParser {
     @Override public long getLong() {
         try {
             return reader.valueAsLong();
-        }
-        catch (IOException e) {
-            throw _wrapException(e);
-        }
-        catch (JsonStreamException e) {
+        } catch (JsonStreamException e) {
             throw _wrapException(e);
         }
     }
@@ -145,11 +125,7 @@ public class GensonJsonParser implements JsonParser {
         // TODO
         try {
             return new BigDecimal(reader.valueAsString());
-        }
-        catch (IOException e) {
-            throw _wrapException(e);
-        }
-        catch (JsonStreamException e) {
+        } catch (JsonStreamException e) {
             throw _wrapException(e);
         }
     }

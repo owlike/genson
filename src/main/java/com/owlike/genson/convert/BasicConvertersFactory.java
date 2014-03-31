@@ -117,11 +117,11 @@ public class BasicConvertersFactory implements Factory<Converter<?>> {
 			this.deserializer = deserializer;
 		}
 
-		public void serialize(T obj, ObjectWriter writer, Context ctx) throws IOException {
+		public void serialize(T obj, ObjectWriter writer, Context ctx) throws Exception {
 			serializer.serialize(obj, writer, ctx);
 		}
 
-		public T deserialize(ObjectReader reader, Context ctx) throws IOException {
+		public T deserialize(ObjectReader reader, Context ctx) throws Exception {
 			return deserializer.deserialize(reader, ctx);
 		}
 

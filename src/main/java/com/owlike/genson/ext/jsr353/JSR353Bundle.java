@@ -45,7 +45,7 @@ public class JSR353Bundle extends GensonBundle {
 
     public class JsonValueConverter implements Converter<JsonValue> {
 
-        @Override public void serialize(JsonValue value, ObjectWriter writer, Context ctx) throws IOException {
+        @Override public void serialize(JsonValue value, ObjectWriter writer, Context ctx) {
             ValueType type = value.getValueType();
             if (ValueType.STRING == type) writer.writeValue(((JsonString) value).getString());
             else if (ValueType.ARRAY == type) writeArray((JsonArray) value, writer, ctx);
@@ -62,14 +62,14 @@ public class JSR353Bundle extends GensonBundle {
             }
         }
 
-        private void writeArray(JsonArray array, ObjectWriter writer, Context ctx) throws IOException {
+        private void writeArray(JsonArray array, ObjectWriter writer, Context ctx) {
             writer.beginArray();
             for (JsonValue value : array)
                 serialize(value, writer, ctx);
             writer.endArray();
         }
 
-        private void writeObject(JsonObject object, ObjectWriter writer, Context ctx) throws IOException {
+        private void writeObject(JsonObject object, ObjectWriter writer, Context ctx) {
             writer.beginObject();
             for (Entry<String, JsonValue> e : object.entrySet()) {
                 writer.writeName(e.getKey());
@@ -78,7 +78,7 @@ public class JSR353Bundle extends GensonBundle {
             writer.endObject();
         }
 
-        @Override public JsonValue deserialize(ObjectReader reader, Context ctx) throws IOException {
+        @Override public JsonValue deserialize(ObjectReader reader, Context ctx) {
             com.owlike.genson.stream.ValueType type = reader.getValueType();
             if (com.owlike.genson.stream.ValueType.OBJECT == type) {
                 return deserObject(reader, ctx);
@@ -103,7 +103,7 @@ public class JSR353Bundle extends GensonBundle {
             throw new IllegalStateException("Unsupported ValueType " + type);
         }
 
-        public JsonValue deserObject(ObjectReader reader, Context ctx) throws IOException {
+        public JsonValue deserObject(ObjectReader reader, Context ctx) {
             JsonObjectBuilder builder = factory.createObjectBuilder();
             reader.beginObject();
 
@@ -127,7 +127,7 @@ public class JSR353Bundle extends GensonBundle {
             return builder.build();
         }
 
-        public JsonValue deserArray(ObjectReader reader, Context ctx) throws IOException{
+        public JsonValue deserArray(ObjectReader reader, Context ctx){
             JsonArrayBuilder builder = factory.createArrayBuilder();
             reader.beginArray();
 

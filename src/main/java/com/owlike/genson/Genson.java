@@ -49,10 +49,7 @@ import com.owlike.genson.reflect.TypeUtil;
 import com.owlike.genson.reflect.VisibilityFilter;
 import com.owlike.genson.reflect.BeanMutatorAccessorResolver.CompositeResolver;
 import com.owlike.genson.reflect.PropertyNameResolver.CompositePropertyNameResolver;
-import com.owlike.genson.stream.JsonReader;
-import com.owlike.genson.stream.JsonWriter;
-import com.owlike.genson.stream.ObjectReader;
-import com.owlike.genson.stream.ObjectWriter;
+import com.owlike.genson.stream.*;
 
 /**
  * <p>
@@ -208,18 +205,14 @@ public final class Genson {
 	 * @param object
 	 *            object to be serialized.
 	 * @return the serialized object as a string.
-	 * @throws com.owlike.genson.JsonBindingException
-	 *             if there was any kind of error during serialization.
-	 * @throws IOException
-	 *             if there was a problem during writing of the object to the output.
+	 * @throws com.owlike.genson.JsonBindingException if there was any kind of error during serialization.
+	 * @throws JsonStreamException if there was a problem during writing of the object to the output.
 	 */
-	public String serialize(Object object) throws IOException {
+	public String serialize(Object object) {
 		StringWriter sw = new StringWriter();
 		ObjectWriter writer = createWriter(sw);
-		if (object == null)
-			nullConverter.serialize(null, writer, null);
-		else
-			serialize(object, object.getClass(), writer, new Context(this));
+        if (object == null) serializeNull(writer);
+		else serialize(object, object.getClass(), writer, new Context(this));
 		writer.flush();
 		return sw.toString();
 	}
@@ -233,15 +226,13 @@ public final class Genson {
 	 *            the type of the object to be serialized.
 	 * @return json string representation.
 	 * @throws com.owlike.genson.JsonBindingException
-	 * @throws IOException
+	 * @throws JsonStreamException
 	 */
-	public String serialize(Object object, GenericType<?> type) throws IOException {
+	public String serialize(Object object, GenericType<?> type) {
 		StringWriter sw = new StringWriter();
 		ObjectWriter writer = createWriter(sw);
-		if (object == null)
-			nullConverter.serialize(null, writer, null);
-		else
-			serialize(object, type.getType(), writer, new Context(this));
+        if (object == null) serializeNull(writer);
+		else serialize(object, type.getType(), writer, new Context(this));
 		writer.flush();
 		return sw.toString();
 	}
@@ -255,16 +246,13 @@ public final class Genson {
 	 *            the BeanViews to apply during this serialization.
 	 * @return
 	 * @throws com.owlike.genson.JsonBindingException
-	 * @throws IOException
+	 * @throws com.owlike.genson.stream.JsonStreamException
 	 */
-	public String serialize(Object object, Class<? extends BeanView<?>>... withViews) throws IOException {
+	public String serialize(Object object, Class<? extends BeanView<?>>... withViews) {
 		StringWriter sw = new StringWriter();
 		ObjectWriter writer = createWriter(sw);
-		if (object == null)
-			nullConverter.serialize(null, writer, null);
-		else
-			serialize(object, object.getClass(), writer,
-					new Context(this, Arrays.asList(withViews)));
+        if (object == null) serializeNull(writer);
+		else serialize(object, object.getClass(), writer, new Context(this, Arrays.asList(withViews)));
 		writer.flush();
 		return sw.toString();
 	}
@@ -273,38 +261,38 @@ public final class Genson {
 	 * Serializes this object to the passed Writer, as Genson did not instantiate it, you are
      * responsible of calling close on it.
 	 */
-	public void serialize(Object object, Writer writer) throws IOException {
+	public void serialize(Object object, Writer writer) {
 		ObjectWriter objectWriter = createWriter(writer);
-		if (object == null)
-			nullConverter.serialize(null, objectWriter, null);
-		else
-			serialize(object, object.getClass(), objectWriter, new Context(this));
-		writer.flush();
-	}
+
+        if (object == null) serializeNull(objectWriter);
+		else serialize(object, object.getClass(), objectWriter, new Context(this));
+
+        try {
+            writer.flush();
+        } catch (IOException e) {
+            throw new JsonStreamException(e);
+        }
+    }
 
 	/**
 	 * Serializes this object to the passed OutputStream, as Genson did not instantiate it, you are
 	 * responsible of calling close on it.
 	 */
-	public void serialize(Object object, OutputStream output) throws IOException {
+	public void serialize(Object object, OutputStream output) {
 		ObjectWriter objectWriter = createWriter(output);
-		if (object == null)
-			nullConverter.serialize(null, objectWriter, null);
-		else
-			serialize(object, object.getClass(), objectWriter, new Context(this));
+        if (object == null) serializeNull(objectWriter);
+		else serialize(object, object.getClass(), objectWriter, new Context(this));
 		objectWriter.flush();
 	}
 
 	/**
 	 * Serializes this object to its json form in a byte array.
 	 */
-	public byte[] serializeBytes(Object object) throws IOException {
+	public byte[] serializeBytes(Object object) {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		ObjectWriter objectWriter = createWriter(baos);
-		if (object == null)
-			nullConverter.serialize(null, objectWriter, null);
-		else
-			serialize(object, object.getClass(), objectWriter, new Context(this));
+        if (object == null) serializeNull(objectWriter);
+		else serialize(object, object.getClass(), objectWriter, new Context(this));
 		objectWriter.flush();
 		return baos.toByteArray();
 	}
@@ -318,11 +306,11 @@ public final class Genson {
 	 *            into which to write the serialized object.
 	 * @param withViews
 	 * @throws com.owlike.genson.JsonBindingException
-	 * @throws IOException
+	 * @throws JsonStreamException
 	 */
     public void serialize(Object object, ObjectWriter writer,
-            Class<? extends BeanView<?>>... withViews) throws IOException {
-        if (object == null) nullConverter.serialize(null, writer, null);
+            Class<? extends BeanView<?>>... withViews) {
+        if (object == null) serializeNull(writer);
         else serialize(object, object.getClass(), writer,
                 new Context(this, Arrays.asList(withViews)));
         writer.flush();
@@ -332,10 +320,22 @@ public final class Genson {
 	 * Serializes this object and writes its representation to writer. As you are providing the
 	 * writer instance you also must ensure to call close on it when you are done.
 	 */
-	public void serialize(Object object, Type type, ObjectWriter writer, Context ctx) throws IOException {
+	public void serialize(Object object, Type type, ObjectWriter writer, Context ctx) {
 		Serializer<Object> ser = provideConverter(type);
-		ser.serialize(object, writer, ctx);
-	}
+        try {
+            ser.serialize(object, writer, ctx);
+        } catch (Exception e) {
+            throw new JsonBindingException("Failed to serialize object of type " + type, e);
+        }
+    }
+
+    private void serializeNull(ObjectWriter writer) {
+        try {
+            nullConverter.serialize(null, writer, null);
+        } catch (Exception e) {
+            throw new JsonBindingException("Could not serialize null value.", e);
+        }
+    }
 
 	/**
 	 * Deserializes fromSource String into an instance of toClass.
@@ -346,9 +346,9 @@ public final class Genson {
 	 *            type into which to deserialize.
 	 * @return
 	 * @throws com.owlike.genson.JsonBindingException
-	 * @throws IOException
+	 * @throws JsonStreamException
 	 */
-	public <T> T deserialize(String fromSource, Class<T> toClass) throws IOException {
+	public <T> T deserialize(String fromSource, Class<T> toClass) {
 		return deserialize(GenericType.of(toClass), createReader(new StringReader(fromSource)),
 				new Context(this));
 	}
@@ -363,9 +363,9 @@ public final class Genson {
 	 * @param toType
 	 * @return
 	 * @throws com.owlike.genson.JsonBindingException
-	 * @throws IOException
+	 * @throws JsonStreamException
 	 */
-	public <T> T deserialize(String fromSource, GenericType<T> toType) throws IOException {
+	public <T> T deserialize(String fromSource, GenericType<T> toType) {
 		return deserialize(toType, createReader(new StringReader(fromSource)), new Context(this));
 	}
 
@@ -373,7 +373,7 @@ public final class Genson {
 	 * Deserializes the incoming json stream into an instance of T.
      * Genson did not create the instance of Reader so it will not be closed
 	 */
-	public <T> T deserialize(Reader reader, GenericType<T> toType) throws IOException {
+	public <T> T deserialize(Reader reader, GenericType<T> toType) {
 		return deserialize(toType, createReader(reader), new Context(this));
 	}
 
@@ -381,7 +381,7 @@ public final class Genson {
      * Deserializes the incoming json stream into an instance of T.
      * Genson did not create the instance of Reader so it will not be closed
      */
-	public <T> T deserialize(Reader reader, Class<T> toType) throws IOException {
+	public <T> T deserialize(Reader reader, Class<T> toType) {
 		return deserialize(GenericType.of(toType), createReader(reader), new Context(this));
 	}
 
@@ -389,7 +389,7 @@ public final class Genson {
      * Deserializes the incoming json stream into an instance of T.
      * Genson did not create the instance of InputStream so it will not be closed
      */
-	public <T> T deserialize(InputStream input, Class<T> toType) throws IOException {
+	public <T> T deserialize(InputStream input, Class<T> toType) {
 		return deserialize(GenericType.of(toType), createReader(input), new Context(this));
 	}
 
@@ -397,47 +397,51 @@ public final class Genson {
      * Deserializes the incoming json stream into an instance of T.
      * Genson did not create the instance of InputStream so it will not be closed.
      */
-	public <T> T deserialize(InputStream input, GenericType<T> toType) throws IOException {
+	public <T> T deserialize(InputStream input, GenericType<T> toType) {
 		return deserialize(toType, createReader(input), new Context(this));
 	}
 
 	/**
      * Deserializes the incoming json byte array into an instance of T.
      */
-	public <T> T deserialize(byte[] input, Class<T> toType) throws IOException {
+	public <T> T deserialize(byte[] input, Class<T> toType) {
 		return deserialize(GenericType.of(toType), createReader(input), new Context(this));
 	}
 
 	/**
      * Deserializes the incoming json byte array into an instance of T.
      */
-	public <T> T deserialize(byte[] input, GenericType<T> toType) throws IOException {
+	public <T> T deserialize(byte[] input, GenericType<T> toType) {
 		return deserialize(toType, createReader(input), new Context(this));
 	}
 
 	public <T> T deserialize(String fromSource, GenericType<T> toType,
-			Class<? extends BeanView<?>>... withViews) throws IOException {
+			Class<? extends BeanView<?>>... withViews) {
 		StringReader reader = new StringReader(fromSource);
 		return deserialize(toType, createReader(reader),
 				new Context(this, Arrays.asList(withViews)));
 	}
 
 	public <T> T deserialize(String fromSource, Class<T> toType,
-			Class<? extends BeanView<?>>... withViews) throws IOException {
+			Class<? extends BeanView<?>>... withViews) {
 		StringReader reader = new StringReader(fromSource);
 		return deserialize(GenericType.of(toType), createReader(reader),
 				new Context(this, Arrays.asList(withViews)));
 	}
 
 	public <T> T deserialize(GenericType<T> type, Reader reader,
-			Class<? extends BeanView<?>>... withViews) throws IOException {
+			Class<? extends BeanView<?>>... withViews) {
 		return deserialize(type, createReader(reader), new Context(this, Arrays.asList(withViews)));
 	}
 
-	public <T> T deserialize(GenericType<T> type, ObjectReader reader, Context ctx) throws IOException {
+	public <T> T deserialize(GenericType<T> type, ObjectReader reader, Context ctx) {
 		Deserializer<T> deser = provideConverter(type.getType());
-		return deser.deserialize(reader, ctx);
-	}
+        try {
+            return deser.deserialize(reader, ctx);
+        } catch (Exception e) {
+            throw new JsonBindingException("Could not deserialize to type " + type.getRawClass(), e);
+        }
+    }
 
 	/**
 	 * Searches if an alias has been registered for clazz. If not will take the class full name and

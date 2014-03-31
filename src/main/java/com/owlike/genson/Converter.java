@@ -14,15 +14,13 @@ import com.owlike.genson.stream.ObjectReader;
  * Genson genson = new Genson.Builder().with(new Converter&lt;URL&gt;() {
  * 
  * 	&#064;Override
- * 	public void serialize(URL url, ObjectWriter writer, Context ctx)
- * 			throws TransformationException, IOException {
+ * 	public void serialize(URL url, ObjectWriter writer, Context ctx) {
  * 		// you don't have to worry about null objects, as the library will handle them.
  * 		writer.writeValue(obj.toExternalForm());
  * 	}
  * 
  * 	&#064;Override
- * 	public URL deserialize(ObjectReader reader, Context ctx) throws TransformationException,
- * 			IOException {
+ * 	public URL deserialize(ObjectReader reader, Context ctx) {
  * 		return new URL(reader.valueAsString());
  * 	}
  * 
@@ -40,7 +38,7 @@ import com.owlike.genson.stream.ObjectReader;
  * @param <T> type of objects handled by this converter.
  */
 public interface Converter<T> extends Serializer<T>, Deserializer<T> {
-	public void serialize(T object, com.owlike.genson.stream.ObjectWriter writer, Context ctx) throws IOException;
+    @Override public void serialize(T object, com.owlike.genson.stream.ObjectWriter writer, Context ctx) throws Exception;
 
-	public T deserialize(ObjectReader reader, Context ctx) throws IOException;
+    @Override public T deserialize(ObjectReader reader, Context ctx) throws Exception;
 }

@@ -64,7 +64,7 @@ public interface Serializer<T> {
 	 * @param writer to use to write data to the output stream.
 	 * @param ctx the current context.
 	 * @throws com.owlike.genson.JsonBindingException
-	 * @throws IOException
+	 * @throws com.owlike.genson.stream.JsonStreamException
 	 */
-	public void serialize(T object, ObjectWriter writer, Context ctx) throws IOException;
+	public void serialize(T object, ObjectWriter writer, Context ctx) throws Exception;
 }

@@ -103,53 +103,53 @@ public class JsonReader implements ObjectReader {
         this.reader = reader;
         this.strictDoubleParse = strictDoubleParse;
         this.readMetadata = readMetadata;
-        try {
-            char token = (char) readNextToken(false);
-            if ('[' == token) valueType = ARRAY;
-            else if ('{' == token) valueType = OBJECT;
-            else {
-                // ok lets try to read next
-                if (_buflen > 0) {
+
+        char token = (char) readNextToken(false);
+        if ('[' == token) valueType = ARRAY;
+        else if ('{' == token) valueType = OBJECT;
+        else {
+            // ok lets try to read next
+            if (_buflen > 0) {
+                try {
+                    valueType = consumeValue();
+                }
+                catch (JsonStreamException jse) {
                     try {
-                        valueType = consumeValue();
+                        // we must cheat because consumeString attends the current token to be "
+                        // and will increment the cursor
+                        _cursor = -1;
+                        _col = -1;
+                        _stringValue = consumeString('"');
+                        valueType = STRING;
                     }
-                    catch (JsonStreamException jse) {
-                        try {
-                            // we must cheat because consumeString attends the current token to be "
-                            // and will increment the cursor
-                            _cursor = -1;
-                            _col = -1;
-                            _stringValue = consumeString('"');
-                            valueType = STRING;
-                        }
-                        catch (RuntimeException re) {
-                            throw re;
-                        }
+                    catch (RuntimeException re) {
+                        throw re;
                     }
-                    if (valueOf(valueType.name()) == null)
-                        throw new JsonStreamException(
-                                "Failed to instanciate reader, first character was " + (char) token
-                                        + " when possible characters are [ and {");
-                } else valueType = NULL;
-            }
-        }
-        catch (IOException ioe) {
-            throw new JsonStreamException("Failed to instanciate reader!", ioe);
+                }
+                if (valueOf(valueType.name()) == null)
+                    throw new JsonStreamException(
+                            "Failed to instanciate reader, first character was " + (char) token
+                                    + " when possible characters are [ and {");
+            } else valueType = NULL;
         }
     }
 
-    public void close() throws IOException {
-        reader.close();
+    public void close() {
+        try {
+            reader.close();
+        } catch (IOException e) {
+            throw new JsonStreamException(e);
+        }
     }
 
-    public ObjectReader beginArray() throws IOException {
+    public ObjectReader beginArray() {
         begin('[', JsonType.ARRAY);
         valueType = ARRAY;
         if (_metadata_readen) _metadata.clear();
         return this;
     }
 
-    public ObjectReader beginObject() throws IOException {
+    public ObjectReader beginObject() {
         if (!_metadata_readen) {
             begin('{', JsonType.OBJECT);
             valueType = OBJECT;
@@ -161,16 +161,16 @@ public class JsonReader implements ObjectReader {
         return this;
     }
 
-    public ObjectReader nextObjectMetadata() throws IOException {
+    public ObjectReader nextObjectMetadata() {
         return beginObject();
     }
 
-    public ObjectReader endArray() throws IOException {
+    public ObjectReader endArray() {
         end(']', JsonType.ARRAY);
         return this;
     }
 
-    public ObjectReader endObject() throws IOException {
+    public ObjectReader endObject() {
         end('}', JsonType.OBJECT);
         _metadata.clear();
         _metadata_readen = false;
@@ -193,7 +193,7 @@ public class JsonReader implements ObjectReader {
         throw new JsonStreamException("Readen value can not be converted to String");
     }
 
-    public int valueAsInt() throws IOException {
+    public int valueAsInt() {
         if (INTEGER == valueType) {
             int value = (int) _intValue;
             if (value != _intValue)
@@ -214,7 +214,7 @@ public class JsonReader implements ObjectReader {
         throw new JsonStreamException("Expected a int but value is of type " + valueType);
     }
 
-    public long valueAsLong() throws IOException {
+    public long valueAsLong() {
         if (INTEGER == valueType) {
             return _intValue;
         } else if (DOUBLE == valueType) {
@@ -228,7 +228,7 @@ public class JsonReader implements ObjectReader {
         throw new JsonStreamException("Expected a long but value is of type " + valueType);
     }
 
-    public double valueAsDouble() throws IOException {
+    public double valueAsDouble() {
         if (DOUBLE == valueType) {
             return _doubleValue;
         } else if (INTEGER == valueType) {
@@ -240,7 +240,7 @@ public class JsonReader implements ObjectReader {
         throw new JsonStreamException("Expected a double but value is of type " + valueType);
     }
 
-    public short valueAsShort() throws IOException {
+    public short valueAsShort() {
         if (INTEGER == valueType) {
             short value = (short) _intValue;
             if (value != _intValue)
@@ -261,7 +261,7 @@ public class JsonReader implements ObjectReader {
         throw new JsonStreamException("Expected a short but value is of type " + valueType);
     }
 
-    public float valueAsFloat() throws IOException {
+    public float valueAsFloat() {
         if (DOUBLE == valueType) {
             if (Float.MIN_VALUE > _doubleValue || _doubleValue > Float.MAX_VALUE)
                 throwNumberFormatException("a float", "overflowing double value " + _doubleValue);
@@ -276,21 +276,21 @@ public class JsonReader implements ObjectReader {
         throw new JsonStreamException("Expected a float but value is of type " + valueType);
     }
 
-    public boolean valueAsBoolean() throws IOException {
+    public boolean valueAsBoolean() {
         if (BOOLEAN == valueType) { return _booleanValue; }
         if (STRING == valueType) return Boolean.parseBoolean(_stringValue);
         if (NULL == valueType) return false;
         throw new JsonStreamException("Readen value is not of type boolean");
     }
 
-    public byte[] valueAsByteArray() throws IOException {
+    public byte[] valueAsByteArray() {
         if (STRING == valueType) return Base64.decodeFast(_stringValue);
         if (NULL == valueType) return null;
         throw new JsonStreamException("Expected a String to convert to byte array found "
                 + valueType);
     }
 
-    public String metadata(String name) throws IOException {
+    public String metadata(String name) {
         if (!_metadata_readen) nextObjectMetadata();
         return _metadata.get(name);
     }
@@ -299,7 +299,7 @@ public class JsonReader implements ObjectReader {
         return valueType;
     }
 
-    public ObjectReader skipValue() throws IOException {
+    public ObjectReader skipValue() {
 
         if (ARRAY == valueType || OBJECT == valueType) {
             int balance = 0;
@@ -331,7 +331,7 @@ public class JsonReader implements ObjectReader {
         return this;
     }
 
-    public boolean hasNext() throws IOException {
+    public boolean hasNext() {
         int token = readNextToken(false);
         if (token == -1) return false;
         if (token < 128) {
@@ -342,7 +342,7 @@ public class JsonReader implements ObjectReader {
         return false;
     }
 
-    public ValueType next() throws IOException {
+    public ValueType next() {
         _metadata_readen = false;
         _first = false;
 
@@ -375,7 +375,7 @@ public class JsonReader implements ObjectReader {
         return _ctx.peek();
     }
 
-    protected final ValueType consumeValue() throws IOException {
+    protected final ValueType consumeValue() {
         char ctoken = (char) readNextToken(false);
         if (ctoken == '"') {
             _stringValue = consumeString(ctoken);
@@ -385,7 +385,7 @@ public class JsonReader implements ObjectReader {
         else return consumeLiteral();
     }
 
-    protected final void readMetadata() throws IOException {
+    protected final void readMetadata() {
         _metadata_readen = true;
         while (true) {
             char ctoken = (char) readNextToken(false);
@@ -408,7 +408,7 @@ public class JsonReader implements ObjectReader {
         }
     }
 
-    protected final void begin(int character, JsonType type) throws IOException {
+    protected final void begin(int character, JsonType type) {
         int token = readNextToken(true);
         // seems unecessary as it is done in readNextToken
         // checkIllegalEnd(token);
@@ -418,7 +418,7 @@ public class JsonReader implements ObjectReader {
         _first = true;
     }
 
-    protected final void end(int character, JsonType type) throws IOException {
+    protected final void end(int character, JsonType type) {
         int token = readNextToken(true);
         // seems unecessary as it is done in readNextToken
         // checkIllegalEnd(token);
@@ -428,7 +428,7 @@ public class JsonReader implements ObjectReader {
         _first = false;
     }
 
-    protected final String consumeString(int token) throws IOException {
+    protected final String consumeString(int token) {
         if (token != '"') newMisplacedTokenException(_cursor);
         _cursor++;
         boolean buffered = false;
@@ -476,7 +476,7 @@ public class JsonReader implements ObjectReader {
      * calling this method the _cursor must be positioned on the first character of the value in the
      * _buffer, you can ensure that by calling {@link #readNextToken(boolean)}.
      */
-    protected final ValueType consumeLiteral() throws IOException {
+    protected final ValueType consumeLiteral() {
         int token = _buffer[_cursor];
 
         if ((token > 47 && token < 58) || token == 45) {
@@ -519,7 +519,7 @@ public class JsonReader implements ObjectReader {
         }
     }
 
-    private ValueType consumeNumber() throws IOException {
+    private ValueType consumeNumber() {
         // lets fill the buffer and handle differently overflowing values
         if ((_buflen - _cursor) < 378) ensureBufferHas(_buflen, false);
 
@@ -706,7 +706,7 @@ public class JsonReader implements ObjectReader {
         return DOUBLE;
     }
 
-    private final ValueType consumeStrictNumber(int localCursor) throws IOException {
+    private final ValueType consumeStrictNumber(int localCursor) {
         if (localCursor < _buflen) {
             // consider all the remaining integer values as part of the double
             for (; localCursor < _buflen; localCursor++) {
@@ -751,7 +751,7 @@ public class JsonReader implements ObjectReader {
         return cursor;
     }
 
-    protected final int readNextToken(boolean consume) throws IOException {
+    protected final int readNextToken(boolean consume) {
         while (true) {
             if (_cursor >= _buflen) fillBuffer(true);
 
@@ -786,7 +786,7 @@ public class JsonReader implements ObjectReader {
         return _cursor < _buflen ? _buffer[_cursor] : -1;
     }
 
-    private final void advanceAfter(char[] str) throws IOException {
+    private final void advanceAfter(char[] str) {
         int strPos = 0;
         while (true) {
             if (_cursor >= _buflen) fillBuffer(true);
@@ -804,7 +804,7 @@ public class JsonReader implements ObjectReader {
         }
     }
 
-    protected final char readEscaped() throws IOException {
+    protected final char readEscaped() {
         fillBuffer(true);
 
         char token = _buffer[_cursor++];
@@ -832,8 +832,8 @@ public class JsonReader implements ObjectReader {
         }
 
         int value = 0;
-        if (ensureBufferHas(4, false) < 0) { throw new JsonStreamException(
-                "Expected 4 hex-digit for character escape sequence!");
+        if (ensureBufferHas(4, false) < 0) {
+            throw new JsonStreamException("Expected 4 hex-digit for character escape sequence!");
         // System.arraycopy(buffer, cursor, buffer, 0, buflen-cursor);
         // buflen = buflen - cursor + reader.read(buffer, buflen-cursor, cursor);
         // cursor = 0;
@@ -841,7 +841,8 @@ public class JsonReader implements ObjectReader {
         for (int i = 0; i < 4; ++i) {
             int ch = _buffer[_cursor++];
             int digit = (ch > 127) ? -1 : sHexValues[ch];
-            if (digit < 0) { throw new JsonStreamException("Wrong character '" + ch
+            if (digit < 0) {
+                throw new JsonStreamException("Wrong character '" + ch
                     + "' expected a hex-digit for character escape sequence!"); }
             value = (value << 4) | digit;
         }
@@ -849,8 +850,7 @@ public class JsonReader implements ObjectReader {
         return (char) value;
     }
 
-    private final void writeToStringBuffer(final char[] data, final int offset, final int length)
-            throws IOException {
+    private final void writeToStringBuffer(final char[] data, final int offset, final int length) {
         if (_stringBufferLength <= (_stringBufferTail + length)) {
             expandStringBuffer(length);
         }
@@ -865,41 +865,49 @@ public class JsonReader implements ObjectReader {
         _stringBufferLength = extendedStringBuffer.length;
     }
 
-    private final int fillBuffer(boolean doThrow) throws IOException {
+    private final int fillBuffer(boolean doThrow) {
         if (_cursor < _buflen) return _buflen;
-        _buflen = reader.read(_buffer);
+        try {
+            _buflen = reader.read(_buffer);
+        } catch (IOException ioe) {
+            throw new JsonStreamException(ioe);
+        }
         checkIllegalEnd(_buflen);
         _cursor = 0;
         _col = 0;
         return _buflen;
     }
 
-    private final int ensureBufferHas(int minLength, boolean doThrow) throws IOException {
-        int actualLen = _buflen - _cursor;
-        if (actualLen >= minLength) { return actualLen; }
+    private final int ensureBufferHas(int minLength, boolean doThrow) {
+        try {
+            int actualLen = _buflen - _cursor;
+            if (actualLen >= minLength) { return actualLen; }
 
-        System.arraycopy(_buffer, _cursor, _buffer, 0, actualLen);
-        for (; actualLen < minLength;) {
-            int len = reader.read(_buffer, actualLen, _buffer.length - actualLen);
-            if (len < 0) {
-                if (doThrow) throw new JsonStreamException(
-                        "Encountered end of stream, incomplete json!");
-                else {
-                    _buflen = actualLen;
-                    _col = 0;
-                    _cursor = 0;
-                    return len;
+            System.arraycopy(_buffer, _cursor, _buffer, 0, actualLen);
+            for (; actualLen < minLength;) {
+                int len = reader.read(_buffer, actualLen, _buffer.length - actualLen);
+                if (len < 0) {
+                    if (doThrow) throw new JsonStreamException(
+                            "Encountered end of stream, incomplete json!");
+                    else {
+                        _buflen = actualLen;
+                        _col = 0;
+                        _cursor = 0;
+                        return len;
+                    }
                 }
+                actualLen += len;
             }
-            actualLen += len;
+            _buflen = actualLen;
+            _col = 0;
+            _cursor = 0;
+            return actualLen;
+        } catch (IOException ioe) {
+            throw new JsonStreamException(ioe);
         }
-        _buflen = actualLen;
-        _col = 0;
-        _cursor = 0;
-        return actualLen;
     }
 
-    protected final boolean isEOF() throws IOException {
+    protected final boolean isEOF() {
         return _buflen < 0 || fillBuffer(false) < 0;
     }
 

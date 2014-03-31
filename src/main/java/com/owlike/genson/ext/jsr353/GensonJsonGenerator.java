@@ -78,8 +78,7 @@ public class GensonJsonGenerator implements JsonGenerator {
     @Override public JsonGenerator write(String name, JsonValue value) {
         try {
             writer.writeName(name);
-        }
-        catch (IOException e) {
+        } catch (JsonStreamException e) {
             throw new JsonException(e.getMessage(), e.getCause());
         }
         return write(value);
@@ -88,8 +87,7 @@ public class GensonJsonGenerator implements JsonGenerator {
     @Override public JsonGenerator write(String name, String value) {
         try {
             writer.writeName(name).writeValue(value);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             _wrapAndThrow(e);
         }
         return this;
@@ -172,11 +170,7 @@ public class GensonJsonGenerator implements JsonGenerator {
             else if (JsonType.ARRAY == type) writer.endArray();
             else throw new JsonGenerationException(
                     "Must call writeStartObject or writeStartArray before calling writeEnd.");
-        }
-        catch (IOException ex) {
-            throw new JsonException(ex.getMessage(), ex.getCause());
-        }
-        catch (JsonStreamException jse) {
+        } catch (JsonStreamException jse) {
             throw new JsonGenerationException(jse.getMessage(), jse.getCause());
         }
         return this;
@@ -296,22 +290,12 @@ public class GensonJsonGenerator implements JsonGenerator {
     }
 
     @Override public void close() {
-        try {
-            flush();
-            writer.close();
-        }
-        catch (IOException e) {
-            throw new JsonException(e.getMessage(), e.getCause());
-        }
+        flush();
+        writer.close();
     }
 
     @Override public void flush() {
-        try {
-            writer.flush();
-        }
-        catch (IOException e) {
-            throw new JsonException(e.getMessage(), e.getCause());
-        }
+        writer.flush();
     }
 
     private void _wrapAndThrow(Exception e) {

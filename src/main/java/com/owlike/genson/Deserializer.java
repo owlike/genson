@@ -22,7 +22,7 @@ public interface Deserializer<T> {
 	 * @param ctx the current context.
 	 * @return an instance of T or a subclass of T.
 	 * @throws com.owlike.genson.JsonBindingException
-	 * @throws IOException
+	 * @throws com.owlike.genson.stream.JsonStreamException
 	 */
-	public T deserialize(ObjectReader reader, Context ctx) throws IOException;
+	public T deserialize(ObjectReader reader, Context ctx) throws Exception;
 }

@@ -23,6 +23,7 @@ import javax.ws.rs.ext.Providers;
 import com.owlike.genson.*;
 import com.owlike.genson.annotation.WithBeanView;
 import com.owlike.genson.ext.jaxb.JAXBBundle;
+import com.owlike.genson.stream.JsonStreamException;
 import com.owlike.genson.stream.ObjectReader;
 import com.owlike.genson.stream.ObjectWriter;
 
@@ -89,7 +90,9 @@ public class GensonJsonConverter implements MessageBodyReader<Object>, MessageBo
 			writer.flush();
 		} catch (JsonBindingException e) {
 			throw new WebApplicationException(e);
-		}
+		} catch (JsonStreamException jse) {
+            throw new WebApplicationException(jse);
+        }
 	}
 
 	private Context createContext(Annotation[] annotations, Genson genson) {
@@ -122,7 +125,9 @@ public class GensonJsonConverter implements MessageBodyReader<Object>, MessageBo
 			return genson.deserialize(GenericType.of(genericType), reader, createContext(annotations, genson));
 		} catch (JsonBindingException e) {
 			throw new WebApplicationException(e);
-		}
+		} catch (JsonStreamException jse) {
+            throw new WebApplicationException(jse);
+        }
 	}
 
 	public long getSize(Object t, Class<?> type, Type genericType, Annotation[] annotations,

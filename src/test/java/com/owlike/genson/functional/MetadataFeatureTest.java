@@ -19,14 +19,14 @@ public class MetadataFeatureTest {
 		genson = new Genson.Builder().setWithClassMetadata(true).addAlias("bean", Bean.class).create();
 	}
 	
-	@Test public void testSerializeUnknownType() throws TransformationException, IOException {
+	@Test public void testSerializeUnknownType() {
 		Bean bean = new Bean();
 		bean.value = new Date();
 		String dateFormated = SimpleDateFormat.getDateInstance().format((Date)bean.value);
 		assertEquals("{\"@class\":\"bean\",\"value\":\""+dateFormated+"\"}", genson.serialize(bean));
 	}
 	
-	@Test public void testDeserializeToUnknownType() throws TransformationException, IOException, ParseException {
+	@Test public void testDeserializeToUnknownType() {
 		Bean bean = (Bean) genson.deserialize("{\"@class\":\"bean\",\"value\":{\"@class\":\"bean\"}}", Object.class);
 		assertTrue(bean.value instanceof Bean);
 		

@@ -19,8 +19,7 @@ import com.owlike.genson.stream.ObjectReader;
 
 public class CombinedObjectTest {
 	@Test
-	public void combineMultipleJsonObjectIntoSingleObject() throws TransformationException,
-			IOException {
+	public void combineMultipleJsonObjectIntoSingleObject() {
 		String json = "{\"Person\":{\"id\":\"2\"},\"Dog\":{\"dateOfBirth\":\"2012-08-20 00:00:00\",\"price\" : \"10.00\"}}";
 		Genson genson = new Genson.Builder().withDeserializerFactory(new MyClassConverterFactory())
 				.create();
@@ -47,8 +46,7 @@ public class CombinedObjectTest {
 		}
 
 		@Override
-		public MyClass deserialize(ObjectReader reader, Context ctx)
-				throws TransformationException, IOException {
+		public MyClass deserialize(ObjectReader reader, Context ctx) {
 			reader.beginObject();
 			MyClass myClass = new MyClass();
 			for (; reader.hasNext();) {

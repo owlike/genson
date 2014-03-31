@@ -31,16 +31,14 @@ import com.owlike.genson.Genson;
  * 		this.converter = converter;
  * 	}
  * 
- * 	public void serialize(Object obj, ObjectWriter writer, Context ctx)
- * 			throws TransformationException, IOException {
+ * 	public void serialize(Object obj, ObjectWriter writer, Context ctx) {
  * 		if (obj == null)
  * 			writer.writeNull();
  * 		else
  * 			converter.serialize(obj, writer, ctx);
  * 	}
  * 
- * 	public Object deserialize(ObjectReader reader, Context ctx) throws TransformationException,
- * 			IOException {
+ * 	public Object deserialize(ObjectReader reader, Context ctx) {
  * 		if (TypeValue.NULL == reader.getTypeValue()) {
  * 			return null;
  * 		} else

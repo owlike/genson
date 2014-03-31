@@ -36,26 +36,22 @@ public class GensonMessageConverter extends AbstractHttpMessageConverter<Object>
 	protected Object readInternal(Class<?> clazz, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
 		MethodParameter mp = ThreadLocalHolder.get("__GENSON$method_param", MethodParameter.class);
-		try {
-			WithBeanView ann = null;
-			Type type = clazz;
-			if (mp != null) {
-				ann = mp.getMethodAnnotation(WithBeanView.class);
-				type = mp.getGenericParameterType();
-			}
-			
-			GenericType<?> genericType = GenericType.of(type);
-			
-			if (ann != null)
-				return genson.deserialize(genericType,
-						genson.createReader(inputMessage.getBody()),
-						new Context(genson, Arrays.asList(ann.views())));
-			else
-				return genson.deserialize(genericType,
-						genson.createReader(inputMessage.getBody()), new Context(genson));
-		} catch (JsonBindingException e) {
-			throw new IOException("Could not deserialize type " + clazz.getName(), e);
-		}
+
+        WithBeanView ann = null;
+        Type type = clazz;
+        if (mp != null) {
+            ann = mp.getMethodAnnotation(WithBeanView.class);
+            type = mp.getGenericParameterType();
+        }
+
+        GenericType<?> genericType = GenericType.of(type);
+
+        if (ann != null)
+            return genson.deserialize(genericType,
+                    genson.createReader(inputMessage.getBody()),
+                    new Context(genson, Arrays.asList(ann.views())));
+        else
+            return genson.deserialize(genericType, genson.createReader(inputMessage.getBody()), new Context(genson));
 	}
 
 	@Override
@@ -67,17 +63,13 @@ public class GensonMessageConverter extends AbstractHttpMessageConverter<Object>
 	@Override
 	protected void writeInternal(Object t, HttpOutputMessage outputMessage) throws IOException,
 			HttpMessageNotWritableException {
-		try {
-			ObjectWriter writer = genson.createWriter(outputMessage.getBody());
-			MethodParameter mp = ThreadLocalHolder.get("__GENSON$return_param", MethodParameter.class);
-			WithBeanView ann = mp != null ? mp.getMethodAnnotation(WithBeanView.class) : null;
-			if (ann != null)
-				genson.serialize(t, writer, ann.views());
-			else
-				genson.serialize(t, writer);
-			writer.flush();
-		} catch (JsonBindingException e) {
-			throw new IOException("Could not serialize type " + t.getClass(), e);
-		}
+        ObjectWriter writer = genson.createWriter(outputMessage.getBody());
+        MethodParameter mp = ThreadLocalHolder.get("__GENSON$return_param", MethodParameter.class);
+        WithBeanView ann = mp != null ? mp.getMethodAnnotation(WithBeanView.class) : null;
+        if (ann != null)
+            genson.serialize(t, writer, ann.views());
+        else
+            genson.serialize(t, writer);
+        writer.flush();
 	}
 }
