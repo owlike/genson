@@ -1,6 +1,5 @@
 package com.owlike.genson.convert;
 
-import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Iterator;
@@ -14,7 +13,6 @@ import com.owlike.genson.Factory;
 import com.owlike.genson.Genson;
 import com.owlike.genson.Operations;
 import com.owlike.genson.Serializer;
-import com.owlike.genson.TransformationException;
 import com.owlike.genson.Wrapper;
 import com.owlike.genson.reflect.BeanDescriptorProvider;
 import com.owlike.genson.reflect.TypeUtil;

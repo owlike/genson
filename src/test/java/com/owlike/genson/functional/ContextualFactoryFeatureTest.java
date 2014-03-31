@@ -1,6 +1,5 @@
 package com.owlike.genson.functional;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -10,7 +9,6 @@ import static org.junit.Assert.*;
 import com.owlike.genson.Context;
 import com.owlike.genson.Converter;
 import com.owlike.genson.Genson;
-import com.owlike.genson.TransformationException;
 import com.owlike.genson.annotation.JsonConverter;
 import com.owlike.genson.annotation.JsonDateFormat;
 import com.owlike.genson.stream.ObjectReader;

@@ -37,13 +37,13 @@ public abstract class PropertyAccessor extends BeanProperty implements Comparabl
 	}
 
 	protected JsonBindingException couldNotAccess(Exception e) {
-		return new TransformationRuntimeException("Could not access value of property named '"
+		return new JsonBindingException("Could not access value of property named '"
 				+ name + "' using accessor " + signature() + " from class "
 				+ declaringClass.getName(), e);
 	}
 
 	protected JsonBindingException couldNotSerialize(Throwable e) {
-		return new TransformationException("Could not serialize property '" + name
+		return new JsonBindingException("Could not serialize property '" + name
 				+ "' from class " + declaringClass.getName(), e);
 	}
 

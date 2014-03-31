@@ -1,13 +1,11 @@
 package com.owlike.genson.functional;
 
-import java.io.IOException;
 import java.util.List;
 
 import org.junit.Test;
 import static org.junit.Assert.*;
 
 import com.owlike.genson.Genson;
-import com.owlike.genson.TransformationException;
 import com.owlike.genson.annotation.JsonIgnore;
 
 public class FilteringAndRenamingTest {

@@ -1,6 +1,6 @@
 package com.owlike.genson.functional;
 
-import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -18,18 +18,17 @@ import static org.junit.Assert.*;
 
 import com.owlike.genson.GenericType;
 import com.owlike.genson.Genson;
-import com.owlike.genson.TransformationException;
 
 public class DefaultConvertersTest {
 	private Genson genson = new Genson();
 	
-	@Test public void testByteArray() throws TransformationException, IOException {
+	@Test public void testByteArray() throws UnsupportedEncodingException {
 		byte[] byteArray = "hey convert me to bytes".getBytes("UTF-8");
 		String json = genson.serialize(byteArray);
 		assertArrayEquals(byteArray, genson.deserialize(json, byte[].class));
 	}
 	
-	@Test public void testEnumSet() throws TransformationException, IOException {
+	@Test public void testEnumSet() {
 		EnumSet<Color> foo = EnumSet.of(Color.blue, Color.red);
         String json = genson.serialize(foo);
         EnumSet<Color> bar = genson.deserialize(json, new GenericType<EnumSet<Color>>() {});
@@ -39,8 +38,7 @@ public class DefaultConvertersTest {
 	}
 	
 	@Test
-	public void testClassMetadataOnceWhenUsedWithRuntimeType() throws TransformationException,
-			IOException {
+	public void testClassMetadataOnceWhenUsedWithRuntimeType() {
 		Genson genson = new Genson.Builder().setUseRuntimeTypeForSerialization(true)
 				.addAlias("subBean", SubBean.class).setWithClassMetadata(true).create();
 		RootBean rootBean = new SubBean();
@@ -49,7 +47,7 @@ public class DefaultConvertersTest {
 	}
 
 	@Test
-	public void testMapWithPrimitiveKeys() throws TransformationException, IOException {
+	public void testMapWithPrimitiveKeys() {
 		Map<Long, String> expected = new HashMap<Long, String>();
 		expected.put(5L, "hey");
 		String json = genson.serialize(expected);
@@ -66,7 +64,7 @@ public class DefaultConvertersTest {
 	}
 
 	@Test
-	public void testPropertiesConverter() throws TransformationException, IOException {
+	public void testPropertiesConverter() {
 		Properties props = new Properties();
 		props.put("key", "value");
 		String json = genson.serialize(props);
@@ -74,7 +72,7 @@ public class DefaultConvertersTest {
 	}
 
 	@Test
-	public void testComplexMapConverter() throws TransformationException, IOException {
+	public void testComplexMapConverter() {
 		Map<UUID, List<UUID>> expected = new HashMap<UUID, List<UUID>>();
 		expected.put(UUID.randomUUID(), Arrays.asList(UUID.randomUUID(), UUID.randomUUID()));
 		expected.put(UUID.randomUUID(), Arrays.asList(UUID.randomUUID()));
@@ -86,14 +84,14 @@ public class DefaultConvertersTest {
 	}
 
 	@Test
-	public void testUUIDConverter() throws TransformationException, IOException {
+	public void testUUIDConverter() {
 		UUID uuid = UUID.randomUUID();
 		String json = genson.serialize(uuid);
 		assertEquals(uuid, genson.deserialize(json, UUID.class));
 	}
 
 	@Test
-	public void testDateConverter() throws TransformationException, IOException {
+	public void testDateConverter() {
 		Genson genson = new Genson.Builder().setDateFormat(
 				new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z", Locale.FRENCH)).create();
 		Date date = new Date();
@@ -104,7 +102,7 @@ public class DefaultConvertersTest {
 	}
 
 	@Test
-	public void testCalendarConverter() throws TransformationException, IOException {
+	public void testCalendarConverter() {
 		Genson genson = new Genson.Builder().useTimeInMillis(true).create();
 		Calendar cal = Calendar.getInstance();
 		String json = genson.serialize(cal);

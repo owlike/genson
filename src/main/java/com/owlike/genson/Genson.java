@@ -192,7 +192,7 @@ public final class Genson {
 		if (converter == null) {
 			converter = (Converter<T>) converterFactory.create(forType, this);
 			if (converter == null)
-				throw new TransformationRuntimeException("No converter found for type " + forType);
+				throw new JsonBindingException("No converter found for type " + forType);
 			if (!Boolean.TRUE.equals(ThreadLocalHolder.get("__GENOSN$DO_NOT_CACHE_CONVERTER",
 					Boolean.class))) converterCache.putIfAbsent(forType, converter);
 		}

@@ -373,7 +373,7 @@ public final class DefaultConverters {
 				}
 				return Long.parseLong(value);
 			} catch (NumberFormatException nfe) {
-				throw new TransformationRuntimeException("Could not convert input value " + value
+				throw new JsonBindingException("Could not convert input value " + value
 						+ " of type " + valueType.toClass() + " to a Number type.", nfe);
 			}
 		}
@@ -783,7 +783,7 @@ public final class DefaultConverters {
 				else
 					return read(reader.valueAsString());
 			} catch (ParseException e) {
-				throw new TransformationException("Could not parse date " + reader.valueAsString(),
+				throw new JsonBindingException("Could not parse date " + reader.valueAsString(),
 						e);
 			}
 		}

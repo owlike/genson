@@ -22,11 +22,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.owlike.genson.BeanView;
-import com.owlike.genson.Context;
-import com.owlike.genson.Converter;
-import com.owlike.genson.Genson;
-import com.owlike.genson.TransformationException;
 import com.owlike.genson.annotation.Creator;
 import com.owlike.genson.annotation.JsonProperty;
 import com.owlike.genson.bean.ComplexObject;
@@ -40,24 +35,24 @@ import com.owlike.genson.stream.ObjectWriter;
 public class JsonSerDeserSymetricTest {
 	Genson genson = new Genson.Builder().setWithDebugInfoPropertyNameResolver(true).create();
 	
-	@Test public void testSerDeserByteArray() throws TransformationException, IOException {
+	@Test public void testSerDeserByteArray() throws IOException {
 		Primitives expected = createPrimitives();
 		List<Integer> is = Arrays.asList(1, 2);
 		genson.serialize(is, new GenericType<List<Number>>() {});
 		byte[] json = genson.serializeBytes(expected);
 		Primitives.assertComparePrimitives(expected, genson.deserialize(json, Primitives.class));
 	}
-	
-	@Test public void testSerDeserStream() throws TransformationException, IOException {
+
+	@Test public void testSerDeserStream() throws IOException {
 		Primitives expected = createPrimitives();
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		genson.serialize(expected, baos);
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 		Primitives.assertComparePrimitives(expected, genson.deserialize(bais, Primitives.class));
 	}
-	
+
 	@Test
-	public void testJsonComplexObjectSerDeser() throws TransformationException, IOException {
+	public void testJsonComplexObjectSerDeser() throws IOException {
 		ComplexObject coo = new ComplexObject(createPrimitives(), Arrays.asList(createPrimitives(),
 				createPrimitives()), new Primitives[] { createPrimitives(), createPrimitives() });
 
@@ -67,7 +62,7 @@ public class JsonSerDeserSymetricTest {
 	}
 
 	@Test
-	public void testPrimitiveSerDeser() throws TransformationException, IOException {
+	public void testPrimitiveSerDeser() throws IOException {
 		int a = 54000048;
 		int b = genson.deserialize(genson.serialize(a), int.class);
 		assertEquals(a, b);
@@ -82,7 +77,7 @@ public class JsonSerDeserSymetricTest {
 	}
 
 	@Test
-	public void testAbstractType() throws TransformationException, IOException {
+	public void testAbstractType() throws IOException {
 		B b = new B();
 		b.a = "aa";
 		b.b = "bb";
@@ -94,7 +89,7 @@ public class JsonSerDeserSymetricTest {
 	}
 
 	@Test
-	public void testSerializerAndDeserializeWithView() throws TransformationException, IOException {
+	public void testSerializerAndDeserializeWithView() throws IOException {
 		Person p = new Person("Mr");
 		p.birthYear = 1986;
 		p.name = "eugen";
@@ -114,16 +109,16 @@ public class JsonSerDeserSymetricTest {
 	}
 
 	@Test
-	public void testWithUrlConverter() throws TransformationException, IOException {
+	public void testWithUrlConverter() throws IOException {
 		Genson genson = new Genson.Builder().withConverters(new Converter<URL>() {
 
 			public void serialize(URL obj, ObjectWriter writer, Context ctx)
-					throws TransformationException, IOException {
+					throws IOException {
 				writer.writeValue(obj.toExternalForm());
 			}
 
 			public URL deserialize(ObjectReader reader, Context ctx)
-					throws TransformationException, IOException {
+					throws IOException {
 				return new URL(reader.valueAsString());
 			}
 
@@ -150,7 +145,7 @@ public class JsonSerDeserSymetricTest {
 
 	@Test
 	public void testDeserializeSerializeTweets() throws JsonParseException, JsonMappingException,
-			IOException, TransformationException {
+			IOException {
 		ObjectMapper mapper = getMapper();
 		Genson genson = getGenson();
 
@@ -172,7 +167,7 @@ public class JsonSerDeserSymetricTest {
 	}
 
 	@Test
-	public void testDeserializeSerializeReaderShort() throws IOException, TransformationException {
+	public void testDeserializeSerializeReaderShort() throws IOException {
 		ObjectMapper mapper = getMapper();
 		Genson genson = getGenson();
 
@@ -189,7 +184,7 @@ public class JsonSerDeserSymetricTest {
 	}
 
 	@Test
-	public void testDeserializeSerializeReaderLong() throws IOException, TransformationException {
+	public void testDeserializeSerializeReaderLong() throws IOException {
 		ObjectMapper mapper = getMapper();
 		Genson genson = getGenson();
 
@@ -205,17 +200,17 @@ public class JsonSerDeserSymetricTest {
 	}
 
 	@Test
-	public void testWithCustomObjectConverter() throws TransformationException, IOException {
+	public void testWithCustomObjectConverter() throws IOException {
 		Genson genson = new Genson.Builder().withConverters(new Converter<Point>() {
 
 			public void serialize(Point obj, ObjectWriter writer, Context ctx)
-					throws TransformationException, IOException {
+					throws IOException {
 				writer.beginObject().writeName("x").writeValue(obj.x).writeName("y").writeValue(
 						obj.y).endObject();
 			}
 
 			public Point deserialize(ObjectReader reader, Context ctx)
-					throws TransformationException, IOException {
+					throws IOException {
 				Point p = new Point();
 				reader.beginObject();
 				for (; reader.hasNext();) {
@@ -245,7 +240,7 @@ public class JsonSerDeserSymetricTest {
 
 	@Test
 	public void testSerializeDeserializeMediaContent() throws JsonParseException,
-			JsonMappingException, IOException, TransformationException {
+			JsonMappingException, IOException {
 		ObjectMapper mapper = new ObjectMapper();
 		Genson genson = new Genson();
 		MediaContent jacksonContent = mapper.readValue(ClassLoader.class

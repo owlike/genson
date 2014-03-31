@@ -1,6 +1,5 @@
 package com.owlike.genson.ext.jsr353;
 
-import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.reflect.Type;
 import java.util.HashMap;
@@ -23,7 +22,6 @@ import com.owlike.genson.Converter;
 import com.owlike.genson.Factory;
 import com.owlike.genson.Genson;
 import com.owlike.genson.Genson.Builder;
-import com.owlike.genson.TransformationException;
 import com.owlike.genson.ext.GensonBundle;
 import com.owlike.genson.stream.JsonWriter;
 import com.owlike.genson.stream.ObjectReader;

@@ -1,12 +1,10 @@
 package com.owlike.genson.convert;
 
-import java.io.IOException;
 import java.lang.reflect.Type;
 
 import com.owlike.genson.Context;
 import com.owlike.genson.Converter;
 import com.owlike.genson.Genson;
-import com.owlike.genson.TransformationException;
 import com.owlike.genson.Wrapper;
 import com.owlike.genson.annotation.HandleNull;
 import com.owlike.genson.stream.ObjectReader;

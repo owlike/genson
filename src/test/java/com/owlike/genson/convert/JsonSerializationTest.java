@@ -1,14 +1,11 @@
 package com.owlike.genson.convert;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-
 
 import org.junit.Test;
 
 import com.owlike.genson.Genson;
-import com.owlike.genson.TransformationException;
 import com.owlike.genson.annotation.JsonIgnore;
 import com.owlike.genson.bean.ComplexObject;
 import com.owlike.genson.bean.Primitives;
@@ -59,8 +56,7 @@ public class JsonSerializationTest {
 	 * XX getter.
 	 */
 	@Test
-	public void testSerializationMixedFieldsAndGetters() throws TransformationException,
-			IOException {
+	public void testSerializationMixedFieldsAndGetters() {
 		String json = "{\"age\":15,\"name\":\"TOTO\",\"noField\":\"TOTO15\"}";
 		ClassWithFieldsAndGetter object = new ClassWithFieldsAndGetter("TOTO", 15);
 		String out = genson.serialize(object);

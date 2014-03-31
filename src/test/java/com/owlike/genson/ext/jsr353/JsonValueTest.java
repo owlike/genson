@@ -1,7 +1,5 @@
 package com.owlike.genson.ext.jsr353;
 
-import java.io.IOException;
-
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonString;
@@ -10,19 +8,18 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 import com.owlike.genson.Genson;
-import com.owlike.genson.TransformationException;
 
 public class JsonValueTest {
     private final Genson genson = new Genson.Builder().with(new JSR353Bundle()).create();
 
-    @Test public void testSerArrayOfLiterals() throws TransformationException, IOException {
+    @Test public void testSerArrayOfLiterals() {
         String json =
                 genson.serialize(JSR353Bundle.factory.createArrayBuilder().addNull().add(1.22)
                         .add(false).add("str").build());
         assertEquals("[null,1.22,false,\"str\"]", json);
     }
 
-    @Test public void testSerObjectAndArray() throws TransformationException, IOException {
+    @Test public void testSerObjectAndArray() {
         String json =
                 genson.serialize(JSR353Bundle.factory.createObjectBuilder().add("int", 98)
                         .addNull("null")
@@ -30,7 +27,7 @@ public class JsonValueTest {
         assertEquals("{\"int\":98,\"null\":null,\"array\":[]}", json);
     }
 
-    @Test public void testDeserArrayOfLiterals() throws TransformationException, IOException {
+    @Test public void testDeserArrayOfLiterals() {
         JsonArray array = genson.deserialize("[1, 2.2, \"str\", true, null]", JsonArray.class);
         assertEquals(1, array.getInt(0));
         assertEquals(2.2, array.getJsonNumber(1).doubleValue(), 1e-200);
@@ -39,7 +36,7 @@ public class JsonValueTest {
         assertEquals(true, array.isNull(4));
     }
 
-    @Test public void testDeserObject() throws TransformationException, IOException {
+    @Test public void testDeserObject() {
         JsonObject object =
                 genson.deserialize("{\"str\":\"a\", \"array\": [1]}", JsonObject.class);
         assertEquals("a", object.getString("str"));
@@ -47,7 +44,7 @@ public class JsonValueTest {
         assertEquals(1, array.getInt(0));
     }
     
-    @Test public void testRoundTripMixBeanAndJsonStructures() throws TransformationException, IOException {
+    @Test public void testRoundTripMixBeanAndJsonStructures() {
         JsonArray array = JSR353Bundle.factory.createArrayBuilder().add(1).add(2).build();
         JsonObject object = JSR353Bundle.factory.createObjectBuilder().add("key", "value").addNull("foo").build();
         Bean bean = new Bean();

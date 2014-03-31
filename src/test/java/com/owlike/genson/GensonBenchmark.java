@@ -7,13 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.owlike.genson.Genson;
-import com.owlike.genson.TransformationException;
 import com.owlike.genson.bean.ComplexObject;
 import com.owlike.genson.bean.Primitives;
 
@@ -48,15 +44,14 @@ public class GensonBenchmark {
 	private Map<String, Object> map;
 	private String json;
 
-	public static void main(String[] args) throws JsonGenerationException, JsonMappingException,
-			IOException, TransformationException {
+	public static void main(String[] args) throws IOException {
 		GensonBenchmark bench = new GensonBenchmark();
 		bench.setUp();
 		bench.benchSerialization();
 		bench.benchDeserialization();
 	}
 
-	public void setUp() throws TransformationException {
+	public void setUp() {
 		map = new HashMap<String, Object>();
 		Primitives p1 = new Primitives(923456789, new Integer(56884646),
 				16737897023.96909986098180546, new Double(54657750.9988904315),
@@ -100,8 +95,7 @@ public class GensonBenchmark {
 		json = sb.toString();
 	}
 
-	public void benchSerialization() throws JsonGenerationException, JsonMappingException,
-			IOException, TransformationException {
+	public void benchSerialization() throws IOException {
 		// warm up
 		for (int i = 0; i < 35; i++) {
 			om.writeValueAsString(map);
@@ -146,8 +140,7 @@ public class GensonBenchmark {
 		System.out.println("Gson avg serialization time=" + moyTimer.stop().printMS() + "\n");
 	}
 
-	public void benchDeserialization() throws JsonGenerationException, JsonMappingException,
-			IOException, TransformationException {
+	public void benchDeserialization() throws IOException {
 		// warm up
 		for (int i = 0; i < 35; i++) {
 			om.readValue(json, ComplexObject[].class);

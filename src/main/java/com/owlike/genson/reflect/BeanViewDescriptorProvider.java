@@ -92,7 +92,7 @@ public class BeanViewDescriptorProvider extends BaseBeanDescriptorProvider {
 
     private JsonBindingException couldNotInstantiateBeanView(Class<?> beanViewClass,
             Exception e) {
-        return new TransformationRuntimeException("Could not instantiate BeanView "
+        return new JsonBindingException("Could not instantiate BeanView "
                 + beanViewClass.getName()
                 + ", BeanView implementations must have a public no arg constructor.", e);
     }
@@ -195,7 +195,7 @@ public class BeanViewDescriptorProvider extends BaseBeanDescriptorProvider {
         public Trilean isCreator(Method method, Class<?> baseClass) {
             if (method.getAnnotation(Creator.class) != null) {
                 if (Modifier.isStatic(method.getModifiers())) return TRUE;
-                throw new TransformationRuntimeException("Method " + method.toGenericString()
+                throw new JsonBindingException("Method " + method.toGenericString()
                         + " annotated with @Creator must be static!");
             }
             return FALSE;

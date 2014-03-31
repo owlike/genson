@@ -2,8 +2,6 @@ package com.owlike.genson.ext.jaxb;
 
 import static org.junit.Assert.*;
 
-import java.io.IOException;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -20,7 +18,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.owlike.genson.Genson;
-import com.owlike.genson.TransformationException;
 
 public class JaxbAnnotationsSupportTest {
 	private Genson genson;

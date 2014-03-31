@@ -5,18 +5,14 @@ import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
-
-import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.owlike.genson.Genson;
-import com.owlike.genson.TransformationException;
 import com.owlike.genson.bean.Feed;
 import com.owlike.genson.bean.Tweet;
+
 
 /**
  * Serialization bench, based on same data as DeserializeBenchmark. Jackson is slightly faster.
@@ -34,11 +30,11 @@ public class SerializationBenchmark {
 	private Feed shortFeed;
 	private Feed longFeed;
 	
-	public SerializationBenchmark() throws TransformationException, IOException {
+	public SerializationBenchmark() throws IOException {
 		setUp();
 	}
 
-	private void setUp() throws TransformationException, IOException {
+	private void setUp() throws IOException {
 		genson = new Genson.Builder().setDateFormat(
 				new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", Locale.US)).create();
 		gson = new GsonBuilder().setDateFormat("EEE MMM dd HH:mm:ss Z yyyy").serializeNulls().create();
@@ -58,8 +54,7 @@ public class SerializationBenchmark {
 				Feed.class);
 	}
 
-	public void go() throws JsonGenerationException, JsonMappingException, IOException,
-			TransformationException {
+	public void go() throws IOException {
 		Timer timer = new Timer();
 		// warmup
 		jacksonWrite(WARMUP_ITER, tweets);
@@ -121,20 +116,19 @@ public class SerializationBenchmark {
 		System.out.println("Gson longFeed:" + timer.stop().printS());
 	}
 
-	public <T> void jacksonWrite(int iter, T object) throws JsonGenerationException,
-			JsonMappingException, IOException {
+	public <T> void jacksonWrite(int iter, T object) throws IOException {
 		for (int i = 0; i < iter; i++) {
 			mapper.writeValueAsString(object);
 		}
 	}
 
-	public <T> void gensonWrite(int iter, T object) throws TransformationException, IOException {
+	public <T> void gensonWrite(int iter, T object) {
 		for (int i = 0; i < iter; i++) {
 			genson.serialize(object);
 		}
 	}
 
-	public <T> void gsonWrite(int iter, T object) throws TransformationException, IOException {
+	public <T> void gsonWrite(int iter, T object) {
 		for (int i = 0; i < iter; i++) {
 			gson.toJson(object);
 		}
@@ -151,8 +145,7 @@ public class SerializationBenchmark {
 		}
 	}
 
-	public static void main(String[] args) throws JsonGenerationException, JsonMappingException,
-			IOException, TransformationException {
+	public static void main(String[] args) throws IOException {
 		new SerializationBenchmark().go();
 	}
 }

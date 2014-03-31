@@ -1,16 +1,11 @@
 package com.owlike.genson.reflect;
 
-import java.io.IOException;
-
 import org.junit.Test;
 
 import com.owlike.genson.BeanView;
 import com.owlike.genson.Genson;
-import com.owlike.genson.TransformationException;
 import com.owlike.genson.annotation.Creator;
 import com.owlike.genson.annotation.JsonProperty;
-import com.owlike.genson.reflect.BeanMutatorAccessorResolver;
-import com.owlike.genson.reflect.VisibilityFilter;
 
 import static org.junit.Assert.*;
 
@@ -22,7 +17,7 @@ public class BeanViewTest {
 					VisibilityFilter.PACKAGE_PUBLIC, VisibilityFilter.PACKAGE_PUBLIC)).create();
 	
 	@Test
-	public void testSerializeWithInheritedView() throws TransformationException, IOException {
+	public void testSerializeWithInheritedView() {
 		MyClass c = new MyClass();
 		c.name = "toto";
 
@@ -37,7 +32,7 @@ public class BeanViewTest {
 	}
 
 	@Test
-	public void testDeserializeWithInheritedView() throws TransformationException, IOException {
+	public void testDeserializeWithInheritedView() {
 		String json = "{\"forName\": \"titi\", \"value\": 123}";
 		MyClass mc = genson.deserialize(json, MyClass.class, ExtendedView.class);
 		assertTrue(ExtendedView.usedCtr);

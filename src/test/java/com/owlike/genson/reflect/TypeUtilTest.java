@@ -1,6 +1,5 @@
 package com.owlike.genson.reflect;
 
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -15,7 +14,6 @@ import java.util.Set;
 import org.junit.Test;
 
 import com.owlike.genson.GenericType;
-import com.owlike.genson.TransformationException;
 
 import static com.owlike.genson.reflect.TypeUtil.*;
 
@@ -97,8 +95,7 @@ public class TypeUtilTest {
 	}
 
 	@Test
-	public void testParameterizedTypeResolution() throws SecurityException, NoSuchFieldException,
-			TransformationException, IOException {
+	public void testParameterizedTypeResolution() throws SecurityException, NoSuchFieldException {
 		Field g = O.class.getDeclaredField("g");
 		Type gt = g.getGenericType();
 		Type expGt = expandType(gt, O.class);

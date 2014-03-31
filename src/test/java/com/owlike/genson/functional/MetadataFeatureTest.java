@@ -1,7 +1,5 @@
 package com.owlike.genson.functional;
 
-import java.io.IOException;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -10,7 +8,6 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 import com.owlike.genson.Genson;
-import com.owlike.genson.TransformationException;
 
 public class MetadataFeatureTest {
 	private Genson genson;

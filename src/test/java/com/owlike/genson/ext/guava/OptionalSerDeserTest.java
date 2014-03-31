@@ -3,11 +3,9 @@ package com.owlike.genson.ext.guava;
 import com.google.common.base.Optional;
 import com.owlike.genson.GenericType;
 import com.owlike.genson.Genson;
-import com.owlike.genson.TransformationException;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 

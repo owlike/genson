@@ -7,10 +7,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-import com.owlike.genson.Context;
-import com.owlike.genson.Converter;
-import com.owlike.genson.TransformationException;
-import com.owlike.genson.TransformationRuntimeException;
+import com.owlike.genson.*;
 import com.owlike.genson.reflect.BeanCreator.BeanCreatorProperty;
 import com.owlike.genson.stream.ObjectReader;
 import com.owlike.genson.stream.ObjectWriter;
@@ -96,7 +93,7 @@ public class BeanDescriptor<T> implements Converter<T> {
 			deserialize(bean, reader, ctx);
 		} else {
 			if (_creator == null)
-				throw new TransformationRuntimeException("No constructor has been found for type "
+				throw new JsonBindingException("No constructor has been found for type "
 						+ ofClass);
 			bean = _deserWithCtrArgs(reader, ctx);
 		}

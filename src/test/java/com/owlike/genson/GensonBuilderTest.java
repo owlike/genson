@@ -1,15 +1,7 @@
 package com.owlike.genson;
 
-import java.io.IOException;
-
 import org.junit.Test;
 
-import com.owlike.genson.Context;
-import com.owlike.genson.Converter;
-import com.owlike.genson.Factory;
-import com.owlike.genson.GenericType;
-import com.owlike.genson.Genson;
-import com.owlike.genson.TransformationException;
 import com.owlike.genson.convert.BasicConvertersFactory;
 import com.owlike.genson.stream.ObjectReader;
 import com.owlike.genson.stream.ObjectWriter;
@@ -20,12 +12,10 @@ public class GensonBuilderTest {
 	@Test
 	public void testCustomConverterRegistration() {
 		final Converter<Number> dummyConverter = new Converter<Number>() {
-			public void serialize(Number object, ObjectWriter writer, Context ctx)
-					throws TransformationException, IOException {
+			public void serialize(Number object, ObjectWriter writer, Context ctx) {
 			}
 
-			public Number deserialize(ObjectReader reader, Context ctx)
-					throws TransformationException, IOException {
+			public Number deserialize(ObjectReader reader, Context ctx) {
 				return null;
 			}
 		};

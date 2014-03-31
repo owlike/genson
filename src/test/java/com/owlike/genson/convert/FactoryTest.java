@@ -1,6 +1,5 @@
 package com.owlike.genson.convert;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,14 +12,8 @@ import com.owlike.genson.Converter;
 import com.owlike.genson.Factory;
 import com.owlike.genson.GenericType;
 import com.owlike.genson.Genson;
-import com.owlike.genson.TransformationException;
 import com.owlike.genson.Wrapper;
 import com.owlike.genson.annotation.HandleClassMetadata;
-import com.owlike.genson.convert.BasicConvertersFactory;
-import com.owlike.genson.convert.BeanViewConverter;
-import com.owlike.genson.convert.ChainedFactory;
-import com.owlike.genson.convert.DefaultConverters;
-import com.owlike.genson.convert.NullConverter;
 import com.owlike.genson.stream.ObjectReader;
 import com.owlike.genson.stream.ObjectWriter;
 

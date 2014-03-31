@@ -1,6 +1,5 @@
 package com.owlike.genson.reflect;
 
-import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -10,8 +9,7 @@ import java.lang.reflect.Type;
 import com.owlike.genson.*;
 import com.owlike.genson.stream.ObjectReader;
 
-public abstract class PropertyMutator extends BeanProperty implements
-		Comparable<PropertyMutator> {
+public abstract class PropertyMutator extends BeanProperty implements Comparable<PropertyMutator> {
 	Deserializer<Object> propertyDeserializer;
 
 	protected PropertyMutator(String name, Type type, Class<?> declaringClass, Annotation[] annotations) {
@@ -43,12 +41,12 @@ public abstract class PropertyMutator extends BeanProperty implements
 	}
 	
 	protected JsonBindingException couldNotMutate(Exception e) {
-		return new TransformationRuntimeException("Could not mutate value of property named '"
+		return new JsonBindingException("Could not mutate value of property named '"
 				+ name + "' using mutator " + signature(), e);
 	}
 	
 	protected JsonBindingException couldNotDeserialize(Throwable e) {
-		return new TransformationException("Could not deserialize to property '" + name + "' of class " + declaringClass, e);
+		return new JsonBindingException("Could not deserialize to property '" + name + "' of class " + declaringClass, e);
 	}
 
 	public static class MethodMutator extends PropertyMutator {

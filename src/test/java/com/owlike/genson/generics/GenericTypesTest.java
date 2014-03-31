@@ -16,7 +16,6 @@ import com.owlike.genson.Context;
 import com.owlike.genson.Converter;
 import com.owlike.genson.GenericType;
 import com.owlike.genson.Genson;
-import com.owlike.genson.TransformationException;
 import com.owlike.genson.stream.ObjectReader;
 import com.owlike.genson.stream.ObjectWriter;
 

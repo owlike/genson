@@ -3,11 +3,7 @@ package com.owlike.genson.convert;
 import java.io.IOException;
 import java.lang.reflect.Type;
 
-import com.owlike.genson.Context;
-import com.owlike.genson.Converter;
-import com.owlike.genson.Genson;
-import com.owlike.genson.TransformationException;
-import com.owlike.genson.Wrapper;
+import com.owlike.genson.*;
 import com.owlike.genson.annotation.HandleClassMetadata;
 import com.owlike.genson.reflect.TypeUtil;
 import com.owlike.genson.stream.ObjectReader;
@@ -93,7 +89,7 @@ public class ClassMetadataConverter<T> extends Wrapper<Converter<T>> implements 
 						return deser.deserialize(reader, ctx);
 					}
 				} catch (ClassNotFoundException e) {
-					throw new TransformationException(
+					throw new JsonBindingException(
 							"Could not use @class metadata, no such class: " + className);
 				}
 			}

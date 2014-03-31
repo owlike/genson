@@ -11,14 +11,13 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.owlike.genson.JsonBindingException;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.EmptyVisitor;
-
-import com.owlike.genson.TransformationRuntimeException;
 
 /**
  * This class uses ASM library to resolve method and constructor parameter names from debug symbols
@@ -119,7 +118,7 @@ public final class ASMCreatorParameterNameResolver implements PropertyNameResolv
 	}
 
 	private void _throwNoDebugInfo(String className) {
-		throw new TransformationRuntimeException(
+		throw new JsonBindingException(
 				"Class "
 						+ className
 						+ " has been compiled with no debug information, so we can not deduce constructor/method parameter names.");
@@ -205,7 +204,7 @@ public final class ASMCreatorParameterNameResolver implements PropertyNameResolv
 				try {
 					return Class.forName(type.getClassName(), true, forClass.getClassLoader());
 				} catch (ClassNotFoundException e) {
-					throw new TransformationRuntimeException("Could not find class "
+					throw new JsonBindingException("Could not find class "
 							+ type.getClassName() + " while searching for constructor "
 							+ signature() + " parameter names.", e);
 				}
@@ -216,7 +215,7 @@ public final class ASMCreatorParameterNameResolver implements PropertyNameResolv
 				return void.class;
 
 			default:
-				throw new TransformationRuntimeException(
+				throw new JsonBindingException(
 						"Could not find corresponding java type to asm type " + type);
 			}
 
@@ -249,7 +248,7 @@ public final class ASMCreatorParameterNameResolver implements PropertyNameResolv
 					parameterNamesMap
 							.put(method, paramNames.toArray(new String[paramNames.size()]));
 				} catch (SecurityException e) {
-					throw new TransformationRuntimeException(
+					throw new JsonBindingException(
 							"Unable to locate method with signature " + signature(), e);
 				} catch (NoSuchMethodException e) {
 					// hum don't do anything... as we accept that it may fail...
@@ -295,7 +294,7 @@ public final class ASMCreatorParameterNameResolver implements PropertyNameResolv
 					parameterNamesMap.put(constructor,
 							paramNames.toArray(new String[paramNames.size()]));
 				} catch (SecurityException e) {
-					throw new TransformationRuntimeException(
+					throw new JsonBindingException(
 							"Unable to locate constructor with signature " + signature(), e);
 				} catch (NoSuchMethodException e) {
 					// hum don't do anything... as we accept that it may fail...

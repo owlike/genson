@@ -9,17 +9,12 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
 
-
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.owlike.genson.Genson;
-import com.owlike.genson.TransformationException;
 import com.owlike.genson.bean.Feed;
 import com.owlike.genson.bean.Tweet;
 
@@ -64,8 +59,7 @@ public class DeserializeBenchmark {
 		longReader = resourceToString("/READER_LONG.json");
 	}
 
-	private void go() throws JsonParseException, JsonMappingException, IOException,
-			TransformationException {
+	private void go() throws IOException {
 
 		// warmup
 		jacksonParse(WARMUP_ITER, tweets, tweetsType);
@@ -133,22 +127,19 @@ public class DeserializeBenchmark {
 		}
 	}
 
-	public <T> void jacksonParse(int iter, String source, TypeReference<T> type)
-			throws JsonParseException, JsonMappingException, IOException {
+	public <T> void jacksonParse(int iter, String source, TypeReference<T> type) throws IOException {
 		for (int i = 0; i < iter; i++) {
 			mapper.readValue(source, type);
 		}
 	}
 
-	public <T> void gensonParse(int iter, String source, GenericType<T> type)
-			throws TransformationException, IOException {
+	public <T> void gensonParse(int iter, String source, GenericType<T> type) {
 		for (int i = 0; i < iter; i++) {
 			genson.deserialize(source, type);
 		}
 	}
 	
-	public <T> void gsonParse(int iter, String source, TypeReference<T> type)
-			throws TransformationException, IOException {
+	public <T> void gsonParse(int iter, String source, TypeReference<T> type) {
 		for (int i = 0; i < iter; i++) {
 			gson.fromJson(source, type.getType());
 		}

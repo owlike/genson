@@ -13,7 +13,7 @@ import java.util.List;
 import static com.owlike.genson.Trilean.FALSE;
 import static com.owlike.genson.Trilean.TRUE;
 
-import com.owlike.genson.TransformationRuntimeException;
+import com.owlike.genson.JsonBindingException;
 import com.owlike.genson.Trilean;
 import com.owlike.genson.annotation.Creator;
 import com.owlike.genson.annotation.JsonIgnore;
@@ -204,7 +204,7 @@ public interface BeanMutatorAccessorResolver {
 				if (Modifier.isPublic(method.getModifiers())
 						&& Modifier.isStatic(method.getModifiers()))
 					return TRUE;
-				throw new TransformationRuntimeException("Method " + method.toGenericString()
+				throw new JsonBindingException("Method " + method.toGenericString()
 						+ " annotated with @Creator must be static!");
 			}
 			return FALSE;

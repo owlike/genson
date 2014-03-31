@@ -1,6 +1,5 @@
 package com.owlike.genson.functional;
 
-import java.io.IOException;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -12,7 +11,6 @@ import com.owlike.genson.Context;
 import com.owlike.genson.Deserializer;
 import com.owlike.genson.Factory;
 import com.owlike.genson.Genson;
-import com.owlike.genson.TransformationException;
 import com.owlike.genson.annotation.JsonProperty;
 import com.owlike.genson.reflect.BeanDescriptor;
 import com.owlike.genson.stream.ObjectReader;

@@ -30,13 +30,7 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import com.owlike.genson.Context;
-import com.owlike.genson.Converter;
-import com.owlike.genson.Factory;
-import com.owlike.genson.Genson;
-import com.owlike.genson.TransformationException;
-import com.owlike.genson.TransformationRuntimeException;
-import com.owlike.genson.Trilean;
+import com.owlike.genson.*;
 import com.owlike.genson.Genson.Builder;
 import com.owlike.genson.annotation.HandleClassMetadata;
 import com.owlike.genson.annotation.WithoutBeanView;
@@ -111,7 +105,7 @@ public class JAXBBundle extends GensonBundle {
 			try {
 				cal.setTime(dateFormat.parse(reader.valueAsString()));
 			} catch (ParseException e) {
-				throw new TransformationRuntimeException("Could not parse date "
+				throw new JsonBindingException("Could not parse date "
 						+ reader.valueAsString(), e);
 			}
 
@@ -151,10 +145,10 @@ public class JAXBBundle extends GensonBundle {
 					Converter<Object> adaptedTypeConverter = genson.provideConverter(adaptedType);
 					converter = new AdaptedConverter(adapter, adaptedTypeConverter);
 				} catch (InstantiationException e) {
-					throw new TransformationRuntimeException(
+					throw new JsonBindingException(
 							"Could not instantiate XmlAdapter of type " + adapterClass, e);
 				} catch (IllegalAccessException e) {
-					throw new TransformationRuntimeException(
+					throw new JsonBindingException(
 							"Could not instantiate XmlAdapter of type " + adapterClass, e);
 				}
 			}
@@ -177,7 +171,7 @@ public class JAXBBundle extends GensonBundle {
 				try {
 					return adapter.unmarshal(value);
 				} catch (Exception e) {
-					throw new TransformationException("Could not unmarshal object using adapter "
+					throw new JsonBindingException("Could not unmarshal object using adapter "
 							+ adapter.getClass());
 				}
 			}
@@ -188,7 +182,7 @@ public class JAXBBundle extends GensonBundle {
 				try {
 					adaptedValue = adapter.marshal(object);
 				} catch (Exception e) {
-					throw new TransformationException("Could not marshal object using adapter "
+					throw new JsonBindingException("Could not marshal object using adapter "
 							+ adapter.getClass());
 				}
 				converter.serialize(adaptedValue, writer, ctx);
@@ -223,7 +217,7 @@ public class JAXBBundle extends GensonBundle {
 
 					return new EnumConverter(valueToEnum, enumToValue);
 				} catch (SecurityException e) {
-					throw new TransformationRuntimeException("Unable to introspect enum "
+					throw new JsonBindingException("Unable to introspect enum "
 							+ enumClass, e);
 				} catch (NoSuchFieldException e) {
 				}

@@ -12,11 +12,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.owlike.genson.JsonBindingException;
-import com.owlike.genson.TransformationException;
 import com.owlike.genson.Wrapper;
 
-public abstract class BeanCreator extends Wrapper<AnnotatedElement> implements
-		Comparable<BeanCreator> {
+public abstract class BeanCreator extends Wrapper<AnnotatedElement> implements Comparable<BeanCreator> {
 	// The type of object it can create
 	protected final Class<?> ofClass;
 	protected final Map<String, BeanCreatorProperty> parameters;
@@ -49,7 +47,7 @@ public abstract class BeanCreator extends Wrapper<AnnotatedElement> implements
 	public abstract int priority();
 
 	protected JsonBindingException couldNotCreate(Exception e) {
-		return new TransformationException("Could not create bean of type " + ofClass.getName()
+		return new JsonBindingException("Could not create bean of type " + ofClass.getName()
 				+ " using creator " + signature(), e);
 	}
 
