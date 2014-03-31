@@ -30,14 +30,14 @@ public class OptionalConverter<T> implements Converter<Optional<T>> {
     }
 
     @Override
-    public void serialize(Optional<T> object, ObjectWriter writer, Context ctx) throws TransformationException, IOException {
+    public void serialize(Optional<T> object, ObjectWriter writer, Context ctx) throws IOException {
         if (object == null || object.isPresent()) {
             valueConverter.serialize(object.get(), writer, ctx);
         } else writer.writeNull();
     }
 
     @Override
-    public Optional<T> deserialize(ObjectReader reader, Context ctx) throws TransformationException, IOException {
+    public Optional<T> deserialize(ObjectReader reader, Context ctx) throws IOException {
         if (ValueType.NULL.equals(reader.getValueType())) {
             return Optional.absent();
         }

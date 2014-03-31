@@ -73,8 +73,7 @@ public class ClassMetadataConverter<T> extends Wrapper<Converter<T>> implements 
 		this.tClass = tClass;
 	}
 
-	public void serialize(T obj, ObjectWriter writer, Context ctx) throws TransformationException,
-			IOException {
+	public void serialize(T obj, ObjectWriter writer, Context ctx) throws IOException {
 		// obj != null allows to not fail in case when the NullConverter is not in the chain
 		if (!Object.class.equals(tClass) && obj != null) {
 			writer.beginNextObjectMetadata()
@@ -83,8 +82,7 @@ public class ClassMetadataConverter<T> extends Wrapper<Converter<T>> implements 
 		wrapped.serialize(obj, writer, ctx);
 	}
 
-	public T deserialize(ObjectReader reader, Context ctx) throws TransformationException,
-			IOException {
+	public T deserialize(ObjectReader reader, Context ctx) throws IOException {
 		if (ValueType.OBJECT.equals(reader.getValueType())) {
 			String className = reader.nextObjectMetadata().metadata("class");
 			if (className != null) {

@@ -21,9 +21,8 @@ public interface Deserializer<T> {
 	 * @param reader used to read data from.
 	 * @param ctx the current context.
 	 * @return an instance of T or a subclass of T.
-	 * @throws TransformationException
+	 * @throws com.owlike.genson.JsonBindingException
 	 * @throws IOException
 	 */
-	public T deserialize(ObjectReader reader, Context ctx) throws TransformationException,
-			IOException;
+	public T deserialize(ObjectReader reader, Context ctx) throws IOException;
 }

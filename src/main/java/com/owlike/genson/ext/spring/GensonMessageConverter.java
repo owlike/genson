@@ -5,6 +5,7 @@ import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
+import com.owlike.genson.*;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -13,11 +14,6 @@ import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 
-import com.owlike.genson.Context;
-import com.owlike.genson.GenericType;
-import com.owlike.genson.Genson;
-import com.owlike.genson.ThreadLocalHolder;
-import com.owlike.genson.TransformationException;
 import com.owlike.genson.annotation.WithBeanView;
 import com.owlike.genson.stream.ObjectWriter;
 
@@ -57,8 +53,8 @@ public class GensonMessageConverter extends AbstractHttpMessageConverter<Object>
 			else
 				return genson.deserialize(genericType,
 						genson.createReader(inputMessage.getBody()), new Context(genson));
-		} catch (TransformationException e) {
-			throw new IOException("Could not deserialize type " + clazz.getName());
+		} catch (JsonBindingException e) {
+			throw new IOException("Could not deserialize type " + clazz.getName(), e);
 		}
 	}
 
@@ -80,7 +76,7 @@ public class GensonMessageConverter extends AbstractHttpMessageConverter<Object>
 			else
 				genson.serialize(t, writer);
 			writer.flush();
-		} catch (TransformationException e) {
+		} catch (JsonBindingException e) {
 			throw new IOException("Could not serialize type " + t.getClass(), e);
 		}
 	}

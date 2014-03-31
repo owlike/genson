@@ -7,10 +7,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
-import com.owlike.genson.Context;
-import com.owlike.genson.Deserializer;
-import com.owlike.genson.TransformationException;
-import com.owlike.genson.TransformationRuntimeException;
+import com.owlike.genson.*;
 import com.owlike.genson.stream.ObjectReader;
 
 public abstract class PropertyMutator extends BeanProperty implements
@@ -21,8 +18,7 @@ public abstract class PropertyMutator extends BeanProperty implements
 		super(name, type, declaringClass, annotations);
 	}
 
-	public Object deserialize(ObjectReader reader, Context ctx) throws TransformationException,
-			IOException {
+	public Object deserialize(ObjectReader reader, Context ctx) throws IOException {
 		try {
 			return propertyDeserializer.deserialize(reader, ctx);
 		} catch (Throwable th) {
@@ -30,8 +26,7 @@ public abstract class PropertyMutator extends BeanProperty implements
 		}
 	}
 
-	public void deserialize(Object into, ObjectReader reader, Context ctx)
-		throws TransformationException, IOException {
+	public void deserialize(Object into, ObjectReader reader, Context ctx) throws IOException {
 		Object propValue = null;
 		try {
 			propValue = propertyDeserializer.deserialize(reader, ctx);
@@ -47,12 +42,12 @@ public abstract class PropertyMutator extends BeanProperty implements
 		return o.priority() - priority();
 	}
 	
-	protected TransformationRuntimeException couldNotMutate(Exception e) {
+	protected JsonBindingException couldNotMutate(Exception e) {
 		return new TransformationRuntimeException("Could not mutate value of property named '"
 				+ name + "' using mutator " + signature(), e);
 	}
 	
-	protected TransformationException couldNotDeserialize(Throwable e) {
+	protected JsonBindingException couldNotDeserialize(Throwable e) {
 		return new TransformationException("Could not deserialize to property '" + name + "' of class " + declaringClass, e);
 	}
 

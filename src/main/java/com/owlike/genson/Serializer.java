@@ -63,9 +63,8 @@ public interface Serializer<T> {
 	 *        has been registered for subclasses).
 	 * @param writer to use to write data to the output stream.
 	 * @param ctx the current context.
-	 * @throws TransformationException
+	 * @throws com.owlike.genson.JsonBindingException
 	 * @throws IOException
 	 */
-	public void serialize(T object, ObjectWriter writer, Context ctx)
-			throws TransformationException, IOException;
+	public void serialize(T object, ObjectWriter writer, Context ctx) throws IOException;
 }

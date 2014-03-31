@@ -29,11 +29,9 @@ import com.owlike.genson.stream.ObjectWriter;
  * <p>
  * When you ask for a Converter it will
  * <ul>
- * <li>Search for a Serializer {@link BasicConvertersFactory#provide(Class, Type, Genson)
- * provide(Serializer.class, type, genson)}.
  * <ol>
  * <li>Lookup in the registered Serializers for one that is parameterized with the current type, if
- * found we finished (it takes the first one, so the order is very important).</li>
+ * found we finished (it takes the first one, so the order matters).</li>
  * <li>Else we will try the factories by searching the ones that can create and instance of
  * Serializer&lt;CurrentType&gt; (again the order is very important). We continue while they return
  * null.</li>
@@ -47,7 +45,7 @@ import com.owlike.genson.stream.ObjectWriter;
  * 
  * Note that the create method from the registered factories will only be called if the type with
  * which they are parameterized is assignable from the current type. For example, if we look for a
- * serializer of Integer then Factory<Converter<Integer>> and Factory<Serializer<Object>> match
+ * serializer of Integer then Factory&lt;Converter&lt;Integer>> and Factory&lt;Serializer&lt;Object>> match
  * both, the first registered will be used.
  * 
  * @author eugen
@@ -119,13 +117,11 @@ public class BasicConvertersFactory implements Factory<Converter<?>> {
 			this.deserializer = deserializer;
 		}
 
-		public void serialize(T obj, ObjectWriter writer, Context ctx)
-				throws TransformationException, IOException {
+		public void serialize(T obj, ObjectWriter writer, Context ctx) throws IOException {
 			serializer.serialize(obj, writer, ctx);
 		}
 
-		public T deserialize(ObjectReader reader, Context ctx) throws TransformationException,
-				IOException {
+		public T deserialize(ObjectReader reader, Context ctx) throws IOException {
 			return deserializer.deserialize(reader, ctx);
 		}
 

@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.owlike.genson.JsonBindingException;
 import com.owlike.genson.TransformationException;
 import com.owlike.genson.Wrapper;
 
@@ -41,13 +42,13 @@ public abstract class BeanCreator extends Wrapper<AnnotatedElement> implements
 		return comp != 0 ? comp : parameters.size() - o.parameters.size();
 	}
 
-	public abstract Object create(Object... args) throws TransformationException;
+	public abstract Object create(Object... args);
 
 	protected abstract String signature();
 
 	public abstract int priority();
 
-	protected TransformationException couldNotCreate(Exception e) {
+	protected JsonBindingException couldNotCreate(Exception e) {
 		return new TransformationException("Could not create bean of type " + ofClass.getName()
 				+ " using creator " + signature(), e);
 	}
@@ -66,7 +67,7 @@ public abstract class BeanCreator extends Wrapper<AnnotatedElement> implements
 			decorate(constructor);
 		}
 
-		public Object create(Object... args) throws TransformationException {
+		public Object create(Object... args) {
 			try {
 				return constructor.newInstance(args);
 			} catch (IllegalArgumentException e) {
@@ -107,7 +108,7 @@ public abstract class BeanCreator extends Wrapper<AnnotatedElement> implements
 			decorate(_creator);
 		}
 
-		public Object create(Object... args) throws TransformationException {
+		public Object create(Object... args) {
 			try {
 				// we will handle only static method creators
 				return ofClass.cast(_creator.invoke(null, args));

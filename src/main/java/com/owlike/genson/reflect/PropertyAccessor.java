@@ -7,11 +7,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
-import com.owlike.genson.Context;
-import com.owlike.genson.Serializer;
-import com.owlike.genson.TransformationException;
-import com.owlike.genson.TransformationRuntimeException;
+import com.owlike.genson.*;
 import com.owlike.genson.stream.ObjectWriter;
+
+import javax.json.Json;
 
 public abstract class PropertyAccessor extends BeanProperty implements Comparable<PropertyAccessor> {
 	Serializer<Object> propertySerializer;
@@ -21,8 +20,7 @@ public abstract class PropertyAccessor extends BeanProperty implements Comparabl
 		super(name, type, declaringClass, annotations);
 	}
 
-	public void serialize(Object propertySource, ObjectWriter writer, Context ctx)
-			throws TransformationException, IOException {
+	public void serialize(Object propertySource, ObjectWriter writer, Context ctx) throws IOException {
 		Object propertyValue = access(propertySource);
 		writer.writeName(name);
 		try {
@@ -38,13 +36,13 @@ public abstract class PropertyAccessor extends BeanProperty implements Comparabl
 		return o.priority() - priority();
 	}
 
-	protected TransformationRuntimeException couldNotAccess(Exception e) {
+	protected JsonBindingException couldNotAccess(Exception e) {
 		return new TransformationRuntimeException("Could not access value of property named '"
 				+ name + "' using accessor " + signature() + " from class "
 				+ declaringClass.getName(), e);
 	}
 
-	protected TransformationException couldNotSerialize(Throwable e) {
+	protected JsonBindingException couldNotSerialize(Throwable e) {
 		return new TransformationException("Could not serialize property '" + name
 				+ "' from class " + declaringClass.getName(), e);
 	}

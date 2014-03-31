@@ -15,10 +15,7 @@ import static com.owlike.genson.Trilean.FALSE;
 import static com.owlike.genson.Trilean.TRUE;
 import static com.owlike.genson.reflect.TypeUtil.*;
 
-import com.owlike.genson.BeanView;
-import com.owlike.genson.Genson;
-import com.owlike.genson.TransformationRuntimeException;
-import com.owlike.genson.Trilean;
+import com.owlike.genson.*;
 import com.owlike.genson.annotation.Creator;
 import com.owlike.genson.reflect.PropertyAccessor.MethodAccessor;
 import com.owlike.genson.reflect.PropertyMutator.MethodMutator;
@@ -93,7 +90,7 @@ public class BeanViewDescriptorProvider extends BaseBeanDescriptorProvider {
         return descriptor;
     }
 
-    private TransformationRuntimeException couldNotInstantiateBeanView(Class<?> beanViewClass,
+    private JsonBindingException couldNotInstantiateBeanView(Class<?> beanViewClass,
             Exception e) {
         return new TransformationRuntimeException("Could not instantiate BeanView "
                 + beanViewClass.getName()

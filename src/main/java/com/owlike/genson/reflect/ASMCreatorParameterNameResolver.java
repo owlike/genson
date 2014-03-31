@@ -205,7 +205,7 @@ public final class ASMCreatorParameterNameResolver implements PropertyNameResolv
 				try {
 					return Class.forName(type.getClassName(), true, forClass.getClassLoader());
 				} catch (ClassNotFoundException e) {
-					throw new TransformationRuntimeException("Could not found class "
+					throw new TransformationRuntimeException("Could not find class "
 							+ type.getClassName() + " while searching for constructor "
 							+ signature() + " parameter names.", e);
 				}

@@ -72,8 +72,7 @@ public class BeanViewConverter<T> extends Wrapper<Converter<T>> implements Conve
 		return null;
 	}
 
-	public void serialize(T obj, ObjectWriter writer, Context ctx) throws TransformationException,
-			IOException {
+	public void serialize(T obj, ObjectWriter writer, Context ctx) throws IOException {
 		boolean handled = false;
 		List<Class<? extends BeanView<?>>> views = ctx.views();
 		if (views != null && views.size() > 0) {
@@ -92,8 +91,7 @@ public class BeanViewConverter<T> extends Wrapper<Converter<T>> implements Conve
 		if (!handled) wrapped.serialize(obj, writer, ctx);
 	}
 
-	public T deserialize(ObjectReader reader, Context ctx) throws TransformationException,
-			IOException {
+	public T deserialize(ObjectReader reader, Context ctx) throws IOException {
 		if (ctx.hasViews()) {
 			Class<? extends BeanView<T>> viewClass = findViewFor(type, ctx.views());
 			if (viewClass != null) {

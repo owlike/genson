@@ -40,9 +40,7 @@ import com.owlike.genson.stream.ObjectReader;
  * @param <T> type of objects handled by this converter.
  */
 public interface Converter<T> extends Serializer<T>, Deserializer<T> {
-	public void serialize(T object, com.owlike.genson.stream.ObjectWriter writer, Context ctx)
-			throws TransformationException, java.io.IOException;
+	public void serialize(T object, com.owlike.genson.stream.ObjectWriter writer, Context ctx) throws IOException;
 
-	public T deserialize(ObjectReader reader, Context ctx) throws TransformationException,
-			IOException;
+	public T deserialize(ObjectReader reader, Context ctx) throws IOException;
 }

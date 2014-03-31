@@ -1,13 +1,9 @@
 package com.owlike.genson;
 
 /**
- * This exception is thrown when there went something wrong and you can not recover from that.
- * You should not try to catch this exception.
- * 
- * @author eugen
- *
+ * @deprecated will be removed in release 1.0, catch instead JsonBindingException.
  */
-public final class TransformationRuntimeException extends RuntimeException {
+public final class TransformationRuntimeException extends JsonBindingException {
 	private static final long serialVersionUID = 3298864591780352514L;
 
 	public TransformationRuntimeException(String message) {
@@ -17,6 +13,4 @@ public final class TransformationRuntimeException extends RuntimeException {
 	public TransformationRuntimeException(String message, Throwable cause) {
 		super(message, cause);
 	}
-	
-	
 }

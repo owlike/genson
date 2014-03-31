@@ -186,8 +186,8 @@ public final class Genson {
 	 * @param forType
 	 *            the type for which a converter is needed.
 	 * @return the converter instance.
-	 * @throws TransformationRuntimeException
-	 *             if no converter has been found.
+	 * @throws com.owlike.genson.JsonBindingException
+	 *             if a problem occurs during converters lookup/construction.
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> Converter<T> provideConverter(Type forType) {
@@ -208,12 +208,12 @@ public final class Genson {
 	 * @param object
 	 *            object to be serialized.
 	 * @return the serialized object as a string.
-	 * @throws TransformationException
+	 * @throws com.owlike.genson.JsonBindingException
 	 *             if there was any kind of error during serialization.
 	 * @throws IOException
 	 *             if there was a problem during writing of the object to the output.
 	 */
-	public String serialize(Object object) throws TransformationException, IOException {
+	public String serialize(Object object) throws IOException {
 		StringWriter sw = new StringWriter();
 		ObjectWriter writer = createWriter(sw);
 		if (object == null)
@@ -232,11 +232,10 @@ public final class Genson {
 	 * @param type
 	 *            the type of the object to be serialized.
 	 * @return json string representation.
-	 * @throws TransformationException
+	 * @throws com.owlike.genson.JsonBindingException
 	 * @throws IOException
 	 */
-	public String serialize(Object object, GenericType<?> type) throws TransformationException,
-			IOException {
+	public String serialize(Object object, GenericType<?> type) throws IOException {
 		StringWriter sw = new StringWriter();
 		ObjectWriter writer = createWriter(sw);
 		if (object == null)
@@ -255,11 +254,10 @@ public final class Genson {
 	 * @param withViews
 	 *            the BeanViews to apply during this serialization.
 	 * @return
-	 * @throws TransformationException
+	 * @throws com.owlike.genson.JsonBindingException
 	 * @throws IOException
 	 */
-	public String serialize(Object object, Class<? extends BeanView<?>>... withViews)
-			throws TransformationException, IOException {
+	public String serialize(Object object, Class<? extends BeanView<?>>... withViews) throws IOException {
 		StringWriter sw = new StringWriter();
 		ObjectWriter writer = createWriter(sw);
 		if (object == null)
@@ -275,7 +273,7 @@ public final class Genson {
 	 * Serializes this object to the passed Writer, as Genson did not instantiate it, you are
      * responsible of calling close on it.
 	 */
-	public void serialize(Object object, Writer writer) throws TransformationException, IOException {
+	public void serialize(Object object, Writer writer) throws IOException {
 		ObjectWriter objectWriter = createWriter(writer);
 		if (object == null)
 			nullConverter.serialize(null, objectWriter, null);
@@ -288,8 +286,7 @@ public final class Genson {
 	 * Serializes this object to the passed OutputStream, as Genson did not instantiate it, you are
 	 * responsible of calling close on it.
 	 */
-	public void serialize(Object object, OutputStream output) throws TransformationException,
-			IOException {
+	public void serialize(Object object, OutputStream output) throws IOException {
 		ObjectWriter objectWriter = createWriter(output);
 		if (object == null)
 			nullConverter.serialize(null, objectWriter, null);
@@ -301,7 +298,7 @@ public final class Genson {
 	/**
 	 * Serializes this object to its json form in a byte array.
 	 */
-	public byte[] serializeBytes(Object object) throws TransformationException, IOException {
+	public byte[] serializeBytes(Object object) throws IOException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		ObjectWriter objectWriter = createWriter(baos);
 		if (object == null)
@@ -320,11 +317,11 @@ public final class Genson {
 	 * @param writer
 	 *            into which to write the serialized object.
 	 * @param withViews
-	 * @throws TransformationException
+	 * @throws com.owlike.genson.JsonBindingException
 	 * @throws IOException
 	 */
     public void serialize(Object object, ObjectWriter writer,
-            Class<? extends BeanView<?>>... withViews) throws TransformationException, IOException {
+            Class<? extends BeanView<?>>... withViews) throws IOException {
         if (object == null) nullConverter.serialize(null, writer, null);
         else serialize(object, object.getClass(), writer,
                 new Context(this, Arrays.asList(withViews)));
@@ -335,8 +332,7 @@ public final class Genson {
 	 * Serializes this object and writes its representation to writer. As you are providing the
 	 * writer instance you also must ensure to call close on it when you are done.
 	 */
-	public void serialize(Object object, Type type, ObjectWriter writer, Context ctx)
-			throws TransformationException, IOException {
+	public void serialize(Object object, Type type, ObjectWriter writer, Context ctx) throws IOException {
 		Serializer<Object> ser = provideConverter(type);
 		ser.serialize(object, writer, ctx);
 	}
@@ -349,11 +345,10 @@ public final class Genson {
 	 * @param toClass
 	 *            type into which to deserialize.
 	 * @return
-	 * @throws TransformationException
+	 * @throws com.owlike.genson.JsonBindingException
 	 * @throws IOException
 	 */
-	public <T> T deserialize(String fromSource, Class<T> toClass) throws TransformationException,
-			IOException {
+	public <T> T deserialize(String fromSource, Class<T> toClass) throws IOException {
 		return deserialize(GenericType.of(toClass), createReader(new StringReader(fromSource)),
 				new Context(this));
 	}
@@ -367,11 +362,10 @@ public final class Genson {
 	 * @param fromSource
 	 * @param toType
 	 * @return
-	 * @throws TransformationException
+	 * @throws com.owlike.genson.JsonBindingException
 	 * @throws IOException
 	 */
-	public <T> T deserialize(String fromSource, GenericType<T> toType)
-			throws TransformationException, IOException {
+	public <T> T deserialize(String fromSource, GenericType<T> toType) throws IOException {
 		return deserialize(toType, createReader(new StringReader(fromSource)), new Context(this));
 	}
 
@@ -379,8 +373,7 @@ public final class Genson {
 	 * Deserializes the incoming json stream into an instance of T.
      * Genson did not create the instance of Reader so it will not be closed
 	 */
-	public <T> T deserialize(Reader reader, GenericType<T> toType) throws TransformationException,
-			IOException {
+	public <T> T deserialize(Reader reader, GenericType<T> toType) throws IOException {
 		return deserialize(toType, createReader(reader), new Context(this));
 	}
 
@@ -388,8 +381,7 @@ public final class Genson {
      * Deserializes the incoming json stream into an instance of T.
      * Genson did not create the instance of Reader so it will not be closed
      */
-	public <T> T deserialize(Reader reader, Class<T> toType) throws TransformationException,
-			IOException {
+	public <T> T deserialize(Reader reader, Class<T> toType) throws IOException {
 		return deserialize(GenericType.of(toType), createReader(reader), new Context(this));
 	}
 
@@ -397,8 +389,7 @@ public final class Genson {
      * Deserializes the incoming json stream into an instance of T.
      * Genson did not create the instance of InputStream so it will not be closed
      */
-	public <T> T deserialize(InputStream input, Class<T> toType) throws TransformationException,
-			IOException {
+	public <T> T deserialize(InputStream input, Class<T> toType) throws IOException {
 		return deserialize(GenericType.of(toType), createReader(input), new Context(this));
 	}
 
@@ -406,48 +397,44 @@ public final class Genson {
      * Deserializes the incoming json stream into an instance of T.
      * Genson did not create the instance of InputStream so it will not be closed.
      */
-	public <T> T deserialize(InputStream input, GenericType<T> toType)
-			throws TransformationException, IOException {
+	public <T> T deserialize(InputStream input, GenericType<T> toType) throws IOException {
 		return deserialize(toType, createReader(input), new Context(this));
 	}
 
 	/**
      * Deserializes the incoming json byte array into an instance of T.
      */
-	public <T> T deserialize(byte[] input, Class<T> toType) throws TransformationException,
-			IOException {
+	public <T> T deserialize(byte[] input, Class<T> toType) throws IOException {
 		return deserialize(GenericType.of(toType), createReader(input), new Context(this));
 	}
 
 	/**
      * Deserializes the incoming json byte array into an instance of T.
      */
-	public <T> T deserialize(byte[] input, GenericType<T> toType) throws TransformationException,
-			IOException {
+	public <T> T deserialize(byte[] input, GenericType<T> toType) throws IOException {
 		return deserialize(toType, createReader(input), new Context(this));
 	}
 
 	public <T> T deserialize(String fromSource, GenericType<T> toType,
-			Class<? extends BeanView<?>>... withViews) throws TransformationException, IOException {
+			Class<? extends BeanView<?>>... withViews) throws IOException {
 		StringReader reader = new StringReader(fromSource);
 		return deserialize(toType, createReader(reader),
 				new Context(this, Arrays.asList(withViews)));
 	}
 
 	public <T> T deserialize(String fromSource, Class<T> toType,
-			Class<? extends BeanView<?>>... withViews) throws TransformationException, IOException {
+			Class<? extends BeanView<?>>... withViews) throws IOException {
 		StringReader reader = new StringReader(fromSource);
 		return deserialize(GenericType.of(toType), createReader(reader),
 				new Context(this, Arrays.asList(withViews)));
 	}
 
 	public <T> T deserialize(GenericType<T> type, Reader reader,
-			Class<? extends BeanView<?>>... withViews) throws TransformationException, IOException {
+			Class<? extends BeanView<?>>... withViews) throws IOException {
 		return deserialize(type, createReader(reader), new Context(this, Arrays.asList(withViews)));
 	}
 
-	public <T> T deserialize(GenericType<T> type, ObjectReader reader, Context ctx)
-			throws TransformationException, IOException {
+	public <T> T deserialize(GenericType<T> type, ObjectReader reader, Context ctx) throws IOException {
 		Deserializer<T> deser = provideConverter(type.getType());
 		return deser.deserialize(reader, ctx);
 	}
