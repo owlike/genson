@@ -1254,16 +1254,6 @@ public final class Genson {
 			return this;
 		}
 
-		/**
-		 * The value of indentation is ignored, it will always use 2 spaces.
-		 * 
-		 * @deprecated use instead {@link #useIndentation(boolean)}
-		 */
-		public Builder setIndentation(String indentation) {
-			this.indent = true;
-			return this;
-		}
-
 		public Builder useTimeInMillis(boolean timeInMillis) {
 			defaultDateConverter = new DateConverter(null, timeInMillis);
 			return this;

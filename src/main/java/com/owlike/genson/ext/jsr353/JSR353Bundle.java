@@ -27,8 +27,6 @@ import com.owlike.genson.stream.JsonWriter;
 import com.owlike.genson.stream.ObjectReader;
 import com.owlike.genson.stream.ObjectWriter;
 
-// TODO register a unknown type converter overriding the existing one, would allow to deser to 
-// jsr structures instead of Map and Lists.
 public class JSR353Bundle extends GensonBundle {
     static final JsonBuilderFactory factory = JsonProvider.provider().createBuilderFactory(
             new HashMap<String, String>());
