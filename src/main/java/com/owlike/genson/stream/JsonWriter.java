@@ -345,8 +345,19 @@ public class JsonWriter implements ObjectWriter {
     }
 
     public ObjectWriter writeValue(byte[] value) {
+        clearMetadata();
+        beforeValue();
+
+        if ((_len + 1) >= _bufferSize) flushBuffer();
+        _buffer[_len++] = '"';
         final char[] charArray = Base64.encodeToChar(value, false);
+
         writeToBuffer(charArray, 0, charArray.length);
+
+        if ((_len + 1) >= _bufferSize) flushBuffer();
+        _buffer[_len++] = '"';
+        _hasPrevious = true;
+
         flush();
         return this;
     }

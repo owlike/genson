@@ -21,6 +21,18 @@ import com.owlike.genson.Genson;
 
 public class DefaultConvertersTest {
 	private Genson genson = new Genson();
+
+    @Test public void testPojoWithBytes() {
+        Genson genson = new Genson.Builder().setWithDebugInfoPropertyNameResolver(true).create();
+        PojoWithByteArray expected = new PojoWithByteArray(5, 777.777, "ABCD".getBytes());
+        String json = genson.serialize(expected);
+        PojoWithByteArray actual = genson.deserialize(json, PojoWithByteArray.class);
+
+        assertEquals("{\"b\":\"QUJDRA==\",\"f\":777.777,\"i\":5}", json);
+        assertArrayEquals(expected.b, actual.b);
+        assertEquals(expected.f, actual.f, 1e-21);
+        assertEquals(expected.i, actual.i);
+    }
 	
 	@Test public void testByteArray() throws UnsupportedEncodingException {
 		byte[] byteArray = "hey convert me to bytes".getBytes("UTF-8");
@@ -34,7 +46,6 @@ public class DefaultConvertersTest {
         EnumSet<Color> bar = genson.deserialize(json, new GenericType<EnumSet<Color>>() {});
         assertTrue(bar.contains(Color.blue));
         assertTrue(bar.contains(Color.red));
-
 	}
 	
 	@Test
@@ -120,4 +131,16 @@ public class DefaultConvertersTest {
 
 	public static class SubBean extends RootBean {
 	}
+
+    public static class PojoWithByteArray {
+        int i;
+        double f;
+        byte[] b;
+
+        PojoWithByteArray(int i, double f, byte[] b) {
+            this.i = i;
+            this.f = f;
+            this.b = b;
+        }
+    }
 }
