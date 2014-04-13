@@ -1,26 +1,33 @@
 package com.owlike.genson.functional;
 
+import java.awt.*;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.EnumSet;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
-import java.util.UUID;
 
+import com.owlike.genson.*;
+import com.owlike.genson.stream.JsonWriter;
+import com.owlike.genson.stream.ObjectReader;
+import com.owlike.genson.stream.ObjectWriter;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-import com.owlike.genson.GenericType;
-import com.owlike.genson.Genson;
-
 public class DefaultConvertersTest {
 	private Genson genson = new Genson();
+
+    @Test public void testReadWriteByteAsInt() {
+        Genson genson = new Genson.Builder().setWithDebugInfoPropertyNameResolver(true).useByteAsInt(true).create();
+        PojoWithByteArray expected = new PojoWithByteArray(5, 777.777, "ABCD".getBytes());
+        String json = genson.serialize(expected);
+        PojoWithByteArray actual = genson.deserialize(json, PojoWithByteArray.class);
+
+        assertEquals("{\"b\":[65,66,67,68],\"f\":777.777,\"i\":5}", json);
+        assertArrayEquals(expected.b, actual.b);
+        assertEquals(expected.f, actual.f, 1e-21);
+        assertEquals(expected.i, actual.i);
+    }
 
     @Test public void testPojoWithBytes() {
         Genson genson = new Genson.Builder().setWithDebugInfoPropertyNameResolver(true).create();
@@ -43,7 +50,8 @@ public class DefaultConvertersTest {
 	@Test public void testEnumSet() {
 		EnumSet<Color> foo = EnumSet.of(Color.blue, Color.red);
         String json = genson.serialize(foo);
-        EnumSet<Color> bar = genson.deserialize(json, new GenericType<EnumSet<Color>>() {});
+        EnumSet<Color> bar = genson.deserialize(json, new GenericType<EnumSet<Color>>() {
+        });
         assertTrue(bar.contains(Color.blue));
         assertTrue(bar.contains(Color.red));
 	}
@@ -91,7 +99,7 @@ public class DefaultConvertersTest {
 		String json = genson.serialize(expected, new GenericType<Map<UUID, List<UUID>>>() {
 		});
 		assertEquals(expected, genson.deserialize(json, new GenericType<Map<UUID, List<UUID>>>() {
-		}));
+        }));
 	}
 
 	@Test

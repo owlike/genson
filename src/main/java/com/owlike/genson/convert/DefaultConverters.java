@@ -196,6 +196,7 @@ public final class DefaultConverters {
 		}
 	}
 
+    @HandleClassMetadata
 	public final static class ByteArrayConverter implements Converter<byte[]> {
 		public static final ByteArrayConverter instance = new ByteArrayConverter();
 
@@ -211,8 +212,36 @@ public final class DefaultConverters {
 		public byte[] deserialize(ObjectReader reader, Context ctx) {
 			return reader.valueAsByteArray();
 		}
-
 	}
+
+    @HandleClassMetadata
+    public static class ByteArrayAsIntArrayConverter implements Converter<byte[]> {
+        public static final ByteArrayAsIntArrayConverter instance = new ByteArrayAsIntArrayConverter();
+
+        private ByteArrayAsIntArrayConverter() {}
+
+        @Override
+        public void serialize(byte[] object, ObjectWriter writer, Context ctx) throws Exception {
+            writer.beginArray();
+            for (int i = 0; i < object.length; i++) writer.writeValue(object[i]);
+            writer.endArray();
+        }
+
+        @Override
+        public byte[] deserialize(ObjectReader reader, Context ctx) throws Exception {
+            byte[] array = new byte[256];
+            reader.beginArray();
+            int i;
+            for (i = 0; reader.hasNext(); i++) {
+                reader.next();
+                Operations.expandArray(array, i, 2);
+                array[i] = (byte) reader.valueAsInt();
+            }
+            reader.endArray();
+
+            return Operations.truncateArray(array, i);
+        }
+    }
 
 	public final static class ArrayConverterFactory implements Factory<Converter<Object>> {
 		public final static ArrayConverterFactory instance = new ArrayConverterFactory();

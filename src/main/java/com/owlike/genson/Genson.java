@@ -1286,6 +1286,13 @@ public final class Genson {
 			return metadata;
 		}
 
+        public Builder useByteAsInt(boolean enable) {
+            if (enable) {
+                withConverters(DefaultConverters.ByteArrayAsIntArrayConverter.instance);
+            }
+            return this;
+        }
+
 		/**
 		 * Creates an instance of Genson. You may use this method as many times you want. It wont
 		 * change the state of the builder, in sense that the returned instance will have always the

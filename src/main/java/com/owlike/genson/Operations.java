@@ -13,6 +13,22 @@ public final class Operations {
 		return arr;
 	}
 
+    public static byte[] expandArray(byte[] array, int idx, double factor) {
+        if (idx >= array.length) {
+            byte[] tmpArray = new byte[(int) (array.length * factor)];
+            System.arraycopy(array, 0, tmpArray, 0, array.length);
+            return tmpArray;
+        } else return array;
+    }
+
+    public static byte[] truncateArray(byte[] array, int size) {
+        if (size < array.length) {
+            byte[] tmpArray = new byte[size];
+            System.arraycopy(array, 0, tmpArray, 0, size);
+            return tmpArray;
+        } else return array;
+    }
+
 	public static void checkNotNull(Object... values) {
 		for (Object value : values)
 			if (value == null) throw new IllegalArgumentException("Null not allowed!");

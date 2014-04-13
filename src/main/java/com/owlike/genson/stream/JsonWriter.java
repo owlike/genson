@@ -460,8 +460,7 @@ public class JsonWriter implements ObjectWriter {
         return this;
     }
 
-    private final void writeToBuffer(final char[] data, final int offset, final int length)
-            {
+    private final void writeToBuffer(final char[] data, final int offset, final int length) {
         if (length < _LIMIT_WRITE_TO_BUFFER && length < (_bufferSize - _len)) {
             System.arraycopy(data, offset, _buffer, _len, length);
             _len += length;
