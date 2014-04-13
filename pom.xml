@@ -17,9 +17,8 @@
 	</licenses>
 	<scm>
 		<url>http://genson.googlecode.com/git</url>
-		<connection>scm:git:http://genson.googlecode.com/git</connection>
-		<developerConnection>scm:git:http://genson.googlecode.com/git</developerConnection>
-		<tag>HEAD</tag>
+		<connection>scm:git:http://code.google.com/p/genson/</connection>
+		<developerConnection>scm:git:http://code.google.com/p/genson/</developerConnection>
 	</scm>
 	<issueManagement>
 		<system>Google Code Issue List</system>
@@ -344,9 +343,8 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-release-plugin</artifactId>
-				<version>2.3.2</version>
+				<version>2.5</version>
 				<configuration>
-					<tagBase>scm:git:http://genson.googlecode.com/git</tagBase>
 					<mavenExecutorId>forked-path</mavenExecutorId>
 				</configuration>
 			</plugin>
