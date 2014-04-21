@@ -1,0 +1,11 @@
+name: "Genson"
+description: "fast & extensible Java <> Json library"
+
+markdown: rdiscount
+pygments: true
+permalink: pretty
+
+
+#url: "[YOUR DOMAIN]"
+
+latest.version: 0.99

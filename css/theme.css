@@ -1,0 +1,72 @@
+
+body {
+    margin-bottom: 50px;
+    background-color: #f8f8f8;
+    color: #333333;
+    font-weight: 500;
+    letter-spacing: .1;
+}
+
+pre {
+    font-size: 12px;
+    overflow: auto;
+    word-wrap: normal;
+    white-space: pre;
+}
+
+.promotion-details {
+    background-color: white;
+    padding-top: 30px;
+}
+
+.navbar-brand {
+    box-shadow: 4px 0 6px -6px #777777;
+}
+header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+}
+.jumbotron {
+    background-color: #2E7BCF;
+    border-bottom: 1px solid #275DA1;
+    margin-bottom: 0px;
+}
+
+.jumbotron, h1, .h1 {
+    font-family: 'Architects Daughter','Helvetica Neue',Helvetica,Arial,serif;
+    color: #FFFFFF;
+    text-shadow: 0 1px 0 #000000;
+
+}
+
+.catch-phrase {
+    color: #9DDCFF;
+}
+
+.featurette-detail {
+    padding-top: 30px;
+}
+
+.fa-big {
+    font-size: 8em !important;
+}
+
+.fa-med {
+    font-size: 55px !important;
+}
+
+pre {
+    font-size: 1.1em;
+    padding: 20px !important;
+}
+
+.lead {
+    font-size: 16px;
+}
+
+.space-bottom {
+    padding-bottom: 30px;
+}
+
+.space-top {
+    padding-top: 30px;
+}
