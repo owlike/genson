@@ -1,0 +1,188 @@
+---
+layout: default
+latest_version: 0.99
+---
+
+<header>
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="">Genson</a>
+        </div>
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="#"><i class="fa fa-compass"></i> Getting started</a></li>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-book"></i> Documentation <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#">Extensions</a></li>
+                        <li><a href="#">Configuration</a></li>
+                        <li><a href="#">Javadoc</a></li>
+                        <li><a href="#">Benchmarks & Metrics</a></li>
+                    </ul>
+                </li>
+                <li><a href="#"><i class="fa fa-group"></i> Community</a></li>
+                <li><a href="#"><i class="fa fa-question"></i> FAQ</a></li>
+            </ul>
+        </div>
+    </div>
+</header>
+
+<div class="jumbotron">
+    <div class="container">
+
+        <div class="pull-left" style="width: 60%">
+            <h1>Genson</h1>
+            <p class="catch-phrase">Fast and easy to use Java <> JSON library.</p>
+        </div>
+        <div class="pull-left space-top">
+            <a href="https://github.com/owlike/genson" class="btn btn-primary btn-lg"><i class="fa fa-github fa-med"></i> View on Github</a>
+            <a href="#download-section" class="btn btn-primary btn-lg"><i class="fa fa-cloud-download fa-med"></i> Download</a>
+        </div>
+    </div>
+</div>
+
+<div class="promotion-details">
+<div class="container">
+    <div class="row">
+        <div class="row">
+            <div class="text-center"><h2>Powerful but easy to use</h2></div>
+        </div>
+        <div class="row featurette-detail">
+            <div class="col-lg-6">
+                <p class="lead"><i class="fa fa-check"></i> Genson API is designed to be easy to use, it handles for you all the databinding stuff, streaming, etc.</p>
+            </div>
+            <div class="col-lg-6">
+                <p class="lead"><i class="fa fa-check"></i> Highly configurable via the GensonBuilder.</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="row">
+                    <pre class="prettyprint"><code class="language-java">new Genson().deserialize("{}", AwesomeBean.class);</code></pre>
+                </div>
+                <div class="row">
+                    <p class="lead"><i class="fa fa-check"></i> Full support of <b>generic types, polymorphic types and immutable objects</b> that don't provide a default constructor.</p>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <pre class="prettyprint"><code class="language-java">new Genson.Builder()
+  .setDateFormat(new SimpleDateFormat("yyyy-MM-dd"))
+  .useIndentation(true)
+  .withSerializers(myCustomSerializer)
+.create();</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <hr />
+    <div class="row">
+        <div class="text-center">
+            <h2>Integrated with Java ecosystem</h2>
+        </div>
+        <div>
+            <div class="row featurette-detail">
+                <div class="col-lg-6">
+                    <div class="lead"><i class="fa fa-check"></i> Just drop the jar in your classpath to enable Json support in a <b>JAX-RS</b> Application.</div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="lead"><i class="fa fa-check"></i> Leverage Genson features in <b>Spring MVC</b>.</div>
+                </div>
+            </div>
+            <div class="row ">
+                <div class="col-lg-6">
+                    <div class=" lead"><i class="fa fa-check"></i> Use Genson as your <b>JSR 353</b> implementation and take advantage of Genson speed or just use JSR 353 DOM structures with Genson.</div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="lead"><i class="fa fa-check"></i> Use <b>JAXB</b> annotations with Genson.</div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-6"><pre class="prettyprint"><code class="language-java">new Genson().serialize(
+  Json.createArrayBuilder()
+    .add(1)
+    .add(2)
+  .build()
+);</code></pre></div>
+                <div class="col-lg-6">
+                    <pre class="prettyprint"><code class="language-java">public class Bean {
+  @XmlJavaTypeAdapter(BeanAdapter.class)
+  private ComplexType complexObject;
+  @XmlTransient
+  private String password;
+}</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <hr />
+    <div class="row">
+    <div class="row">
+        <h2 class="text-center">Performant and scalable</h2>
+    </div>
+    <div class="row featurette-detail">
+        <div class="col-lg-6">
+            <img src="https://chart.googleapis.com/chart?chtt=total+%28nanos%29&chf=c||lg||0||FFFFFF||1||76A4FB||0|bg||s||EFEFEF&chs=500x150&chd=t:15020,19363,27431,57752,162714,225332&chds=0,247866.06735000003&chxt=y&chxl=0:|json%2Fjson-lib-databind|json%2Fflexjson%2Fdatabind|json%2Fsvenson-databind|json%2Fgoogle-gson%2Fdatabind|json%2Fgenson%2Fdatabind|json%2Fjackson%2Fdatabind-strings&chm=N *f*,000000,0,-1,10&lklk&chdlp=t&chco=660000|660033|660066|660099|6600CC|6600FF|663300|663333|663366|663399|6633CC|6633FF|666600|666633|666666&cht=bhg&chbh=10,0,10&nonsense=aaa.png"/>
+        </div>
+        <div class="col-lg-6">
+            <div class="lead">
+                <div class="row space-bottom">
+                    <i class="fa fa-check"></i> Small memory footprint with the Streaming API.
+                </div>
+                <div class="row">
+                    <i class="fa fa-check"></i> High serialization and deserialization throughput independent from JSON size.
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <hr />
+    <div class="row" name="download-section">
+        <div class="row text-center">
+            <h2>Get it!</h2>
+            <div class="lead">
+                <i class="fa fa-check"></i> Genson is packaged as a all in one solution of ~300Kb, everything needed is inside the jar.
+            </div>
+        </div>
+
+        <div class="row featurette-detail">
+                <div class="col-lg-6">
+                    <div class="lead"><i class="fa fa-check"></i> No more ClassNotFound exceptions for non maven users because you forgot to download a dependency!</div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="lead">
+                        <i class="fa fa-check"></i> No more headaches handling dependency versions for maven users!
+                    </div>
+                </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="text-center">
+                    <a href="http://repo1.maven.org/maven2/com/owlike/genson/{{page.latest_version}}/genson-{{page.latest_version}}.jar" class="btn">
+                        <i class="fa fa-cloud-download fa-big"></i>
+                        <br>Download genson-{{page.latest_version}}.jar
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div>
+                        <pre class="prettyprint"><code class="language-xml">&lt;dependency>
+    &lt;groupId>com.owlike&lt;/groupId>
+    &lt;artifactId>genson&lt;/artifactId>
+    &lt;version>{{page.latest_version}}&lt;/version>
+&lt;/dependency></code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
