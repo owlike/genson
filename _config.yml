@@ -5,6 +5,7 @@ markdown: rdiscount
 pygments: true
 permalink: pretty
 
+baseurl: /genson
 
 #url: "[YOUR DOMAIN]"
 
