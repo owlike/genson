@@ -5,22 +5,22 @@
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#menu-navbar-collapse-1">
                 <i class="fa fa-bars menu-item"></i>
             </button>
-            <a class="navbar-brand" href="/">Genson</a>
+            <a class="navbar-brand" href="{{ site.baseurl }}/">Genson</a>
         </div>
         <div class="collapse navbar-collapse" id="menu-navbar-collapse-1">
             <ul class="nav navbar-nav">
-                <li class="active"><a href="#"><i class="fa fa-compass"></i> Getting started</a></li>
+                <li class="active"><a href="/GettingStarted"><i class="fa fa-compass"></i> Getting started</a></li>
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-book"></i> Documentation <b class="caret"></b></a>
                     <ul class="dropdown-menu">
-                        <li><a href="#">Extensions</a></li>
-                        <li><a href="#">Configuration</a></li>
-                        <li><a href="#">Javadoc</a></li>
-                        <li><a href="#">Benchmarks & Metrics</a></li>
+                        <li><a href="{{ site.baseurl }}/Documentation/Extensions">Extensions</a></li>
+                        <li><a href="{{ site.baseurl }}/Documentation/Configuration">Configuration</a></li>
+                        <li><a href="{{ site.baseurl }}/Documentation/Javadoc">Javadoc</a></li>
+                        <li><a href="{{ site.baseurl }}/Documentation/Benchmarks & Metrics">Benchmarks & Metrics</a></li>
                     </ul>
                 </li>
-                <li><a href="/Community"><i class="fa fa-group"></i> Community</a></li>
-                <li><a href="#"><i class="fa fa-question"></i> FAQ</a></li>
+                <li><a href="{{ site.baseurl }}/Community"><i class="fa fa-group"></i> Community</a></li>
+                <li><a href="{{ site.baseurl }}/Faq"><i class="fa fa-question"></i> FAQ</a></li>
             </ul>
         </div>
     </div>
