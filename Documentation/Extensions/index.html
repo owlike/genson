@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Genson</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Fast & extensible Java <> Json library">
+
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-theme.min.css">
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+
+    <script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <link href='/genson/css/theme.css' rel='stylesheet' type='text/css' />
+    <link href='/genson/css/pygments-default.css' rel='stylesheet' type='text/css' />
+
+    <script>
+
+        $(function() {
+          $('a[href*=#]:not([href=#])').click(function() {
+            if (location.pathname.replace(/^\//,'') == this.pathname.replace(/^\//,'') && location.hostname == this.hostname) {
+              var target = $(this.hash);
+              target = target.length ? target : $('[name=' + this.hash.slice(1) +']');
+              if (target.length) {
+                $('html,body').animate({
+                  scrollTop: target.offset().top
+                }, 500);
+                return false;
+              }
+            }
+          });
+        });
+    </script>
+</head>
+
+<body>
+
+
+
+<header>
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#menu-navbar-collapse-1">
+                <i class="fa fa-bars menu-item"></i>
+            </button>
+            <a class="navbar-brand" href="/genson/">Genson</a>
+        </div>
+        <div class="collapse navbar-collapse" id="menu-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="/genson/GettingStarted"><i class="fa fa-compass"></i> Getting started</a></li>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-book"></i> Documentation <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/genson/Documentation/Extensions">Extensions</a></li>
+                        <li><a href="/genson/Documentation/Configuration">Configuration</a></li>
+                        <li><a href="/genson/Documentation/Javadoc">Javadoc</a></li>
+                        <li><a href="/genson/Documentation/Benchmarks & Metrics">Benchmarks & Metrics</a></li>
+                    </ul>
+                </li>
+                <li><a href="/genson/Community"><i class="fa fa-group"></i> Community</a></li>
+                <li><a href="/genson/Faq"><i class="fa fa-question"></i> FAQ</a></li>
+            </ul>
+        </div>
+    </div>
+</header>
+
+
+<div class="jumbotron">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>3d Party Integrations</h1>
+                <p class="catch-phrase">
+                    Genson provides bla bla...
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="content">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-9" role="main">
+                <h2 id="jax-rs-jersey--cie">JAX-RS: Jersey &amp; cie</h2>
+
+<p>To enable json support in JAX-RS implementations with Genson, just drop the jar into your classpath.
+The implementation will detect it and use Genson for json conversions.</p>
+
+<p>Actually it has been tested with Jersey and Resteasy. It works out of the box.</p>
+
+<h3 id="customization">Customization</h3>
+<p>In many cases you might want to customize Genson instance.
+To do that use Genson.Builder to create a custom instance and then inject it with ContextResolver.</p>
+
+<div class="highlight"><pre><code class="java"><span class="nd">@Provider</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">GensonCustomResolver</span> <span class="kd">implements</span> <span class="n">ContextResolver</span><span class="o">&lt;</span><span class="n">Genson</span><span class="o">&gt;</span> <span class="o">{</span>
+    <span class="c1">// configure the Genson instance</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">Genson</span> <span class="n">genson</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Genson</span><span class="o">.</span><span class="na">Builder</span><span class="o">().</span><span class="na">create</span><span class="o">();</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">Genson</span> <span class="nf">getContext</span><span class="o">(</span><span class="n">Class</span><span class="o">&lt;?&gt;</span> <span class="n">type</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">genson</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+
+<p><strong>Note</strong></p>
+
+<p>By default Genson JAX-RS integration enables JAXB annotations support.</p>
+
+<h2 id="jsr-353---java-api-for-json-processing">JSR 353 - Java API for Json Processing</h2>
+
+<p>Genson provides two kind of integrations with the JSR. You can use Genson as the JSR implementation or use Genson
+to work with the DOM structures defined in the JSR.</p>
+
+<h3 id="using-genson-as-jsr-353-implementation">Using Genson as JSR 353 implementation</h3>
+
+<p>Since version 0.99 Genson provides a complete implementation of JSR 353. To use Genson implementation,
+you only need it on your classpath.</p>
+
+<h3 id="using-jsr-353-types-with-genson">Using JSR 353 types with Genson</h3>
+
+<p>Starting with release 0.98 Genson provides a bundle JSR353Bundle that enables support of JSR 353 types in Genson.
+This means that you can ser/deser using those types but also mix them with the databinding mechanism.</p>
+
+<div class="highlight"><pre><code class="java"> <span class="n">Genson</span> <span class="n">genson</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Genson</span><span class="o">.</span><span class="na">Builder</span><span class="o">().</span><span class="na">with</span><span class="o">(</span><span class="k">new</span> <span class="n">JSR353Bundle</span><span class="o">()).</span><span class="na">create</span><span class="o">();</span>
+ <span class="n">JsonObject</span> <span class="n">object</span> <span class="o">=</span> <span class="n">genson</span><span class="o">.</span><span class="na">deserialize</span><span class="o">(</span><span class="n">json</span><span class="o">,</span> <span class="n">JsonObject</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</code></pre></div>
+
+<p>You can also mix with standard Pojos.</p>
+
+<div class="highlight"><pre><code class="java"> <span class="kd">class</span> <span class="nc">Pojo</span> <span class="o">{</span>
+  <span class="kd">public</span> <span class="n">String</span> <span class="n">aString</span><span class="o">;</span>
+  <span class="kd">public</span> <span class="n">JsonArray</span> <span class="n">someArray</span><span class="o">;</span>
+ <span class="o">}</span>
+
+<span class="n">Pojo</span> <span class="n">pojo</span> <span class="o">=</span> <span class="n">genson</span><span class="o">.</span><span class="na">deserialize</span><span class="o">(</span><span class="n">json</span><span class="o">,</span> <span class="n">Pojo</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</code></pre></div>
+
+<h2 id="jaxb-annotations">JAXB Annotations</h2>
+
+<p>Since version 0.95 Genson provides support for JAXB annotations.
+All annotations are not supported as some do not make sense in the JSON world.
+enson annotations can be used to override Jaxb annotations.</p>
+
+<p><em>In Jersey JAXB bundle is enabled by default</em>. If you are using Genson outside Jersey you have to register JAXB bundle:</p>
+
+<div class="highlight"><pre><code class="java"><span class="n">Genson</span> <span class="n">genson</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Genson</span><span class="o">.</span><span class="na">Builder</span><span class="o">().</span><span class="na">with</span><span class="o">(</span><span class="k">new</span> <span class="n">JAXBBundle</span><span class="o">()).</span><span class="na">create</span><span class="o">();</span>
+</code></pre></div>
+
+<h3 id="supported-annotations">Supported annotations</h3>
+
+<ul>
+  <li>
+    <p>XmlAttribute can be used to include a property in serialization/deserialization (can be used on fields, getter and setter).
+ If a name is defined it will be used instead of the one derived from the method/field.</p>
+  </li>
+  <li>
+    <p>XmlElement works as XmlAttribute, if type is defined it will be used instead of the actual one.</p>
+  </li>
+  <li>
+    <p>XmlJavaTypeAdapter can be used to define a custom XmlAdapter. This adapter must have a no arg constructor.</p>
+  </li>
+  <li>
+    <p>XmlEnumValue can be used on enum values to map them to different values (it can be mixed with default behaviour:
+ you can use this annotation on some enum values and let the others be ser/deser using the default strategy).</p>
+  </li>
+  <li>
+    <p>XmlAccessorType can be used to define how to detect properties (fields, methods, public only etc).</p>
+  </li>
+  <li>
+    <p>XmlTransient to exclude a field or get/set from ser/deser process.</p>
+  </li>
+</ul>
+
+<h3 id="supported-types">Supported types</h3>
+<p>Actual implementation has default converters for Duration and XMLGregorianCalendar.</p>
+
+<h3 id="what-might-come-next">What might come next</h3>
+
+<p>Support for cyclic references using XmlId and XmlIdRef, XmlType.
+ Maybe XmlRootElement, even if I doubt of its pertinence in JSON…</p>
+
+<p>If there are other jaxb features you would like to be supported just open an issue or drop an email on the google group.</p>
+
+<h2 id="spring-mvc">Spring MVC</h2>
+
+<p>To enable json support in Spring MVC with Genson, you need to register Gensons MessageConverter implementation.</p>
+
+<div class="highlight"><pre><code class="xml"><span class="nt">&lt;mvc:annotation-driven&gt;</span>
+  <span class="nt">&lt;mvc:message-converters&gt;</span>
+    <span class="nt">&lt;bean</span> <span class="na">class=</span><span class="s">&quot;com.owlike.genson.ext.spring.GensonMessageConverter&quot;</span><span class="nt">/&gt;</span>
+  <span class="nt">&lt;/mvc:message-converters&gt;</span>
+<span class="nt">&lt;/mvc:annotation-driven&gt;</span>
+</code></pre></div>
+
+            </div>
+            <div class="col-md-3">
+                <div class="content-nav hidden-print" data-spy="affix" data-offset-top="240" role="complementary">
+                    <ul class="nav nav-tabs nav-stacked">
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+$(function() {
+    var menuContent = $('.content-nav ul')
+    $('h2').each(function(idx, elem) {
+        menuContent.append('<li><a href="#' + elem.id + '">' + elem.innerHTML + '</a></li>')
+    })
+
+
+    $('body').scrollspy({ target: '.content-nav' })
+})
+</script>
+
+
+
+</body>
+</html>

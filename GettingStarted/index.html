@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Genson</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Fast & extensible Java <> Json library">
+
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-theme.min.css">
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+
+    <script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <link href='/genson/css/theme.css' rel='stylesheet' type='text/css' />
+    <link href='/genson/css/pygments-default.css' rel='stylesheet' type='text/css' />
+
+    <script>
+
+        $(function() {
+          $('a[href*=#]:not([href=#])').click(function() {
+            if (location.pathname.replace(/^\//,'') == this.pathname.replace(/^\//,'') && location.hostname == this.hostname) {
+              var target = $(this.hash);
+              target = target.length ? target : $('[name=' + this.hash.slice(1) +']');
+              if (target.length) {
+                $('html,body').animate({
+                  scrollTop: target.offset().top
+                }, 500);
+                return false;
+              }
+            }
+          });
+        });
+    </script>
+</head>
+
+<body>
+
+
+
+<header>
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#menu-navbar-collapse-1">
+                <i class="fa fa-bars menu-item"></i>
+            </button>
+            <a class="navbar-brand" href="/genson/">Genson</a>
+        </div>
+        <div class="collapse navbar-collapse" id="menu-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="/genson/GettingStarted"><i class="fa fa-compass"></i> Getting started</a></li>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-book"></i> Documentation <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/genson/Documentation/Extensions">Extensions</a></li>
+                        <li><a href="/genson/Documentation/Configuration">Configuration</a></li>
+                        <li><a href="/genson/Documentation/Javadoc">Javadoc</a></li>
+                        <li><a href="/genson/Documentation/Benchmarks & Metrics">Benchmarks & Metrics</a></li>
+                    </ul>
+                </li>
+                <li><a href="/genson/Community"><i class="fa fa-group"></i> Community</a></li>
+                <li><a href="/genson/Faq"><i class="fa fa-question"></i> FAQ</a></li>
+            </ul>
+        </div>
+    </div>
+</header>
+
+
+<div class="jumbotron">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>Getting Started</h1>
+                <p class="catch-phrase">
+                    The getting started guide gives an overview of Genson and some base features that can be enable via configuration. After reading it you should be able to do address most of your use cases.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="content">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-9" role="main">
+                <h2 id="overview">Overview</h2>
+
+<p>Genson is the main class of the library.
+It provides all the required methods to do java to json serialization and json to java deserialization.
+If the default configuration fits your needs you can use its no arg constructor otherwise you can use Genson.Builder
+ inner class to create custom instances of Genson.</p>
+
+<h2 id="readwrite-json">Read/Write JSON</h2>
+
+<div class="highlight"><pre><code class="java"><span class="n">Genson</span> <span class="n">genson</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Genson</span><span class="o">();</span>
+<span class="n">String</span> <span class="n">json</span> <span class="o">=</span> <span class="n">genson</span><span class="o">.</span><span class="na">serialize</span><span class="o">(</span><span class="mf">777.777</span><span class="o">);</span> <span class="c1">// the output will be 777.777</span>
+<span class="n">genson</span><span class="o">.</span><span class="na">serialize</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span> <span class="c1">// output is true (without quotes)</span>
+
+<span class="n">genson</span><span class="o">.</span><span class="na">deserialize</span><span class="o">(</span><span class="s">&quot;777&quot;</span><span class="o">,</span> <span class="kt">int</span><span class="o">.</span><span class="na">class</span><span class="o">);</span> <span class="c1">// deserializes it into 777</span>
+<span class="n">genson</span><span class="o">.</span><span class="na">deserialize</span><span class="o">(</span><span class="s">&quot;777.777&quot;</span><span class="o">,</span> <span class="n">Object</span><span class="o">.</span><span class="na">class</span><span class="o">);</span> <span class="c1">// will return 777.777 (a double)</span>
+<span class="n">genson</span><span class="o">.</span><span class="na">deserialize</span><span class="o">(</span><span class="s">&quot;null&quot;</span><span class="o">,</span> <span class="n">Object</span><span class="o">.</span><span class="na">class</span><span class="o">);</span> <span class="c1">// will return null;</span>
+</code></pre></div>
+
+<p>You can also work with arrays:</p>
+
+<div class="highlight"><pre><code class="java"><span class="n">json</span> <span class="o">=</span> <span class="n">genson</span><span class="o">.</span><span class="na">serialize</span><span class="o">(</span><span class="k">new</span> <span class="n">Object</span><span class="o">[]{</span><span class="mi">1</span><span class="o">,</span> <span class="mf">2.2</span><span class="o">,</span> <span class="kc">null</span><span class="o">,</span> <span class="kc">false</span><span class="o">,</span> <span class="s">&quot;hey!&quot;</span><span class="o">});</span> <span class="c1">// the result is [1,2.2,null,false,&quot;hey!&quot;]</span>
+
+<span class="c1">// and now let&#39;s do some magic an deserialize it back without knowing the types:</span>
+<span class="n">genson</span><span class="o">.</span><span class="na">deserialize</span><span class="o">(</span><span class="n">json</span><span class="o">,</span> <span class="n">Object</span><span class="o">[].</span><span class="na">class</span><span class="o">);</span> <span class="c1">// and we got back our initial array!</span>
+</code></pre></div>
+
+<p>Genson can serialize generic maps and deserialize back to it, it also supports serialization of objects and deserialization into Maps, but we will see it later.</p>
+
+<div class="highlight"><pre><code class="java"><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">Object</span><span class="o">&gt;</span> <span class="n">map</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">Object</span><span class="o">&gt;();</span>
+<span class="n">map</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">&quot;aString&quot;</span><span class="o">,</span> <span class="s">&quot;hey&quot;</span><span class="o">);</span>
+<span class="n">map</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">&quot;aInt&quot;</span><span class="o">,</span> <span class="mi">1</span><span class="o">);</span>
+<span class="n">map</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">&quot;anArray&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="kt">int</span><span class="o">[]{</span><span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">});</span>
+<span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">Object</span><span class="o">&gt;</span> <span class="n">anotherMap</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">Object</span><span class="o">&gt;();</span>
+<span class="n">anotherMap</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">&quot;aBool&quot;</span><span class="o">,</span> <span class="kc">false</span><span class="o">);</span>
+<span class="n">map</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">&quot;theOtherMap&quot;</span><span class="o">,</span> <span class="n">anotherMap</span><span class="o">);</span>
+
+<span class="n">json</span> <span class="o">=</span> <span class="n">genson</span><span class="o">.</span><span class="na">serialize</span><span class="o">(</span><span class="n">map</span><span class="o">);</span> <span class="c1">// we obtain {&quot;aString&quot;:&quot;hey&quot;,&quot;aInt&quot;:1,&quot;anArray&quot;:[1,2],&quot;theOtherMap&quot;:{&quot;aBool&quot;:false}}</span>
+<span class="n">genson</span><span class="o">.</span><span class="na">deserialize</span><span class="o">(</span><span class="n">json</span><span class="o">,</span> <span class="n">Map</span><span class="o">.</span><span class="na">class</span><span class="o">);</span> <span class="c1">// we got the initial map back</span>
+</code></pre></div>
+
+<p>You can also work with multidimensional arrays without problems. Note that if you want to deserialize to a unknown type the result will be and array of objects, so you won’t be able to cast it to an array of int.</p>
+
+<div class="highlight"><pre><code class="java"><span class="c1">// result is [[[1,2],[5],[4]],[[6]]]</span>
+<span class="n">json</span> <span class="o">=</span> <span class="n">genson</span><span class="o">.</span><span class="na">serialize</span><span class="o">(</span><span class="k">new</span> <span class="kt">int</span><span class="o">[][][]{{{</span><span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">},{</span><span class="mi">5</span><span class="o">},{</span><span class="mi">4</span><span class="o">}},{{</span><span class="mi">6</span><span class="o">}}});</span>
+<span class="kt">int</span><span class="o">[][][]</span> <span class="n">threeDimensionArray</span> <span class="o">=</span> <span class="n">genson</span><span class="o">.</span><span class="na">deserialize</span><span class="o">(</span><span class="n">json</span><span class="o">,</span> <span class="kt">int</span><span class="o">[][][].</span><span class="na">class</span><span class="o">);</span>
+
+<span class="c1">// works also but you will have to cast each value separately as it is an array of objects.</span>
+<span class="n">Object</span> <span class="n">object</span> <span class="o">=</span> <span class="n">genson</span><span class="o">.</span><span class="na">deserialize</span><span class="o">(</span><span class="n">json</span><span class="o">,</span> <span class="n">Object</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</code></pre></div>
+
+<h2 id="binding-to-pojos">Binding to POJOs</h2>
+<p>Genson provides full support for object databinding by following standard JavaBean conventions. The basic rules for databinding are:</p>
+
+<ul>
+  <li>All public or package visibility fields, getters and setters will be used, including the inherited ones.</li>
+  <li>If a getter/setter exists for a field then it will be used instead of the field.</li>
+  <li>Transient and synthetic fields are not serialized nor used during deserialization.</li>
+  <li>If a field does not exist in the json stream then its field/setter will not be used.</li>
+  <li>If a value is null then you can choose whether you want it to be serialized as null or just skipped, by default null values are serialized.</li>
+</ul>
+
+<p>Lets have a closer look to an example.</p>
+
+<div class="highlight"><pre><code class="java"><span class="kd">class</span> <span class="nc">Person</span> <span class="o">{</span>
+ <span class="n">String</span> <span class="n">fullName</span><span class="o">;</span>
+ <span class="c1">// will be converted even if it is private</span>
+ <span class="nd">@JsonProperty</span> <span class="kd">private</span> <span class="n">Date</span> <span class="n">birthDate</span><span class="o">;</span>
+ <span class="n">Adress</span> <span class="n">adress</span><span class="o">;</span>
+ <span class="nd">@JsonIgnore</span> <span class="kd">public</span> <span class="kt">int</span> <span class="n">ignoredField</span><span class="o">;</span>
+ <span class="kd">private</span> <span class="kt">int</span> <span class="n">privateNotDetected</span><span class="o">;</span>
+ <span class="kd">private</span> <span class="nf">Person</span><span class="o">()</span> <span class="o">{}</span>
+
+ <span class="nd">@Creator</span> <span class="kd">public</span> <span class="kd">static</span> <span class="n">Person</span> <span class="n">create</span><span class="o">()</span> <span class="o">{</span>
+   <span class="k">return</span> <span class="k">new</span> <span class="nf">Person</span><span class="o">();</span>
+ <span class="o">}</span>
+
+ <span class="kd">public</span> <span class="n">String</span> <span class="nf">getFullName</span><span class="o">(){</span>
+  <span class="c1">// will be used instead of direct field access</span>
+ <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="kd">class</span> <span class="nc">Adress</span> <span class="o">{</span>
+  <span class="kd">final</span> <span class="kt">int</span> <span class="n">building</span><span class="o">;</span>
+  <span class="kd">final</span> <span class="n">String</span> <span class="n">street</span><span class="o">;</span>
+  <span class="c1">// only a constructor with arguments genson will use it during deserialization</span>
+  <span class="kd">public</span> <span class="nf">Adress</span><span class="o">(</span><span class="nd">@JsonProperty</span><span class="o">(</span><span class="s">&quot;building&quot;</span><span class="o">)</span> <span class="kt">int</span> <span class="n">building</span><span class="o">,</span> <span class="nd">@JsonProperty</span><span class="o">(</span><span class="s">&quot;street&quot;</span><span class="o">)</span>  <span class="n">String</span> <span class="n">street</span><span class="o">)</span> <span class="o">{</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="n">Person</span> <span class="n">someone</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Person</span><span class="o">(</span><span class="s">&quot;eugen&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="n">GregorianCalendar</span><span class="o">(</span><span class="mi">1986</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">16</span><span class="o">).</span><span class="na">getTime</span><span class="o">(),</span> <span class="k">new</span> <span class="n">Adress</span><span class="o">(</span><span class="mi">157</span><span class="o">,</span> <span class="s">&quot;paris&quot;</span><span class="o">));</span>
+<span class="c1">// we obtain the following json string</span>
+<span class="c1">//{&quot;adress&quot;:{&quot;building&quot;:157,&quot;street&quot;:&quot;paris&quot;},&quot;birthDate&quot;:&quot;16 févr. 1986&quot;,&quot;happy&quot;:true,&quot;fullName&quot;:&quot;eugen&quot;}</span>
+<span class="n">String</span> <span class="n">json</span> <span class="o">=</span> <span class="n">genson</span><span class="o">.</span><span class="na">serialize</span><span class="o">(</span><span class="n">someone</span><span class="o">);</span>
+
+<span class="c1">// now we deserialize it back</span>
+<span class="n">someone</span> <span class="o">=</span> <span class="n">genson</span><span class="o">.</span><span class="na">deserialize</span><span class="o">(</span><span class="n">json</span><span class="o">,</span> <span class="n">Person</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</code></pre></div>
+
+<p>Note the use of 
+<span class="nd">@JsonIgnore</span>
+ and 
+<span class="nd">@JsonProperty</span>
+ annotations.
+The first one allows to mark a field/method as ignored for serialization/deserialization,
+the second one allows you to specify a name for your property and to include fields/methods.
+In Genson we choose to give priority to explicit information (ex: annotations) over implicit information (ex: naming convetions, visibility, etc).
+Another important thing to notice is that Adress provides a single constructor that takes arguments.
+Genson will invoke it with the corresponding values from the json string. You may also use static factory methods as
+the “create” method of Person class, to be detected they need to be marked with 
+<span class="nd">@Creator</span>
+ annotation and be static.</p>
+
+<p><strong>Remarks</strong></p>
+
+<ul>
+  <li>
+    <p>If there is a no arg constructor Genson will use it instead of others constructors, except if there is a constructor or
+ method annotated with 
+<span class="nd">@Creator</span>
+, then this one will be used.</p>
+  </li>
+  <li>
+    <p>In some cases you may have a single creator or a constructor annotated with 
+<span class="nd">@Creator</span>
+ but without Genson using it,
+ this means that your creator has arguments but there is no way to resolve their names. Annotate each argument with @JsonProperty
+  or enable automatic argument name resolution with 
+<span class="n">Genson</span><span class="o">.</span><span class="na">Builder</span><span class="o">.</span><span class="na">setWithDebugInfoPropertyNameResolver</span><span class="o">(</span><span class="kc">true</span><span class="o">)</span>
+.</p>
+  </li>
+  <li>
+    <p>You can have only a Constructor/Method annotated with @Creator per class.</p>
+  </li>
+  <li>
+    <p>Actually inner and anonymous classes serialization is supported but not deserialization, except if it is a static inner class.</p>
+  </li>
+  <li>
+    <p>By default Genson will serialize objects using their compile type and not runtime type
+ (List<em>&lt;</em>Number<em>&gt;</em> content will be serialized as Numbers no matter their runtime type) if you want to use runtime
+ type configure your genson instance with 
+<span class="n">setUseRuntimeTypeForSerialization</span><span class="o">(</span><span class="kc">true</span><span class="o">)</span>
+.</p>
+  </li>
+</ul>
+
+<h2 id="nice-features">Nice Features</h2>
+
+<h2 id="generics-support">Generics support</h2>
+
+<h3 id="deserialize-to-generic-lists">Deserialize to Generic Lists</h3>
+
+<p>You may ask yourself “okay this is cool but how can I work with generic types?”
+Indeed it is a good question. Due to type erasure you can not do things like List<em>&lt;</em>String<em>&gt;</em>.class, the solution
+is to use what is called TypeTokens, see <a href="this blog">http://gafter.blogspot.fr/2006/12/super-type-tokens.html</a> for an explanation. Gensons implementation of TypeToken is [http://genson.googlecode.com/git/javadoc/com/owlike/genson/GenericType.html GenericType]</p>
+
+<div class="highlight"><pre><code class="java"><span class="n">json</span> <span class="o">=</span> <span class="n">genson</span><span class="o">.</span><span class="na">serialize</span><span class="o">(</span><span class="n">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">));</span>
+<span class="n">List</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span> <span class="n">listOfInt</span> <span class="o">=</span> <span class="n">genson</span><span class="o">.</span><span class="na">deserialize</span><span class="o">(</span><span class="n">json</span><span class="o">,</span> <span class="k">new</span> <span class="n">GenericType</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;&gt;(){});</span>
+</code></pre></div>
+
+<p>Genson will respect the type information.</p>
+
+<div class="highlight"><pre><code class="java"><span class="n">Type</span> <span class="n">type</span> <span class="o">=</span> <span class="k">new</span> <span class="n">GenericType</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Number</span><span class="o">&gt;&gt;(){}.</span><span class="na">getType</span><span class="o">();</span>
+<span class="c1">// this will work, Genson will convert 2.2 to a double, but if the parameterized type was String, 2.2</span>
+<span class="c1">// would not be converted to an int</span>
+
+<span class="n">genson</span><span class="o">.</span><span class="na">deserialize</span><span class="o">(</span><span class="s">&quot;[1, \&quot;2.2\&quot;, null]&quot;</span><span class="o">,</span> <span class="n">type</span><span class="o">);</span>
+
+<span class="c1">// but if you want to deserialize a content that can not be converted to the parameterized type it will fail!</span>
+<span class="c1">// this will throw an exception of the form &quot;org.genson.TransformationRuntimeException:</span>
+<span class="c1">// Could not convert input value GG of type class java.lang.String to a Number type.&quot;</span>
+
+<span class="n">genson</span><span class="o">.</span><span class="na">deserialize</span><span class="o">(</span><span class="s">&quot;[1, \&quot;GG\&quot;]&quot;</span><span class="o">,</span> <span class="n">type</span><span class="o">);</span>
+</code></pre></div>
+
+<h3 id="generic-objects">Generic Objects</h3>
+<p>Genson has full support of java generics. It supports generic types specialization in subclasses, wildcards, type variables and so long.</p>
+
+<div class="highlight"><pre><code class="java"> <span class="kd">public</span> <span class="kd">class</span> <span class="nc">P</span> <span class="o">{}</span>
+
+ <span class="kd">public</span> <span class="kd">class</span> <span class="nc">GenericList</span><span class="o">&lt;</span><span class="n">E</span> <span class="kd">extends</span> <span class="n">P</span><span class="o">&gt;</span> <span class="o">{</span>
+  <span class="n">List</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="n">list</span><span class="o">;</span>
+ <span class="o">}</span>
+
+ <span class="c1">// list elements will be deserialized to type P</span>
+ <span class="n">GenericList</span> <span class="n">genericContainer</span> <span class="o">=</span> <span class="n">genson</span><span class="o">.</span><span class="na">deserialize</span><span class="o">(</span><span class="s">&quot;{\&quot;list\&quot;:[{}, {}]}&quot;</span><span class="o">,</span> <span class="n">GenericList</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</code></pre></div>
+
+<h2 id="polymorphic-types">Polymorphic types</h2>
+
+<p>Another nice feature of Genson is its ability to deserialize an object serialized with Genson back into its concrete type.
+This feature is disabled by default, to enable it use 
+<span class="n">Genson</span><span class="o">.</span><span class="na">Builder</span><span class="o">.</span><span class="na">setWithClassMetadata</span><span class="o">(</span><span class="kc">true</span><span class="o">)</span>
+.
+This will enable serialization of class names and use it during deserialization to detect the concrete type.
+You should use Genson alias mechanism to associate an alias with the concerned class.
+Instead of serializing the class name the alias will be used.
+It is a good practice to do so as it gives you the ability to rename your class or package without any impact
+on the json (especially useful if you store json into a database) and it is also safer from a security point of view.</p>
+
+<div class="highlight"><pre><code class="java"><span class="c1">// suppose we have the following interface and that the Person class from previous example implements it.</span>
+<span class="kd">interface</span> <span class="nc">Entity</span> <span class="o">{}</span>
+
+<span class="n">Genson</span> <span class="n">genson</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Genson</span><span class="o">.</span><span class="na">Builder</span><span class="o">().</span><span class="na">setWithClassMetadata</span><span class="o">(</span><span class="kc">true</span><span class="o">).</span><span class="na">create</span><span class="o">();</span>
+<span class="c1">// json value will be {&quot;@class&quot;:&quot;mypackage.Person&quot;, ... other properties ...}</span>
+<span class="n">String</span> <span class="n">json</span> <span class="o">=</span> <span class="n">genson</span><span class="o">.</span><span class="na">serialize</span><span class="o">(</span><span class="k">new</span> <span class="n">Person</span><span class="o">());</span>
+<span class="c1">// the value of @class property will be used to detect that the concrete type is Person</span>
+<span class="n">Entity</span> <span class="n">entity</span> <span class="o">=</span> <span class="n">genson</span><span class="o">.</span><span class="na">deserialize</span><span class="o">(</span><span class="n">json</span><span class="o">,</span> <span class="n">Entity</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+
+<span class="c1">// a better way to achieve the same thing would be to use an alias</span>
+<span class="c1">// no need to use setWithClassMetadata(true) as when you add an alias Genson</span>
+<span class="c1">// will automatically enable the class metadata mechanism</span>
+<span class="n">genson</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Genson</span><span class="o">.</span><span class="na">Builder</span><span class="o">().</span><span class="na">addAlias</span><span class="o">(</span><span class="s">&quot;person&quot;</span><span class="o">,</span> <span class="n">Person</span><span class="o">.</span><span class="na">class</span><span class="o">).</span><span class="na">create</span><span class="o">();</span>
+
+<span class="c1">// output is {&quot;@class&quot;:&quot;person&quot;, ... other properties ...}</span>
+<span class="n">genson</span><span class="o">.</span><span class="na">serialize</span><span class="o">(</span><span class="k">new</span> <span class="n">Person</span><span class="o">());</span>
+</code></pre></div>
+
+<p>Metadata will be discussed more in depth in the advanced user guide.</p>
+
+<p><strong>Remarks</strong></p>
+
+<ul>
+  <li>
+    <p>Class metadata and the overall metadata mechanism is available only for object types and not for arrays or litteral values.
+ Metadata must always be the first name/value pairs in json objects.</p>
+  </li>
+  <li>
+    <p>Genson does not serialize, nor use class metadata for standard types (lists, primitives, etc).</p>
+  </li>
+  <li>
+    <p>If you define a custom Converter and do not want Genson to use class metadata for types supported by your Converter
+ use @HandleClassMetadata annotation.</p>
+  </li>
+</ul>
+
+
+            </div>
+            <div class="col-md-3">
+                <div class="content-nav hidden-print" data-spy="affix" data-offset-top="240" role="complementary">
+                    <ul class="nav nav-tabs nav-stacked">
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+$(function() {
+    var menuContent = $('.content-nav ul')
+    $('h2').each(function(idx, elem) {
+        menuContent.append('<li><a href="#' + elem.id + '">' + elem.innerHTML + '</a></li>')
+    })
+
+
+    $('body').scrollspy({ target: '.content-nav' })
+})
+</script>
+
+
+
+</body>
+</html>

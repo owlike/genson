@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Genson</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Fast & extensible Java <> Json library">
+
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-theme.min.css">
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+
+    <script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <link href='/genson/css/theme.css' rel='stylesheet' type='text/css' />
+    <link href='/genson/css/pygments-default.css' rel='stylesheet' type='text/css' />
+
+    <script>
+
+        $(function() {
+          $('a[href*=#]:not([href=#])').click(function() {
+            if (location.pathname.replace(/^\//,'') == this.pathname.replace(/^\//,'') && location.hostname == this.hostname) {
+              var target = $(this.hash);
+              target = target.length ? target : $('[name=' + this.hash.slice(1) +']');
+              if (target.length) {
+                $('html,body').animate({
+                  scrollTop: target.offset().top
+                }, 500);
+                return false;
+              }
+            }
+          });
+        });
+    </script>
+</head>
+
+<body>
+
+
+
+<header>
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#menu-navbar-collapse-1">
+                <i class="fa fa-bars menu-item"></i>
+            </button>
+            <a class="navbar-brand" href="/genson/">Genson</a>
+        </div>
+        <div class="collapse navbar-collapse" id="menu-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="/genson/GettingStarted"><i class="fa fa-compass"></i> Getting started</a></li>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-book"></i> Documentation <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/genson/Documentation/Extensions">Extensions</a></li>
+                        <li><a href="/genson/Documentation/Configuration">Configuration</a></li>
+                        <li><a href="/genson/Documentation/Javadoc">Javadoc</a></li>
+                        <li><a href="/genson/Documentation/Benchmarks & Metrics">Benchmarks & Metrics</a></li>
+                    </ul>
+                </li>
+                <li><a href="/genson/Community"><i class="fa fa-group"></i> Community</a></li>
+                <li><a href="/genson/Faq"><i class="fa fa-question"></i> FAQ</a></li>
+            </ul>
+        </div>
+    </div>
+</header>
+
+
+<div class="jumbotron">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>Benchmarks & Metrics</h1>
+                <p class="catch-phrase">
+                    Genson metrics and comparision with other librairies.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="content">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-9" role="main">
+                <p>All the following measures were made with Genson 0.98, Jackson 1.9.9 and Gson 2.2.3 on a Intel core i7 laptop with 2GHz and 4 Gio of RAM.
+The following benchmarks take into account the latest versions of Genson and Jackson but also the recent optimizations added to Gson  improving their deserialization performances.</p>
+
+<h2 id="performance-benchmarks">Performance benchmarks</h2>
+
+<p>This first benchmark compares Genson to others known librairies using <a href="https://github.com/eishay/jvm-serializers/wiki/">jvm-serializers</a>.
+The dataset can be found <a href="https://github.com/eishay/jvm-serializers/blob/kannan/tpc/data/media.3.cks">here</a>.</p>
+
+<p><img src="/genson/images/total_ser_de.png" />
+<img src="/genson/images/ser.png" />
+<img src="/genson/images/deser.png" /></p>
+
+<h3 id="benchmarking-methodology">Benchmarking methodology</h3>
+<p>The following benchmarks were run in the same jvm. Before starting to measure performances, each library has been warmed up. To limit memory usage impact, an explicit call to the garbage collector has been made, followed by sleep of the running thread for some seconds between each library bench.</p>
+
+<p>Here is a second benchmark using Gson benchmarks data (located in their metrics project).
+This chart represents serialization and deserialization average time of
+<a href="http://code.google.com/p/genson/source/browse/src/test/resources/READER_LONG.json">LONG_READER</a> data in milliseconds with 5000
+iterations and 50 warmup iterations. The documents weights 189Ko. Complete results in their numeric reprensentation can be
+found <a href="http://code.google.com/p/genson/source/browse/bench_results/benchmark_gson_metrics.txt">here</a>.
+Serialization source code is located <a href="http://code.google.com/p/genson/source/browse/src/test/java/com/owlike/genson/SerializationBenchmark.java">here</a>
+ and deserialization <a href="http://code.google.com/p/genson/source/browse/src/test/java/com/owlike/genson/DeserializeBenchmark.java">here</a>.</p>
+
+<p><img src="http://genson.googlecode.com/files/gson_metrics_bench.png" /></p>
+
+<p>The last benchmark goal is to measure performances of use cases where you have got a lot of beans (so reflection will be used), big numbers, many lists, arrays and maps (small and big). Note that we compare two versions of Genson, the first one uses a custom algorithm allowing to parse doubles really fast, but with a small precision loss, the other one uses standard Double.parse. In most cases using the custom algorithm should be fine.</p>
+
+<p><img src="http://genson.googlecode.com/files/genson_fictive_bench.png" /></p>
+
+<p>When looking at all those benchmarks we can see that Genson and Jackson performances are relatively close and Gson latest optimizations improved nicely its performances.
+Performances are important, but at that level other things may be more important, such as library design, ease to use and ease to develop and intergrate new features by yourself.</p>
+
+<h2 id="artifact-size">Artifact size</h2>
+<p>Last measure that can be very important for mobile developers is the jar size. In fact Gson has the smallest archive size but Genson is faster and weights only 2Ko more (Jackson is 5 times heavier)!</p>
+
+<p><img src="http://genson.googlecode.com/files/Jarsizeinko.JPG" /></p>
+
+            </div>
+            <div class="col-md-3">
+                <div class="content-nav hidden-print" data-spy="affix" data-offset-top="240" role="complementary">
+                    <ul class="nav nav-tabs nav-stacked">
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+$(function() {
+    var menuContent = $('.content-nav ul')
+    $('h2').each(function(idx, elem) {
+        menuContent.append('<li><a href="#' + elem.id + '">' + elem.innerHTML + '</a></li>')
+    })
+
+
+    $('body').scrollspy({ target: '.content-nav' })
+})
+</script>
+
+
+
+</body>
+</html>
