@@ -1,10 +1,9 @@
 name: "Genson"
-description: "fast & extensible Java <> Json library"
+description: "Fast & extensible Java <> Json library"
 
 markdown: kramdown
 pygments: true
 permalink: pretty
 
 baseurl: /genson
-
 latest_version: 0.99

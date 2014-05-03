@@ -27,11 +27,18 @@ runCommand "git diff-index --quiet origin/HEAD --" "You have uncommited changes,
 
 runSuite "mvn clean javadoc:javadoc"
 
+version=$(mvn org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version|grep -Ev '(^\[|Download\w+:)')
+
 runSuite "git clone https://github.com/owlike/genson.git tmp_website" "cd tmp_website" "git checkout gh-pages" "rm -R *"
 
-runSuite "cp -R ../website/* ." "cp -R ../target/site/apidocs Documentation/Javadoc"
+echo "latest_version: $version" > _config-release.yml
 
-runSuite "git add ." "git commit -m \"Documentation Release\"" "git push origin gh-pages"
+runSuite "jekyll build --source ../website --destination . --config ../website/_config.yml,_config-release.yml"
 
-runSuite "cd .." "rm -R tmp_website"
+rm _config-release.yml
 
+runSuite "cp -R ../target/site/apidocs Documentation/Javadoc"
+
+runSuite "git add -u ." "git add ." "git commit -m \"Documentation Release $version\"" "git push origin gh-pages"
+
+runSuite "cd .." "rm -Rf tmp_website"
