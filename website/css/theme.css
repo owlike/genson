@@ -19,9 +19,11 @@ a {
     outline: none !important;
 }
 
-.promotion-details {
-    background-color: white;
-    padding-top: 30px;
+.content, .promotion-details {
+    padding-top: 35px;
+    padding-bottom: 35px;
+    box-shadow: 0 1px 0 #c4c4c4;
+    background-color: #FFFFFF;
 }
 
 .navbar-brand {
@@ -142,11 +144,6 @@ pre {
     margin: 0px 0px;
 }
 
-.content {
-    padding-top: 35px;
-    background-color: #F6F6F6;
-}
-
 .content [role=main] {
     font-size: 16px;
 }
@@ -185,11 +182,13 @@ pre {
 .content-nav li:last-child > a {
     border-bottom-left-radius: 4px;
     border-bottom-right-radius: 4px;
-    border-bottom: 1px solid #DDDDDD;
+    border-bottom: 1px solid #DDDDDD !important;
 }
 
-.content-nav li.active > a {
+.content-nav li.active > a, .content-nav li.active > a:hover, .content-nav li.active > a:focus {
     font-weight: 700;
+    border-bottom: 0px;
+    background-color: #F6F6F6;
 }
 
 .content-nav .nav-tabs li a:hover,
@@ -197,6 +196,8 @@ pre {
 .content-nav .nav-tabs li.active a {
     border-left: 1px solid #428BCA;
 }
+
+
 
 .highlight {
     font-size: 12px;

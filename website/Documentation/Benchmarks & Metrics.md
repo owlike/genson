@@ -4,24 +4,20 @@ layout: default
 menu: true
 jumbotron: true
 quick-overview: Genson metrics and comparision with other librairies.
-
-img_total_ser_deser: https://chart.googleapis.com/chart?chtt=total+%28nanos%29&chf=c||lg||0||FFFFFF||1||76A4FB||0|bg||s||EFEFEF&chs=500x150&chd=t:15020,19363,27431,57752,162714,225332&chds=0,247866.06735000003&chxt=y&chxl=0:|json%2Fjson-lib-databind|json%2Fflexjson%2Fdatabind|json%2Fsvenson-databind|json%2Fgoogle-gson%2Fdatabind|json%2Fgenson%2Fdatabind|json%2Fjackson%2Fdatabind-strings&chm=N *f*,000000,0,-1,10&lklk&chdlp=t&chco=660000|660033|660066|660099|6600CC|6600FF|663300|663333|663366|663399|6633CC|6633FF|666600|666633|666666&cht=bhg&chbh=10,0,10&nonsense=aaa.png"
-img_ser: https://chart.googleapis.com/chart?chtt=ser+%28nanos%29&chf=c||lg||0||FFFFFF||1||76A4FB||0|bg||s||EFEFEF&chs=500x150&chd=t:7265,10850,17885,21964,42852,53675&chds=0,59042.52695000001&chxt=y&chxl=0:|json%2Fjson-lib-databind|json%2Fflexjson%2Fdatabind|json%2Fsvenson-databind|json%2Fgoogle-gson%2Fdatabind|json%2Fgenson%2Fdatabind|json%2Fjackson%2Fdatabind-strings&chm=N *f*,000000,0,-1,10&lklk&chdlp=t&chco=660000|660033|660066|660099|6600CC|6600FF|663300|663333|663366|663399|6633CC|6633FF|666600|666633|666666&cht=bhg&chbh=10,0,10&nonsense=aaa.png
-img_deser: https://chart.googleapis.com/chart?chtt=deser+%28nanos%29&chf=c||lg||0||FFFFFF||1||76A4FB||0|bg||s||EFEFEF&chs=500x150&chd=t:7755,8513,9546,35787,119862,171657&chds=0,188823.5404&chxt=y&chxl=0:|json%2Fjson-lib-databind|json%2Fflexjson%2Fdatabind|json%2Fsvenson-databind|json%2Fgoogle-gson%2Fdatabind|json%2Fgenson%2Fdatabind|json%2Fjackson%2Fdatabind-strings&chm=N *f*,000000,0,-1,10&lklk&chdlp=t&chco=660000|660033|660066|660099|6600CC|6600FF|663300|663333|663366|663399|6633CC|6633FF|666600|666633|666666&cht=bhg&chbh=10,0,10&nonsense=aaa.png
 ---
 
-All the following measures were made with Genson 0.93, Jackson 1.9.9 and Gson 2.2.3 on a Intel core i7 laptop with 2GHz and 4 Gio of RAM.
+All the following measures were made with Genson 0.98, Jackson 1.9.9 and Gson 2.2.3 on a Intel core i7 laptop with 2GHz and 4 Gio of RAM.
 The following benchmarks take into account the latest versions of Genson and Jackson but also the recent optimizations added to Gson  improving their deserialization performances.
 
 ##Performance benchmarks##
 
-This first benchmark compares Genson to others known librairies using [https://github.com/eishay/jvm-serializers/wiki/](jvm-serializers).
-The dataset can be found [https://github.com/eishay/jvm-serializers/blob/kannan/tpc/data/media.3.cks](here).
+This first benchmark compares Genson to others known librairies using [jvm-serializers](https://github.com/eishay/jvm-serializers/wiki/).
+The dataset can be found [here](https://github.com/eishay/jvm-serializers/blob/kannan/tpc/data/media.3.cks).
 
 
-<img src='{{page.img_total_ser_deser}}'/>
-<img src='{{page.img_ser}}'/>
-<img src='{{page.img_deser}}'/>
+<img src='{{site.baseurl}}/images/total_ser_de.png'/>
+<img src='{{site.baseurl}}/images/ser.png'/>
+<img src='{{site.baseurl}}/images/deser.png'/>
 
 
 ###Benchmarking methodology###
@@ -29,11 +25,11 @@ The following benchmarks were run in the same jvm. Before starting to measure pe
 
 Here is a second benchmark using Gson benchmarks data (located in their metrics project).
 This chart represents serialization and deserialization average time of
-[http://code.google.com/p/genson/source/browse/src/test/resources/READER_LONG.json](LONG_READER) data in milliseconds with 5000
+[LONG_READER](http://code.google.com/p/genson/source/browse/src/test/resources/READER_LONG.json) data in milliseconds with 5000
 iterations and 50 warmup iterations. The documents weights 189Ko. Complete results in their numeric reprensentation can be
-found [http://code.google.com/p/genson/source/browse/bench_results/benchmark_gson_metrics.txt](here).
-Serialization source code is located [http://code.google.com/p/genson/source/browse/src/test/java/com/owlike/genson/SerializationBenchmark.java](here)
- and deserialization [http://code.google.com/p/genson/source/browse/src/test/java/com/owlike/genson/DeserializeBenchmark.java](here).
+found [here](http://code.google.com/p/genson/source/browse/bench_results/benchmark_gson_metrics.txt).
+Serialization source code is located [here](http://code.google.com/p/genson/source/browse/src/test/java/com/owlike/genson/SerializationBenchmark.java)
+ and deserialization [here](http://code.google.com/p/genson/source/browse/src/test/java/com/owlike/genson/DeserializeBenchmark.java).
 
 <img src="http://genson.googlecode.com/files/gson_metrics_bench.png" />
 
