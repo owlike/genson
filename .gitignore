@@ -15,4 +15,4 @@ target/
 .classpath
 .project
 *.iml
-_site/
+*/_site/
