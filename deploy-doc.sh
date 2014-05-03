@@ -27,7 +27,7 @@ runCommand "git diff-index --quiet origin/HEAD --" "You have uncommited changes,
 
 runSuite "mvn clean javadoc:javadoc"
 
-runSuite "git clone https://github.com/owlike/genson.git tmp_website" "cd tmp_website" "git checkout gh-pages" "rm -R"
+runSuite "git clone https://github.com/owlike/genson.git tmp_website" "cd tmp_website" "git checkout gh-pages" "rm -R *"
 
 runSuite "cp -R ../website/* ." "cp -R ../target/site/apidocs Documentation/Javadoc"
 
