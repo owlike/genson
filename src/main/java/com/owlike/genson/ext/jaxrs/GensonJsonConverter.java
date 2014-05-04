@@ -86,7 +86,7 @@ public class GensonJsonConverter implements MessageBodyReader<Object>, MessageBo
 		Genson genson = getInstance(type);
 		ObjectWriter writer = genson.createWriter(new OutputStreamWriter(entityStream, "UTF-8"));
 		try {
-			genson.serialize(t, genericType, writer, createContext(annotations, genson));
+			genson.serialize(t, rawIfNullGenericType(type, genericType), writer, createContext(annotations, genson));
 			writer.flush();
 		} catch (JsonBindingException e) {
 			throw new WebApplicationException(e);
@@ -122,7 +122,7 @@ public class GensonJsonConverter implements MessageBodyReader<Object>, MessageBo
 		try {
 			Genson genson = getInstance(type);
 			ObjectReader reader = genson.createReader(new InputStreamReader(entityStream, "UTF-8"));
-			return genson.deserialize(GenericType.of(genericType), reader, createContext(annotations, genson));
+			return genson.deserialize(GenericType.of(rawIfNullGenericType(type, genericType)), reader, createContext(annotations, genson));
 		} catch (JsonBindingException e) {
 			throw new WebApplicationException(e);
 		} catch (JsonStreamException jse) {
@@ -135,4 +135,7 @@ public class GensonJsonConverter implements MessageBodyReader<Object>, MessageBo
 		return -1;
 	}
 
+    private Type rawIfNullGenericType(Class<?> rawType, Type genericType) {
+        return genericType != null ? genericType: rawType;
+    }
 }

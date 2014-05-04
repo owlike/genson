@@ -1,16 +1,11 @@
 package com.owlike.genson.functional;
 
-import java.awt.*;
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
 
 import com.owlike.genson.*;
-import com.owlike.genson.stream.JsonWriter;
-import com.owlike.genson.stream.ObjectReader;
-import com.owlike.genson.stream.ObjectWriter;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
