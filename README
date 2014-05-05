@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/owlike/genson.svg?branch=master)](https://travis-ci.org/owlike/genson)
+
 Genson json <-> java conversion library.
 
 Project url : http://code.google.com/p/genson/
