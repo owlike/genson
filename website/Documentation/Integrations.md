@@ -1,5 +1,5 @@
 ---
-title: 3d Party Integrations
+title: Integrations
 layout: default
 menu: true
 jumbotron: true
