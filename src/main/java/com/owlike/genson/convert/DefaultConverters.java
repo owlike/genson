@@ -16,20 +16,7 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.EnumSet;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import com.owlike.genson.*;
 import com.owlike.genson.annotation.HandleClassMetadata;
@@ -71,6 +58,92 @@ public final class DefaultConverters {
 		}
 	}
 
+    @HandleClassMetadata
+    public static class LinkedListConverter<E> extends CollectionConverter<E> {
+
+        public LinkedListConverter(Class<E> eClass, Converter<E> elementConverter) {
+            super(eClass, elementConverter);
+        }
+
+        @Override
+        protected Collection<E> create() {
+            return new LinkedList<E>();
+        }
+    }
+
+    @HandleClassMetadata
+    public static class TreeSetConverter<E> extends CollectionConverter<E> {
+
+        public TreeSetConverter(Class<E> eClass, Converter<E> elementConverter) {
+            super(eClass, elementConverter);
+        }
+
+        @Override
+        public void serialize(Collection<E> array, ObjectWriter writer, Context ctx) throws Exception {
+            TreeSet<E> treeSet = (TreeSet<E>)array;
+            if (treeSet.comparator() != null) {
+                throw new UnsupportedOperationException("Serialization and deserialization of TreeSet with Comparator is not supported. " +
+                        "You need to implement a custom Converter to handle it.");
+            }
+            super.serialize(array, writer, ctx);
+        }
+
+        @Override
+        protected Collection<E> create() {
+            return new TreeSet<E>();
+        }
+    }
+
+    @HandleClassMetadata
+    public static class LinkedHashSetConverter<E> extends CollectionConverter<E> {
+
+        public LinkedHashSetConverter(Class<E> eClass, Converter<E> elementConverter) {
+            super(eClass, elementConverter);
+        }
+
+        @Override
+        protected Collection<E> create() {
+            return new LinkedHashSet<E>();
+        }
+    }
+
+    @HandleClassMetadata
+    public static class ArrayDequeConverter<E> extends CollectionConverter<E> {
+
+        public ArrayDequeConverter(Class<E> eClass, Converter<E> elementConverter) {
+            super(eClass, elementConverter);
+        }
+
+        @Override
+        protected Collection<E> create() {
+            return new ArrayDeque<E>();
+        }
+    }
+
+    @HandleClassMetadata
+    public static class PriorityQueueConverter<E> extends CollectionConverter<E> {
+
+        public PriorityQueueConverter(Class<E> eClass, Converter<E> elementConverter) {
+            super(eClass, elementConverter);
+        }
+
+        @Override
+        public void serialize(Collection<E> array, ObjectWriter writer, Context ctx) throws Exception {
+            PriorityQueue<E> queue = (PriorityQueue<E>)array;
+            if (queue.comparator() != null) {
+                throw new UnsupportedOperationException("Serialization and deserialization of PriorityQueue with Comparator is not supported. " +
+                        "You need to implement a custom Converter to handle it.");
+            }
+            super.serialize(array, writer, ctx);
+        }
+
+        @Override
+        protected Collection<E> create() {
+            return new PriorityQueue<E>();
+        }
+    }
+
+    @HandleClassMetadata
 	public static class EnumSetConverter<E> extends CollectionConverter<E> {
 		private final Class<E> eClass;
 
@@ -140,10 +213,23 @@ public final class DefaultConverters {
 					.getCollectionType(forType));
 
 			Class<?> parameterRawClass = TypeUtil.getRawClass(TypeUtil.getCollectionType(forType));
-			if (EnumSet.class.isAssignableFrom(getRawClass(forType)) && parameterRawClass.isEnum())
-				return new EnumSetConverter(parameterRawClass, elementConverter);
-			if (Set.class.isAssignableFrom(TypeUtil.getRawClass(forType)))
+            Class<?> rawClass = getRawClass(forType);
+
+            if (EnumSet.class.isAssignableFrom(rawClass) && parameterRawClass.isEnum())
+                return new EnumSetConverter(parameterRawClass, elementConverter);
+            if (LinkedHashSet.class.isAssignableFrom(rawClass))
+                return new LinkedHashSetConverter(parameterRawClass, elementConverter);
+            if (TreeSet.class.isAssignableFrom(rawClass))
+                return new TreeSetConverter(parameterRawClass, elementConverter);
+			if (Set.class.isAssignableFrom(rawClass))
 				return new SetConverter(parameterRawClass, elementConverter);
+            if (LinkedList.class.isAssignableFrom(rawClass))
+                return new LinkedListConverter(parameterRawClass, elementConverter);
+            if (ArrayDeque.class.isAssignableFrom(rawClass))
+                return new ArrayDequeConverter(parameterRawClass, elementConverter);
+            if (PriorityQueue.class.isAssignableFrom(rawClass))
+                return new PriorityQueueConverter(parameterRawClass, elementConverter);
+
 			return new CollectionConverter(parameterRawClass, elementConverter);
 		}
 	};
@@ -566,6 +652,38 @@ public final class DefaultConverters {
 		}
 	}
 
+    public final static class TreeMapConverter<K, V> extends MapConverter<K, V> {
+        public TreeMapConverter(KeyAdapter<K> keyAdapter, Converter<V> valueConverter) {
+            super(keyAdapter, valueConverter);
+        }
+
+        @Override
+        public void serialize(Map<K, V> obj, ObjectWriter writer, Context ctx) throws Exception {
+            TreeMap<K, V> treeMap = (TreeMap<K, V>) obj;
+            if (((TreeMap<K, V>) obj).comparator() != null)
+                throw new UnsupportedOperationException("Serialization and deserialization of TreeMap with Comparator is not supported. " +
+                    "You need to implement a custom Converter to handle it.");
+
+            super.serialize(obj, writer, ctx);
+        }
+
+        @Override
+        protected Map<K, V> create() {
+            return new TreeMap<K, V>();
+        }
+    }
+
+    public final static class LinkedHashMapConverter<K, V> extends MapConverter<K, V> {
+        public LinkedHashMapConverter(KeyAdapter<K> keyAdapter, Converter<V> valueConverter) {
+            super(keyAdapter, valueConverter);
+        }
+
+        @Override
+        protected Map<K, V> create() {
+            return new LinkedHashMap<K, V>();
+        }
+    }
+
 	private static abstract class KeyAdapter<K> {
 		public abstract K adapt(String str);
 
@@ -748,16 +866,21 @@ public final class DefaultConverters {
 		@SuppressWarnings("unchecked")
 		private <K, V> MapConverter<K, V> createConverter(Class<?> typeOfMap,
 				KeyAdapter<K> keyAdapter, Converter<V> valueConverter) {
-			if (Properties.class.equals(typeOfMap)) {
+			if (Properties.class.equals(typeOfMap))
 				return new PropertiesConverter(keyAdapter, valueConverter);
-			}
 
 			if (Hashtable.class.equals(typeOfMap))
 				return new HashTableConverter<K, V>(keyAdapter, valueConverter);
 
+            if (TreeMap.class.equals(typeOfMap))
+                return new TreeMapConverter<K, V>(keyAdapter, valueConverter);
+
+            if (LinkedHashMap.class.equals(typeOfMap))
+                return new LinkedHashMapConverter<K, V>(keyAdapter, valueConverter);
+
 			return new HashMapConverter<K, V>(keyAdapter, valueConverter);
 		}
-	};
+	}
 
 	@SuppressWarnings("rawtypes")
 	public static class DateContextualFactory implements ContextualFactory {
