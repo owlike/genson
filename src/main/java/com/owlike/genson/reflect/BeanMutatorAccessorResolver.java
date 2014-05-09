@@ -60,7 +60,7 @@ public interface BeanMutatorAccessorResolver {
 
 	public Trilean isMutator(Method method, Class<?> fromClass);
 
-	public static class BaseResolver implements BeanMutatorAccessorResolver {
+	public static class PropertyBaseResolver implements BeanMutatorAccessorResolver {
 		@Override
 		public Trilean isAccessor(Field field, Class<?> fromClass) {
 			return Trilean.UNKNOWN;
@@ -264,7 +264,7 @@ public interface BeanMutatorAccessorResolver {
 
 		/**
 		 * Creates a new instance of StandardMutaAccessorResolver with
-		 * {@link VisibilityFilter#DEFAULT} visibility for fields,
+		 * {@link VisibilityFilter#PACKAGE_PUBLIC} visibility for fields,
 		 * {@link VisibilityFilter#PACKAGE_PUBLIC} visibility for methods and creators.
 		 */
 		public StandardMutaAccessorResolver() {

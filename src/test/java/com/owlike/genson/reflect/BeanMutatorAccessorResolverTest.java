@@ -16,7 +16,7 @@ public class BeanMutatorAccessorResolverTest {
 	@Test
 	public void testCustomResolver() throws SecurityException, NoSuchFieldException {
 		List<BeanMutatorAccessorResolver> resolvers = new ArrayList<BeanMutatorAccessorResolver>();
-		resolvers.add(new BaseResolver() {
+		resolvers.add(new PropertyBaseResolver() {
 			@Override
 			public Trilean isAccessor(Field field, Class<?> fromClass) {
 				return MyProxy.class.equals(field.getType()) ? Trilean.FALSE : Trilean.UNKNOWN;

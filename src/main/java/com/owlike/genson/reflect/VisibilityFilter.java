@@ -33,7 +33,7 @@ public final class VisibilityFilter {
 	/**
 	 * Modifier.TRANSIENT Modifier.NATIVE
 	 */
-	public final static VisibilityFilter DEFAULT = new VisibilityFilter(Modifier.TRANSIENT,
+	public final static VisibilityFilter PRIVATE = new VisibilityFilter(Modifier.TRANSIENT,
 			Modifier.NATIVE, Modifier.STATIC);
 	public final static VisibilityFilter ALL = new VisibilityFilter();
 	public final static VisibilityFilter PROTECTED = new VisibilityFilter(Modifier.TRANSIENT,

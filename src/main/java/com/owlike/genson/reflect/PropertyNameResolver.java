@@ -134,7 +134,7 @@ public interface PropertyNameResolver {
 			else if (name.startsWith("set"))
 				length = 3;
 
-			if (length > -1) {
+			if (length > -1 && length < name.length()) {
 				return Character.toLowerCase(name.charAt(length)) + name.substring(length + 1);
 			} else
 				return null;
