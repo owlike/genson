@@ -1,13 +1,14 @@
 package com.owlike.genson.ext;
 
 import com.owlike.genson.Genson.Builder;
+import com.owlike.genson.GensonBuilder;
 
 /**
  * Bundles allow to package all kind of Genson customizations into a single module and register
  * them all together. Extensions are registered using Genson.Builder.
  * 
  * <pre>
- * Genson genson = new Genson.Builder().with(new SuperCoolExtension()).create();
+ * Genson genson = new GensonBuilder().with(new SuperCoolExtension()).create();
  * </pre>
  * 
  * Extension configuration is mixed with user custom configuration (no way to distinguish them),
@@ -25,5 +26,5 @@ public abstract class GensonBundle {
 	 * This method is called when all custom configuration has been registered. Use the builder to
 	 * register your bundles.
 	 */
-	public abstract void configure(Builder builder);
+	public abstract void configure(GensonBuilder builder);
 }

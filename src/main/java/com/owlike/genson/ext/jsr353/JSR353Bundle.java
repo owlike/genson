@@ -17,10 +17,7 @@ import javax.json.JsonValue;
 import javax.json.JsonValue.ValueType;
 import javax.json.spi.JsonProvider;
 
-import com.owlike.genson.Context;
-import com.owlike.genson.Converter;
-import com.owlike.genson.Factory;
-import com.owlike.genson.Genson;
+import com.owlike.genson.*;
 import com.owlike.genson.Genson.Builder;
 import com.owlike.genson.ext.GensonBundle;
 import com.owlike.genson.stream.JsonWriter;
@@ -31,7 +28,7 @@ public class JSR353Bundle extends GensonBundle {
     static final JsonBuilderFactory factory = JsonProvider.provider().createBuilderFactory(
             new HashMap<String, String>());
 
-    @Override public void configure(Builder builder) {
+    @Override public void configure(GensonBuilder builder) {
         builder.withConverterFactory(new Factory<Converter<JsonValue>>() {
             @Override public Converter<JsonValue> create(Type type, Genson genson) {
                 return new JsonValueConverter();

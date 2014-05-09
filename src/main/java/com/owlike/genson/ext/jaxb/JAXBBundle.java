@@ -2,7 +2,6 @@ package com.owlike.genson.ext.jaxb;
 
 import static com.owlike.genson.reflect.TypeUtil.*;
 
-import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
@@ -31,21 +30,12 @@ import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import com.owlike.genson.*;
-import com.owlike.genson.Genson.Builder;
 import com.owlike.genson.annotation.HandleClassMetadata;
 import com.owlike.genson.annotation.WithoutBeanView;
 import com.owlike.genson.convert.ContextualFactory;
 import com.owlike.genson.convert.DefaultConverters.DateConverter;
 import com.owlike.genson.ext.GensonBundle;
-import com.owlike.genson.reflect.BeanCreator;
-import com.owlike.genson.reflect.BeanProperty;
-import com.owlike.genson.reflect.BeanPropertyFactory;
-import com.owlike.genson.reflect.PropertyAccessor;
-import com.owlike.genson.reflect.PropertyMutator;
-import com.owlike.genson.reflect.PropertyNameResolver;
-import com.owlike.genson.reflect.TypeUtil;
-import com.owlike.genson.reflect.BeanMutatorAccessorResolver.BaseResolver;
-import com.owlike.genson.reflect.VisibilityFilter;
+import com.owlike.genson.reflect.*;
 import com.owlike.genson.stream.ObjectReader;
 import com.owlike.genson.stream.ObjectWriter;
 
@@ -67,7 +57,7 @@ public class JAXBBundle extends GensonBundle {
 	}
 
 	@Override
-	public void configure(Builder builder) {
+	public void configure(GensonBuilder builder) {
 		builder.withConverters(new XMLGregorianCalendarConverter(), new DurationConveter())
 				.with(new JaxbAnnotationsResolver())
 				.with(new JaxbNameResolver())
@@ -356,7 +346,7 @@ public class JAXBBundle extends GensonBundle {
 		}
 	}
 
-	private class JaxbAnnotationsResolver extends BaseResolver {
+	private class JaxbAnnotationsResolver extends BeanMutatorAccessorResolver.PropertyBaseResolver {
 		@Override
 		public Trilean isAccessor(Field field, Class<?> fromClass) {
 
@@ -420,7 +410,7 @@ public class JAXBBundle extends GensonBundle {
 
 			if (xmlAccessTypeAnn != null) {
 				if (xmlAccessTypeAnn.value() == accessType
-						&& VisibilityFilter.DEFAULT.isVisible(member)) return Trilean.TRUE;
+						&& VisibilityFilter.PACKAGE_PUBLIC.isVisible(member)) return Trilean.TRUE;
 				if (xmlAccessTypeAnn.value() != accessType
 						&& xmlAccessTypeAnn.value() != XmlAccessType.PUBLIC_MEMBER)
 					return Trilean.FALSE;
