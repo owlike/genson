@@ -410,7 +410,7 @@ public class JAXBBundle extends GensonBundle {
 
 			if (xmlAccessTypeAnn != null) {
 				if (xmlAccessTypeAnn.value() == accessType
-						&& VisibilityFilter.PACKAGE_PUBLIC.isVisible(member)) return Trilean.TRUE;
+						&& VisibilityFilter.PRIVATE.isVisible(member)) return Trilean.TRUE;
 				if (xmlAccessTypeAnn.value() != accessType
 						&& xmlAccessTypeAnn.value() != XmlAccessType.PUBLIC_MEMBER)
 					return Trilean.FALSE;
