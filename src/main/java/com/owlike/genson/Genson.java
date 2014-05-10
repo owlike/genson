@@ -312,6 +312,11 @@ public final class Genson {
                 new Context(this, Arrays.asList(withViews)));
     }
 
+    public void serialize(Object object, ObjectWriter writer, Context ctx) {
+        if (object == null) serializeNull(writer);
+        else serialize(object, object.getClass(), writer, ctx);
+    }
+
 	/**
 	 * Serializes this object and writes its representation to writer. As you are providing the
 	 * writer instance you also must ensure to call close on it when you are done.

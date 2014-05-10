@@ -34,11 +34,25 @@
 $(function() {
     var menuContent = $('.content-nav ul')
     $('h2').each(function(idx, elem) {
-         menuContent.append('<li><a href="#' + elem.id + '">' + elem.innerHTML + '</a></li>')
+      var $elem = $(elem)
+
+      if ($elem.index() > 0) $elem.before('<hr />')
+
+      menuContent.append('<li><a href="#' + elem.id + '">' + elem.innerHTML + '</a></li>')
     })
 
 
     $('body').scrollspy({ target: '.content-nav' })
 })
 </script>
+{% else %}
+<div class="content">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-9" role="main">
+                {{ content }}
+            </div>
+        </div>
+    </div>
+</div>
 {% endif %}

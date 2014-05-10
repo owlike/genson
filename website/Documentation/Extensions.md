@@ -1,10 +1,29 @@
 ---
-title: Integrations
+title: Extensions
 layout: default
 menu: true
 jumbotron: true
-quick-overview: Genson provides bla bla...
+quick-overview: Genson provides out of the box integrations with some common frameworks and is packaged with Bundles to support types from commonly used libraries.
 ---
+
+##Extension types##
+
+At the moment you can find two kind of extensions in Genson,
+
+ - Integrations of Genson in common frameworks to handle the JSON ser/deser. This kind of integration tries to be done automatically by Genson,
+ but it is not always possible if the framework does not provide extension points.
+ - Integration in Genson of types defined in widely used libraries, ie. support JSR 353 JsonObject, JsonArray, etc types.
+ This is done through the GensonBundle system.
+
+##GensonBundle##
+
+A GensonBundle is a way to group a set of features in a single registrable component. Bundles by default, are not registered, you must do it
+explicitly. This is used internally to support types and annotations defined in other libraries and is intended to allow users to group their customizations
+behind a logical abstraction - the bundle.
+
+Bundles take precedence over user defined customization at the builder level.
+This means that if a bundle says you won't serialize null values and you tell the builder the contrary, the bundle will win.
+This has been designed this way because we consider that the configuration supplied by a Bundle is required by it, in order to work.
 
 ##JAX-RS: Jersey & cie##
 
@@ -20,13 +39,13 @@ To do that use Genson.Builder to create a custom instance and then inject it wit
 {% highlight java %}
 @Provider
 public class GensonCustomResolver implements ContextResolver<Genson> {
-    // configure the Genson instance
-    private final Genson genson = new Genson.Builder().create();
+  // configure the Genson instance
+  private final Genson genson = new Genson.Builder().create();
 
-    @Override
-    public Genson getContext(Class<?> type) {
-        return genson;
-    }
+  @Override
+  public Genson getContext(Class<?> type) {
+      return genson;
+  }
 }
 {% endhighlight %}
 
@@ -41,6 +60,17 @@ By default Genson JAX-RS integration enables JAXB annotations support.
 Genson provides two kind of integrations with the JSR. You can use Genson as the JSR implementation or use Genson
 to work with the DOM structures defined in the JSR.
 
+
+If the JSR API is not included in your Java version, you can still get it with Maven.
+
+{% highlight xml %}
+<dependency>
+  <groupId>javax.json</groupId>
+  <artifactId>javax.json-api</artifactId>
+  <version>1.0</version>
+</dependency>
+{% endhighlight %}
+
 ###Using Genson as JSR 353 implementation###
 
 Since version 0.99 Genson provides a complete implementation of JSR 353. To use Genson implementation,
@@ -52,17 +82,17 @@ you only need it on your classpath.
 Starting with release 0.98 Genson provides a bundle JSR353Bundle that enables support of JSR 353 types in Genson.
 This means that you can ser/deser using those types but also mix them with the databinding mechanism.
 {% highlight java %}
- Genson genson = new Genson.Builder().with(new JSR353Bundle()).create();
- JsonObject object = genson.deserialize(json, JsonObject.class);
+Genson genson = new Genson.Builder().with(new JSR353Bundle()).create();
+JsonObject object = genson.deserialize(json, JsonObject.class);
 {% endhighlight %}
 
 You can also mix with standard Pojos.
 
 {% highlight java %}
- class Pojo {
+class Pojo {
   public String aString;
   public JsonArray someArray;
- }
+}
 
 Pojo pojo = genson.deserialize(json, Pojo.class);
 {% endhighlight %}
