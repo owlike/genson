@@ -16,3 +16,4 @@ target/
 .project
 *.iml
 */_site/
+.settings

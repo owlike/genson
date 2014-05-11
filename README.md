@@ -13,6 +13,7 @@ Gensons main strengths?
 ##Online Documentation
 
 Checkout our new website - <http://owlike.github.io/genson/>!
+Old website - <http://code.google.com/p/genson/>
 
 ##Motivation
 
