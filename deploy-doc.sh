@@ -31,7 +31,7 @@ version=$(mvn org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpres
 
 runSuite "git clone https://github.com/owlike/genson.git tmp_website" "cd tmp_website" "git checkout gh-pages" "rm -R *"
 
-echo "latest_version: $version" > _config-release.yml
+echo -e "latest_version: $version \nproduction: true" > _config-release.yml
 
 runSuite "jekyll build --source ../website --destination . --config ../website/_config.yml,_config-release.yml"
 
