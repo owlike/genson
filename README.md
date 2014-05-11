@@ -1,7 +1,6 @@
 [![Build Status](https://travis-ci.org/owlike/genson.svg?branch=master)](https://travis-ci.org/owlike/genson)
 
 #Genson
---------
 
 Genson is a complete json <-> java conversion library, providing full databinding, streaming and much more.
 
