@@ -8,7 +8,7 @@ import com.owlike.genson.Context;
 import com.owlike.genson.Converter;
 import com.owlike.genson.Genson;
 import com.owlike.genson.Wrapper;
-import com.owlike.genson.annotation.WithoutBeanView;
+import com.owlike.genson.annotation.HandleBeanView;
 import com.owlike.genson.reflect.BeanDescriptor;
 import com.owlike.genson.reflect.BeanViewDescriptorProvider;
 import com.owlike.genson.reflect.TypeUtil;
@@ -39,7 +39,7 @@ public class BeanViewConverter<T> extends Wrapper<Converter<T>> implements Conve
 		@Override
 		protected Converter<?> create(Type type, Genson genson, Converter<?> nextConverter) {
 			if (!Wrapper.toAnnotatedElement(nextConverter).isAnnotationPresent(
-					WithoutBeanView.class))
+					HandleBeanView.class))
 				// TODO as we link an instance to a type, we may optimize things, but for the moment it is okay
 				// lets see if this feature is used
 				return new BeanViewConverter(type, provider, nextConverter);

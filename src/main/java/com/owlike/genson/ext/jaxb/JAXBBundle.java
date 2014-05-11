@@ -31,7 +31,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import com.owlike.genson.*;
 import com.owlike.genson.annotation.HandleClassMetadata;
-import com.owlike.genson.annotation.WithoutBeanView;
+import com.owlike.genson.annotation.HandleBeanView;
 import com.owlike.genson.convert.ContextualFactory;
 import com.owlike.genson.convert.DefaultConverters.DateConverter;
 import com.owlike.genson.ext.GensonBundle;
@@ -79,7 +79,7 @@ public class JAXBBundle extends GensonBundle {
 	}
 
 	@HandleClassMetadata
-	@WithoutBeanView
+	@HandleBeanView
 	private class XMLGregorianCalendarConverter implements Converter<XMLGregorianCalendar> {
 		private final DateConverter converter = new DateConverter();
 		private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-DD'T'hh:mm:ssZ");
@@ -218,7 +218,7 @@ public class JAXBBundle extends GensonBundle {
 		}
 
 		@HandleClassMetadata
-		@WithoutBeanView
+		@HandleBeanView
 		private class EnumConverter implements Converter<Enum<?>> {
 			private final Map<String, Enum<?>> valueToEnum;
 			private final Map<Enum<?>, String> enumToValue;

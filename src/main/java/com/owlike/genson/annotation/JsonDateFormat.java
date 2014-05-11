@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 import java.text.SimpleDateFormat;
 
 /**
- * Can be used on java.util.Date and java.util.Calendar to indicate the pattern or locale to
+ * Can be used on java.util.Date and java.util.Calendar to indicate the pattern or lang to
  * use when working with this date field. The pattern format are the standard ones from
  * {@link SimpleDateFormat}.
  * 
@@ -26,5 +26,5 @@ public @interface JsonDateFormat {
 	 */
 	String value() default "";
 	boolean asTimeInMillis() default false;
-	String locale() default "";
+	String lang() default "";
 }

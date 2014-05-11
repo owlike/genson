@@ -1,7 +1,6 @@
 package com.owlike.genson.convert;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.GenericArrayType;
@@ -19,11 +18,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import com.owlike.genson.*;
-import com.owlike.genson.annotation.HandleClassMetadata;
-import com.owlike.genson.annotation.HandleNull;
-import com.owlike.genson.annotation.JsonConverter;
-import com.owlike.genson.annotation.JsonDateFormat;
-import com.owlike.genson.annotation.WithoutBeanView;
+import com.owlike.genson.annotation.*;
+import com.owlike.genson.annotation.HandleBeanView;
 import com.owlike.genson.reflect.BeanProperty;
 import com.owlike.genson.reflect.TypeUtil;
 import com.owlike.genson.stream.ObjectReader;
@@ -353,7 +349,7 @@ public final class DefaultConverters {
 	};
 
 	@HandleClassMetadata
-	@WithoutBeanView
+	@HandleBeanView
 	public final static class StringConverter implements Converter<String> {
 		public final static StringConverter instance = new StringConverter();
 
@@ -370,7 +366,7 @@ public final class DefaultConverters {
 	};
 
 	@HandleClassMetadata
-	@WithoutBeanView
+	@HandleBeanView
 	public final static class BooleanConverter implements Converter<Boolean> {
 		public final static BooleanConverter instance = new BooleanConverter();
 
@@ -391,7 +387,7 @@ public final class DefaultConverters {
 	};
 
 	@HandleClassMetadata
-	@WithoutBeanView
+	@HandleBeanView
 	public final static class IntegerConverter implements Converter<Integer> {
 		public final static IntegerConverter instance = new IntegerConverter();
 
@@ -412,7 +408,7 @@ public final class DefaultConverters {
 	};
 
 	@HandleClassMetadata
-	@WithoutBeanView
+	@HandleBeanView
 	public final static class LongConverter implements Converter<Long> {
 		public final static LongConverter instance = new LongConverter();
 
@@ -433,7 +429,7 @@ public final class DefaultConverters {
 	};
 
 	@HandleClassMetadata
-	@WithoutBeanView
+	@HandleBeanView
 	public final static class DoubleConverter implements Converter<Double> {
 		public final static DoubleConverter instance = new DoubleConverter();
 
@@ -454,7 +450,7 @@ public final class DefaultConverters {
 	};
 
 	@HandleClassMetadata
-	@WithoutBeanView
+	@HandleBeanView
 	public final static class NumberConverter implements Converter<Number> {
 		public final static NumberConverter instance = new NumberConverter();
 
@@ -513,7 +509,7 @@ public final class DefaultConverters {
 
 		@HandleClassMetadata
 		@HandleNull
-		@WithoutBeanView
+		@HandleBeanView
 		public final static class booleanConverter implements Converter<Boolean> {
 			public final static booleanConverter instance = new booleanConverter();
 
@@ -531,7 +527,7 @@ public final class DefaultConverters {
 
 		@HandleClassMetadata
 		@HandleNull
-		@WithoutBeanView
+		@HandleBeanView
 		public final static class intConverter implements Converter<Integer> {
 			public final static intConverter instance = new intConverter();
 
@@ -549,7 +545,7 @@ public final class DefaultConverters {
 
 		@HandleClassMetadata
 		@HandleNull
-		@WithoutBeanView
+		@HandleBeanView
 		public final static class doubleConverter implements Converter<Double> {
 			public final static doubleConverter instance = new doubleConverter();
 
@@ -567,7 +563,7 @@ public final class DefaultConverters {
 
 		@HandleClassMetadata
 		@HandleNull
-		@WithoutBeanView
+		@HandleBeanView
 		public final static class longConverter implements Converter<Long> {
 			public final static longConverter instance = new longConverter();
 
@@ -888,8 +884,8 @@ public final class DefaultConverters {
 		public Converter create(BeanProperty property, Genson genson) {
 			JsonDateFormat ann = property.getAnnotation(JsonDateFormat.class);
 			if (ann != null) {
-				Locale locale = ann.locale().isEmpty() ? Locale.getDefault() : new Locale(
-						ann.locale());
+				Locale locale = ann.lang().isEmpty() ? Locale.getDefault() : new Locale(
+						ann.lang());
 				SimpleDateFormat dateFormat = new SimpleDateFormat(ann.value(), locale);
 				if (Date.class.isAssignableFrom(property.getRawClass()))
 					return new DateConverter(dateFormat, ann.asTimeInMillis());
@@ -902,7 +898,7 @@ public final class DefaultConverters {
 	}
 
 	@HandleClassMetadata
-	@WithoutBeanView
+	@HandleBeanView
 	public static class DateConverter implements Converter<Date> {
 		private DateFormat dateFormat;
 		private final boolean asTimeInMillis;
@@ -979,7 +975,7 @@ public final class DefaultConverters {
 	};
 
 	@HandleClassMetadata
-	@WithoutBeanView
+	@HandleBeanView
 	public static class EnumConverter<T extends Enum<T>> implements Converter<T> {
 		private final Class<T> eClass;
 
@@ -1011,7 +1007,7 @@ public final class DefaultConverters {
 	};
 
 	@HandleClassMetadata
-	@WithoutBeanView
+	@HandleBeanView
 	public static class URLConverter implements Converter<URL> {
 		public final static URLConverter instance = new URLConverter();
 
@@ -1032,7 +1028,7 @@ public final class DefaultConverters {
 	}
 
 	@HandleClassMetadata
-	@WithoutBeanView
+	@HandleBeanView
 	public static class URIConverter implements Converter<URI> {
 		public final static URIConverter instance = new URIConverter();
 
@@ -1049,7 +1045,7 @@ public final class DefaultConverters {
 	}
 
 	@HandleClassMetadata
-	@WithoutBeanView
+	@HandleBeanView
 	public static class BigDecimalConverter implements Converter<BigDecimal> {
 		public final static BigDecimalConverter instance = new BigDecimalConverter();
 
@@ -1068,7 +1064,7 @@ public final class DefaultConverters {
 	}
 
 	@HandleClassMetadata
-	@WithoutBeanView
+	@HandleBeanView
 	public static class BigIntegerConverter implements Converter<BigInteger> {
 		public final static BigIntegerConverter instance = new BigIntegerConverter();
 
@@ -1087,7 +1083,7 @@ public final class DefaultConverters {
 	}
 
 	@HandleClassMetadata
-	@WithoutBeanView
+	@HandleBeanView
 	public static class TimestampConverter implements Converter<Timestamp> {
 		public final static TimestampConverter instance = new TimestampConverter();
 
@@ -1106,7 +1102,7 @@ public final class DefaultConverters {
 	}
 
 	@HandleClassMetadata
-	@WithoutBeanView
+	@HandleBeanView
 	public static class UUIDConverter implements Converter<UUID> {
 		public final static UUIDConverter instance = new UUIDConverter();
 
@@ -1166,7 +1162,7 @@ public final class DefaultConverters {
 	}
 
 	@HandleClassMetadata
-	@WithoutBeanView
+	@HandleBeanView
 	public final static class FileConverter implements Converter<File> {
 		public final static FileConverter instance = new FileConverter();
 

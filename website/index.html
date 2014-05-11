@@ -36,18 +36,22 @@ layout: home
         <div class="row">
             <div class="col-lg-6">
                 <div class="row">
-                    <pre class="prettyprint"><code class="language-java">new Genson().deserialize("{}", AwesomeBean.class);</code></pre>
+{% highlight java %}
+new Genson().deserialize("{}", AwesomeBean.class);
+{% endhighlight %}
                 </div>
                 <div class="row">
                     <p class="lead"><i class="fa fa-check"></i> Full support of <b>generic types, polymorphic types and immutable objects</b> that don't provide a default constructor.</p>
                 </div>
             </div>
             <div class="col-lg-6">
-                <pre class="prettyprint"><code class="language-java">new Genson.Builder()
-  .setDateFormat(new SimpleDateFormat("yyyy-MM-dd"))
+{% highlight java %}
+new GensonBuilder()
+  .useDateFormat(new SimpleDateFormat("yyyy-MM-dd"))
   .useIndentation(true)
   .withSerializers(myCustomSerializer)
-.create();</code></pre>
+.create();
+{% endhighlight %}
             </div>
         </div>
     </div>
@@ -75,19 +79,25 @@ layout: home
                 </div>
             </div>
             <div class="row">
-                <div class="col-lg-6"><pre class="prettyprint"><code class="language-java">new Genson().serialize(
+                <div class="col-lg-6">
+{% highlight java %}
+new Genson().serialize(
   Json.createArrayBuilder()
     .add(1)
     .add(2)
   .build()
-);</code></pre></div>
+);
+{% endhighlight %}
+                </div>
                 <div class="col-lg-6">
-                    <pre class="prettyprint"><code class="language-java">public class Bean {
+{% highlight java %}
+public class Bean {
   @XmlJavaTypeAdapter(BeanAdapter.class)
   private ComplexType complexObject;
   @XmlTransient
   private String password;
-}</code></pre>
+}
+{% endhighlight %}
                 </div>
             </div>
         </div>
@@ -149,11 +159,12 @@ layout: home
             </div>
             <div class="col-lg-6">
                 <div>
-                        <pre class="prettyprint"><code class="language-xml">&lt;dependency>
-    &lt;groupId>com.owlike&lt;/groupId>
-    &lt;artifactId>genson&lt;/artifactId>
-    &lt;version>{{site.latest_version}}&lt;/version>
-&lt;/dependency></code></pre>
+{% highlight xml %}
+<dependency>
+  <groupId>com.owlike</groupId>
+  <artifactId>genson</artifactId>
+  <version>{{site.latest_version}}</version>
+</dependency>{% endhighlight %}
                 </div>
             </div>
         </div>
