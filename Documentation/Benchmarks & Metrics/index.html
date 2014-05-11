@@ -20,8 +20,6 @@
     <!-- Latest compiled and minified JavaScript -->
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
 
-    <script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
-
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
     <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
@@ -85,7 +83,7 @@
     <div class="container">
         <div class="row">
             <div class="col-md-12">
-                <h1>Benchmarks & Metrics</h1>
+                <h1>Metrics</h1>
                 <p class="catch-phrase">
                     Genson metrics and comparision with other librairies.
                 </p>
@@ -100,7 +98,8 @@
     <div class="container">
         <div class="row">
             <div class="col-md-9" role="main">
-                <p>All the following measures were made with Genson 0.98, Jackson 1.9.9 and Gson 2.2.3 on a Intel core i7 laptop with 2GHz and 4 Gio of RAM.
+                <h2 id="overview">Overview</h2>
+<p>All the following measures were made with Genson 0.98, Jackson 1.9.9 and Gson 2.2.3 on a Intel core i7 laptop with 2GHz and 4 Gio of RAM.
 The following benchmarks take into account the latest versions of Genson and Jackson but also the recent optimizations added to Gson  improving their deserialization performances.</p>
 
 <h2 id="performance-benchmarks">Performance benchmarks</h2>
@@ -108,9 +107,9 @@ The following benchmarks take into account the latest versions of Genson and Jac
 <p>This first benchmark compares Genson to others known librairies using <a href="https://github.com/eishay/jvm-serializers/wiki/">jvm-serializers</a>.
 The dataset can be found <a href="https://github.com/eishay/jvm-serializers/blob/kannan/tpc/data/media.3.cks">here</a>.</p>
 
-<p><img src="/genson/images/total_ser_de.png" />
-<img src="/genson/images/ser.png" />
-<img src="/genson/images/deser.png" /></p>
+<p><img class="img-responsive" src="/genson/images/total_ser_de.png" />
+<img class="img-responsive" src="/genson/images/ser.png" />
+<img class="img-responsive" src="/genson/images/deser.png" /></p>
 
 <h3 id="benchmarking-methodology">Benchmarking methodology</h3>
 <p>The following benchmarks were run in the same jvm. Before starting to measure performances, each library has been warmed up. To limit memory usage impact, an explicit call to the garbage collector has been made, followed by sleep of the running thread for some seconds between each library bench.</p>
@@ -123,11 +122,11 @@ found <a href="http://code.google.com/p/genson/source/browse/bench_results/bench
 Serialization source code is located <a href="http://code.google.com/p/genson/source/browse/src/test/java/com/owlike/genson/SerializationBenchmark.java">here</a>
  and deserialization <a href="http://code.google.com/p/genson/source/browse/src/test/java/com/owlike/genson/DeserializeBenchmark.java">here</a>.</p>
 
-<p><img src="http://genson.googlecode.com/files/gson_metrics_bench.png" /></p>
+<p><img class="img-responsive" src="http://genson.googlecode.com/files/gson_metrics_bench.png" /></p>
 
 <p>The last benchmark goal is to measure performances of use cases where you have got a lot of beans (so reflection will be used), big numbers, many lists, arrays and maps (small and big). Note that we compare two versions of Genson, the first one uses a custom algorithm allowing to parse doubles really fast, but with a small precision loss, the other one uses standard Double.parse. In most cases using the custom algorithm should be fine.</p>
 
-<p><img src="http://genson.googlecode.com/files/genson_fictive_bench.png" /></p>
+<p><img class="img-responsive" src="http://genson.googlecode.com/files/genson_fictive_bench.png" /></p>
 
 <p>When looking at all those benchmarks we can see that Genson and Jackson performances are relatively close and Gson latest optimizations improved nicely its performances.
 Performances are important, but at that level other things may be more important, such as library design, ease to use and ease to develop and intergrate new features by yourself.</p>
@@ -135,7 +134,7 @@ Performances are important, but at that level other things may be more important
 <h2 id="artifact-size">Artifact size</h2>
 <p>Last measure that can be very important for mobile developers is the jar size. In fact Gson has the smallest archive size but Genson is faster and weights only 2Ko more (Jackson is 5 times heavier)!</p>
 
-<p><img src="http://genson.googlecode.com/files/Jarsizeinko.JPG" /></p>
+<p><img class="img-responsive" src="http://genson.googlecode.com/files/Jarsizeinko.JPG" /></p>
 
             </div>
             <div class="col-md-3">
@@ -152,7 +151,11 @@ Performances are important, but at that level other things may be more important
 $(function() {
     var menuContent = $('.content-nav ul')
     $('h2').each(function(idx, elem) {
-        menuContent.append('<li><a href="#' + elem.id + '">' + elem.innerHTML + '</a></li>')
+      var $elem = $(elem)
+
+      if ($elem.index() > 0) $elem.before('<hr />')
+
+      menuContent.append('<li><a href="#' + elem.id + '">' + elem.innerHTML + '</a></li>')
     })
 
 

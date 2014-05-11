@@ -197,8 +197,11 @@ pre {
     border-left: 1px solid #428BCA;
 }
 
-
-
-.highlight {
+.content > .container [role=main] .highlight {
+    /*padding-bottom: 15px;*/
     font-size: 12px;
+}
+
+.content > .container [role=main] h2:not(:first-child) {
+    padding-top: 35px;
 }
