@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.owlike.genson.Genson;
-import com.owlike.genson.annotation.Creator;
+import com.owlike.genson.annotation.JsonCreator;
 import com.owlike.genson.reflect.BeanCreator.BeanCreatorProperty;
 
 import static com.owlike.genson.reflect.TypeUtil.*;
@@ -258,7 +258,7 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 		// first lets do some checks
 		for (int i = 0; i < creators.size(); i++) {
 			BeanCreator ctr = creators.get(i);
-			if (ctr.isAnnotationPresent(Creator.class)) {
+			if (ctr.isAnnotationPresent(JsonCreator.class)) {
 				if (!hasCreatorAnnotation)
 					hasCreatorAnnotation = true;
 				else
@@ -269,7 +269,7 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 
 		if (hasCreatorAnnotation) {
 			for (BeanCreator ctr : creators)
-				if (ctr.isAnnotationPresent(Creator.class)) return ctr;
+				if (ctr.isAnnotationPresent(JsonCreator.class)) return ctr;
 		} else {
 			creator = creators.get(0);
 		}

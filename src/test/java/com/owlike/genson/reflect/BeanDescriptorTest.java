@@ -6,23 +6,19 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import com.owlike.genson.GensonBuilder;
 import org.junit.Test;
 
 import com.owlike.genson.Converter;
 import com.owlike.genson.Factory;
 import com.owlike.genson.Genson;
-import com.owlike.genson.annotation.Creator;
+import com.owlike.genson.annotation.JsonCreator;
 import com.owlike.genson.annotation.JsonIgnore;
 import com.owlike.genson.annotation.JsonProperty;
 import com.owlike.genson.convert.BasicConvertersFactory;
 import com.owlike.genson.convert.DefaultConverters;
 import com.owlike.genson.convert.DefaultConverters.CollectionConverter;
 import com.owlike.genson.reflect.AbstractBeanDescriptorProvider.ContextualConverterFactory;
-import com.owlike.genson.reflect.BaseBeanDescriptorProvider;
-import com.owlike.genson.reflect.BeanDescriptor;
-import com.owlike.genson.reflect.BeanMutatorAccessorResolver;
-import com.owlike.genson.reflect.PropertyAccessor;
-import com.owlike.genson.reflect.PropertyNameResolver;
 
 import static org.junit.Assert.*;
 
@@ -37,7 +33,7 @@ public class BeanDescriptorTest {
 						new BeanPropertyFactory.CompositeFactory(Arrays
 								.asList(new BeanPropertyFactory.StandardFactory())),
 						getMutatorAccessorResolver(), getPropertyNameResolver(),
-						isUseGettersAndSetters(), isUseFields(), true) {
+						true, true, true) {
 					@SuppressWarnings({ "unchecked", "rawtypes" })
 					protected <T> com.owlike.genson.reflect.BeanDescriptor<T> create(
 							java.lang.Class<T> forClass,
@@ -81,14 +77,14 @@ public class BeanDescriptorTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testConverterChain() {
-		Genson genson = new Genson.Builder() {
+		Genson genson = new GensonBuilder() {
 			@Override
 			protected Factory<Converter<?>> createConverterFactory() {
 				return new BasicConvertersFactory(
 						getSerializersMap(), getDeserializersMap(), getFactories(),
 						getBeanDescriptorProvider());
 			}
-		}.setWithDebugInfoPropertyNameResolver(true).create();
+		}.useConstructorWithArguments(true).create();
 
 		@SuppressWarnings("rawtypes")
 		BeanDescriptor<ThatObject> pDesc = (BeanDescriptor) genson
@@ -199,7 +195,7 @@ public class BeanDescriptorTest {
 		ForceMethodCreator() {
 		}
 
-		@Creator
+		@JsonCreator
 		public static ForceMethodCreator create() {
 			usedMethod = true;
 			return new ForceMethodCreator();
@@ -212,18 +208,18 @@ public class BeanDescriptorTest {
 		ForceConstructorCreator() {
 		}
 
-		@Creator
+		@JsonCreator
 		ForceConstructorCreator(@JsonProperty("i") Integer iii) {
 			usedCtr = true;
 		}
 	}
 
 	static class MultipleCreator {
-		@Creator
+		@JsonCreator
 		MultipleCreator() {
 		}
 
-		@Creator
+		@JsonCreator
 		public static MultipleCreator create() {
 			return null;
 		}

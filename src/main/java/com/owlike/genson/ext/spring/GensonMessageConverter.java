@@ -24,7 +24,7 @@ public class GensonMessageConverter extends AbstractHttpMessageConverter<Object>
 	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
 	public GensonMessageConverter() {
-		this(new Genson.Builder().setHtmlSafe(true).setSkipNull(true).setWithBeanViewConverter(true).create());
+		this(new GensonBuilder().setHtmlSafe(true).setSkipNull(true).useBeanViews(true).create());
 	}
 
 	public GensonMessageConverter(Genson genson) {

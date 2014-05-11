@@ -35,7 +35,7 @@ public class DeserializeBenchmark {
 	private String tweets;
 	private String shortReader;
 	private String longReader;
-	private Genson genson = new Genson.Builder().setDateFormat(
+	private Genson genson = new GensonBuilder().useDateFormat(
 			new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", Locale.US)).create();
 	private Gson gson = new GsonBuilder().setDateFormat("EEE MMM dd HH:mm:ss Z yyyy").create();
 	private ObjectMapper mapper = new ObjectMapper();

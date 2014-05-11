@@ -3,6 +3,7 @@ package com.owlike.genson.convert;
 import java.util.Arrays;
 import java.util.List;
 
+import com.owlike.genson.GensonBuilder;
 import org.junit.Test;
 
 import com.owlike.genson.Genson;
@@ -69,7 +70,7 @@ public class JsonSerializationTest {
 				ClassWithFieldsAndGetter.class).create();
 		String json = genson.serialize(new ClassWithFieldsAndGetter("a", 0));
 		assertTrue(json.startsWith("{\"@class\":\"ClassWithFieldsAndGetter\""));
-		genson = new Genson.Builder().setWithClassMetadata(true).create();
+		genson = new GensonBuilder().useClassMetadata(true).create();
 		json = genson.serialize(new ClassWithFieldsAndGetter("a", 0));
 		assertTrue(json
 				.startsWith("{\"@class\":\"com.owlike.genson.convert.JsonSerializationTest$ClassWithFieldsAndGetter\""));

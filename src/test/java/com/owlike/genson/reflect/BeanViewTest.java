@@ -1,18 +1,19 @@
 package com.owlike.genson.reflect;
 
+import com.owlike.genson.GensonBuilder;
+import com.owlike.genson.annotation.JsonCreator;
 import org.junit.Test;
 
 import com.owlike.genson.BeanView;
 import com.owlike.genson.Genson;
-import com.owlike.genson.annotation.Creator;
 import com.owlike.genson.annotation.JsonProperty;
 
 import static org.junit.Assert.*;
 
 public class BeanViewTest {
-	Genson genson = new Genson.Builder()
-			.setWithBeanViewConverter(true)
-			.setWithDebugInfoPropertyNameResolver(true)
+	Genson genson = new GensonBuilder()
+			.useBeanViews(true)
+			.useConstructorWithArguments(true)
 			.set(new BeanMutatorAccessorResolver.StandardMutaAccessorResolver(VisibilityFilter.ALL,
 					VisibilityFilter.PACKAGE_PUBLIC, VisibilityFilter.PACKAGE_PUBLIC)).create();
 	
@@ -50,7 +51,7 @@ public class BeanViewTest {
 		static boolean usedForNameMethod = false;
 		static int val;
 
-		@Creator
+		@JsonCreator
 		public static MyClass create(String forName, @JsonProperty(value = "value") Integer theValue) {
 			usedCtr = true;
 			MyClass mc = new MyClass();

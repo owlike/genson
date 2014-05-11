@@ -15,7 +15,7 @@ import static com.owlike.genson.Trilean.TRUE;
 
 import com.owlike.genson.JsonBindingException;
 import com.owlike.genson.Trilean;
-import com.owlike.genson.annotation.Creator;
+import com.owlike.genson.annotation.JsonCreator;
 import com.owlike.genson.annotation.JsonIgnore;
 import com.owlike.genson.annotation.JsonProperty;
 
@@ -200,7 +200,7 @@ public interface BeanMutatorAccessorResolver {
 		}
 
 		public Trilean isCreator(Method method, Class<?> fromClass) {
-			if (method.getAnnotation(Creator.class) != null) {
+			if (method.getAnnotation(JsonCreator.class) != null) {
 				if (Modifier.isPublic(method.getModifiers())
 						&& Modifier.isStatic(method.getModifiers()))
 					return TRUE;

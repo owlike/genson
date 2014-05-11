@@ -15,6 +15,7 @@ import java.util.Locale;
 
 import static org.junit.Assert.*;
 
+import com.owlike.genson.annotation.JsonCreator;
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -22,7 +23,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.owlike.genson.annotation.Creator;
 import com.owlike.genson.annotation.JsonProperty;
 import com.owlike.genson.bean.ComplexObject;
 import com.owlike.genson.bean.Feed;
@@ -33,7 +33,7 @@ import com.owlike.genson.stream.ObjectReader;
 import com.owlike.genson.stream.ObjectWriter;
 
 public class JsonSerDeserSymetricTest {
-	Genson genson = new Genson.Builder().setWithDebugInfoPropertyNameResolver(true).create();
+	Genson genson = new GensonBuilder().useConstructorWithArguments(true).create();
 	
 	@Test public void testSerDeserByteArray() throws IOException {
 		Primitives expected = createPrimitives();
@@ -81,7 +81,7 @@ public class JsonSerDeserSymetricTest {
 		B b = new B();
 		b.a = "aa";
 		b.b = "bb";
-		Genson genson = new Genson.Builder().setWithClassMetadata(true).create();
+		Genson genson = new GensonBuilder().useClassMetadata(true).create();
 		String json = genson.serialize(b);
 		B b2 = (B) genson.deserialize(json, Object.class);
 		assertEquals(b.a, b2.a);
@@ -94,8 +94,8 @@ public class JsonSerDeserSymetricTest {
 		p.birthYear = 1986;
 		p.name = "eugen";
 
-		Genson genson = new Genson.Builder().setWithBeanViewConverter(true)
-				.setWithDebugInfoPropertyNameResolver(true).create();
+		Genson genson = new GensonBuilder().useBeanViews(true)
+				.useConstructorWithArguments(true).create();
 
 		@SuppressWarnings("unchecked")
 		String json = genson.serialize(p, ViewOfPerson.class);
@@ -110,7 +110,7 @@ public class JsonSerDeserSymetricTest {
 
 	@Test
 	public void testWithUrlConverter() throws IOException {
-		Genson genson = new Genson.Builder().withConverters(new Converter<URL>() {
+		Genson genson = new GensonBuilder().withConverters(new Converter<URL>() {
 
 			public void serialize(URL obj, ObjectWriter writer, Context ctx)
 					throws IOException {
@@ -139,8 +139,8 @@ public class JsonSerDeserSymetricTest {
 	}
 
 	public Genson getGenson() {
-		return new Genson.Builder().setDateFormat(
-				new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", Locale.US)).create();
+		return new GensonBuilder().useDateFormat(
+                new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", Locale.US)).create();
 	}
 
 	@Test
@@ -201,7 +201,7 @@ public class JsonSerDeserSymetricTest {
 
 	@Test
 	public void testWithCustomObjectConverter() throws IOException {
-		Genson genson = new Genson.Builder().withConverters(new Converter<Point>() {
+		Genson genson = new GensonBuilder().withConverters(new Converter<Point>() {
 
 			public void serialize(Point obj, ObjectWriter writer, Context ctx)
 					throws IOException {
@@ -269,7 +269,7 @@ public class JsonSerDeserSymetricTest {
 
 		static boolean usedCtr = false;
 
-		@Creator
+		@JsonCreator
 		public static Person createNewPerson(String gender) {
 			usedCtr = true;
 			String civility = "M".equalsIgnoreCase(gender) ? "Mr"

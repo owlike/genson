@@ -16,7 +16,7 @@ import static com.owlike.genson.Trilean.TRUE;
 import static com.owlike.genson.reflect.TypeUtil.*;
 
 import com.owlike.genson.*;
-import com.owlike.genson.annotation.Creator;
+import com.owlike.genson.annotation.JsonCreator;
 import com.owlike.genson.reflect.PropertyAccessor.MethodAccessor;
 import com.owlike.genson.reflect.PropertyMutator.MethodMutator;
 
@@ -193,7 +193,7 @@ public class BeanViewDescriptorProvider extends BaseBeanDescriptorProvider {
         }
 
         public Trilean isCreator(Method method, Class<?> baseClass) {
-            if (method.getAnnotation(Creator.class) != null) {
+            if (method.getAnnotation(JsonCreator.class) != null) {
                 if (Modifier.isStatic(method.getModifiers())) return TRUE;
                 throw new JsonBindingException("Method " + method.toGenericString()
                         + " annotated with @Creator must be static!");

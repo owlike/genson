@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.owlike.genson.GensonBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -28,7 +29,7 @@ public class JsonDeserializationTest {
 
 	@Before
 	public void init() {
-		genson = new Genson.Builder().setWithDebugInfoPropertyNameResolver(true).create();
+		genson = new GensonBuilder().useConstructorWithArguments(true).create();
 	}
 
 	@Test

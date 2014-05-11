@@ -35,7 +35,7 @@ public class SerializationBenchmark {
 	}
 
 	private void setUp() throws IOException {
-		genson = new Genson.Builder().setDateFormat(
+		genson = new GensonBuilder().useDateFormat(
 				new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", Locale.US)).create();
 		gson = new GsonBuilder().setDateFormat("EEE MMM dd HH:mm:ss Z yyyy").serializeNulls().create();
 		mapper = new ObjectMapper();

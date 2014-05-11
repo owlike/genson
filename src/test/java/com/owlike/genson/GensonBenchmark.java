@@ -38,7 +38,7 @@ Gson avg deserialization time=0.85536 ms
  */
 public class GensonBenchmark {
 	final int ITERATION_CNT = 50000;
-	private Genson genson = new Genson.Builder().setStrictDoubleParse(true).create();
+	private Genson genson = new GensonBuilder().useStrictDoubleParse(true).create();
 	private Gson gson = new GsonBuilder().serializeNulls().create();
 	private ObjectMapper om = new ObjectMapper();
 	private Map<String, Object> map;

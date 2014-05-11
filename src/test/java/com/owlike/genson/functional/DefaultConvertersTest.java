@@ -15,7 +15,7 @@ public class DefaultConvertersTest {
 
 
     @Test public void testReadWriteByteAsInt() {
-        Genson genson = new Genson.Builder().setWithDebugInfoPropertyNameResolver(true).useByteAsInt(true).create();
+        Genson genson = new GensonBuilder().useConstructorWithArguments(true).useByteAsInt(true).create();
         PojoWithByteArray expected = new PojoWithByteArray(5, 777.777, "ABCD".getBytes());
         String json = genson.serialize(expected);
         PojoWithByteArray actual = genson.deserialize(json, PojoWithByteArray.class);
@@ -64,7 +64,7 @@ public class DefaultConvertersTest {
     }
 
     @Test public void testPojoWithBytes() {
-        Genson genson = new Genson.Builder().setWithDebugInfoPropertyNameResolver(true).create();
+        Genson genson = new GensonBuilder().useConstructorWithArguments(true).create();
         PojoWithByteArray expected = new PojoWithByteArray(5, 777.777, "ABCD".getBytes());
         String json = genson.serialize(expected);
         PojoWithByteArray actual = genson.deserialize(json, PojoWithByteArray.class);
@@ -92,8 +92,8 @@ public class DefaultConvertersTest {
 
     @Test
     public void testClassMetadataOnceWhenUsedWithRuntimeType() {
-        Genson genson = new Genson.Builder().setUseRuntimeTypeForSerialization(true)
-                .addAlias("subBean", SubBean.class).setWithClassMetadata(true).create();
+        Genson genson = new GensonBuilder().useRuntimeType(true)
+                .addAlias("subBean", SubBean.class).useClassMetadata(true).create();
         RootBean rootBean = new SubBean();
         rootBean.bean = new SubBean();
         assertEquals("{\"@class\":\"subBean\",\"bean\":{\"@class\":\"subBean\",\"bean\":null}}", genson.serialize(rootBean));
@@ -145,7 +145,7 @@ public class DefaultConvertersTest {
 
     @Test
     public void testDateConverter() {
-        Genson genson = new Genson.Builder().setDateFormat(
+        Genson genson = new GensonBuilder().useDateFormat(
                 new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z", Locale.FRENCH)).create();
         Date date = new Date();
         String json = genson.serialize(date);

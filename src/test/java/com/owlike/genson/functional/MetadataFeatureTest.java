@@ -3,6 +3,7 @@ package com.owlike.genson.functional;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import com.owlike.genson.GensonBuilder;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -13,7 +14,7 @@ public class MetadataFeatureTest {
 	private Genson genson;
 	
 	@Before public void setUp() {
-		genson = new Genson.Builder().setWithClassMetadata(true).addAlias("bean", Bean.class).create();
+		genson = new GensonBuilder().useClassMetadata(true).addAlias("bean", Bean.class).create();
 	}
 	
 	@Test public void testSerializeUnknownType() {

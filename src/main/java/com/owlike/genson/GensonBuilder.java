@@ -16,7 +16,7 @@ import java.util.*;
  * for example to register custom converters/serializers/deserializers
  * {@link #withConverters(Converter...)} or custom converter Factories
  * {@link #withConverterFactory(Factory)}.
- *
+ * <p/>
  * This class combines the GensonBuilder design pattern with template pattern providing handy
  * configuration and extensibility. All its public methods are intended to be used in the
  * GensonBuilder "style" and its protected methods are part of the template. When you call
@@ -28,7 +28,6 @@ import java.util.*;
  * Converters that you always want to register then override {@link #getDefaultConverters()}.
  *
  * @author eugen
- *
  */
 public class GensonBuilder {
     private final Map<Type, Serializer<?>> serializersMap = new HashMap<Type, Serializer<?>>();
@@ -75,7 +74,7 @@ public class GensonBuilder {
      * Alias used in serialized class metadata instead of the full class name. See
      * {@link com.owlike.genson.convert.ClassMetadataConverter ClassMetadataConverter} for more
      * metadata. If you add an alias, it will automatically enable the class metadata feature,
-     * as if you used {@link #setWithClassMetadata(boolean)}.
+     * as if you used {@link #useClassMetadata(boolean)}.
      *
      * @param alias
      * @param forClass
@@ -106,10 +105,8 @@ public class GensonBuilder {
     /**
      * Register converter by mapping it to type argument.
      *
-     * @param converter
-     *            to register
-     * @param type
-     *            of objects this converter handles
+     * @param converter to register
+     * @param type      of objects this converter handles
      * @return a reference to this builder.
      */
     public <T> GensonBuilder withConverter(Converter<T> converter, Class<? extends T> type) {
@@ -120,10 +117,8 @@ public class GensonBuilder {
     /**
      * Register converter by mapping it to the parameterized type of type argument.
      *
-     * @param converter
-     *            to register
-     * @param type
-     *            of objects this converter handles
+     * @param converter to register
+     * @param type      of objects this converter handles
      * @return a reference to this builder.
      */
     public <T> GensonBuilder withConverter(Converter<T> converter, GenericType<? extends T> type) {
@@ -188,7 +183,7 @@ public class GensonBuilder {
     }
 
     public <T> GensonBuilder withDeserializer(Deserializer<T> deserializer,
-                                        GenericType<? extends T> type) {
+                                              GenericType<? extends T> type) {
         registerDeserializer(deserializer, type.getType());
         return this;
     }
@@ -204,8 +199,7 @@ public class GensonBuilder {
     /**
      * Registers converter factories.
      *
-     * @param factory
-     *            to register
+     * @param factory to register
      * @return a reference to this builder.
      */
     public GensonBuilder withConverterFactory(Factory<? extends Converter<?>> factory) {
@@ -216,8 +210,7 @@ public class GensonBuilder {
     /**
      * Registers serializer factories.
      *
-     * @param factory
-     *            to register
+     * @param factory to register
      * @return a reference to this builder.
      */
     public GensonBuilder withSerializerFactory(Factory<? extends Serializer<?>> factory) {
@@ -228,8 +221,7 @@ public class GensonBuilder {
     /**
      * Registers deserializer factories.
      *
-     * @param factory
-     *            to register
+     * @param factory to register
      * @return a reference to this builder.
      */
     public GensonBuilder withDeserializerFactory(Factory<? extends Deserializer<?>> factory) {
@@ -253,6 +245,91 @@ public class GensonBuilder {
      */
     public GensonBuilder withBeanPropertyFactory(BeanPropertyFactory... factories) {
         beanPropertyFactories.addAll(Arrays.asList(factories));
+        return this;
+    }
+
+    /**
+     * Register some genson bundles. For example to enable JAXB support:
+     * <p/>
+     * <pre>
+     * builder.with(new JAXBExtension());
+     * </pre>
+     *
+     * @see GensonBundle
+     */
+    public GensonBuilder with(GensonBundle... bundles) {
+        for (GensonBundle ext : bundles)
+            _bundles.add(ext);
+        return this;
+    }
+
+
+    /**
+     * Replaces default {@link com.owlike.genson.reflect.BeanMutatorAccessorResolver
+     * BeanMutatorAccessorResolver} by the specified one.
+     *
+     * @param resolver
+     * @return a reference to this builder.
+     */
+    public GensonBuilder set(BeanMutatorAccessorResolver resolver) {
+        mutatorAccessorResolver = resolver;
+        return this;
+    }
+
+    /**
+     * Replaces default {@link com.owlike.genson.reflect.PropertyNameResolver
+     * PropertyNameResolver} by the specified one.
+     *
+     * @param resolver
+     * @return a reference to this builder.
+     */
+    public GensonBuilder set(PropertyNameResolver resolver) {
+        propertyNameResolver = resolver;
+        return this;
+    }
+
+    /**
+     * Register additional BeanMutatorAccessorResolver that will be used before the standard
+     * ones.
+     *
+     * @param resolvers
+     * @return a reference to this builder.
+     */
+    public GensonBuilder with(BeanMutatorAccessorResolver... resolvers) {
+        if (mutatorAccessorResolver == null)
+            mutatorAccessorResolver = createBeanMutatorAccessorResolver();
+        if (mutatorAccessorResolver instanceof BeanMutatorAccessorResolver.CompositeResolver)
+            ((BeanMutatorAccessorResolver.CompositeResolver) mutatorAccessorResolver).add(resolvers);
+        else
+            throw new IllegalStateException(
+                    "You can not add multiple resolvers if the base resolver is not of type "
+                            + BeanMutatorAccessorResolver.CompositeResolver.class.getName());
+        return this;
+    }
+
+    public Map<Type, Serializer<?>> getSerializersMap() {
+        return Collections.unmodifiableMap(serializersMap);
+    }
+
+    public Map<Type, Deserializer<?>> getDeserializersMap() {
+        return Collections.unmodifiableMap(deserializersMap);
+    }
+
+    /**
+     * Registers the specified resolvers in the order they were defined and before the standard
+     * ones.
+     *
+     * @param resolvers
+     * @return a reference to this builder.
+     */
+    public GensonBuilder with(PropertyNameResolver... resolvers) {
+        if (propertyNameResolver == null) propertyNameResolver = createPropertyNameResolver();
+        if (propertyNameResolver instanceof PropertyNameResolver.CompositePropertyNameResolver)
+            ((PropertyNameResolver.CompositePropertyNameResolver) propertyNameResolver).add(resolvers);
+        else
+            throw new IllegalStateException(
+                    "You can not add multiple resolvers if the base resolver is not of type "
+                            + PropertyNameResolver.CompositePropertyNameResolver.class.getName());
         return this;
     }
 
@@ -288,7 +365,7 @@ public class GensonBuilder {
      * Renames all fields named field, of type fieldOfType and declared in fromClass to toName.
      */
     public GensonBuilder rename(final String field, final Class<?> fromClass, final String toName,
-                          final Class<?> ofType) {
+                                final Class<?> ofType) {
         return with(new PropertyNameResolver() {
 
             @Override
@@ -369,7 +446,7 @@ public class GensonBuilder {
     }
 
     private GensonBuilder filter(final String field, final Class<?> declaringClass,
-                           final Class<?> ofType, final boolean exclude) {
+                                 final Class<?> ofType, final boolean exclude) {
         return with(new BeanMutatorAccessorResolver.PropertyBaseResolver() {
             @Override
             public Trilean isAccessor(Field field, Class<?> fromClass) {
@@ -422,8 +499,7 @@ public class GensonBuilder {
     /**
      * If true will not serialize null values
      *
-     * @param skipNull
-     *            indicates whether null values should be serialized or not.
+     * @param skipNull indicates whether null values should be serialized or not.
      * @return a reference to this builder.
      */
     public GensonBuilder setSkipNull(boolean skipNull) {
@@ -438,8 +514,7 @@ public class GensonBuilder {
     /**
      * If true \,<,>,&,= characters will be replaced by \u0027, \u003c, \u003e, \u0026, \u003d
      *
-     * @param htmlSafe
-     *            indicates whether serialized data should be html safe.
+     * @param htmlSafe indicates whether serialized data should be html safe.
      * @return a reference to this builder.
      */
     public GensonBuilder setHtmlSafe(boolean htmlSafe) {
@@ -452,80 +527,13 @@ public class GensonBuilder {
     }
 
     /**
-     * Replaces default {@link com.owlike.genson.reflect.BeanMutatorAccessorResolver
-     * BeanMutatorAccessorResolver} by the specified one.
-     *
-     * @param resolver
-     * @return a reference to this builder.
-     */
-    public GensonBuilder set(BeanMutatorAccessorResolver resolver) {
-        mutatorAccessorResolver = resolver;
-        return this;
-    }
-
-    /**
-     * Replaces default {@link com.owlike.genson.reflect.PropertyNameResolver
-     * PropertyNameResolver} by the specified one.
-     *
-     * @param resolver
-     * @return a reference to this builder.
-     */
-    public GensonBuilder set(PropertyNameResolver resolver) {
-        propertyNameResolver = resolver;
-        return this;
-    }
-
-    /**
-     * Register additional BeanMutatorAccessorResolver that will be used before the standard
-     * ones.
-     *
-     * @param resolvers
-     * @return a reference to this builder.
-     */
-    public GensonBuilder with(BeanMutatorAccessorResolver... resolvers) {
-        if (mutatorAccessorResolver == null)
-            mutatorAccessorResolver = createBeanMutatorAccessorResolver();
-        if (mutatorAccessorResolver instanceof BeanMutatorAccessorResolver.CompositeResolver)
-            ((BeanMutatorAccessorResolver.CompositeResolver) mutatorAccessorResolver).add(resolvers);
-        else
-            throw new IllegalStateException(
-                    "You can not add multiple resolvers if the base resolver is not of type "
-                            + BeanMutatorAccessorResolver.CompositeResolver.class.getName());
-        return this;
-    }
-
-    /**
-     * Registers the specified resolvers in the order they were defined and before the standard
-     * ones.
-     *
-     * @param resolvers
-     * @return a reference to this builder.
-     */
-    public GensonBuilder with(PropertyNameResolver... resolvers) {
-        if (propertyNameResolver == null) propertyNameResolver = createPropertyNameResolver();
-        if (propertyNameResolver instanceof PropertyNameResolver.CompositePropertyNameResolver)
-            ((PropertyNameResolver.CompositePropertyNameResolver) propertyNameResolver).add(resolvers);
-        else
-            throw new IllegalStateException(
-                    "You can not add multiple resolvers if the base resolver is not of type "
-                            + PropertyNameResolver.CompositePropertyNameResolver.class.getName());
-        return this;
-    }
-
-    public boolean isWithClassMetadata() {
-        return withClassMetadata;
-    }
-
-    /**
      * Indicates whether class metadata should be serialized and used during deserialization.
      *
      * @see com.owlike.genson.convert.ClassMetadataConverter ClassMetadataConverter
-     * @param withClassMetadata
-     * @return a reference to this builder.
      */
-    public GensonBuilder setWithClassMetadata(boolean withClassMetadata) {
-        this.withClassMetadata = withClassMetadata;
-        this.metadata = withClassMetadata || metadata;
+    public GensonBuilder useClassMetadata(boolean enabled) {
+        this.withClassMetadata = enabled;
+        this.metadata = true;
         return this;
     }
 
@@ -536,7 +544,7 @@ public class GensonBuilder {
      * @param dateFormat
      * @return a reference to this builder.
      */
-    public GensonBuilder setDateFormat(DateFormat dateFormat) {
+    public GensonBuilder useDateFormat(DateFormat dateFormat) {
         defaultDateConverter = new DefaultConverters.DateConverter(dateFormat, false);
         return this;
     }
@@ -546,82 +554,56 @@ public class GensonBuilder {
     }
 
     /**
-     * Used in conjunction with {@link #setWithDebugInfoPropertyNameResolver(boolean)}. If true
+     * Used in conjunction with {@link #useConstructorWithArguments(boolean)}. If true
      * an exception will be thrown when a class has been compiled without debug informations.
      *
-     * @see com.owlike.genson.reflect.ASMCreatorParameterNameResolver
-     *      ASMCreatorParameterNameResolver
      * @param throwExcOnNoDebugInfo
      * @return a reference to this builder.
+     * @see com.owlike.genson.reflect.ASMCreatorParameterNameResolver
+     * ASMCreatorParameterNameResolver
      */
     public GensonBuilder setThrowExceptionIfNoDebugInfo(boolean throwExcOnNoDebugInfo) {
         this.throwExcOnNoDebugInfo = throwExcOnNoDebugInfo;
         return this;
     }
 
-    public boolean isUseGettersAndSetters() {
-        return useGettersAndSetters;
-    }
-
     /**
      * If true, getters and setters would be used during serialization/deserialization in favor
      * of fields. If there is not getter/setter for a field then the field will be used, except
-     * if you specified that fields should not be used with {@link #setUseFields(boolean)}. By
+     * if you specified that fields should not be used with {@link #useFields(boolean)}. By
      * default getters, setters and fields will be used.
-     *
-     * @param useGettersAndSetters
-     * @return a reference to this builder.
      */
-    public GensonBuilder setUseGettersAndSetters(boolean useGettersAndSetters) {
-        this.useGettersAndSetters = useGettersAndSetters;
+    public GensonBuilder useMethods(boolean enabled) {
+        this.useGettersAndSetters = enabled;
         return this;
     }
 
-    public boolean isUseFields() {
-        return useFields;
+    public GensonBuilder useMethods(boolean enabled, VisibilityFilter visibility) {
+        useMethods(enabled);
+        return setMethodFilter(visibility);
     }
 
     /**
      * If true, fields will be used when no getter/setter is available, except if you specified
-     * that no getter/setter should be used with {@link #setUseGettersAndSetters(boolean)}, in
+     * that no getter/setter should be used with {@link #useMethods(boolean)}, in
      * that case only fields will be used. By default getters, setters and fields will be used.
-     *
-     * @param useFields
-     * @return a reference to this builder.
      */
-    public GensonBuilder setUseFields(boolean useFields) {
-        this.useFields = useFields;
+    public GensonBuilder useFields(boolean enabled) {
+        this.useFields = enabled;
         return this;
     }
 
-    public boolean isWithBeanViewConverter() {
-        return withBeanViewConverter;
+    public GensonBuilder useFields(boolean enabled, VisibilityFilter visibility) {
+        useFields(enabled);
+        return setFieldFilter(visibility);
     }
 
     /**
      * If true {@link BeanView} mechanism will be enabled.
-     *
-     * @param withBeanViewConverter
-     * @return a reference to this builder.
      */
-    public GensonBuilder setWithBeanViewConverter(boolean withBeanViewConverter) {
-        this.withBeanViewConverter = withBeanViewConverter;
+    public GensonBuilder useBeanViews(boolean enabled) {
+        this.withBeanViewConverter = enabled;
         return this;
-    }
-
-    public boolean isUseRuntimeTypeForSerialization() {
-        return useRuntimeTypeForSerialization;
-    }
-
-
-    /**
-     * @param useRuntimeTypeForSerialization
-     * @return
-     * @deprecated prefer using useRuntimeType instead.
-     */
-    @Deprecated
-    public GensonBuilder setUseRuntimeTypeForSerialization(boolean useRuntimeTypeForSerialization) {
-        return useRuntimeType(useRuntimeTypeForSerialization);
     }
 
     /**
@@ -637,35 +619,19 @@ public class GensonBuilder {
         return this;
     }
 
-
-    public boolean isWithDebugInfoPropertyNameResolver() {
-        return withDebugInfoPropertyNameResolver;
-    }
-
-    /**
-     * @deprecated #useConstructorWithArguments(boolean) should be used instead.
-     */
-    public GensonBuilder setWithDebugInfoPropertyNameResolver(boolean withDebugInfoPropertyNameResolver) {
-        return useConstructorWithArguments(withDebugInfoPropertyNameResolver);
-    }
-
     /**
      * If true constructor and method arguments name will be resolved from the generated debug
      * symbols during compilation. It is a very powerful feature from Genson, you should have a
      * look at {@link com.owlike.genson.reflect.ASMCreatorParameterNameResolver
      * ASMCreatorParameterNameResolver}.
      *
-     * @see #setThrowExceptionIfNoDebugInfo(boolean)
      * @param enabled
      * @return a reference to this builder.
+     * @see #setThrowExceptionIfNoDebugInfo(boolean)
      */
     public GensonBuilder useConstructorWithArguments(boolean enabled) {
         this.withDebugInfoPropertyNameResolver = enabled;
         return this;
-    }
-
-    public Converter<Object> getNullConverter() {
-        return nullConverter;
     }
 
     /**
@@ -680,17 +646,9 @@ public class GensonBuilder {
         return this;
     }
 
-    public VisibilityFilter getFieldFilter() {
-        return propertyFilter;
-    }
-
     public GensonBuilder setFieldFilter(VisibilityFilter propertyFilter) {
         this.propertyFilter = propertyFilter;
         return this;
-    }
-
-    public VisibilityFilter getMethodFilter() {
-        return methodFilter;
     }
 
     public GensonBuilder setMethodFilter(VisibilityFilter methodFilter) {
@@ -698,34 +656,14 @@ public class GensonBuilder {
         return this;
     }
 
-    public VisibilityFilter getConstructorFilter() {
-        return constructorFilter;
-    }
-
     public GensonBuilder setConstructorFilter(VisibilityFilter constructorFilter) {
         this.constructorFilter = constructorFilter;
         return this;
     }
 
-    public Map<Type, Serializer<?>> getSerializersMap() {
-        return Collections.unmodifiableMap(serializersMap);
-    }
-
-    public Map<Type, Deserializer<?>> getDeserializersMap() {
-        return Collections.unmodifiableMap(deserializersMap);
-    }
-
-    public boolean isStrictDoubleParse() {
-        return strictDoubleParse;
-    }
-
-    public GensonBuilder setStrictDoubleParse(boolean strictDoubleParse) {
+    public GensonBuilder useStrictDoubleParse(boolean strictDoubleParse) {
         this.strictDoubleParse = strictDoubleParse;
         return this;
-    }
-
-    public boolean isIndented() {
-        return indent;
     }
 
     /**
@@ -742,31 +680,9 @@ public class GensonBuilder {
         return this;
     }
 
-    /**
-     * Register some genson bundles. For example to enable JAXB support:
-     *
-     * <pre>
-     * builder.with(new JAXBExtension());
-     * </pre>
-     *
-     * @see GensonBundle
-     */
-    public GensonBuilder with(GensonBundle... bundles) {
-        for (GensonBundle ext : bundles)
-            _bundles.add(ext);
-        return this;
-    }
-
     public GensonBuilder useMetadata(boolean metadata) {
         this.metadata = metadata;
         return this;
-    }
-
-    /**
-     * true if metadata is enabled during parsing.
-     */
-    public boolean isMetadata() {
-        return metadata;
     }
 
     public GensonBuilder useByteAsInt(boolean enable) {
@@ -866,9 +782,9 @@ public class GensonBuilder {
      */
     protected Genson create(Factory<Converter<?>> converterFactory,
                             Map<String, Class<?>> classAliases) {
-        return new Genson(converterFactory, getBeanDescriptorProvider(), getNullConverter(),
-                isSkipNull(), isHtmlSafe(), classAliases, isWithClassMetadata(),
-                isStrictDoubleParse(), isIndented(), isMetadata());
+        return new Genson(converterFactory, getBeanDescriptorProvider(), nullConverter,
+                isSkipNull(), isHtmlSafe(), classAliases, withClassMetadata,
+                strictDoubleParse, indent, metadata);
     }
 
     /**
@@ -877,7 +793,7 @@ public class GensonBuilder {
      * them differently.
      *
      * @return the converter <u>factory instance that will be used to resolve
-     *         <strong>ALL</strong> converters</u>.
+     * <strong>ALL</strong> converters</u>.
      */
     protected Factory<Converter<?>> createConverterFactory() {
         ChainedFactory chainHead = new CircularClassReferenceConverterFactory();
@@ -885,13 +801,13 @@ public class GensonBuilder {
 
         chainTail = chainTail.withNext(new NullConverter.NullConverterFactory());
 
-        if (isUseRuntimeTypeForSerialization()) chainTail = chainTail
+        if (useRuntimeTypeForSerialization) chainTail = chainTail
                 .withNext(new RuntimeTypeConverter.RuntimeTypeConverterFactory());
 
         chainTail = chainTail
                 .withNext(new ClassMetadataConverter.ClassMetadataConverterFactory());
 
-        if (isWithBeanViewConverter()) chainTail = chainTail
+        if (withBeanViewConverter) chainTail = chainTail
                 .withNext(new BeanViewConverter.BeanViewConverterFactory(
                         getBeanViewDescriptorProvider()));
 
@@ -906,11 +822,11 @@ public class GensonBuilder {
 
     protected BeanMutatorAccessorResolver createBeanMutatorAccessorResolver() {
         List<BeanMutatorAccessorResolver> resolvers = new ArrayList<BeanMutatorAccessorResolver>();
-        VisibilityFilter propFilter = getFieldFilter();
+        VisibilityFilter propFilter = propertyFilter;
         if (propFilter == null) propFilter = VisibilityFilter.PACKAGE_PUBLIC;
-        VisibilityFilter methodFilter = getFieldFilter();
+        VisibilityFilter methodFilter = propertyFilter;
         if (methodFilter == null) methodFilter = VisibilityFilter.PACKAGE_PUBLIC;
-        VisibilityFilter ctrFilter = getFieldFilter();
+        VisibilityFilter ctrFilter = propertyFilter;
         if (ctrFilter == null) ctrFilter = VisibilityFilter.PACKAGE_PUBLIC;
         resolvers.add(new BeanMutatorAccessorResolver.GensonAnnotationsResolver());
 
@@ -927,16 +843,16 @@ public class GensonBuilder {
      * setting another one with {@link #set(PropertyNameResolver)}.
      *
      * @return the property name resolver to be used. It should be an instance of
-     *         {@link com.owlike.genson.reflect.PropertyNameResolver.CompositePropertyNameResolver
-     *         PropertyNameResolver.CompositePropertyNameResolver}, otherwise you will not be
-     *         able to add others PropertyNameResolvers using
-     *         {@link #with(PropertyNameResolver...)} method.
+     * {@link com.owlike.genson.reflect.PropertyNameResolver.CompositePropertyNameResolver
+     * PropertyNameResolver.CompositePropertyNameResolver}, otherwise you will not be
+     * able to add others PropertyNameResolvers using
+     * {@link #with(PropertyNameResolver...)} method.
      */
     protected PropertyNameResolver createPropertyNameResolver() {
         List<PropertyNameResolver> resolvers = new ArrayList<PropertyNameResolver>();
         resolvers.add(new PropertyNameResolver.AnnotationPropertyNameResolver());
         resolvers.add(new PropertyNameResolver.ConventionalBeanPropertyNameResolver());
-        if (isWithDebugInfoPropertyNameResolver())
+        if (withDebugInfoPropertyNameResolver)
             resolvers.add(new ASMCreatorParameterNameResolver(isThrowExceptionOnNoDebugInfo()));
 
         return new PropertyNameResolver.CompositePropertyNameResolver(resolvers);
@@ -972,8 +888,7 @@ public class GensonBuilder {
     /**
      * Override this method if you want to change the default converter factories.
      *
-     * @param factories
-     *            list, is not null.
+     * @param factories list, is not null.
      */
     protected void addDefaultConverterFactories(List<Factory<? extends Converter<?>>> factories) {
         factories.add(DefaultConverters.ArrayConverterFactory.instance);
@@ -1018,7 +933,7 @@ public class GensonBuilder {
         return new BaseBeanDescriptorProvider(new AbstractBeanDescriptorProvider.ContextualConverterFactory(
                 contextualFactories), createBeanPropertyFactory(),
                 getMutatorAccessorResolver(), getPropertyNameResolver(),
-                isUseGettersAndSetters(), isUseFields(), true);
+                useGettersAndSetters, useFields, true);
     }
 
     protected BeanPropertyFactory createBeanPropertyFactory() {
