@@ -7,4 +7,4 @@ permalink: pretty
 
 baseurl: /genson
 latest_version: 0.99
-production: false
+production: true
