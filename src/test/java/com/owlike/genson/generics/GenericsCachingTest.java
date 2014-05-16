@@ -1,6 +1,7 @@
 package com.owlike.genson.generics;
 
 import com.owlike.genson.Genson;
+import com.owlike.genson.GensonBuilder;
 import com.owlike.genson.annotation.JsonProperty;
 import com.owlike.genson.reflect.TypeUtil;
 
@@ -44,7 +45,7 @@ public class GenericsCachingTest {
 
     @Test
     public void testDistinctExpandedTypeNotMixed() throws Exception {
-        Genson genson = new Genson.Builder().setSkipNull(true).create();
+        Genson genson = new GensonBuilder().setSkipNull(true).create();
 
         FooContainer fooContainer = new FooContainer(new FooBarContainer<Foo>(Arrays.asList(new Foo("foo"))));
         BarContainer barContainer = new BarContainer(new FooBarContainer<Bar>(Arrays.asList(new Bar("bar"))));

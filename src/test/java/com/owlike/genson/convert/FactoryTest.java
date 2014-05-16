@@ -4,15 +4,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.owlike.genson.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.owlike.genson.Context;
-import com.owlike.genson.Converter;
-import com.owlike.genson.Factory;
-import com.owlike.genson.GenericType;
-import com.owlike.genson.Genson;
-import com.owlike.genson.Wrapper;
 import com.owlike.genson.annotation.HandleClassMetadata;
 import com.owlike.genson.stream.ObjectReader;
 import com.owlike.genson.stream.ObjectWriter;
@@ -34,7 +29,7 @@ public class FactoryTest {
 	@Before
 	public void setUp() {
 
-		genson = new Genson.Builder() {
+		genson = new GensonBuilder() {
 			@Override
 			protected Factory<Converter<?>> createConverterFactory() {
 				factory = new BasicConvertersFactory(getSerializersMap(), getDeserializersMap(),
@@ -85,7 +80,7 @@ public class FactoryTest {
 
 	@Test
 	public void testUnwrapAnnotations() throws Exception {
-		Genson genson = new Genson.Builder().withConverters(new ClassMetadataConverter()).create();
+		Genson genson = new GensonBuilder().withConverters(new ClassMetadataConverter()).create();
 		@SuppressWarnings({ "unchecked", "rawtypes" }) // argh its ugly with those warnings...
 		Wrapper<Converter<A>> wrapper = (Wrapper) genson.provideConverter(A.class);
 		Converter<A> converter = wrapper.unwrap();

@@ -4,13 +4,14 @@ import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonString;
 
+import com.owlike.genson.GensonBuilder;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
 import com.owlike.genson.Genson;
 
 public class JsonValueTest {
-    private final Genson genson = new Genson.Builder().with(new JSR353Bundle()).create();
+    private final Genson genson = new GensonBuilder().with(new JSR353Bundle()).create();
 
     @Test public void testSerArrayOfLiterals() {
         String json =

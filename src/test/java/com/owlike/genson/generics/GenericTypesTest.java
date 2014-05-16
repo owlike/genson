@@ -10,12 +10,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.owlike.genson.*;
 import org.junit.Test;
 
-import com.owlike.genson.Context;
-import com.owlike.genson.Converter;
-import com.owlike.genson.GenericType;
-import com.owlike.genson.Genson;
 import com.owlike.genson.stream.ObjectReader;
 import com.owlike.genson.stream.ObjectWriter;
 
@@ -106,7 +103,7 @@ public class GenericTypesTest {
 		pojo.a.t = new MyGenericClass<URL>();
 		pojo.a.t.tField = new URL("http://google.com");
 
-		Genson genson = new Genson.Builder().withConverters(new MyGenericClassUrlConverter())
+		Genson genson = new GensonBuilder().withConverters(new MyGenericClassUrlConverter())
 				.create();
 
 		MyGenericClassUrlConverter.used = false;

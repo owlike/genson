@@ -19,7 +19,7 @@ public class GensonBuilderTest {
 				return null;
 			}
 		};
-		Genson genson = new Genson.Builder() {
+		Genson genson = new GensonBuilder() {
 			@Override
 			protected Factory<Converter<?>> createConverterFactory() {
 				assertEquals(dummyConverter, getSerializersMap().get(Number.class));

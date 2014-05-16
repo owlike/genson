@@ -3,6 +3,7 @@ package com.owlike.genson.spring;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.owlike.genson.GensonBuilder;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.springframework.core.MethodParameter;
@@ -27,7 +28,7 @@ public class SpringIntegrationTest {
 		resp.setContentType("application/json");
 		
 		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
-		converters.add(new GensonMessageConverter(new Genson.Builder().setSkipNull(false).create()));
+		converters.add(new GensonMessageConverter(new GensonBuilder().setSkipNull(false).create()));
 		ExtendedReqRespBodyMethodProcessor handler = new ExtendedReqRespBodyMethodProcessor(converters);
 		handler.handleReturnValue(get(), new MethodParameter(SpringIntegrationTest.class.getMethod("get"), -1), new ModelAndViewContainer(), new ServletWebRequest(req, resp));
 		assertEquals(get().jsonString(), resp.getContentAsString());

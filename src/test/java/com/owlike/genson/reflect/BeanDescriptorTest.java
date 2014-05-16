@@ -27,7 +27,7 @@ public class BeanDescriptorTest {
 
 	@Test
 	public void testFailFastBeanDescriptorWithWrongType() {
-		BeanDescriptorProvider provider = new Genson.Builder() {
+		BeanDescriptorProvider provider = new GensonBuilder() {
 			protected BeanDescriptorProvider createBeanDescriptorProvider() {
 				return new BaseBeanDescriptorProvider(new ContextualConverterFactory(null),
 						new BeanPropertyFactory.CompositeFactory(Arrays

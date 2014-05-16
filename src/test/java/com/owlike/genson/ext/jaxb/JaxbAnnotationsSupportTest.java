@@ -14,6 +14,7 @@ import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import com.owlike.genson.GensonBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -24,7 +25,7 @@ public class JaxbAnnotationsSupportTest {
 
 	@Before
 	public void setUp() {
-		genson = new Genson.Builder().with(new JAXBBundle()).create();
+		genson = new GensonBuilder().with(new JAXBBundle()).create();
 	}
 
 	@Test

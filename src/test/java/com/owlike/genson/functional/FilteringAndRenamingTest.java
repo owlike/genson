@@ -2,6 +2,7 @@ package com.owlike.genson.functional;
 
 import java.util.List;
 
+import com.owlike.genson.GensonBuilder;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -13,7 +14,7 @@ public class FilteringAndRenamingTest {
 	@Test
 	public void testSetterWithoutArgs() {
 		// bug https://groups.google.com/forum/?fromgroups=#!topic/genson/9rE026i7Vhg
-		assertNotNull(new Genson.Builder().exclude("any").create()
+		assertNotNull(new GensonBuilder().exclude("any").create()
 				.provideConverter(BeanWithVoidSetter.class));
 	}
 
@@ -33,24 +34,24 @@ public class FilteringAndRenamingTest {
 		String expectedSuccess = "{\"name\":\"toto\"}";
 		String expectedFailure = "{\"myname\":\"toto\"}";
 
-		String json = new Genson.Builder().rename("myname", "name").create().serialize(mac);
+		String json = new GensonBuilder().rename("myname", "name").create().serialize(mac);
 		assertEquals(expectedSuccess, json);
 
-		json = new Genson.Builder().rename(String.class, "name").create().serialize(mac);
+		json = new GensonBuilder().rename(String.class, "name").create().serialize(mac);
 		assertEquals(expectedSuccess, json);
-		json = new Genson.Builder().rename(int.class, "name").create().serialize(mac);
+		json = new GensonBuilder().rename(int.class, "name").create().serialize(mac);
 		assertEquals(expectedFailure, json);
 
-		json = new Genson.Builder().rename("myname", MyAClass.class, "name").create()
+		json = new GensonBuilder().rename("myname", MyAClass.class, "name").create()
 				.serialize(mac);
 		assertEquals(expectedSuccess, json);
-		json = new Genson.Builder().rename("myname", List.class, "name").create().serialize(mac);
+		json = new GensonBuilder().rename("myname", List.class, "name").create().serialize(mac);
 		assertEquals(expectedFailure, json);
 
-		json = new Genson.Builder().rename("myname", MyAClass.class, "name", String.class).create()
+		json = new GensonBuilder().rename("myname", MyAClass.class, "name", String.class).create()
 				.serialize(mac);
 		assertEquals(expectedSuccess, json);
-		json = new Genson.Builder().rename("myname", MyAClass.class, "name", Integer.class)
+		json = new GensonBuilder().rename("myname", MyAClass.class, "name", Integer.class)
 				.create().serialize(mac);
 		assertEquals(expectedFailure, json);
 	}
@@ -62,25 +63,25 @@ public class FilteringAndRenamingTest {
 		String expectedSuccess = "{}";
 		String expectedFailure = "{\"myname\":\"toto\"}";
 
-		String json = new Genson.Builder().exclude("myname").create().serialize(mac);
+		String json = new GensonBuilder().exclude("myname").create().serialize(mac);
 		assertEquals(expectedSuccess, json);
-		json = new Genson.Builder().exclude("xxx").create().serialize(mac);
+		json = new GensonBuilder().exclude("xxx").create().serialize(mac);
 		assertEquals(expectedFailure, json);
 
-		json = new Genson.Builder().exclude(String.class).create().serialize(mac);
+		json = new GensonBuilder().exclude(String.class).create().serialize(mac);
 		assertEquals(expectedSuccess, json);
-		json = new Genson.Builder().exclude(Integer.class).create().serialize(mac);
+		json = new GensonBuilder().exclude(Integer.class).create().serialize(mac);
 		assertEquals(expectedFailure, json);
 
-		json = new Genson.Builder().exclude("myname", MyAClass.class).create().serialize(mac);
+		json = new GensonBuilder().exclude("myname", MyAClass.class).create().serialize(mac);
 		assertEquals(expectedSuccess, json);
-		json = new Genson.Builder().exclude("myname", List.class).create().serialize(mac);
+		json = new GensonBuilder().exclude("myname", List.class).create().serialize(mac);
 		assertEquals(expectedFailure, json);
 
-		json = new Genson.Builder().exclude("myname", MyAClass.class, String.class).create()
+		json = new GensonBuilder().exclude("myname", MyAClass.class, String.class).create()
 				.serialize(mac);
 		assertEquals(expectedSuccess, json);
-		json = new Genson.Builder().exclude("myname", MyAClass.class, Integer.class).create()
+		json = new GensonBuilder().exclude("myname", MyAClass.class, Integer.class).create()
 				.serialize(mac);
 		assertEquals(expectedFailure, json);
 	}
@@ -92,24 +93,24 @@ public class FilteringAndRenamingTest {
 		String expectedSuccess = "{\"prop\":\"toto\"}";
 		String expectedFailure = "{}";
 
-		String json = new Genson.Builder().include("prop").create().serialize(mac);
+		String json = new GensonBuilder().include("prop").create().serialize(mac);
 		assertEquals(expectedSuccess, json);
-		json = new Genson.Builder().include("xxx").create().serialize(mac);
+		json = new GensonBuilder().include("xxx").create().serialize(mac);
 		assertEquals(expectedFailure, json);
 
-		json = new Genson.Builder().include(String.class).create().serialize(mac);
+		json = new GensonBuilder().include(String.class).create().serialize(mac);
 		assertEquals(expectedSuccess, json);
 
-		json = new Genson.Builder().include("prop", ClassWithIncludedProperty.class).create()
+		json = new GensonBuilder().include("prop", ClassWithIncludedProperty.class).create()
 				.serialize(mac);
 		assertEquals(expectedSuccess, json);
-		json = new Genson.Builder().include("prop", MyAClass.class).create().serialize(mac);
+		json = new GensonBuilder().include("prop", MyAClass.class).create().serialize(mac);
 		assertEquals(expectedFailure, json);
 
-		json = new Genson.Builder().include("prop", ClassWithIncludedProperty.class, String.class)
+		json = new GensonBuilder().include("prop", ClassWithIncludedProperty.class, String.class)
 				.create().serialize(mac);
 		assertEquals(expectedSuccess, json);
-		json = new Genson.Builder().include("prop", ClassWithIncludedProperty.class, Integer.class)
+		json = new GensonBuilder().include("prop", ClassWithIncludedProperty.class, Integer.class)
 				.create().serialize(mac);
 		assertEquals(expectedFailure, json);
 	}
@@ -121,7 +122,7 @@ public class FilteringAndRenamingTest {
 		mac.prop2 = "hi";
 		String expectedSuccess = "{\"prop2\":\"hi\"}";
 
-		String json = new Genson.Builder().exclude("transientLong", ClassWithTransient.class)
+		String json = new GensonBuilder().exclude("transientLong", ClassWithTransient.class)
 				.create().serialize(mac);
 		assertEquals(expectedSuccess, json);
 	}

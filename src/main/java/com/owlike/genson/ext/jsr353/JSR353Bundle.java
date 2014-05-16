@@ -18,7 +18,6 @@ import javax.json.JsonValue.ValueType;
 import javax.json.spi.JsonProvider;
 
 import com.owlike.genson.*;
-import com.owlike.genson.Genson.Builder;
 import com.owlike.genson.ext.GensonBundle;
 import com.owlike.genson.stream.JsonWriter;
 import com.owlike.genson.stream.ObjectReader;

@@ -266,7 +266,7 @@ public class JsonDeserializationTest {
 
 	@Test
 	public void testDeserializeJsonWithClassAlias() {
-		Genson genson = new Genson.Builder().addAlias("rect", Rectangle.class).create();
+		Genson genson = new GensonBuilder().addAlias("rect", Rectangle.class).create();
 		Shape p = genson.deserialize("{\"@class\":\"rect\"}", Shape.class);
 		assertTrue(p instanceof Rectangle);
 		p = genson.deserialize("{\"@class\":\"java.awt.Rectangle\"}", Shape.class);

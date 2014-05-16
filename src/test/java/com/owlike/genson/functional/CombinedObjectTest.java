@@ -4,13 +4,10 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 
+import com.owlike.genson.*;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-import com.owlike.genson.Context;
-import com.owlike.genson.Deserializer;
-import com.owlike.genson.Factory;
-import com.owlike.genson.Genson;
 import com.owlike.genson.annotation.JsonProperty;
 import com.owlike.genson.reflect.BeanDescriptor;
 import com.owlike.genson.stream.ObjectReader;
@@ -19,7 +16,7 @@ public class CombinedObjectTest {
 	@Test
 	public void combineMultipleJsonObjectIntoSingleObject() {
 		String json = "{\"Person\":{\"id\":\"2\"},\"Dog\":{\"dateOfBirth\":\"2012-08-20 00:00:00\",\"price\" : \"10.00\"}}";
-		Genson genson = new Genson.Builder().withDeserializerFactory(new MyClassConverterFactory())
+		Genson genson = new GensonBuilder().withDeserializerFactory(new MyClassConverterFactory())
 				.create();
 		MyClass myClass = genson.deserialize(json, MyClass.class);
 		assertEquals(Timestamp.valueOf("2012-08-20 00:00:00"), myClass.dogsDateOfBirth);

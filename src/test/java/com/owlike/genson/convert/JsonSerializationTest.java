@@ -66,7 +66,7 @@ public class JsonSerializationTest {
 
 	@Test
 	public void testSerializeWithAlias() {
-		Genson genson = new Genson.Builder().addAlias("ClassWithFieldsAndGetter",
+		Genson genson = new GensonBuilder().addAlias("ClassWithFieldsAndGetter",
 				ClassWithFieldsAndGetter.class).create();
 		String json = genson.serialize(new ClassWithFieldsAndGetter("a", 0));
 		assertTrue(json.startsWith("{\"@class\":\"ClassWithFieldsAndGetter\""));

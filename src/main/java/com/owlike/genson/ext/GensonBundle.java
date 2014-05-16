@@ -1,6 +1,5 @@
 package com.owlike.genson.ext;
 
-import com.owlike.genson.Genson.Builder;
 import com.owlike.genson.GensonBuilder;
 
 /**
