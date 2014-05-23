@@ -761,10 +761,7 @@ public class GensonBuilder {
     private void addDefaultDeserializers(List<? extends Deserializer<?>> deserializers) {
         if (deserializers != null) {
             for (Deserializer<?> deserializer : deserializers) {
-                Type typeOfConverter = TypeUtil
-                        .typeOf(0,
-                                TypeUtil.lookupGenericType(Deserializer.class,
-                                        deserializer.getClass()));
+                Type typeOfConverter = TypeUtil.typeOf(0, TypeUtil.lookupGenericType(Deserializer.class, deserializer.getClass()));
                 typeOfConverter = TypeUtil.expandType(typeOfConverter, deserializer.getClass());
                 if (!deserializersMap.containsKey(typeOfConverter))
                     deserializersMap.put(typeOfConverter, deserializer);
@@ -871,6 +868,8 @@ public class GensonBuilder {
         converters.add(DefaultConverters.IntegerConverter.instance);
         converters.add(DefaultConverters.DoubleConverter.instance);
         converters.add(DefaultConverters.LongConverter.instance);
+        converters.add(DefaultConverters.ShortConverter.instance);
+        converters.add(DefaultConverters.FloatConverter.instance);
         converters.add(DefaultConverters.NumberConverter.instance);
         if (defaultDateConverter == null)
             defaultDateConverter = new DefaultConverters.DateConverter();
@@ -930,9 +929,9 @@ public class GensonBuilder {
      * @return the BeanDescriptorProvider instance.
      */
     protected BeanDescriptorProvider createBeanDescriptorProvider() {
-        return new BaseBeanDescriptorProvider(new AbstractBeanDescriptorProvider.ContextualConverterFactory(
-                contextualFactories), createBeanPropertyFactory(),
-                getMutatorAccessorResolver(), getPropertyNameResolver(),
+        return new BaseBeanDescriptorProvider(
+                new AbstractBeanDescriptorProvider.ContextualConverterFactory(contextualFactories),
+                createBeanPropertyFactory(), getMutatorAccessorResolver(), getPropertyNameResolver(),
                 useGettersAndSetters, useFields, true);
     }
 

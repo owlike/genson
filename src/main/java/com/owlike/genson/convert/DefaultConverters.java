@@ -428,6 +428,27 @@ public final class DefaultConverters {
 		}
 	};
 
+    @HandleClassMetadata
+    @HandleBeanView
+    public final static class ShortConverter implements Converter<Short> {
+        public final static ShortConverter instance = new ShortConverter();
+
+        private ShortConverter() {
+        }
+
+        public Short deserialize(ObjectReader reader, Context ctx) {
+            if (ValueType.STRING.equals(reader.getValueType())) {
+                String value = reader.valueAsString();
+                return "".equals(value) ? null : Short.parseShort(value);
+            }
+            return reader.valueAsShort();
+        }
+
+        public void serialize(Short obj, ObjectWriter writer, Context ctx) {
+            writer.writeValue(obj.shortValue());
+        }
+    };
+
 	@HandleClassMetadata
 	@HandleBeanView
 	public final static class DoubleConverter implements Converter<Double> {
@@ -448,6 +469,27 @@ public final class DefaultConverters {
 			writer.writeValue(obj.doubleValue());
 		}
 	};
+
+    @HandleClassMetadata
+    @HandleBeanView
+    public final static class FloatConverter implements Converter<Float> {
+        public final static FloatConverter instance = new FloatConverter();
+
+        private FloatConverter() {
+        }
+
+        public Float deserialize(ObjectReader reader, Context ctx) {
+            if (ValueType.STRING.equals(reader.getValueType())) {
+                String value = reader.valueAsString();
+                return "".equals(value) ? null : Float.parseFloat(value);
+            }
+            return reader.valueAsFloat();
+        }
+
+        public void serialize(Float obj, ObjectWriter writer, Context ctx) {
+            writer.writeValue(obj.floatValue());
+        }
+    };
 
 	@HandleClassMetadata
 	@HandleBeanView
