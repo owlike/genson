@@ -29,4 +29,21 @@ class ScalaAPITest extends FunSuite with Matchers {
 
     map("k1").head shouldEqual new URL("http://www.google.com")
   }
+
+  test("type inference of Map with Int key") {
+    val map = genson.fromJson[Map[Int, Int]]("{\"1\": 2}")
+    map(1) shouldEqual 2
+  }
+
+  test("type inference of tuple of Map with Int key") {
+    val (map, intValue) = genson.fromJson[(Map[Int, Int], Int)]("[{\"1\": 2}, 3]")
+    map(1) shouldEqual 2
+    intValue shouldEqual 3
+  }
+
+  test("round trip Map with Optional values") {
+    val map = genson.fromJson[Map[Int, Option[String]]]("{\"1\": null, \"2\": \"foo bar\"}")
+    map(1) shouldEqual None
+    map(2) shouldEqual Some("foo bar")
+  }
 }

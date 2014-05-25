@@ -30,6 +30,7 @@ import scala.Seq
 import scala.Traversable
 import scala.List
 import scala.collection.immutable.Map.{Map4, Map3, Map2, Map1}
+import com.owlike.genson.annotation.{HandleBeanView, HandleClassMetadata}
 
 class MapConverterFactory extends Factory[Converter[_ <: Any]]() {
   val cbfByType = List[(Class[_], CanBuildFrom[_ <: Traversable[_], _, _ <: Traversable[_]])](
@@ -111,6 +112,7 @@ class TraversableConverterFactory extends Factory[Converter[_ <: Traversable[Any
   }
 }
 
+@HandleClassMetadata
 class MapConverter[K, V, C <: Map[K, V]]
 (keyAdapter: KeyAdapter[K], elemConverter: Converter[V])(implicit cbf: CanBuildFrom[C, (K, V), C])
   extends Converter[C] {
@@ -136,6 +138,7 @@ class MapConverter[K, V, C <: Map[K, V]]
   }
 }
 
+@HandleClassMetadata
 class TraversableConverter[T, C <: Traversable[T]](elemConverter: Converter[T])(implicit cbf: CanBuildFrom[C, T, C])
   extends Converter[C] {
 

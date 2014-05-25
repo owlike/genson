@@ -4,6 +4,7 @@ import com.owlike.genson._
 import java.lang.reflect.{ParameterizedType, Constructor, Type}
 import com.owlike.genson.reflect.TypeUtil
 import com.owlike.genson.stream.{ObjectWriter, ObjectReader}
+import com.owlike.genson.annotation.HandleClassMetadata
 
 class TupleConverterFactory extends Factory[Converter[_ <: Any]] {
 
@@ -21,6 +22,7 @@ class TupleConverterFactory extends Factory[Converter[_ <: Any]] {
   }
 }
 
+@HandleClassMetadata
 class TupleNConverter(val ctr: Constructor[_], val valuesConverters: Array[Converter[AnyRef]]) extends Converter[Product] {
 
   assert(ctr.getGenericParameterTypes.length == valuesConverters.length)

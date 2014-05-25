@@ -17,6 +17,7 @@ class ScalaBundle extends GensonBundle {
       .withConverterFactory(new MapConverterFactory())
       .withConverterFactory(ScalaUntypedConverterFactory)
       .withConverterFactory(new TupleConverterFactory())
+      .withConverterFactory(new OptionConverterFactory())
   }
 }
 
