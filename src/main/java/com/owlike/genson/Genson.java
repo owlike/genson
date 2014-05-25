@@ -2,7 +2,6 @@ package com.owlike.genson;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -11,44 +10,16 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.owlike.genson.convert.BasicConvertersFactory;
-import com.owlike.genson.convert.BeanViewConverter;
-import com.owlike.genson.convert.ChainedFactory;
-import com.owlike.genson.convert.CircularClassReferenceConverterFactory;
-import com.owlike.genson.convert.ClassMetadataConverter;
-import com.owlike.genson.convert.ContextualFactory;
-import com.owlike.genson.convert.DefaultConverters;
-import com.owlike.genson.convert.NullConverter;
-import com.owlike.genson.convert.RuntimeTypeConverter;
-import com.owlike.genson.convert.DefaultConverters.DateConverter;
-import com.owlike.genson.ext.GensonBundle;
-import com.owlike.genson.reflect.ASMCreatorParameterNameResolver;
-import com.owlike.genson.reflect.BaseBeanDescriptorProvider;
 import com.owlike.genson.reflect.BeanDescriptorProvider;
-import com.owlike.genson.reflect.BeanMutatorAccessorResolver;
-import com.owlike.genson.reflect.AbstractBeanDescriptorProvider.ContextualConverterFactory;
-import com.owlike.genson.reflect.AbstractBeanDescriptorProvider.ContextualFactoryDecorator;
-import com.owlike.genson.reflect.BeanPropertyFactory;
-import com.owlike.genson.reflect.BeanViewDescriptorProvider;
-import com.owlike.genson.reflect.PropertyNameResolver;
-import com.owlike.genson.reflect.TypeUtil;
-import com.owlike.genson.reflect.VisibilityFilter;
-import com.owlike.genson.reflect.BeanMutatorAccessorResolver.CompositeResolver;
-import com.owlike.genson.reflect.PropertyNameResolver.CompositePropertyNameResolver;
 import com.owlike.genson.stream.*;
 
 /**
@@ -91,7 +62,7 @@ public final class Genson {
 	 * Default genson configuration, the default configuration (sers, desers, etc) will be shared
 	 * accros all default Genson instances.
 	 */
-	private final static Genson _default = new Builder().create();
+	private final static Genson _default = new GensonBuilder().create();
 
 	private final ConcurrentHashMap<Type, Converter<?>> converterCache = new ConcurrentHashMap<Type, Converter<?>>();
 	private final Factory<Converter<?>> converterFactory;
@@ -111,7 +82,7 @@ public final class Genson {
 	private final static Charset UTF8_CHARSET = Charset.forName("UTF-8");
 
 	/**
-	 * The default constructor will use the default configuration provided by the {@link Builder}.
+	 * The default constructor will use the default configuration provided by the {@link GensonBuilder}.
 	 * In most cases using this default constructor will suffice.
 	 */
 	public Genson() {
@@ -250,12 +221,16 @@ public final class Genson {
 	 * @throws com.owlike.genson.JsonBindingException
 	 * @throws com.owlike.genson.stream.JsonStreamException
 	 */
-	public String serialize(Object object, Class<? extends BeanView<?>>... withViews) {
+	public String serialize(Object object, Class<? extends BeanView<?>> firstView, Class<? extends BeanView<?>>... withViews) {
 		StringWriter sw = new StringWriter();
 		ObjectWriter writer = createWriter(sw);
 
+        List<Class<? extends BeanView<?>>> views = new ArrayList(withViews.length);
+        for (Class<? extends BeanView<?>> view : withViews) views.add(view);
+        views.add(firstView);
+
         if (object == null) serializeNull(writer);
-		else serialize(object, object.getClass(), writer, new Context(this, Arrays.asList(withViews)));
+		else serialize(object, object.getClass(), writer, new Context(this, views));
 
 		return sw.toString();
 	}
@@ -295,23 +270,15 @@ public final class Genson {
 		return baos.toByteArray();
 	}
 
-	/**
-	 * Serializes this object and writes its representation to writer. As you are providing the
-	 * writer instance you also must ensure to call flush and close on it when you are done.
-	 * 
-	 * @param object
-	 * @param writer
-	 *            into which to write the serialized object.
-	 * @param withViews
-	 * @throws com.owlike.genson.JsonBindingException
-	 * @throws JsonStreamException
-	 */
-    public void serialize(Object object, ObjectWriter writer, Class<? extends BeanView<?>>... withViews) {
-        if (object == null) serializeNull(writer);
-        else serialize(object, object.getClass(), writer,
-                new Context(this, Arrays.asList(withViews)));
-    }
-
+    /**
+     * Serializes this object and writes its representation to writer. As you are providing the
+     * writer instance you also must ensure to call flush and close on it when you are done.
+     *
+     * @param object
+     * @param writer into which to write the serialized object.
+     * @throws com.owlike.genson.JsonBindingException
+     * @throws JsonStreamException
+     */
     public void serialize(Object object, ObjectWriter writer, Context ctx) {
         if (object == null) serializeNull(writer);
         else serialize(object, object.getClass(), writer, ctx);
@@ -418,22 +385,19 @@ public final class Genson {
 		return deserialize(toType, createReader(input), new Context(this));
 	}
 
-	public <T> T deserialize(String fromSource, GenericType<T> toType,
-			Class<? extends BeanView<?>>... withViews) {
+	public <T> T deserialize(String fromSource, GenericType<T> toType, Class<? extends BeanView<?>>... withViews) {
 		StringReader reader = new StringReader(fromSource);
 		return deserialize(toType, createReader(reader),
 				new Context(this, Arrays.asList(withViews)));
 	}
 
-	public <T> T deserialize(String fromSource, Class<T> toType,
-			Class<? extends BeanView<?>>... withViews) {
+	public <T> T deserialize(String fromSource, Class<T> toType, Class<? extends BeanView<?>>... withViews) {
 		StringReader reader = new StringReader(fromSource);
 		return deserialize(GenericType.of(toType), createReader(reader),
 				new Context(this, Arrays.asList(withViews)));
 	}
 
-	public <T> T deserialize(GenericType<T> type, Reader reader,
-			Class<? extends BeanView<?>>... withViews) {
+	public <T> T deserialize(GenericType<T> type, Reader reader, Class<? extends BeanView<?>>... withViews) {
 		return deserialize(type, createReader(reader), new Context(this, Arrays.asList(withViews)));
 	}
 

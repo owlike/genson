@@ -722,7 +722,7 @@ public final class DefaultConverters {
         }
     }
 
-	private static abstract class KeyAdapter<K> {
+	public static abstract class KeyAdapter<K> {
 		public abstract K adapt(String str);
 
 		public abstract String adapt(K key);
@@ -874,32 +874,22 @@ public final class DefaultConverters {
 			Type keyType = typeOf(0, expandedType);
 			Type valueType = typeOf(1, expandedType);
 			Class<?> keyRawClass = getRawClass(keyType);
-			if (Object.class.equals(keyRawClass)) {
-				return createConverter(getRawClass(type), KeyAdapter.runtimeAdapter,
-						genson.provideConverter(valueType));
-			} else if (String.class.equals(keyRawClass)) {
-				return createConverter(getRawClass(type), KeyAdapter.strAdapter,
-						genson.provideConverter(valueType));
-			} else if (int.class.equals(keyRawClass) || Integer.class.equals(keyRawClass)) {
-				return createConverter(getRawClass(type), KeyAdapter.intAdapter,
-						genson.provideConverter(valueType));
-			} else if (double.class.equals(keyRawClass) || Double.class.equals(keyRawClass)) {
-				return createConverter(getRawClass(type), KeyAdapter.doubleAdapter,
-						genson.provideConverter(valueType));
-			} else if (long.class.equals(keyRawClass) || Long.class.equals(keyRawClass)) {
-				return createConverter(getRawClass(type), KeyAdapter.longAdapter,
-						genson.provideConverter(valueType));
-			} else if (float.class.equals(keyRawClass) || Float.class.equals(keyRawClass)) {
-				return createConverter(getRawClass(type), KeyAdapter.floatAdapter,
-						genson.provideConverter(valueType));
-			} else if (short.class.equals(keyRawClass) || Short.class.equals(keyRawClass)) {
-				return createConverter(getRawClass(type), KeyAdapter.shortAdapter,
-						genson.provideConverter(valueType));
-			} else {
-				return new ComplexMapConverter(genson.provideConverter(keyType),
-						genson.provideConverter(valueType));
-			}
+            KeyAdapter<?> keyAdapter = keyAdapter(keyRawClass);
+
+            if (keyAdapter != null) return createConverter(getRawClass(type), keyAdapter, genson.provideConverter(valueType));
+            else return new ComplexMapConverter(genson.provideConverter(keyType), genson.provideConverter(valueType));
 		}
+
+        public static KeyAdapter<?> keyAdapter(Class<?> keyRawClass) {
+            if (Object.class.equals(keyRawClass)) return KeyAdapter.runtimeAdapter;
+            else if (String.class.equals(keyRawClass)) return KeyAdapter.strAdapter;
+            else if (int.class.equals(keyRawClass) || Integer.class.equals(keyRawClass)) return KeyAdapter.intAdapter;
+            else if (double.class.equals(keyRawClass) || Double.class.equals(keyRawClass)) return KeyAdapter.doubleAdapter;
+            else if (long.class.equals(keyRawClass) || Long.class.equals(keyRawClass)) return KeyAdapter.longAdapter;
+            else if (float.class.equals(keyRawClass) || Float.class.equals(keyRawClass)) return KeyAdapter.floatAdapter;
+            else if (short.class.equals(keyRawClass) || Short.class.equals(keyRawClass)) return KeyAdapter.shortAdapter;
+            else return null;
+        }
 
 		@SuppressWarnings("unchecked")
 		private <K, V> MapConverter<K, V> createConverter(Class<?> typeOfMap,
