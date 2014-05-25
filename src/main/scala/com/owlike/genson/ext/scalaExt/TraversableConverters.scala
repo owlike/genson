@@ -33,7 +33,6 @@ import scala.collection.immutable.Map.{Map4, Map3, Map2, Map1}
 
 class MapConverterFactory extends Factory[Converter[_ <: Any]]() {
   val cbfByType = List[(Class[_], CanBuildFrom[_ <: Traversable[_], _, _ <: Traversable[_]])](
-    // mappings for immutable collections
     classOf[Map1[_, _]] -> Map.canBuildFrom,
     classOf[Map2[_, _]] -> Map.canBuildFrom,
     classOf[Map3[_, _]] -> Map.canBuildFrom,
@@ -62,7 +61,9 @@ class MapConverterFactory extends Factory[Converter[_ <: Any]]() {
       val keyType: Type = typeOf(0, expandedType)
       val valueType: Type = typeOf(1, expandedType)
       val elemConverter: Converter[Any] = genson.provideConverter(valueType)
-      val keyAdapter = JavaMapFactory.keyAdapter(getRawClass(keyType)).asInstanceOf[KeyAdapter[Any]]
+      val keyAdapter = Option(JavaMapFactory.keyAdapter(getRawClass(keyType)))
+        .getOrElse(KeyAdapter.runtimeAdapter)
+        .asInstanceOf[KeyAdapter[Any]]
       new MapConverter[Any, Any, Map[Any, Any]](keyAdapter, elemConverter)(castCBF)
     }.getOrElse(null)
   }
@@ -70,7 +71,6 @@ class MapConverterFactory extends Factory[Converter[_ <: Any]]() {
 
 class TraversableConverterFactory extends Factory[Converter[_ <: Traversable[Any]]]() {
   val cbfByType = List[(Class[_], CanBuildFrom[_ <: Traversable[_], _, _ <: Traversable[_]])](
-    // mappings for immutable collections
     classOf[colon[_]] -> List.canBuildFrom,
     classOf[HashTrieSet[_]] -> HashSet.canBuildFrom,
     classOf[HashSet[_]] -> HashSet.canBuildFrom,

@@ -29,6 +29,14 @@ import org.scalatest.prop.PropertyChecks
 class TraversableSerDeTest extends FunSuite with Matchers with PropertyChecks {
   lazy val genson = new GensonBuilder().`with`(new ScalaBundle()).create()
 
+  val tupleTests = Table(
+    "expected",
+    Tuple1(1),
+    (1, 2),
+    (1, "a"),
+    (true, "hey", List(1, 2, 3), Map("key" -> "bar"), 2, 2.3)
+  )
+
   val mapTests = Table(
     ("expected"),
     Map("1" -> "aa"),
@@ -78,6 +86,10 @@ class TraversableSerDeTest extends FunSuite with Matchers with PropertyChecks {
     Buffer(1, 2)
   )
 
+  test("tuple round trip") {
+    forAll(tupleTests) (checkRoundTrip)
+  }
+
   test("map like traversable round trip") {
     forAll(mapTests) (checkRoundTrip)
   }
@@ -89,6 +101,7 @@ class TraversableSerDeTest extends FunSuite with Matchers with PropertyChecks {
   def checkRoundTrip(expected: Any) {
     val json = genson.serialize(expected, GenericType.of(expected.getClass))
     val actual = genson.deserialize(json, GenericType.of(expected.getClass))
+
     actual.getClass shouldEqual expected.getClass
     actual shouldEqual expected
   }
