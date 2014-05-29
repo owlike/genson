@@ -259,7 +259,7 @@ public interface ObjectWriter {
 	 * writer.beginObject().writeMetadata(&quot;doc&quot;, &quot;Object documentation bla bla...&quot;).writeName(&quot;name&quot;)
 	 * 		.writeNull().endObject().flush();
 	 * 
-	 * // previous example works fine, but if you wan't to write some metadata and still be able to call
+	 * // previous example works fine, but if you want to write some metadata and still be able to call
 	 * // beginObject (for example in a converter you want to write some metadata and have all the existing
 	 * // continue to work with calling beginObject) you must use beginNextObjectMetadata.
 	 * 
@@ -282,6 +282,27 @@ public interface ObjectWriter {
 	 * @throws JsonStreamException
 	 */
 	public ObjectWriter writeMetadata(String name, String value);
+
+    /**
+     * @see #writeString(String, String)
+     */
+    public ObjectWriter writeBoolean(String name, Boolean value);
+
+    /**
+     * @see #writeString(String, String)
+     */
+    public ObjectWriter writeNumber(String name, Number value);
+
+    /**
+     * Will write the name and the value, it is just a shortcut for writer.writeName("key").writeString(value).
+     * Note if the value is null, writeNull is used.
+     */
+    public ObjectWriter writeString(String name, String value);
+
+    /**
+     * @see #writeString(String, String)
+     */
+    public ObjectWriter writeBytes(String name, byte[] value);
 
     public void flush();
 
