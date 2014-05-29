@@ -165,6 +165,11 @@ public interface ObjectWriter {
 	 */
 	public ObjectWriter writeValue(boolean value);
 
+    /**
+     * @see #writeString(String)
+     */
+    public ObjectWriter writeBoolean(Boolean value);
+
 	/**
 	 * See {@link #writeValue(int)}.
 	 * 
@@ -172,6 +177,11 @@ public interface ObjectWriter {
 	 * @see #writeValue(int)
 	 */
 	public ObjectWriter writeValue(Number value);
+
+    /**
+     * @see #writeString(String)
+     */
+    public ObjectWriter writeNumber(Number value);
 
 	/**
 	 * See {@link #writeValue(int)}.
@@ -181,6 +191,12 @@ public interface ObjectWriter {
 	 */
 	public ObjectWriter writeValue(String value);
 
+    /**
+     * Similar to writeValue(String) but is null safe, meaning that if the value is null,
+     * then the write will call writeNull for you.
+     */
+    public ObjectWriter writeString(String value);
+
 	/**
 	 * Writes an array of bytes as a base64 encoded string. See {@link #writeValue(int)}.
 	 * 
@@ -188,6 +204,11 @@ public interface ObjectWriter {
 	 * @see #writeValue(int)
 	 */
 	public ObjectWriter writeValue(byte[] value);
+
+    /**
+     * @see #writeString(String)
+     */
+    public ObjectWriter writeBytes(byte[] value);
 
 	/**
 	 * Writes value as is without any pre-processing, it's faster than {@link #writeValue(String)}

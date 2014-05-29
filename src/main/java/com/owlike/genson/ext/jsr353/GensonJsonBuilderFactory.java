@@ -14,27 +14,28 @@ public class GensonJsonBuilderFactory implements JsonBuilderFactory {
 
             @Override
             public JsonObjectBuilder add(String name, JsonValue value) {
-                if (value == null) throw new NullPointerException();
-                values.put(name, value);
+                if (value == null) addNull(name);
+                else values.put(name, value);
+
                 return this;
             }
 
             @Override
             public JsonObjectBuilder add(String name, String value) {
-                if (value == null) throw new NullPointerException();
-                return add(name, new GensonJsonString(value));
+                if (value == null) return addNull(name);
+                else return add(name, new GensonJsonString(value));
             }
 
             @Override
             public JsonObjectBuilder add(String name, BigInteger value) {
-                if (value == null) throw new NullPointerException();
-                return add(name, new GensonJsonNumber.IntJsonNumber(value));
+                if (value == null) return addNull(name);
+                else return add(name, new GensonJsonNumber.IntJsonNumber(value));
             }
 
             @Override
             public JsonObjectBuilder add(String name, BigDecimal value) {
-                if (value == null) throw new NullPointerException();
-                return add(name, new GensonJsonNumber.DoubleJsonNumber(value));
+                if (value == null) return addNull(name);
+                else return add(name, new GensonJsonNumber.DoubleJsonNumber(value));
             }
 
             @Override
@@ -64,14 +65,14 @@ public class GensonJsonBuilderFactory implements JsonBuilderFactory {
 
             @Override
             public JsonObjectBuilder add(String name, JsonObjectBuilder builder) {
-                if (builder == null) throw new NullPointerException();
-                return add(name, builder.build());
+                if (builder == null) return addNull(name);
+                else return add(name, builder.build());
             }
 
             @Override
             public JsonObjectBuilder add(String name, JsonArrayBuilder builder) {
-                if (builder == null) throw new NullPointerException();
-                return add(name, builder.build());
+                if (builder == null) return addNull(name);
+                else return add(name, builder.build());
             }
 
             @Override
@@ -88,27 +89,28 @@ public class GensonJsonBuilderFactory implements JsonBuilderFactory {
 
             @Override
             public JsonArrayBuilder add(JsonValue value) {
-                if (value == null) throw new NullPointerException();
-                values.add(value);
+                if (value == null) addNull();
+                else values.add(value);
+
                 return this;
             }
 
             @Override
             public JsonArrayBuilder add(String value) {
-                if (value == null) throw new NullPointerException();
-                return add(new GensonJsonString(value));
+                if (value == null) return addNull();
+                else return add(new GensonJsonString(value));
             }
 
             @Override
             public JsonArrayBuilder add(BigDecimal value) {
-                if (value == null) throw new NullPointerException();
-                return add(new GensonJsonNumber.DoubleJsonNumber(value));
+                if (value == null) return addNull();
+                else return add(new GensonJsonNumber.DoubleJsonNumber(value));
             }
 
             @Override
             public JsonArrayBuilder add(BigInteger value) {
-                if (value == null) throw new NullPointerException();
-                return add(new GensonJsonNumber.IntJsonNumber(value));
+                if (value == null) return addNull();
+                else return add(new GensonJsonNumber.IntJsonNumber(value));
             }
 
             @Override
@@ -138,14 +140,14 @@ public class GensonJsonBuilderFactory implements JsonBuilderFactory {
 
             @Override
             public JsonArrayBuilder add(JsonObjectBuilder builder) {
-                if (builder == null) throw new NullPointerException();
-                return add(builder.build());
+                if (builder == null) return addNull();
+                else return add(builder.build());
             }
 
             @Override
             public JsonArrayBuilder add(JsonArrayBuilder builder) {
-                if (builder == null) throw new NullPointerException();
-                return add(builder.build());
+                if (builder == null) return addNull();
+                else return add(builder.build());
             }
 
             @Override

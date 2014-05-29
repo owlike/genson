@@ -330,6 +330,26 @@ public class JsonWriter implements ObjectWriter {
         return this;
     }
 
+    public ObjectWriter writeBoolean(final Boolean value) {
+        if (value == null) return writeNull();
+        else return writeValue(value);
+    }
+
+    public ObjectWriter writeNumber(final Number value) {
+        if (value == null) return writeNull();
+        else return writeValue(value);
+    }
+
+    public ObjectWriter writeString(String value) {
+        if (value == null) return writeNull();
+        else return writeValue(value);
+    }
+
+    public ObjectWriter writeBytes(byte[] value) {
+        if (value == null) return writeNull();
+        else return writeValue(value);
+    }
+
     private void checkValidJsonDouble(Number num) {
         if (num.equals(Double.NaN))
             throw new NumberFormatException("NaN is not a valid json number.");
