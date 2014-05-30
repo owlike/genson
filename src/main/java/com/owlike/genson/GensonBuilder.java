@@ -487,9 +487,8 @@ public class GensonBuilder {
             private Trilean filter(String actualName, Class<?> fromClass,
                                    Class<?> propertyType, boolean exclude) {
                 if ((field == null || actualName.equalsIgnoreCase(field))
-                        && (declaringClass == null || declaringClass
-                        .isAssignableFrom(fromClass))
-                        && (ofType == null || ofType.isAssignableFrom(propertyType)))
+                        && (declaringClass == null || declaringClass.isAssignableFrom(fromClass))
+                        && (ofType == null || ofType.isAssignableFrom(TypeUtil.wrap(propertyType))))
                     return exclude ? Trilean.FALSE : Trilean.TRUE;
                 return Trilean.UNKNOWN;
             }
