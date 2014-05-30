@@ -11,7 +11,7 @@ import static org.junit.Assert.*;
 import com.owlike.genson.Genson;
 
 public class JsonValueTest {
-    private final Genson genson = new GensonBuilder().with(new JSR353Bundle()).create();
+    private final Genson genson = new GensonBuilder().withBundle(new JSR353Bundle()).create();
 
     @Test public void testSerArrayOfLiterals() {
         String json =

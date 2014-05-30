@@ -25,7 +25,7 @@ public class JaxbAnnotationsSupportTest {
 
 	@Before
 	public void setUp() {
-		genson = new GensonBuilder().with(new JAXBBundle()).create();
+		genson = new GensonBuilder().withBundle(new JAXBBundle()).create();
 	}
 
 	@Test

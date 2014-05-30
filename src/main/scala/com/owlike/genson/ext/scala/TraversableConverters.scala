@@ -1,6 +1,6 @@
-package com.owlike.genson.ext.scalaExt
+package com.owlike.genson.ext.scala
 
-import com.owlike.genson.{Context, Genson, Converter, Factory}
+import com.owlike.genson.{Context, Converter, Factory}
 
 import java.lang.reflect.Type
 import com.owlike.genson.reflect.TypeUtil._

@@ -44,7 +44,7 @@ public class GensonJsonConverter implements MessageBodyReader<Object>, MessageBo
 		}
 
 		private final Genson createDefaultInstance() {
-			return new GensonBuilder().with(new JAXBBundle()).useBeanViews(true)
+			return new GensonBuilder().withBundle(new JAXBBundle()).useBeanViews(true)
 					.useConstructorWithArguments(true).create();
 		}
 	}

@@ -1,7 +1,7 @@
-package com.owlike.genson.ext.scalaExt
+package com.owlike.genson.ext.scala
 
 import com.owlike.genson.ext.GensonBundle
-import com.owlike.genson.{Context, GenericType, GensonBuilder, Genson}
+import com.owlike.genson.{Context, GenericType}
 import java.lang.reflect.{ParameterizedType, Type => JType}
 import com.owlike.genson.reflect.TypeUtil._
 import java.io.{OutputStream, Writer, InputStream, StringReader}
@@ -24,7 +24,7 @@ class ScalaBundle extends GensonBundle {
 object ScalaBundle {
   def apply() = new ScalaBundle()
 
-  protected[scalaExt] def getTraversableType(genType: JType): JType = {
+  protected[scala] def getTraversableType(genType: JType): JType = {
 
     if (genType.isInstanceOf[Class[_]]) {
       val clazz: Class[_] = genType.asInstanceOf[Class[_]]

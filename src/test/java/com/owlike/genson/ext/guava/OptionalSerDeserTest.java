@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class OptionalSerDeserTest {
-    private Genson genson = new GensonBuilder().with(new GuavaBundle()).create();
+    private Genson genson = new GensonBuilder().withBundle(new GuavaBundle()).create();
 
     @Test public void roundTripListOfOptionals() {
         List<Optional<String>> expected = Arrays.asList(Optional.<String>absent(), Optional.fromNullable("hey"), Optional.of("you"));

@@ -1,7 +1,7 @@
-package com.owlike.genson.ext.scalaExt
+package com.owlike.genson.ext.scala
 
-import com.owlike.genson._
-import java.lang.reflect.{ParameterizedType, Constructor, Type}
+import com.owlike.genson.{JsonBindingException, Factory, Converter, Context}
+import java.lang.reflect.{Constructor, ParameterizedType, Type}
 import com.owlike.genson.reflect.TypeUtil
 import com.owlike.genson.stream.{ObjectWriter, ObjectReader}
 import com.owlike.genson.annotation.HandleClassMetadata

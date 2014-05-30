@@ -1,15 +1,16 @@
-package com.owlike.genson.ext.scalaExt
+package com.owlike.genson.ext.scala
 
 import org.scalatest.FunSuite
-import com.owlike.genson.GensonBuilder
 import org.scalatest.Matchers
 import java.net.URL
 import java.util.Date
 import java.text.SimpleDateFormat
 
+import defaultGenson._
+
 class ScalaAPITest extends FunSuite with Matchers {
   val df = new SimpleDateFormat("yyyy-MM-dd")
-  val genson = new GensonBuilder().`with`(ScalaBundle()).useDateFormat(df).create()
+  val genson = new GensonBuilder().withBundle(ScalaBundle()).useDateFormat(df).create()
 
   test("type inference with Tuples") {
     val (date, url) = genson.fromJson[(Date, URL)]("[\"2014-12-01\", \"http://www.google.com\"]")
@@ -19,7 +20,7 @@ class ScalaAPITest extends FunSuite with Matchers {
   }
 
   test("type inference with List") {
-    val List(url) = genson.fromJson[List[URL]]("[\"http://www.google.com\"]")
+    val List(url) = fromJson[List[URL]]("[\"http://www.google.com\"]")
 
     url.toString shouldEqual "http://www.google.com"
   }

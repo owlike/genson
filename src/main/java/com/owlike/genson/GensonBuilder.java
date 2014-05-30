@@ -252,12 +252,12 @@ public class GensonBuilder {
      * Register some genson bundles. For example to enable JAXB support:
      * <p/>
      * <pre>
-     * builder.with(new JAXBExtension());
+     * builder.withBundle(new JAXBExtension());
      * </pre>
      *
      * @see GensonBundle
      */
-    public GensonBuilder with(GensonBundle... bundles) {
+    public GensonBuilder withBundle(GensonBundle... bundles) {
         for (GensonBundle ext : bundles)
             _bundles.add(ext);
         return this;

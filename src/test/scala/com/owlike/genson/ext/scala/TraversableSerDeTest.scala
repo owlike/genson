@@ -1,7 +1,6 @@
-package com.owlike.genson.ext.scalaExt
+package com.owlike.genson.ext.scala
 
 import org.scalatest.FunSuite
-import com.owlike.genson.{GenericType, GensonBuilder}
 import org.scalatest.Matchers
 
 import scala.collection.immutable.{
@@ -25,9 +24,10 @@ import scala.collection.mutable.{
 }
 
 import org.scalatest.prop.PropertyChecks
+import com.owlike.genson.GenericType
 
 class TraversableSerDeTest extends FunSuite with Matchers with PropertyChecks {
-  lazy val genson = new GensonBuilder().`with`(new ScalaBundle()).create()
+  lazy val genson = new GensonBuilder().withBundle(new ScalaBundle()).create()
 
   val tupleTests = Table(
     "expected",

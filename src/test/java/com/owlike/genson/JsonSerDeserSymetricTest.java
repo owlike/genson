@@ -34,7 +34,7 @@ import com.owlike.genson.stream.ObjectWriter;
 
 public class JsonSerDeserSymetricTest {
 	Genson genson = new GensonBuilder().useConstructorWithArguments(true).create();
-	
+
 	@Test public void testSerDeserByteArray() throws IOException {
 		Primitives expected = createPrimitives();
 		List<Integer> is = Arrays.asList(1, 2);
