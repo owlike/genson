@@ -88,7 +88,7 @@ public class BasicConvertersFactory implements Factory<Converter<?>> {
 
 		for (Iterator<Factory<?>> it = factories.iterator(); it.hasNext();) {
 			Factory<?> factory = it.next();
-			Object object = null;
+			Object object;
 			Type factoryType = TypeUtil.lookupGenericType(Factory.class, factory.getClass());
 			factoryType = TypeUtil.expandType(factoryType, factory.getClass());
 			// it is a parameterized type and we want the parameter corresponding to Serializer from

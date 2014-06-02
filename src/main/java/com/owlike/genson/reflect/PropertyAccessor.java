@@ -1,6 +1,5 @@
 package com.owlike.genson.reflect;
 
-import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -10,14 +9,12 @@ import java.lang.reflect.Type;
 import com.owlike.genson.*;
 import com.owlike.genson.stream.ObjectWriter;
 
-import javax.json.Json;
-
 public abstract class PropertyAccessor extends BeanProperty implements Comparable<PropertyAccessor> {
 	Serializer<Object> propertySerializer;
 
 	protected PropertyAccessor(String name, Type type, Class<?> declaringClass,
-			Annotation[] annotations) {
-		super(name, type, declaringClass, annotations);
+			Annotation[] annotations, int modifiers) {
+		super(name, type, declaringClass, annotations, modifiers);
 	}
 
 	public void serialize(Object propertySource, ObjectWriter writer, Context ctx) {
@@ -51,7 +48,7 @@ public abstract class PropertyAccessor extends BeanProperty implements Comparabl
 		protected final Method _getter;
 
 		public MethodAccessor(String name, Method getter, Type type, Class<?> declaringClass) {
-			super(name, type, declaringClass, getter.getAnnotations());
+			super(name, type, declaringClass, getter.getAnnotations(), getter.getModifiers());
 			this._getter = getter;
 			if (!_getter.isAccessible()) {
 				_getter.setAccessible(true);
@@ -86,7 +83,7 @@ public abstract class PropertyAccessor extends BeanProperty implements Comparabl
 		protected final Field _field;
 
 		public FieldAccessor(String name, Field field, Type type, Class<?> declaringClass) {
-			super(name, type, declaringClass, field.getAnnotations());
+			super(name, type, declaringClass, field.getAnnotations(), field.getModifiers());
 			this._field = field;
 			if (!_field.isAccessible()) {
 				_field.setAccessible(true);

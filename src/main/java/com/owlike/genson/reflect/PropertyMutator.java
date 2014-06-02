@@ -12,8 +12,8 @@ import com.owlike.genson.stream.ObjectReader;
 public abstract class PropertyMutator extends BeanProperty implements Comparable<PropertyMutator> {
 	Deserializer<Object> propertyDeserializer;
 
-	protected PropertyMutator(String name, Type type, Class<?> declaringClass, Annotation[] annotations) {
-		super(name, type, declaringClass, annotations);
+	protected PropertyMutator(String name, Type type, Class<?> declaringClass, Annotation[] annotations, int modifiers) {
+		super(name, type, declaringClass, annotations, modifiers);
 	}
 
 	public Object deserialize(ObjectReader reader, Context ctx) {
@@ -53,7 +53,7 @@ public abstract class PropertyMutator extends BeanProperty implements Comparable
 		protected final Method _setter;
 
 		public MethodMutator(String name, Method setter, Type type, Class<?> declaringClass) {
-			super(name, type, declaringClass, setter.getAnnotations());
+			super(name, type, declaringClass, setter.getAnnotations(), setter.getModifiers());
 			this._setter = setter;
 			if (!_setter.isAccessible()) {
 				_setter.setAccessible(true);
@@ -88,7 +88,7 @@ public abstract class PropertyMutator extends BeanProperty implements Comparable
 		protected final Field _field;
 
 		public FieldMutator(String name, Field field, Type type, Class<?> declaringClass) {
-			super(name, type, declaringClass, field.getAnnotations());
+			super(name, type, declaringClass, field.getAnnotations(), field.getModifiers());
 			this._field = field;
 			if (!_field.isAccessible()) {
 				_field.setAccessible(true);

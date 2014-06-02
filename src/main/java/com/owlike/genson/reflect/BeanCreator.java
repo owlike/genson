@@ -51,6 +51,12 @@ public abstract class BeanCreator extends Wrapper<AnnotatedElement> implements C
 				+ " using creator " + signature(), e);
 	}
 
+    public Map<String, BeanCreatorProperty> getProperties() {
+        return new HashMap<String, BeanCreatorProperty>(parameters);
+    }
+
+    public abstract int getModifiers();
+
 	public static class ConstructorBeanCreator extends BeanCreator {
 		protected final Constructor<?> constructor;
 
@@ -88,7 +94,12 @@ public abstract class BeanCreator extends Wrapper<AnnotatedElement> implements C
 		public int priority() {
 			return 50;
 		}
-	}
+
+        @Override
+        public int getModifiers() {
+            return constructor.getModifiers();
+        }
+    }
 
 	public static class MethodBeanCreator extends BeanCreator {
 		protected final Method _creator;
@@ -128,7 +139,12 @@ public abstract class BeanCreator extends Wrapper<AnnotatedElement> implements C
 		public int priority() {
 			return 100;
 		}
-	}
+
+        @Override
+        public int getModifiers() {
+            return _creator.getModifiers();
+        }
+    }
 
 	public static class BeanCreatorProperty extends PropertyMutator {
 		protected final int index;
@@ -143,14 +159,14 @@ public abstract class BeanCreator extends Wrapper<AnnotatedElement> implements C
 
 		protected BeanCreatorProperty(String name, Type type, int index, Annotation[] annotations,
 				Class<?> declaringClass, BeanCreator creator, boolean doThrowMutateException) {
-			super(name, type, declaringClass, annotations);
+			super(name, type, declaringClass, annotations, 0);
 			this.index = index;
 			this.annotations = annotations;
 			this.creator = creator;
 			this.doThrowMutateException = doThrowMutateException;
 		}
 
-		public int getIndex() {
+        public int getIndex() {
 			return index;
 		}
 
@@ -169,7 +185,12 @@ public abstract class BeanCreator extends Wrapper<AnnotatedElement> implements C
 					.append(creator.signature()).toString();
 		}
 
-		@Override
+        @Override
+        public int getModifiers() {
+            return creator.getModifiers();
+        }
+
+        @Override
 		public void mutate(Object target, Object value) {
 			if (doThrowMutateException) {
 				throw new IllegalStateException(

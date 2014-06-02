@@ -205,7 +205,7 @@ public interface BeanMutatorAccessorResolver {
 						&& Modifier.isStatic(method.getModifiers()))
 					return TRUE;
 				throw new JsonBindingException("Method " + method.toGenericString()
-						+ " annotated with @Creator must be static!");
+						+ " annotated with @JsonCreator must be static!");
 			}
 			return FALSE;
 		}

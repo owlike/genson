@@ -80,6 +80,10 @@ public class JsonSerializationTest {
 		assertEquals("\"JAVA\"", genson.serialize(Player.JAVA));
 	}
 
+    @Test public void testSerializeBoxedFloat() {
+        assertEquals("2.0", genson.serialize(new Float(2)));
+    }
+
 	private Primitives createPrimitives() {
 		return new Primitives(1, new Integer(10), 1.00001, new Double(0.00001), "TEXT ...  HEY!",
 				true, new Boolean(false));

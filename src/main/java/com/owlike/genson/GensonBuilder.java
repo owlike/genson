@@ -705,8 +705,7 @@ public class GensonBuilder {
 
         if (nullConverter == null) nullConverter = new NullConverter();
         if (propertyNameResolver == null) propertyNameResolver = createPropertyNameResolver();
-        if (mutatorAccessorResolver == null)
-            mutatorAccessorResolver = createBeanMutatorAccessorResolver();
+        if (mutatorAccessorResolver == null) mutatorAccessorResolver = createBeanMutatorAccessorResolver();
 
         List<Converter<?>> converters = getDefaultConverters();
         addDefaultSerializers(converters);

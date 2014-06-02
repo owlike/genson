@@ -14,13 +14,15 @@ public abstract class BeanProperty {
 	protected final Type type;
 	protected final Class<?> declaringClass;
 	protected final Annotation[] annotations;
+    protected final int modifiers;
 
-	protected BeanProperty(String name, Type type, Class<?> declaringClass, Annotation[] annotations) {
+	protected BeanProperty(String name, Type type, Class<?> declaringClass, Annotation[] annotations, int modifiers) {
 		this.name = name;
 		this.type = type;
 		this.declaringClass = declaringClass;
 		this.annotations = annotations;
-	}
+        this.modifiers = modifiers;
+    }
 
 	/**
 	 * 
@@ -48,6 +50,10 @@ public abstract class BeanProperty {
 	public Class<?> getRawClass() {
 		return TypeUtil.getRawClass(type);
 	}
+
+    public int getModifiers() {
+        return modifiers;
+    }
 
 	public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
 		for (Annotation ann : annotations)

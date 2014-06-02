@@ -63,17 +63,17 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 	}
 
 	public final static class ContextualFactoryDecorator implements Factory<Converter<?>> {
-		private final Factory<Converter<?>> delegatedConverter;
+		private final Factory<Converter<?>> delegatedFactory;
 
-		public ContextualFactoryDecorator(Factory<Converter<?>> delegatedConverter) {
-			this.delegatedConverter = delegatedConverter;
+		public ContextualFactoryDecorator(Factory<Converter<?>> delegatedFactory) {
+			this.delegatedFactory = delegatedFactory;
 		}
 
 		@Override
 		public Converter<?> create(Type type, Genson genson) {
 			Converter<?> converter = ThreadLocalHolder.get(CONTEXT_KEY, Converter.class);
 			if (converter != null) return converter;
-			return delegatedConverter.create(type, genson);
+			return delegatedFactory.create(type, genson);
 		}
 	}
 
@@ -117,8 +117,8 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 			if (mutator != null) mutators.put(mutator.name, mutator);
 		}
 
-		mergeMutatorsWithCreatorProperties(ofType, mutators, creators);
-		BeanCreator ctr = checkAndMerge(ofType, creators);
+        BeanCreator ctr = checkAndMerge(ofType, creators);
+        if (ctr != null) mergeMutatorsWithCreatorProperties(ofType, mutators, ctr);
 
 		// 1 - prepare the converters for the accessors
 		for (PropertyAccessor accessor : accessors) {
@@ -140,8 +140,7 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 		// lets fail fast if the BeanDescriptor has been built for the wrong type.
 		// another option could be to pass in all the methods an additional parameter Class<T> that
 		// would not necessarily correspond to the rawClass of ofType. In fact we authorize that
-		// ofType
-		// rawClass is different from Class<T>, but the BeanDescriptor must match!
+		// ofType rawClass is different from Class<T>, but the BeanDescriptor must match!
 		BeanDescriptor<T> descriptor = create(ofClass, ofType, ctr, accessors, mutators);
 		if (!ofClass.isAssignableFrom(descriptor.getOfClass()))
 			throw new ClassCastException("Actual implementation of BeanDescriptorProvider "
@@ -242,15 +241,24 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 			LinkedList<PropertyMutator> mutators);
 
 	/**
-	 * Implementations may do additional merge operations based on resolved creators and their
-	 * properties and the resolved mutators.
+	 * Implementations may do additional merge operations based on the resolved creator
+	 * parameters and the resolved mutators.
 	 * 
 	 * @param ofType
 	 * @param mutators
-	 * @param creators
+	 * @param creator
 	 */
-	protected abstract void mergeMutatorsWithCreatorProperties(Type ofType,
-			Map<String, PropertyMutator> mutators, List<BeanCreator> creators);
+	protected abstract void mergeMutatorsWithCreatorProperties(Type ofType, Map<String, PropertyMutator> mutators, BeanCreator creator);
+
+    /**
+     * Implementations may do additional merge operations based on the resolved creator
+     * parameters and the resolved accessors.
+     *
+     * @param ofType
+     * @param accessors
+     * @param creator
+     */
+    protected abstract void mergeAccessorsWithCreatorProperties(Type ofType, Map<String, PropertyAccessor> accessors, BeanCreator creator);
 
 	/**
 	 * Implementations are supposed to merge the {@link PropertyAccessor}s from accessors list into

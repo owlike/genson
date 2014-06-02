@@ -16,6 +16,7 @@ import java.util.Map;
 import com.owlike.genson.Genson;
 import com.owlike.genson.annotation.JsonCreator;
 import com.owlike.genson.reflect.BeanCreator.BeanCreatorProperty;
+import com.owlike.genson.reflect.AbstractBeanDescriptorProvider.ContextualConverterFactory;
 
 import static com.owlike.genson.reflect.TypeUtil.*;
 import static com.owlike.genson.Trilean.*;
@@ -263,7 +264,7 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 					hasCreatorAnnotation = true;
 				else
 					_throwCouldCreateBeanDescriptor(ofClass,
-							" only one @Creator annotation per class is allowed.");
+							" only one @JsonCreator annotation per class is allowed.");
 			}
 		}
 
@@ -321,26 +322,22 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 		return property;
 	}
 
-	/*
-	 * TODO must be rethinked? maybe not, but a solution could be to separate ctr properties from
-	 * the others, and while deserializing to check first in normal mutator map and if null check
-	 * for property in the ctr props...
-	 */
 	@Override
-	protected void mergeMutatorsWithCreatorProperties(Type ofType,
-			Map<String, PropertyMutator> mutators, List<BeanCreator> creators) {
-		for (BeanCreator creator : creators) {
-			for (Map.Entry<String, ? extends BeanCreatorProperty> entry : creator.parameters
-					.entrySet()) {
-				PropertyMutator muta = mutators.get(entry.getKey());
-				if (muta == null) {
-					// add to mutators only creator properties that don't exist as standard
-					// mutator (dont exist as field or method, but only as ctr arg)
-					BeanCreatorProperty ctrProperty = entry.getValue();
-					mutators.put(entry.getKey(), ctrProperty);
-					// TODO we should maybe remove the other creators ?
-				}
-			}
-		}
+	protected void mergeMutatorsWithCreatorProperties(Type ofType, Map<String, PropertyMutator> mutators, BeanCreator creator) {
+
+        for (Map.Entry<String, ? extends BeanCreatorProperty> entry : creator.parameters.entrySet()) {
+            PropertyMutator muta = mutators.get(entry.getKey());
+            if (muta == null) {
+                // add to mutators only creator properties that don't exist as standard
+                // mutator (dont exist as field or method, but only as ctr arg)
+                BeanCreatorProperty ctrProperty = entry.getValue();
+                mutators.put(entry.getKey(), ctrProperty);
+            }
+        }
 	}
+
+    @Override
+    protected void mergeAccessorsWithCreatorProperties(Type ofType, Map<String, PropertyAccessor> accessors, BeanCreator creator) {
+        // do nothing
+    }
 }

@@ -1,6 +1,11 @@
 package com.owlike.genson.ext;
 
 import com.owlike.genson.GensonBuilder;
+import com.owlike.genson.reflect.AbstractBeanDescriptorProvider.ContextualConverterFactory;
+import com.owlike.genson.reflect.BeanDescriptorProvider;
+import com.owlike.genson.reflect.BeanMutatorAccessorResolver;
+import com.owlike.genson.reflect.BeanPropertyFactory;
+import com.owlike.genson.reflect.PropertyNameResolver;
 
 /**
  * Bundles allow to package all kind of Genson customizations into a single module and register
@@ -26,4 +31,13 @@ public abstract class GensonBundle {
 	 * register your bundles.
 	 */
 	public abstract void configure(GensonBuilder builder);
+
+    public BeanDescriptorProvider createBeanDescriptorProvider(ContextualConverterFactory contextualConverterFactory,
+                                                               BeanPropertyFactory beanPropertyFactory,
+                                                               BeanMutatorAccessorResolver propertyResolver,
+                                                               PropertyNameResolver propertyNameResolver,
+                                                               GensonBuilder builder,
+                                                               BeanDescriptorProvider nextProvider) {
+        return null;
+    }
 }
