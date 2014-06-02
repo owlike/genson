@@ -67,9 +67,9 @@ public class GensonMessageConverter extends AbstractHttpMessageConverter<Object>
         MethodParameter mp = ThreadLocalHolder.get("__GENSON$return_param", MethodParameter.class);
         WithBeanView ann = mp != null ? mp.getMethodAnnotation(WithBeanView.class) : null;
         if (ann != null)
-            genson.serialize(t, writer, ann.views());
+            genson.serialize(t, writer, new Context(genson, Arrays.asList(ann.views())));
         else
-            genson.serialize(t, writer);
+            genson.serialize(t, writer, new Context(genson));
         writer.flush();
 	}
 }

@@ -165,6 +165,11 @@ public interface ObjectWriter {
 	 */
 	public ObjectWriter writeValue(boolean value);
 
+    /**
+     * @see #writeString(String)
+     */
+    public ObjectWriter writeBoolean(Boolean value);
+
 	/**
 	 * See {@link #writeValue(int)}.
 	 * 
@@ -172,6 +177,11 @@ public interface ObjectWriter {
 	 * @see #writeValue(int)
 	 */
 	public ObjectWriter writeValue(Number value);
+
+    /**
+     * @see #writeString(String)
+     */
+    public ObjectWriter writeNumber(Number value);
 
 	/**
 	 * See {@link #writeValue(int)}.
@@ -181,6 +191,12 @@ public interface ObjectWriter {
 	 */
 	public ObjectWriter writeValue(String value);
 
+    /**
+     * Similar to writeValue(String) but is null safe, meaning that if the value is null,
+     * then the write will call writeNull for you.
+     */
+    public ObjectWriter writeString(String value);
+
 	/**
 	 * Writes an array of bytes as a base64 encoded string. See {@link #writeValue(int)}.
 	 * 
@@ -188,6 +204,11 @@ public interface ObjectWriter {
 	 * @see #writeValue(int)
 	 */
 	public ObjectWriter writeValue(byte[] value);
+
+    /**
+     * @see #writeString(String)
+     */
+    public ObjectWriter writeBytes(byte[] value);
 
 	/**
 	 * Writes value as is without any pre-processing, it's faster than {@link #writeValue(String)}
@@ -238,7 +259,7 @@ public interface ObjectWriter {
 	 * writer.beginObject().writeMetadata(&quot;doc&quot;, &quot;Object documentation bla bla...&quot;).writeName(&quot;name&quot;)
 	 * 		.writeNull().endObject().flush();
 	 * 
-	 * // previous example works fine, but if you wan't to write some metadata and still be able to call
+	 * // previous example works fine, but if you want to write some metadata and still be able to call
 	 * // beginObject (for example in a converter you want to write some metadata and have all the existing
 	 * // continue to work with calling beginObject) you must use beginNextObjectMetadata.
 	 * 
@@ -261,6 +282,27 @@ public interface ObjectWriter {
 	 * @throws JsonStreamException
 	 */
 	public ObjectWriter writeMetadata(String name, String value);
+
+    /**
+     * @see #writeString(String, String)
+     */
+    public ObjectWriter writeBoolean(String name, Boolean value);
+
+    /**
+     * @see #writeString(String, String)
+     */
+    public ObjectWriter writeNumber(String name, Number value);
+
+    /**
+     * Will write the name and the value, it is just a shortcut for writer.writeName("key").writeString(value).
+     * Note if the value is null, writeNull is used.
+     */
+    public ObjectWriter writeString(String name, String value);
+
+    /**
+     * @see #writeString(String, String)
+     */
+    public ObjectWriter writeBytes(String name, byte[] value);
 
     public void flush();
 

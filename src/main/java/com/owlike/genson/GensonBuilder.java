@@ -53,9 +53,9 @@ public class GensonBuilder {
 
     private PropertyNameResolver propertyNameResolver;
     private BeanMutatorAccessorResolver mutatorAccessorResolver;
-    private VisibilityFilter propertyFilter;
-    private VisibilityFilter methodFilter;
-    private VisibilityFilter constructorFilter;
+    private VisibilityFilter propertyFilter = VisibilityFilter.PACKAGE_PUBLIC;
+    private VisibilityFilter methodFilter = VisibilityFilter.PACKAGE_PUBLIC;
+    private VisibilityFilter constructorFilter = VisibilityFilter.PACKAGE_PUBLIC;
 
     private BeanDescriptorProvider beanDescriptorProvider;
     private Converter<Object> nullConverter;
@@ -252,12 +252,12 @@ public class GensonBuilder {
      * Register some genson bundles. For example to enable JAXB support:
      * <p/>
      * <pre>
-     * builder.with(new JAXBExtension());
+     * builder.withBundle(new JAXBExtension());
      * </pre>
      *
      * @see GensonBundle
      */
-    public GensonBuilder with(GensonBundle... bundles) {
+    public GensonBuilder withBundle(GensonBundle... bundles) {
         for (GensonBundle ext : bundles)
             _bundles.add(ext);
         return this;
@@ -487,9 +487,8 @@ public class GensonBuilder {
             private Trilean filter(String actualName, Class<?> fromClass,
                                    Class<?> propertyType, boolean exclude) {
                 if ((field == null || actualName.equalsIgnoreCase(field))
-                        && (declaringClass == null || declaringClass
-                        .isAssignableFrom(fromClass))
-                        && (ofType == null || ofType.isAssignableFrom(propertyType)))
+                        && (declaringClass == null || declaringClass.isAssignableFrom(fromClass))
+                        && (ofType == null || ofType.isAssignableFrom(TypeUtil.wrap(propertyType))))
                     return exclude ? Trilean.FALSE : Trilean.TRUE;
                 return Trilean.UNKNOWN;
             }
@@ -818,16 +817,10 @@ public class GensonBuilder {
 
     protected BeanMutatorAccessorResolver createBeanMutatorAccessorResolver() {
         List<BeanMutatorAccessorResolver> resolvers = new ArrayList<BeanMutatorAccessorResolver>();
-        VisibilityFilter propFilter = propertyFilter;
-        if (propFilter == null) propFilter = VisibilityFilter.PACKAGE_PUBLIC;
-        VisibilityFilter methodFilter = propertyFilter;
-        if (methodFilter == null) methodFilter = VisibilityFilter.PACKAGE_PUBLIC;
-        VisibilityFilter ctrFilter = propertyFilter;
-        if (ctrFilter == null) ctrFilter = VisibilityFilter.PACKAGE_PUBLIC;
         resolvers.add(new BeanMutatorAccessorResolver.GensonAnnotationsResolver());
 
-        resolvers.add(new BeanMutatorAccessorResolver.StandardMutaAccessorResolver(propFilter,
-                methodFilter, ctrFilter));
+        resolvers.add(new BeanMutatorAccessorResolver.StandardMutaAccessorResolver(propertyFilter,
+                methodFilter, constructorFilter));
 
         return new BeanMutatorAccessorResolver.CompositeResolver(resolvers);
     }

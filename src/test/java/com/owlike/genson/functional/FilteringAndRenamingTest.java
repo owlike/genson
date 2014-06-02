@@ -1,8 +1,13 @@
 package com.owlike.genson.functional;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.List;
 
 import com.owlike.genson.GensonBuilder;
+import com.owlike.genson.Trilean;
+import com.owlike.genson.annotation.JsonProperty;
+import com.owlike.genson.reflect.BeanMutatorAccessorResolver;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -10,6 +15,24 @@ import com.owlike.genson.Genson;
 import com.owlike.genson.annotation.JsonIgnore;
 
 public class FilteringAndRenamingTest {
+
+    @Test public void excludeAllExceptJsonProperty() {
+        ClassWithOneJsonProperty value = new ClassWithOneJsonProperty();
+        value.a = 1;
+        value.b = 2;
+
+        Genson genson = new GensonBuilder()
+                .exclude(Object.class)
+                .with(new BeanMutatorAccessorResolver.GensonAnnotationsResolver())
+                .create();
+
+
+        assertEquals("{\"b\":2}", genson.serialize(value));
+
+        ClassWithOneJsonProperty actual = genson.deserialize("{\"a\":1,\"b\":2}", ClassWithOneJsonProperty.class);
+        assertEquals(0, actual.a);
+        assertEquals(2, actual.b);
+    }
 
 	@Test
 	public void testSetterWithoutArgs() {
@@ -126,6 +149,12 @@ public class FilteringAndRenamingTest {
 				.create().serialize(mac);
 		assertEquals(expectedSuccess, json);
 	}
+
+    public static class ClassWithOneJsonProperty {
+        public String[] array;
+        public int a;
+        @JsonProperty public int b;
+    }
 
 	static class AnotherClass extends ClassWithTransient {
 		public String prop2;

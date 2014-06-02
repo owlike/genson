@@ -1,7 +1,6 @@
 package com.owlike.genson.ext.scala
 
 import org.scalatest.{Matchers, FunSuite}
-import com.owlike.genson.GensonBuilder
 import java.io.StringWriter
 import com.owlike.genson.reflect.VisibilityFilter
 

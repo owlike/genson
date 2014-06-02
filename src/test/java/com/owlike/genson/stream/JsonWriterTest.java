@@ -158,4 +158,24 @@ public class JsonWriterTest {
     @Test(expected=NumberFormatException.class) public void testFloatInfinityhrowsException() throws IOException {
         w.writeValue(Float.POSITIVE_INFINITY);
     }
+
+    @Test public void writeNullValuesUsingNullSafeMethods_Object() {
+        w.beginObject()
+                .writeName("a").writeString(null)
+                .writeName("b").writeNumber(null)
+                .writeName("c").writeNumber(2)
+            .endObject().flush();
+
+        assertEquals("{\"a\":null,\"b\":null,\"c\":2}", sw.toString());
+    }
+
+    @Test public void writeNullValuesUsingNullSafeMethods_Array() {
+        w.beginArray()
+                .writeString(null)
+                .writeNumber(null)
+                .writeNumber(2)
+            .endArray().flush();
+
+        assertEquals("[null,null,2]", sw.toString());
+    }
 }

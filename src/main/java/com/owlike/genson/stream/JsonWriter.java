@@ -330,6 +330,26 @@ public class JsonWriter implements ObjectWriter {
         return this;
     }
 
+    public ObjectWriter writeBoolean(final Boolean value) {
+        if (value == null) return writeNull();
+        else return writeValue(value);
+    }
+
+    public ObjectWriter writeNumber(final Number value) {
+        if (value == null) return writeNull();
+        else return writeValue(value);
+    }
+
+    public ObjectWriter writeString(String value) {
+        if (value == null) return writeNull();
+        else return writeValue(value);
+    }
+
+    public ObjectWriter writeBytes(byte[] value) {
+        if (value == null) return writeNull();
+        else return writeValue(value);
+    }
+
     private void checkValidJsonDouble(Number num) {
         if (num.equals(Double.NaN))
             throw new NumberFormatException("NaN is not a valid json number.");
@@ -431,18 +451,8 @@ public class JsonWriter implements ObjectWriter {
         return this;
     }
 
-    /*
-     * beginNextObjectMetadata write metadata call same beginNextObjectMetadata write some other
-     * metadata
-     * 
-     * ctx = METADATA|OBJECT
-     * 
-     * if beginObject -> dump all else -> erase all
-     */
-
     public ObjectWriter beginNextObjectMetadata() {
-        // this way we can use this method multiple times in different converters before calling
-        // beginObject
+        // this way we can use this method multiple times in different converters before calling beginObject
         if (_ctx.peek() != JsonType.METADATA) {
             _ctx.push(JsonType.METADATA);
             _metadata.clear();
@@ -456,8 +466,28 @@ public class JsonWriter implements ObjectWriter {
             writeName('@' + name);
             writeValue(value);
         }
-        // else do nothing so we silently dont write metadata for literals and arrays
+        // else do nothing so we silently don't write metadata for literals and arrays
         return this;
+    }
+
+    public ObjectWriter writeBoolean(String name, Boolean value) {
+        writeName(name);
+        return writeBoolean(value);
+    }
+
+    public ObjectWriter writeNumber(String name, Number value) {
+        writeName(name);
+        return writeNumber(value);
+    }
+
+    public ObjectWriter writeString(String name, String value) {
+        writeName(name);
+        return writeString(value);
+    }
+
+    public ObjectWriter writeBytes(String name, byte[] value) {
+        writeName(name);
+        return writeBytes(value);
     }
 
     private final void writeToBuffer(final char[] data, final int offset, final int length) {
