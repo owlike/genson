@@ -215,7 +215,7 @@
         <dependency>
             <groupId>org.scalacheck</groupId>
             <artifactId>scalacheck_2.10</artifactId>
-            <version>1.11.4</version>
+            <version>1.11.2</version>
             <scope>test</scope>
         </dependency>
 	</dependencies>

@@ -366,51 +366,7 @@ public class GensonBuilder {
      */
     public GensonBuilder rename(final String field, final Class<?> fromClass, final String toName,
                                 final Class<?> ofType) {
-        return with(new PropertyNameResolver() {
-
-            @Override
-            public String resolve(int parameterIdx, Constructor<?> fromConstructor) {
-                return null;
-            }
-
-            @Override
-            public String resolve(int parameterIdx, Method fromMethod) {
-                return null;
-            }
-
-            @Override
-            public String resolve(Field fromField) {
-                return tryToRename(fromField.getName(), fromField.getDeclaringClass(),
-                        fromField.getType());
-            }
-
-            @Override
-            public String resolve(Method fromMethod) {
-                String name = fromMethod.getName();
-                if (name.startsWith("is") && name.length() > 2) {
-                    return tryToRename(name.substring(2), fromMethod.getDeclaringClass(),
-                            fromMethod.getReturnType());
-                }
-                if (name.length() > 3) {
-                    if (name.startsWith("get"))
-                        return tryToRename(name.substring(3), fromMethod.getDeclaringClass(),
-                                fromMethod.getReturnType());
-                    if (name.startsWith("set") && fromMethod.getParameterTypes().length == 1)
-                        return tryToRename(name.substring(3), fromMethod.getDeclaringClass(),
-                                fromMethod.getParameterTypes()[0]);
-                }
-                return null;
-            }
-
-            private String tryToRename(String actualName, Class<?> declaringClass,
-                                       Class<?> propertyType) {
-                if ((field == null || actualName.equalsIgnoreCase(field))
-                        && (fromClass == null || fromClass.isAssignableFrom(declaringClass))
-                        && (ofType == null || ofType.isAssignableFrom(propertyType)))
-                    return toName;
-                return null;
-            }
-        });
+        return with(new RenamingPropertyNameResolver(field, fromClass, ofType, toName));
     }
 
     public GensonBuilder exclude(String field) {
@@ -447,52 +403,7 @@ public class GensonBuilder {
 
     private GensonBuilder filter(final String field, final Class<?> declaringClass,
                                  final Class<?> ofType, final boolean exclude) {
-        return with(new BeanMutatorAccessorResolver.PropertyBaseResolver() {
-            @Override
-            public Trilean isAccessor(Field field, Class<?> fromClass) {
-                return filter(field.getName(), fromClass, field.getType(), exclude);
-            }
-
-            @Override
-            public Trilean isMutator(Field field, Class<?> fromClass) {
-                return filter(field.getName(), fromClass, field.getType(), exclude);
-            }
-
-            @Override
-            public Trilean isAccessor(Method method, Class<?> fromClass) {
-                String name = method.getName();
-                if (name.startsWith("is") && name.length() > 2) {
-                    return filter(name.substring(2), method.getDeclaringClass(),
-                            method.getReturnType(), exclude);
-                }
-                if (name.length() > 3) {
-                    if (name.startsWith("get"))
-                        return filter(name.substring(3), method.getDeclaringClass(),
-                                method.getReturnType(), exclude);
-                }
-                return Trilean.UNKNOWN;
-            }
-
-            @Override
-            public Trilean isMutator(Method method, Class<?> fromClass) {
-                String name = method.getName();
-                if (name.length() > 3 && method.getParameterTypes().length == 1) {
-                    if (name.startsWith("set"))
-                        return filter(name.substring(3), method.getDeclaringClass(),
-                                method.getParameterTypes()[0], exclude);
-                }
-                return Trilean.UNKNOWN;
-            }
-
-            private Trilean filter(String actualName, Class<?> fromClass,
-                                   Class<?> propertyType, boolean exclude) {
-                if ((field == null || actualName.equalsIgnoreCase(field))
-                        && (declaringClass == null || declaringClass.isAssignableFrom(fromClass))
-                        && (ofType == null || ofType.isAssignableFrom(TypeUtil.wrap(propertyType))))
-                    return exclude ? Trilean.FALSE : Trilean.TRUE;
-                return Trilean.UNKNOWN;
-            }
-        });
+        return with(new PropertyFilter(exclude, field, declaringClass, ofType));
     }
 
     /**
