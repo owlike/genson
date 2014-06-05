@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.owlike.genson.GensonBuilder;
+import com.owlike.genson.reflect.ASMCreatorParameterNameResolver;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -25,12 +26,11 @@ import com.owlike.genson.reflect.BeanDescriptor;
 import com.owlike.genson.stream.JsonReader;
 
 public class JsonDeserializationTest {
-	Genson genson;
+	final Genson genson = new GensonBuilder().useConstructorWithArguments(true).create();;
 
-	@Before
-	public void init() {
-		genson = new GensonBuilder().useConstructorWithArguments(true).create();
-	}
+    @Test public void testASMResolverShouldNotFailWhenUsingBootstrapClassloader() {
+        assertNotNull(genson.deserialize("{}", Exception.class));
+    }
 
 	@Test
 	public void testJsonEmptyObject() {
