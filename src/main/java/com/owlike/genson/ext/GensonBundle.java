@@ -33,11 +33,10 @@ public abstract class GensonBundle {
 	public abstract void configure(GensonBuilder builder);
 
     public BeanDescriptorProvider createBeanDescriptorProvider(ContextualConverterFactory contextualConverterFactory,
-                                                               BeanPropertyFactory beanPropertyFactory,
+                                                               BeanPropertyFactory propertyFactory,
                                                                BeanMutatorAccessorResolver propertyResolver,
-                                                               PropertyNameResolver propertyNameResolver,
-                                                               GensonBuilder builder,
-                                                               BeanDescriptorProvider nextProvider) {
+                                                               PropertyNameResolver nameResolver,
+                                                               GensonBuilder builder) {
         return null;
     }
 }

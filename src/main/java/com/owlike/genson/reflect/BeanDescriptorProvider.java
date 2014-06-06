@@ -1,6 +1,8 @@
 package com.owlike.genson.reflect;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.owlike.genson.Genson;
 
@@ -40,4 +42,43 @@ public interface BeanDescriptorProvider {
 	 * @return A BeanDescriptor instance able to serialize/deserialize objects of type ofClass.
 	 */
 	public <T> BeanDescriptor<T> provide(Class<T> ofClass, Type type, Genson genson);
+
+
+    public static class CompositeBeanDescriptorProvider implements BeanDescriptorProvider {
+        private final List<BeanDescriptorProvider> providers;
+
+        public CompositeBeanDescriptorProvider(List<BeanDescriptorProvider> providers) {
+            this.providers = new ArrayList<BeanDescriptorProvider>(providers);
+        }
+
+        @Override
+        public BeanDescriptor<?> provide(Type ofType, Genson genson) {
+            BeanDescriptor<?> desc = null;
+            for (BeanDescriptorProvider provider : providers) {
+                desc = provider.provide(ofType, genson);
+                if (desc != null) break;
+            }
+            return desc;
+        }
+
+        @Override
+        public <T> BeanDescriptor<T> provide(Class<T> ofClass, Genson genson) {
+            BeanDescriptor<T> desc = null;
+            for (BeanDescriptorProvider provider : providers) {
+                desc = provider.provide(ofClass, genson);
+                if (desc != null) break;
+            }
+            return desc;
+        }
+
+        @Override
+        public <T> BeanDescriptor<T> provide(Class<T> ofClass, Type type, Genson genson) {
+            BeanDescriptor<T> desc = null;
+            for (BeanDescriptorProvider provider : providers) {
+                desc = provider.provide(ofClass, type, genson);
+                if (desc != null) break;
+            }
+            return desc;
+        }
+    }
 }

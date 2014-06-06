@@ -3,10 +3,10 @@ package com.owlike.genson;
 import com.owlike.genson.convert.*;
 import com.owlike.genson.ext.GensonBundle;
 import com.owlike.genson.reflect.*;
+import com.owlike.genson.reflect.BeanDescriptorProvider.CompositeBeanDescriptorProvider;
+import com.owlike.genson.reflect.AbstractBeanDescriptorProvider.ContextualFactoryDecorator;
+import com.owlike.genson.reflect.AbstractBeanDescriptorProvider.ContextualConverterFactory;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.text.DateFormat;
 import java.util.*;
@@ -717,7 +717,7 @@ public class GensonBuilder {
                 .withNext(new BeanViewConverter.BeanViewConverterFactory(
                         getBeanViewDescriptorProvider()));
 
-        AbstractBeanDescriptorProvider.ContextualFactoryDecorator ctxFactoryDecorator = new AbstractBeanDescriptorProvider.ContextualFactoryDecorator(
+        ContextualFactoryDecorator ctxFactoryDecorator = new ContextualFactoryDecorator(
                 new BasicConvertersFactory(getSerializersMap(), getDeserializersMap(),
                         getFactories(), getBeanDescriptorProvider()));
 
@@ -832,10 +832,26 @@ public class GensonBuilder {
      * @return the BeanDescriptorProvider instance.
      */
     protected BeanDescriptorProvider createBeanDescriptorProvider() {
-        return new BaseBeanDescriptorProvider(
+
+        ContextualConverterFactory contextualConverterFactory = new ContextualConverterFactory(contextualFactories);
+        BeanPropertyFactory beanPropertyFactory = createBeanPropertyFactory();
+
+        List<BeanDescriptorProvider> providers = new ArrayList<BeanDescriptorProvider>();
+        for (GensonBundle bundle : _bundles) {
+            BeanDescriptorProvider provider = bundle.createBeanDescriptorProvider(contextualConverterFactory,
+                    beanPropertyFactory,
+                    getMutatorAccessorResolver(),
+                    getPropertyNameResolver(), this);
+
+            if (provider != null) providers.add(provider);
+        }
+
+        providers.add(new BaseBeanDescriptorProvider(
                 new AbstractBeanDescriptorProvider.ContextualConverterFactory(contextualFactories),
                 createBeanPropertyFactory(), getMutatorAccessorResolver(), getPropertyNameResolver(),
-                useGettersAndSetters, useFields, true);
+                useGettersAndSetters, useFields, true));
+
+        return new CompositeBeanDescriptorProvider(providers);
     }
 
     protected BeanPropertyFactory createBeanPropertyFactory() {

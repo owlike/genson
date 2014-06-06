@@ -1,15 +1,16 @@
 package com.owlike.genson.ext.scala
 
 import java.lang.reflect.Type
-import com.owlike.genson.reflect.TypeUtil
+import com.owlike.genson.reflect.TypeUtil._
 import com.owlike.genson.stream.{ObjectReader, ObjectWriter, ValueType}
 import com.owlike.genson.annotation.{HandleClassMetadata, HandleNull}
 import com.owlike.genson.{Factory, Context, Converter}
 
 class OptionConverterFactory extends Factory[Converter[Option[AnyRef]]] {
 
-  def create(`type`: Type, genson: Genson): Converter[Option[AnyRef]] = {
-    val typeOfValue: Type = TypeUtil.typeOf(0, `type`)
+  def create(genType: Type, genson: Genson): Converter[Option[AnyRef]] = {
+    val typeOfValue: Type = typeOf(0, genType)
+
     return new OptionConverter[AnyRef](genson.provideConverter(typeOfValue))
   }
 }

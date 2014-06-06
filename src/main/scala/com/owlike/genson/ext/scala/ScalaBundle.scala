@@ -9,20 +9,15 @@ import scala.collection.JavaConversions._
 
 import com.owlike.genson.{Context, GenericType, Factory, Converter}
 
-import com.owlike.genson.reflect.{
-    BaseBeanDescriptorProvider,
-    AbstractBeanDescriptorProvider,
-    BeanPropertyFactory,
-    BeanMutatorAccessorResolver,
-    PropertyNameResolver,
-    BeanCreator,
-    PropertyAccessor
-}
+import com.owlike.genson.reflect._
 
 import com.owlike.genson.reflect.TypeUtil._
 import com.owlike.genson.stream.{ObjectWriter, ObjectReader}
 import com.owlike.genson.annotation.{JsonProperty, JsonCreator}
 import com.owlike.genson.ext.GensonBundle
+import com.owlike.genson.reflect.AbstractBeanDescriptorProvider.ContextualConverterFactory
+import com.owlike.genson.reflect.BeanMutatorAccessorResolver.{StandardMutaAccessorResolver, CompositeResolver}
+import java.util
 
 
 class ScalaBundle extends GensonBundle {
@@ -35,6 +30,19 @@ class ScalaBundle extends GensonBundle {
       .withConverterFactory(new TupleConverterFactory())
       .withConverterFactory(new OptionConverterFactory())
   }
+
+    override def createBeanDescriptorProvider(contextualConverterFactory: ContextualConverterFactory,
+                                              beanPropertyFactory: BeanPropertyFactory,
+                                              propertyResolver: BeanMutatorAccessorResolver,
+                                              propertyNameResolver: PropertyNameResolver,
+                                              builder: GensonBuilder): BeanDescriptorProvider = {
+        val caseClassPropertyResolver = new CompositeResolver(util.Arrays.asList(
+            new StandardMutaAccessorResolver(VisibilityFilter.PRIVATE, VisibilityFilter.NONE, VisibilityFilter.PRIVATE),
+            propertyResolver)
+        )
+
+        new CaseClassDescriptorProvider(contextualConverterFactory, beanPropertyFactory, caseClassPropertyResolver, propertyNameResolver, true)
+    }
 }
 
 object ScalaBundle {
@@ -98,10 +106,13 @@ class CaseClassDescriptorProvider(ctxConverterFactory: AbstractBeanDescriptorPro
                                   mutatorAccessorResolver: BeanMutatorAccessorResolver,
                                   nameResolver: PropertyNameResolver,
                                   useOnlyConstructorFields: Boolean)
-    extends BaseBeanDescriptorProvider(ctxConverterFactory, propertyFactory, mutatorAccessorResolver, nameResolver, false, true, true)
-    with Factory[Converter[Product]] {
+    extends BaseBeanDescriptorProvider(ctxConverterFactory, propertyFactory, mutatorAccessorResolver, nameResolver, false, true, true) {
 
-    def create(`type`: JType, genson: Genson): Converter[Product] = provide(`type`, genson).asInstanceOf[Converter[Product]]
+
+    override def provide[T](ofClass: Class[T], ofType: JType, genson: Genson): BeanDescriptor[T] = {
+        if (classOf[Product].isAssignableFrom(ofClass)) super.provide(ofClass, ofType, genson)
+        else null
+    }
 
     protected override def checkAndMerge(ofType: JType, creators: JList[BeanCreator]): BeanCreator = {
         val ctr = super.checkAndMerge(ofType, creators)
@@ -110,17 +121,20 @@ class CaseClassDescriptorProvider(ctxConverterFactory: AbstractBeanDescriptorPro
         ctr
     }
 
-    protected override def mergeAccessorsWithCreatorProperties(ofType: JType, accessors: JMap[String, PropertyAccessor], creator: BeanCreator) {
+    protected override def mergeAccessorsWithCreatorProperties(ofType: JType, accessors: JList[PropertyAccessor], creator: BeanCreator) {
         super.mergeAccessorsWithCreatorProperties(ofType, accessors, creator)
 
         if (useOnlyConstructorFields) {
             val ctrProps = creator.getProperties
 
             // don't serialize properties that are not used in a constructor and are final and note annotated with JsonProperty
-            for (
-                (name, prop) <- accessors.toMap
-                if !ctrProps.containsKey(name) && isFinal(prop) && prop.getAnnotation(classOf[JsonProperty]) == null
-            ) accessors.remove(name)
+            val it = accessors.iterator()
+            while (it.hasNext) {
+                val prop = it.next()
+                if (!ctrProps.containsKey(prop.getName)
+                    && isFinal(prop)
+                    && prop.getAnnotation(classOf[JsonProperty]) == null) it.remove()
+            }
         }
     }
 

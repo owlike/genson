@@ -7,11 +7,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
@@ -252,6 +248,14 @@ public class JsonSerDeserSymetricTest {
 		gensonContent = genson.deserialize(json, MediaContent.class);
 		assertEquals(jacksonContent, gensonContent);
 	}
+
+    public class InnerClass {
+        private final int value;
+
+        public InnerClass(int value) {
+            this.value = value;
+        }
+    }
 
 	public static class Person {
 		String civility;

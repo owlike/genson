@@ -110,14 +110,14 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 			if (accessor != null) accessors.add(accessor);
 		}
 
-		Map<String, PropertyMutator> mutators = new HashMap<String, PropertyMutator>(
-				mutatorsMap.size());
+		Map<String, PropertyMutator> mutators = new HashMap<String, PropertyMutator>(mutatorsMap.size());
 		for (Map.Entry<String, LinkedList<PropertyMutator>> entry : mutatorsMap.entrySet()) {
 			PropertyMutator mutator = checkAndMergeMutators(entry.getKey(), entry.getValue());
 			if (mutator != null) mutators.put(mutator.name, mutator);
 		}
 
         BeanCreator ctr = checkAndMerge(ofType, creators);
+        if (ctr!= null) mergeAccessorsWithCreatorProperties(ofType, accessors, ctr);
         if (ctr != null) mergeMutatorsWithCreatorProperties(ofType, mutators, ctr);
 
 		// 1 - prepare the converters for the accessors
@@ -258,7 +258,7 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
      * @param accessors
      * @param creator
      */
-    protected abstract void mergeAccessorsWithCreatorProperties(Type ofType, Map<String, PropertyAccessor> accessors, BeanCreator creator);
+    protected abstract void mergeAccessorsWithCreatorProperties(Type ofType, List<PropertyAccessor> accessors, BeanCreator creator);
 
 	/**
 	 * Implementations are supposed to merge the {@link PropertyAccessor}s from accessors list into

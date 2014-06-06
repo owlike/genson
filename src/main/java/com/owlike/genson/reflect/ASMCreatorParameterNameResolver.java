@@ -59,9 +59,9 @@ public final class ASMCreatorParameterNameResolver implements PropertyNameResolv
 		String ofClassName = ofClass.getName();
 		ofClassName = ofClassName.replace('.', '/') + ".class";
 
-        InputStream is;
-        if (ofClass.getClassLoader() == null) is = ClassLoader.getSystemClassLoader().getResourceAsStream(ofClassName);
-        else is = ofClass.getClassLoader().getResourceAsStream(ofClassName);
+    InputStream is;
+    if (ofClass.getClassLoader() == null) is = ClassLoader.getSystemClassLoader().getResourceAsStream(ofClassName);
+    else is = ofClass.getClassLoader().getResourceAsStream(ofClassName);
 
 		ClassReader cr;
 		ClassConstructorsVisitor visitor = new ClassConstructorsVisitor(ofClass, constructorParameterNames, methodParameterNames);

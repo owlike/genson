@@ -30,21 +30,20 @@ import java.lang.reflect.Modifier;
  * 
  */
 public final class VisibilityFilter {
-	/**
-	 * Modifier.TRANSIENT Modifier.NATIVE
-	 */
+
+    private final static int JAVA_MODIFIERS = Modifier.PUBLIC | Modifier.PROTECTED
+            | Modifier.PRIVATE | Modifier.ABSTRACT | Modifier.STATIC | Modifier.FINAL
+            | Modifier.TRANSIENT | Modifier.VOLATILE | Modifier.SYNCHRONIZED | Modifier.NATIVE
+            | Modifier.STRICT | Modifier.INTERFACE;
+
 	public final static VisibilityFilter PRIVATE = new VisibilityFilter(Modifier.TRANSIENT,
 			Modifier.NATIVE, Modifier.STATIC);
 	public final static VisibilityFilter ALL = new VisibilityFilter();
+    public final static VisibilityFilter NONE = new VisibilityFilter(JAVA_MODIFIERS);
 	public final static VisibilityFilter PROTECTED = new VisibilityFilter(Modifier.TRANSIENT,
 			Modifier.NATIVE, Modifier.STATIC, Modifier.PRIVATE);
 	public final static VisibilityFilter PACKAGE_PUBLIC = new VisibilityFilter(Modifier.TRANSIENT,
 			Modifier.NATIVE, Modifier.STATIC, Modifier.PRIVATE, Modifier.PROTECTED);
-
-	private final static int JAVA_MODIFIERS = Modifier.PUBLIC | Modifier.PROTECTED
-			| Modifier.PRIVATE | Modifier.ABSTRACT | Modifier.STATIC | Modifier.FINAL
-			| Modifier.TRANSIENT | Modifier.VOLATILE | Modifier.SYNCHRONIZED | Modifier.NATIVE
-			| Modifier.STRICT | Modifier.INTERFACE;
 
 	private int filter;
 

@@ -337,7 +337,7 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
 	}
 
     @Override
-    protected void mergeAccessorsWithCreatorProperties(Type ofType, Map<String, PropertyAccessor> accessors, BeanCreator creator) {
+    protected void mergeAccessorsWithCreatorProperties(Type ofType, List<PropertyAccessor> accessors, BeanCreator creator) {
         // do nothing
     }
 }
