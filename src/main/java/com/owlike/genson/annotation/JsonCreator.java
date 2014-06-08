@@ -10,14 +10,14 @@ import java.lang.annotation.*;
  * default it is disabled. To enable this feature use
  *
  * <pre>
- * new Genson.Builder().setWithDebugInfoPropertyNameResolver(true).create();
+ * new GensonBuilder().useConstructorWithArguments(true).create();
  * </pre>
  *
  * It will register {@link com.owlike.genson.reflect.ASMCreatorParameterNameResolver
  * ASMCreatorParameterNameResolver} name resolver, that will use the debug symbols generated during
  * compilation to resolve the names.
  *
- * By default if a object contains constructors and methods annotated with @Creator the factory
+ * By default if a object contains constructors and methods annotated with @JsonCreator the factory
  * methods will be privileged.
  *
  * @see com.owlike.genson.annotation.JsonProperty JsonProperty

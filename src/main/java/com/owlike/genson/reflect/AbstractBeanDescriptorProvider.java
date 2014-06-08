@@ -195,7 +195,7 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 	 * 
 	 * @param ofType
 	 * @param genson
-	 * @return
+	 * @return a list of resolved bean creators
 	 */
 	protected abstract List<BeanCreator> provideBeanCreators(Type ofType, Genson genson);
 
@@ -266,7 +266,7 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
 	 * 
 	 * @param name
 	 * @param accessors
-	 * @return
+	 * @return a single property accessor for this name
 	 */
 	protected abstract PropertyAccessor checkAndMergeAccessors(String name,
 			LinkedList<PropertyAccessor> accessors);

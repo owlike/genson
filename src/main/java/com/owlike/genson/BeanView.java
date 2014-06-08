@@ -25,13 +25,13 @@ package com.owlike.genson;
  * deserialization. The parameterized type T will correspond to the type of the objects on which
  * this view can be applied. All the methods from the view respecting the conventional JavaBean
  * structure will be used (getters to extract data, setters to aggregate and static methods
- * annotated with {@link com.owlike.genson.annotation.Creator Creator} as factory methods). Except that the
+ * annotated with {@link com.owlike.genson.annotation.JsonCreator JsonCreator} as factory methods). Except that the
  * getters will take an argument of type T (from which to extract the data), and the setter two
  * arguments, the value (can be a complex object, in that case Genson will try to deserialize the
  * current value into that type) and T object in which to set the data. Parameters order matters,
  * for setters the first parameter is the value to deserialize and the second is the object that you
  * are building (of type T). By default the beanview functionality is disabled, to enable it use
- * method {@link com.owlike.genson.Genson.Builder#setWithBeanViewConverter(boolean)
+ * method {@link com.owlike.genson.GensonBuilder#useBeanViews(boolean)}
  * setWithBeanViewConverter(true)} from Genson.Builder. Lets have a look at this example to better
  * understand how it works.
  * 
@@ -58,7 +58,7 @@ package com.owlike.genson;
  * 
  * 	// This method will be called to create an instance of Person instead of using the constructor
  * 	// or annotated @Creator method from Person
- * 	&#064;Creator
+ * 	&#064;JsonCreator
  * 	public static Person createNewPerson(String lastName) {
  * 		return new Person(lastName);
  * 	}
@@ -108,7 +108,7 @@ package com.owlike.genson;
  * 
  * @see com.owlike.genson.convert.BeanViewConverter BeanViewConverter
  * @see com.owlike.genson.reflect.BeanViewDescriptorProvider BeanViewDescriptorProvider
- * @see com.owlike.genson.annotation.Creator Creator
+ * @see com.owlike.genson.annotation.JsonCreator JsonCreator
  * @see com.owlike.genson.annotation.JsonProperty JsonProperty
  * 
  * @param <T> the type of objects on which this view will be applied.

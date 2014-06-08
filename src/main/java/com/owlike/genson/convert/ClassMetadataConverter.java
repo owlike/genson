@@ -16,25 +16,23 @@ import com.owlike.genson.stream.ValueType;
  * written only in objects (never in arrays or literals) and is always the first element in the
  * object. Most default converters are annotated with @HandleClassMetada indicating that they will
  * not have class metadata written nor use it during deserialization. This feature is disabled by
- * default, to enable it use {@link com.owlike.genson.Genson.Builder#setWithClassMetadata(boolean)
- * Builder.setWithClassMetadata(true)}. Genson provides also a aliases mechanism that will replace
- * the class name with the value of your alias in the generated stream. You should use it as it is
- * more "secure" and provides you more flexibility. Indeed if you change the name or package of your
- * class you will still be able to deserialize to it. An example allowing to serialize a object and then deserialize it back
- * without knowing its type would be:
+ * default, to enable it use {@link com.owlike.genson.GensonBuilder#useClassMetadata(boolean)}.
+ * Genson provides also a aliases mechanism that will replace the class name with the value of your alias
+ * in the generated stream. You should use it as it is more "secure" and provides you more flexibility.
+ * Indeed if you change the name or package of your class you will still be able to deserialize to it.
+ * An example allowing to serialize a object and then deserialize it back without knowing its type would be:
  * 
  * <pre>
  * class Foo {
  * }
  * 
- * Genson genson = new Genson.Builder().setWithClassMetadata(true).addAlias("foo", Foo.class).create();
+ * Genson genson = new GensonBuilder().useClassMetadata(true).addAlias("foo", Foo.class).create();
  * String json = genson.serialize(new Foo());
  * // json value will be {&quot;@class&quot;:&quot;Foo&quot;}
  * Foo foo = (Foo) genson.deserialize(json, Object.class);
  * </pre>
  * 
- * @see com.owlike.genson.stream.ObjectWriter#writeMetadata(String, String) ObjectWriter.metadata(key,
- *      value)
+ * @see com.owlike.genson.stream.ObjectWriter#writeMetadata(String, String) ObjectWriter.metadata(key, value)
  * @see com.owlike.genson.stream.ObjectReader#metadata(String) ObjectReader.metadata("class")
  * @see com.owlike.genson.Genson#aliasFor(Class) Genson.aliasFor(Class)
  * 

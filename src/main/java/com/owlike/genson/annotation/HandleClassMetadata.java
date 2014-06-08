@@ -14,11 +14,11 @@ import java.lang.annotation.Target;
  * converters from {@link com.owlike.genson.convert.DefaultConverters DefaultConverters} annotated with @HandleClassMetadata
  * do not serialize type information nor do they use it during deserialization. For security reasons
  * class metadata is disabled by default. To enable it
- * {@link com.owlike.genson.Genson.Builder#setWithClassMetadata(boolean)
- * Genson.Builder.setWithClassMetadata(true)}
+ * {@link com.owlike.genson.GensonBuilder#useClassMetadata(boolean)}
+ * GensonBuilder.useClassMetadata(true)}
  * 
  * @see com.owlike.genson.convert.ClassMetadataConverter ClassMetadataConverter
- * @see com.owlike.genson.Genson.Builder#setWithClassMetadata(boolean)
+ * @see com.owlike.genson.GensonBuilder#useClassMetadata(boolean)
  *      Genson.Builder.setWithClassMetadata(true)
  * 
  * @author eugen

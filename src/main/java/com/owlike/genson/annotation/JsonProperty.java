@@ -18,7 +18,7 @@ import java.lang.annotation.Target;
  * 
  * @see com.owlike.genson.reflect.PropertyNameResolver.AnnotationPropertyNameResolver
  *      AnnotationPropertyNameResolver
- * @see com.owlike.genson.annotation.Creator Creator
+ * @see com.owlike.genson.annotation.JsonCreator JsonCreator
  * @see com.owlike.genson.annotation.JsonIgnore JsonIgnore
  * 
  * @author eugen

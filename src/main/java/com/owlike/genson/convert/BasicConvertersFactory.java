@@ -38,7 +38,7 @@ import com.owlike.genson.stream.ObjectWriter;
  * </li>
  * <li>We apply all the same logic a second time for Deserializer.</li>
  * <li>If they are both an instance of Converter then we return one of them</li>
- * <li>Otherwise we will wrap both into a {@link DelegatedConverter} instance.</li>
+ * <li>Otherwise we will wrap both into a Converter.</li>
  * </ul>
  * 
  * Note that the create method from the registered factories will only be called if the type with

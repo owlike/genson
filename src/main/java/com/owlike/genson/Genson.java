@@ -29,11 +29,11 @@ import com.owlike.genson.stream.*;
  * better performances. This class is immutable and thread safe.
  * 
  * For more examples have a look at the <a
- * href="http://code.google.com/p/genson/wiki/GettingStarted">wiki</a>.
+ * href="http://owlike.github.io/genson/">online documentation</a>.
  * 
  * <p>
  * To create a new instance of Genson you can use the default no arg constructor or the
- * {@link Builder} class to have control over Gensons configuration. <br>
+ * {@link GensonBuilder} class to have control over Gensons configuration. <br>
  * A basic usage of Genson would be:
  * 
  * <pre>
@@ -217,7 +217,7 @@ public final class Genson {
 	 * @param object
 	 * @param withViews
 	 *            the BeanViews to apply during this serialization.
-	 * @return
+	 * @return the json string representing this object
 	 * @throws com.owlike.genson.JsonBindingException
 	 * @throws com.owlike.genson.stream.JsonStreamException
 	 */
@@ -314,7 +314,6 @@ public final class Genson {
 	 *            source from which to deserialize.
 	 * @param toClass
 	 *            type into which to deserialize.
-	 * @return
 	 * @throws com.owlike.genson.JsonBindingException
 	 * @throws JsonStreamException
 	 */
@@ -331,7 +330,6 @@ public final class Genson {
 	 * 
 	 * @param fromSource
 	 * @param toType
-	 * @return
 	 * @throws com.owlike.genson.JsonBindingException
 	 * @throws JsonStreamException
 	 */

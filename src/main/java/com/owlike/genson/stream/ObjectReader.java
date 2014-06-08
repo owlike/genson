@@ -188,7 +188,6 @@ public interface ObjectReader extends Closeable {
 
 	/**
 	 * @see #valueAsString()
-	 * @return
 	 * @throws JsonStreamException
 	 * @throws NumberFormatException
 	 */
@@ -196,7 +195,6 @@ public interface ObjectReader extends Closeable {
 
 	/**
 	 * @see #valueAsString()
-	 * @return
 	 * @throws JsonStreamException
 	 * @throws NumberFormatException
 	 */
@@ -204,7 +202,6 @@ public interface ObjectReader extends Closeable {
 
 	/**
 	 * @see #valueAsString()
-	 * @return
 	 * @throws JsonStreamException
 	 * @throws NumberFormatException
 	 */
@@ -212,7 +209,6 @@ public interface ObjectReader extends Closeable {
 
 	/**
 	 * @see #valueAsString()
-	 * @return
 	 * @throws JsonStreamException
 	 * @throws NumberFormatException
 	 */
@@ -220,7 +216,6 @@ public interface ObjectReader extends Closeable {
 
 	/**
 	 * @see #valueAsString()
-	 * @return
 	 * @throws JsonStreamException
 	 * @throws NumberFormatException
 	 */
@@ -228,7 +223,6 @@ public interface ObjectReader extends Closeable {
 
 	/**
 	 * @see #valueAsString()
-	 * @return
      * @throws JsonStreamException
 	 */
 	public boolean valueAsBoolean();

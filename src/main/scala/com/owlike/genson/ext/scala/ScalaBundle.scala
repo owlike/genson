@@ -5,9 +5,7 @@ import java.io.{OutputStream, Writer, InputStream, StringReader, Reader => JRead
 import java.net.URL
 import java.util.{List => JList, Map => JMap}
 
-import scala.collection.JavaConversions._
-
-import com.owlike.genson.{Context, GenericType, Factory, Converter}
+import com.owlike.genson.{Context, GenericType}
 
 import com.owlike.genson.reflect._
 
@@ -21,6 +19,7 @@ import java.util
 
 
 class ScalaBundle extends GensonBundle {
+  private var useOnlyConstructorFields: Boolean = true
 
   def configure(builder: GensonBuilder) {
     builder.useConstructorWithArguments(true)
@@ -29,6 +28,11 @@ class ScalaBundle extends GensonBundle {
       .withConverterFactory(ScalaUntypedConverterFactory)
       .withConverterFactory(new TupleConverterFactory())
       .withConverterFactory(new OptionConverterFactory())
+  }
+
+  def useOnlyConstructorFields(enable: Boolean): ScalaBundle = {
+    useOnlyConstructorFields = enable
+    this
   }
 
     override def createBeanDescriptorProvider(contextualConverterFactory: ContextualConverterFactory,
@@ -41,7 +45,11 @@ class ScalaBundle extends GensonBundle {
             propertyResolver)
         )
 
-        new CaseClassDescriptorProvider(contextualConverterFactory, beanPropertyFactory, caseClassPropertyResolver, propertyNameResolver, true)
+        new CaseClassDescriptorProvider(contextualConverterFactory,
+          beanPropertyFactory,
+          caseClassPropertyResolver,
+          propertyNameResolver,
+          useOnlyConstructorFields)
     }
 }
 

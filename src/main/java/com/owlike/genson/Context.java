@@ -14,7 +14,7 @@ import static com.owlike.genson.Operations.checkNotNull;
  * <p>
  * For example if you have computed in a first serializer a value and you need it later in another
  * one, you can put it in the context by using {@link Context#store(String, Object)} method and
- * later retrieve it with {@link #get(String)} or remove it with {@link #remove(String)}.
+ * later retrieve it with {@link #get(String, Class)} or remove it with {@link #remove(String, Class)}.
  * <p>
  * You can achieve the same thing with {@link ThreadLocalHolder} that stores the data in a thread
  * local map but it is cleaner to use this Context class as you wont have to worry about removing
@@ -79,21 +79,6 @@ public class Context {
 	}
 
 	/**
-	 * Gets the object associated with that key. There is no guarantee that this object is of type
-	 * T, however we allow that so the code of the user can be more fluent and freed from a lot of
-	 * casts.
-	 * 
-	 * @param key
-	 *            must be not null
-	 * @return the object associated with key or null
-	 * @deprecated use the type safe method {@link #get(String, Class)} instead.
-	 */
-	@SuppressWarnings("unchecked")
-	public <T> T get(String key) {
-		return (T) get(key, Object.class);
-	}
-
-	/**
 	 * Returns the value mapped to key in this context or null. If the value is not of type
 	 * valueType then an exception is thrown.
 	 * 
@@ -111,20 +96,6 @@ public class Context {
 	}
 
 	/**
-	 * Same as get, but in addition removes the object with the associated key.
-	 * 
-	 * @param key
-	 *            must be not null
-	 * @return
-	 * @see #get(String)
-	 * @deprecated use the type safe method {@link #remove(String, Class)} instead.
-	 */
-	@SuppressWarnings("unchecked")
-	public <T> T remove(String key) {
-		return (T) remove(key, Object.class);
-	}
-
-	/**
 	 * Removes the mapping for this key from the context. If there is no mapping for that key, null
 	 * is returned. If the value mapped to key is not of type valueType an ClassCastException is
 	 * thrown and the mapping is not removed.
@@ -133,10 +104,10 @@ public class Context {
 	 *            must be not null
 	 * @param valueType
 	 *            the type of the value, null not allowed
-	 * @return
+	 * @return the value associated to this key
 	 * @throws ClassCastException
 	 *             if the value mapped to key is not of type valueType.
-	 * @see #get(String)
+	 * @see com.owlike.genson.Context#get(String, Class)
 	 */
 	public <T> T remove(String key, Class<T> valueType) {
 		checkNotNull(key, valueType);
