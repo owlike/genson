@@ -103,9 +103,9 @@ Most of those options are documented in the [Javadoc]({{base.url}}/Documentation
   <td>A DateFormat to be used when converting Dates, Calendars...</td>
 </tr>
 <tr>
-  <td>useTimeInMillis</td>
+  <td>useDateAsMillis</td>
   <td>The default date formatting style for the default locale.</td>
-  <td>When enabled, will ser/de dates as long representing the time in milliseconds.</td>
+  <td>When enabled, will ser/de dates as long representing the date in milliseconds.</td>
 </tr>
 <tr>
   <td>useRuntimeType</td>
