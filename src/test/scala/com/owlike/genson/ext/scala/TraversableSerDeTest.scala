@@ -4,23 +4,23 @@ import org.scalatest.FunSuite
 import org.scalatest.Matchers
 
 import scala.collection.immutable.{
-  HashSet,
-  ListSet,
-  ListMap,
-  HashMap,
-  Map,
-  Queue
+HashSet,
+ListSet,
+ListMap,
+HashMap,
+Map,
+Queue
 }
 
 import scala.collection.mutable.{
-  Map => MMap,
-  ListMap  => MListMap,
-  HashMap => MHashMap,
-  Set => MSet,
-  HashSet => MHashSet,
-  ListBuffer,
-  Queue => MQueue,
-  Buffer
+Map => MMap,
+ListMap => MListMap,
+HashMap => MHashMap,
+Set => MSet,
+HashSet => MHashSet,
+ListBuffer,
+Queue => MQueue,
+Buffer
 }
 
 import org.scalatest.prop.PropertyChecks
@@ -87,15 +87,15 @@ class TraversableSerDeTest extends FunSuite with Matchers with PropertyChecks {
   )
 
   test("tuple round trip") {
-    forAll(tupleTests) (checkRoundTrip)
+    forAll(tupleTests)(checkRoundTrip)
   }
 
   test("map like traversable round trip") {
-    forAll(mapTests) (checkRoundTrip)
+    forAll(mapTests)(checkRoundTrip)
   }
 
   test("iterable like traversable round trip") {
-    forAll(traversableTests) (checkRoundTrip)
+    forAll(traversableTests)(checkRoundTrip)
   }
 
   def checkRoundTrip(expected: Any) {

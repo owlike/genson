@@ -1,6 +1,6 @@
 package com.owlike.genson.ext.scala
 
-import java.lang.reflect.{Type => JType, Modifier, ParameterizedType}
+import java.lang.reflect.{Type => JType, Method, Modifier, ParameterizedType}
 import java.io.{OutputStream, Writer, InputStream, StringReader, Reader => JReader}
 import java.net.URL
 import java.util.{List => JList, Map => JMap}
@@ -16,7 +16,6 @@ import com.owlike.genson.ext.GensonBundle
 import com.owlike.genson.reflect.AbstractBeanDescriptorProvider.ContextualConverterFactory
 import com.owlike.genson.reflect.BeanMutatorAccessorResolver.{StandardMutaAccessorResolver, CompositeResolver}
 import java.util
-
 
 class ScalaBundle extends GensonBundle {
   private var useOnlyConstructorFields: Boolean = true
@@ -35,22 +34,22 @@ class ScalaBundle extends GensonBundle {
     this
   }
 
-    override def createBeanDescriptorProvider(contextualConverterFactory: ContextualConverterFactory,
-                                              beanPropertyFactory: BeanPropertyFactory,
-                                              propertyResolver: BeanMutatorAccessorResolver,
-                                              propertyNameResolver: PropertyNameResolver,
-                                              builder: GensonBuilder): BeanDescriptorProvider = {
-        val caseClassPropertyResolver = new CompositeResolver(util.Arrays.asList(
-            new StandardMutaAccessorResolver(VisibilityFilter.PRIVATE, VisibilityFilter.NONE, VisibilityFilter.PRIVATE),
-            propertyResolver)
-        )
+  override def createBeanDescriptorProvider(contextualConverterFactory: ContextualConverterFactory,
+                                            beanPropertyFactory: BeanPropertyFactory,
+                                            propertyResolver: BeanMutatorAccessorResolver,
+                                            propertyNameResolver: PropertyNameResolver,
+                                            builder: GensonBuilder): BeanDescriptorProvider = {
+    val caseClassPropertyResolver = new CompositeResolver(util.Arrays.asList(
+      new StandardMutaAccessorResolver(VisibilityFilter.PRIVATE, VisibilityFilter.NONE, VisibilityFilter.PRIVATE),
+      propertyResolver)
+    )
 
-        new CaseClassDescriptorProvider(contextualConverterFactory,
-          beanPropertyFactory,
-          caseClassPropertyResolver,
-          propertyNameResolver,
-          useOnlyConstructorFields)
-    }
+    new CaseClassDescriptorProvider(contextualConverterFactory,
+      beanPropertyFactory,
+      caseClassPropertyResolver,
+      propertyNameResolver,
+      useOnlyConstructorFields)
+  }
 }
 
 object ScalaBundle {
@@ -75,38 +74,38 @@ object ScalaBundle {
 
 class ScalaGenson(val genson: Genson) extends AnyVal {
 
-    def toJson[T: Manifest](value: T): String = genson.serialize(value, GenericType.of(toJavaType))
+  def toJson[T: Manifest](value: T): String = genson.serialize(value, GenericType.of(toJavaType))
 
-    def toJsonBytes[T: Manifest](value: T): Array[Byte] = genson.serializeBytes(value, GenericType.of(toJavaType))
+  def toJsonBytes[T: Manifest](value: T): Array[Byte] = genson.serializeBytes(value, GenericType.of(toJavaType))
 
-    def toJson[T: Manifest](value: T, writer: Writer): Unit = toJson(value, genson.createWriter(writer))
+  def toJson[T: Manifest](value: T, writer: Writer): Unit = toJson(value, genson.createWriter(writer))
 
-    def toJson[T: Manifest](value: T, os: OutputStream): Unit = toJson(value, genson.createWriter(os))
+  def toJson[T: Manifest](value: T, os: OutputStream): Unit = toJson(value, genson.createWriter(os))
 
-    def toJson[T: Manifest](value: T, writer: ObjectWriter): Unit = genson.serialize(value, toJavaType, writer, new Context(genson))
+  def toJson[T: Manifest](value: T, writer: ObjectWriter): Unit = genson.serialize(value, toJavaType, writer, new Context(genson))
 
-    def fromJson[T: Manifest](json: String): T = fromJson(genson.createReader(new StringReader(json)))
+  def fromJson[T: Manifest](json: String): T = fromJson(genson.createReader(new StringReader(json)))
 
-    def fromJson[T: Manifest](jsonUrl: URL): T = fromJson(genson.createReader(jsonUrl.openStream()))
+  def fromJson[T: Manifest](jsonUrl: URL): T = fromJson(genson.createReader(jsonUrl.openStream()))
 
-    def fromJson[T: Manifest](json: JReader): T = fromJson(genson.createReader(json))
+  def fromJson[T: Manifest](json: JReader): T = fromJson(genson.createReader(json))
 
-    def fromJson[T: Manifest](json: InputStream): T = fromJson(genson.createReader(json))
+  def fromJson[T: Manifest](json: InputStream): T = fromJson(genson.createReader(json))
 
-    def fromJson[T: Manifest](json: Array[Byte]): T = fromJson(genson.createReader(json))
+  def fromJson[T: Manifest](json: Array[Byte]): T = fromJson(genson.createReader(json))
 
-    def fromJson[T: Manifest](reader: ObjectReader): T = {
-        genson.deserialize(GenericType.of(toJavaType), reader, new Context(genson)).asInstanceOf[T]
+  def fromJson[T: Manifest](reader: ObjectReader): T = {
+    genson.deserialize(GenericType.of(toJavaType), reader, new Context(genson)).asInstanceOf[T]
+  }
+
+  private def toJavaType(implicit m: Manifest[_]): JType = {
+    if (m.typeArguments.nonEmpty) {
+      new ScalaParameterizedType(None, m.runtimeClass, m.typeArguments.map(m => toJavaType(m)).toArray)
+    } else {
+      if (m.runtimeClass.isPrimitive) wrap(m.runtimeClass)
+      else m.runtimeClass
     }
-
-    private def toJavaType(implicit m: Manifest[_]): JType = {
-        if (m.typeArguments.nonEmpty) {
-            new ScalaParameterizedType(None, m.runtimeClass, m.typeArguments.map(m => toJavaType(m)).toArray)
-        } else {
-            if (m.runtimeClass.isPrimitive) wrap(m.runtimeClass)
-            else m.runtimeClass
-        }
-    }
+  }
 }
 
 class CaseClassDescriptorProvider(ctxConverterFactory: AbstractBeanDescriptorProvider.ContextualConverterFactory,
@@ -114,39 +113,71 @@ class CaseClassDescriptorProvider(ctxConverterFactory: AbstractBeanDescriptorPro
                                   mutatorAccessorResolver: BeanMutatorAccessorResolver,
                                   nameResolver: PropertyNameResolver,
                                   useOnlyConstructorFields: Boolean)
-    extends BaseBeanDescriptorProvider(ctxConverterFactory, propertyFactory, mutatorAccessorResolver, nameResolver, false, true, true) {
+  extends BaseBeanDescriptorProvider(ctxConverterFactory, propertyFactory, mutatorAccessorResolver, nameResolver, false, true, true) {
 
 
-    override def provide[T](ofClass: Class[T], ofType: JType, genson: Genson): BeanDescriptor[T] = {
-        if (classOf[Product].isAssignableFrom(ofClass)) super.provide(ofClass, ofType, genson)
-        else null
-    }
+  override def provide[T](ofClass: Class[T], ofType: JType, genson: Genson): BeanDescriptor[T] = {
+    if (classOf[Product].isAssignableFrom(ofClass)) super.provide(ofClass, ofType, genson)
+    else null
+  }
 
-    protected override def checkAndMerge(ofType: JType, creators: JList[BeanCreator]): BeanCreator = {
-        val ctr = super.checkAndMerge(ofType, creators)
-        if (creators.size() > 1 && !ctr.isAnnotationPresent(classOf[JsonCreator]))
-            throw new JsonBindingException("Case classes with multiple constructor must indicate what constructor to use with @JsonCreator annotation.")
-        ctr
-    }
-
-    protected override def mergeAccessorsWithCreatorProperties(ofType: JType, accessors: JList[PropertyAccessor], creator: BeanCreator) {
-        super.mergeAccessorsWithCreatorProperties(ofType, accessors, creator)
-
-        if (useOnlyConstructorFields) {
-            val ctrProps = creator.getProperties
-
-            // don't serialize properties that are not used in a constructor and are final and note annotated with JsonProperty
-            val it = accessors.iterator()
-            while (it.hasNext) {
-                val prop = it.next()
-                if (!ctrProps.containsKey(prop.getName)
-                    && isFinal(prop)
-                    && prop.getAnnotation(classOf[JsonProperty]) == null) it.remove()
-            }
+  protected override def checkAndMerge(ofType: JType, creators: JList[BeanCreator]): BeanCreator = {
+    defaultApply(getRawClass(ofType)).map {
+      applyMethod =>
+        scala.collection.JavaConversions.collectionAsScalaIterable(creators).find {
+          ctr =>
+            ctr.isAnnotationPresent(classOf[JsonCreator]) || isDefaultCreator(applyMethod, ctr)
         }
-    }
+    }.flatten.getOrElse(super.checkAndMerge(ofType, creators))
+  }
 
-    private def isFinal(prop: PropertyAccessor) = (prop.getModifiers & Modifier.FINAL) != 0
+  protected override def mergeAccessorsWithCreatorProperties(ofType: JType,
+                                                             accessors: JList[PropertyAccessor],
+                                                             creator: BeanCreator) {
+    
+    super.mergeAccessorsWithCreatorProperties(ofType, accessors, creator)
+
+    if (useOnlyConstructorFields) {
+      val ctrProps = creator.getProperties
+
+      // don't serialize properties that are not used in a constructor and are final and note annotated with JsonProperty
+      val it = accessors.iterator()
+      while (it.hasNext) {
+        val prop = it.next()
+        if (!ctrProps.containsKey(prop.getName)
+          && isFinal(prop)
+          && prop.getAnnotation(classOf[JsonProperty]) == null) it.remove()
+      }
+    }
+  }
+
+  protected def companionOf(clazz: Class[_]): Option[AnyRef] = try {
+    val companionClassName = clazz.getName + "$"
+    val companionClass = Class.forName(companionClassName)
+    val moduleField = companionClass.getField("MODULE$")
+    Some(moduleField.get(null))
+  } catch {
+    case e: Throwable => None
+  }
+
+  protected def isDefaultCreator(applyMethod: Method, ctr: BeanCreator): Boolean = {
+    val ctrParams = scala.collection.JavaConversions.collectionAsScalaIterable(ctr.getProperties.entrySet()).toList
+    applyMethod.getParameterTypes.zipWithIndex.forall {
+      case (clazz, idx) =>
+        ctrParams(idx).getValue.getType.equals(clazz)
+    }
+  }
+
+  protected def defaultApply(clazz: Class[_]): Option[Method] = {
+    companionOf(clazz).map {
+      companion =>
+        companion.getClass.getDeclaredMethods.filter(m =>
+          m.getName.equals("apply") && m.getReturnType.equals(clazz)
+        ).headOption
+    }.flatten
+  }
+
+  private def isFinal(prop: PropertyAccessor) = (prop.getModifiers & Modifier.FINAL) != 0
 }
 
 private class ScalaParameterizedType(val ownerType: Option[JType], val rawType: JType, val typeArgs: Array[JType])

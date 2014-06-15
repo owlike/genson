@@ -11,14 +11,14 @@ import scala.collection.generic.CanBuildFrom
 import scala.collection.immutable.{:: => colon, _}
 
 import scala.collection.mutable.{
-  Map => MMap,
-  ListMap  => MListMap,
-  HashMap => MHashMap,
-  Set => MSet,
-  HashSet => MHashSet,
-  ListBuffer,
-  Queue => MQueue,
-  Buffer
+Map => MMap,
+ListMap => MListMap,
+HashMap => MHashMap,
+Set => MSet,
+HashSet => MHashSet,
+ListBuffer,
+Queue => MQueue,
+Buffer
 }
 
 import scala.collection.Map
@@ -53,19 +53,21 @@ class MapConverterFactory extends Factory[Converter[_ <: Any]]() {
   def create(genType: Type, genson: Genson): Converter[_ <: Any] = {
     val rawClass = getRawClass(genType)
 
-    cbfByType.filter { case (clazz, cbf) =>
-      clazz.isAssignableFrom(rawClass)
-    }.headOption.map { case (clazz, cbf) =>
-      val castCBF = cbf.asInstanceOf[CanBuildFrom[Map[Any, Any], Any, Map[Any, Any]]]
+    cbfByType.filter {
+      case (clazz, cbf) =>
+        clazz.isAssignableFrom(rawClass)
+    }.headOption.map {
+      case (clazz, cbf) =>
+        val castCBF = cbf.asInstanceOf[CanBuildFrom[Map[Any, Any], Any, Map[Any, Any]]]
 
-      val expandedType = expandType(lookupGenericType(classOf[Map[_, _]], getRawClass(genType)), genType)
-      val keyType: Type = typeOf(0, expandedType)
-      val valueType: Type = typeOf(1, expandedType)
-      val elemConverter: Converter[Any] = genson.provideConverter(valueType)
-      val keyAdapter = Option(JavaMapFactory.keyAdapter(getRawClass(keyType)))
-        .getOrElse(KeyAdapter.runtimeAdapter)
-        .asInstanceOf[KeyAdapter[Any]]
-      new MapConverter[Any, Any, Map[Any, Any]](keyAdapter, elemConverter)(castCBF)
+        val expandedType = expandType(lookupGenericType(classOf[Map[_, _]], getRawClass(genType)), genType)
+        val keyType: Type = typeOf(0, expandedType)
+        val valueType: Type = typeOf(1, expandedType)
+        val elemConverter: Converter[Any] = genson.provideConverter(valueType)
+        val keyAdapter = Option(JavaMapFactory.keyAdapter(getRawClass(keyType)))
+          .getOrElse(KeyAdapter.runtimeAdapter)
+          .asInstanceOf[KeyAdapter[Any]]
+        new MapConverter[Any, Any, Map[Any, Any]](keyAdapter, elemConverter)(castCBF)
     }.getOrElse(null)
   }
 }
@@ -102,12 +104,14 @@ class TraversableConverterFactory extends Factory[Converter[_ <: Traversable[Any
   def create(genType: Type, genson: Genson): Converter[_ <: Traversable[Any]] = {
     val rawClass = getRawClass(genType)
 
-    cbfByType.filter { case (clazz, cbf) =>
-      clazz.isAssignableFrom(rawClass)
-    }.headOption.map { case (_, cbf) =>
-      val castCBF = cbf.asInstanceOf[CanBuildFrom[Traversable[Any], Any, Traversable[Any]]]
-      val elemConverter: Converter[Any] = genson.provideConverter(ScalaBundle.getTraversableType(genType))
-      new TraversableConverter[Any, Traversable[Any]](elemConverter)(castCBF)
+    cbfByType.filter {
+      case (clazz, cbf) =>
+        clazz.isAssignableFrom(rawClass)
+    }.headOption.map {
+      case (_, cbf) =>
+        val castCBF = cbf.asInstanceOf[CanBuildFrom[Traversable[Any], Any, Traversable[Any]]]
+        val elemConverter: Converter[Any] = genson.provideConverter(ScalaBundle.getTraversableType(genType))
+        new TraversableConverter[Any, Traversable[Any]](elemConverter)(castCBF)
     }.getOrElse(null)
   }
 }
@@ -119,9 +123,10 @@ class MapConverter[K, V, C <: Map[K, V]]
 
   def serialize(value: C, writer: ObjectWriter, ctx: Context): Unit = {
     writer.beginObject()
-    value.foreach { t =>
-      writer.writeName(keyAdapter.adapt(t._1))
-      elemConverter.serialize(t._2, writer, ctx)
+    value.foreach {
+      t =>
+        writer.writeName(keyAdapter.adapt(t._1))
+        elemConverter.serialize(t._2, writer, ctx)
     }
     writer.endObject()
   }
@@ -144,8 +149,9 @@ class TraversableConverter[T, C <: Traversable[T]](elemConverter: Converter[T])(
 
   def serialize(value: C, writer: ObjectWriter, ctx: Context): Unit = {
     writer.beginArray()
-    value.foreach { t =>
-      elemConverter.serialize(t, writer, ctx)
+    value.foreach {
+      t =>
+        elemConverter.serialize(t, writer, ctx)
     }
     writer.endArray()
   }

@@ -30,9 +30,10 @@ class TupleNConverter(val ctr: Constructor[_], val valuesConverters: Array[Conve
   def serialize(value: Product, writer: ObjectWriter, ctx: Context): Unit = {
     var i = 0
     writer.beginArray()
-    value.productIterator.foreach { elem =>
-      valuesConverters(i).serialize(elem.asInstanceOf[AnyRef], writer, ctx)
-      i += 1
+    value.productIterator.foreach {
+      elem =>
+        valuesConverters(i).serialize(elem.asInstanceOf[AnyRef], writer, ctx)
+        i += 1
     }
     writer.endArray()
   }
@@ -49,11 +50,11 @@ class TupleNConverter(val ctr: Constructor[_], val valuesConverters: Array[Conve
     reader.endArray()
 
     if (i < valuesConverters.length) {
-      throw new JsonBindingException("Can't bind to Tuple"+valuesConverters.length+" the json contained only " + i + " values")
+      throw new JsonBindingException("Can't bind to Tuple" + valuesConverters.length + " the json contained only " + i + " values")
     } else if (reader.hasNext && i == valuesConverters.length) {
-      throw new JsonBindingException("Can't bind to Tuple"+valuesConverters.length+" the json contains more values")
+      throw new JsonBindingException("Can't bind to Tuple" + valuesConverters.length + " the json contains more values")
     }
 
-    ctr.newInstance(values:_*).asInstanceOf[Product]
+    ctr.newInstance(values: _*).asInstanceOf[Product]
   }
 }

@@ -47,4 +47,12 @@ class ScalaAPITest extends FunSuite with Matchers {
     map(1) shouldEqual None
     map(2) shouldEqual Some("foo bar")
   }
+
+  test("deserialize to unknown type") {
+    fromJson[Map[String, Option[Any]]]("""{"name":"foo bar", "age": 28, "address":null}""") match {
+      case map: Map[String, Option[Any]] =>
+        map should be (Map("name" -> Some("foo bar"), "age" -> Some(28), "address" -> None))
+      case _ => fail()
+    }
+  }
 }

@@ -5,7 +5,7 @@ import com.owlike.genson.stream.{ValueType, ObjectWriter, ObjectReader}
 import java.lang.reflect.Type
 import com.owlike.genson.reflect.TypeUtil
 
-object ScalaUntypedConverterFactory extends Factory[Converter[Any]] {
+object ScalaUntypedConverterFactory extends Factory[Converter[_]] {
 
   object ScalaUntypedConverter extends Converter[Any] {
 
@@ -19,13 +19,18 @@ object ScalaUntypedConverterFactory extends Factory[Converter[Any]] {
     }
 
     def serialize(obj: Any, writer: ObjectWriter, ctx: Context) {
-      if (classOf[AnyRef] == obj.getClass) throw new UnsupportedOperationException("Serialization of type Object is not supported by default serializers.")
+      if (classOf[AnyRef] == obj.getClass)
+        throw new UnsupportedOperationException("Serialization of type Object is not supported by default serializers.")
       ctx.genson.serialize(obj, obj.getClass, writer, ctx)
     }
   }
 
-  def create(genType: Type, genson: Genson): Converter[Any] = {
-    if (classOf[Object].equals(TypeUtil.getRawClass(genType))) {
+  def create(genType: Type, genson: Genson): Converter[_] = {
+    val rawClass = TypeUtil.getRawClass(genType)
+    if (classOf[Object].equals(rawClass)
+      || classOf[Nothing].equals(rawClass)
+      || classOf[Any].equals(rawClass)) {
+
       ScalaUntypedConverter
     } else null
   }
