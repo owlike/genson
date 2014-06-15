@@ -14,14 +14,13 @@ import com.owlike.genson.BeanView;
  * {@link com.owlike.genson.ext.spring.GensonMessageConverter GensonMessageConverter} to indicate
  * at runtime what BeanView must be used. Its intended to be used in conjunction
  * with springs @ResponseBody/@RequestBody and @RequestMapping annotations.
- * 
+ *
  * @author eugen
- * 
  */
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
 public @interface WithBeanView {
-	Class<? extends BeanView<?>>[] views() default {};
+  Class<? extends BeanView<?>>[] views() default {};
 }

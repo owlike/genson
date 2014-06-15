@@ -15,106 +15,107 @@ import com.owlike.genson.stream.ObjectWriter;
 import static org.junit.Assert.*;
 
 public class FactoryTest {
-	private BasicConvertersFactory factory;
-	private Genson genson;
+  private BasicConvertersFactory factory;
+  private Genson genson;
 
-	@SuppressWarnings("serial")
-	public static class ParameterizedSuperType extends HashMap<Object, String> {
-	}
-	
-	@Test public void testConstructionForTypeWithParameters() {
-		assertNotNull(new Genson().provideConverter(ParameterizedSuperType.class));
-	}
-	
-	@Before
-	public void setUp() {
+  @SuppressWarnings("serial")
+  public static class ParameterizedSuperType extends HashMap<Object, String> {
+  }
 
-		genson = new GensonBuilder() {
-			@Override
-			protected Factory<Converter<?>> createConverterFactory() {
-				factory = new BasicConvertersFactory(getSerializersMap(), getDeserializersMap(),
-						getFactories(), getBeanDescriptorProvider());
+  @Test
+  public void testConstructionForTypeWithParameters() {
+    assertNotNull(new Genson().provideConverter(ParameterizedSuperType.class));
+  }
 
-				ChainedFactory chain = new NullConverter.NullConverterFactory();
-				chain.withNext(
-						new BeanViewConverter.BeanViewConverterFactory(
-								getBeanViewDescriptorProvider())).withNext(factory);
+  @Before
+  public void setUp() {
 
-				return chain;
-			}
-		}.create();
-	}
+    genson = new GensonBuilder() {
+      @Override
+      protected Factory<Converter<?>> createConverterFactory() {
+        factory = new BasicConvertersFactory(getSerializersMap(), getDeserializersMap(),
+          getFactories(), getBeanDescriptorProvider());
 
-	@SuppressWarnings("unchecked")
-	@Test
-	public void testBasicConvertersFactory() {
-		Converter<Integer> ci = (Converter<Integer>) factory.create(Integer.class, genson);
-		assertEquals(DefaultConverters.IntegerConverter.class, ci.getClass());
+        ChainedFactory chain = new NullConverter.NullConverterFactory();
+        chain.withNext(
+          new BeanViewConverter.BeanViewConverterFactory(
+            getBeanViewDescriptorProvider())).withNext(factory);
 
-		Converter<Boolean> cb = (Converter<Boolean>) factory.create(Boolean.class, genson);
-		assertEquals(DefaultConverters.BooleanConverter.class, cb.getClass());
+        return chain;
+      }
+    }.create();
+  }
 
-		assertNotNull(factory.create(int.class, genson));
+  @SuppressWarnings("unchecked")
+  @Test
+  public void testBasicConvertersFactory() {
+    Converter<Integer> ci = (Converter<Integer>) factory.create(Integer.class, genson);
+    assertEquals(DefaultConverters.IntegerConverter.class, ci.getClass());
 
-		Converter<Long[]> cal = (Converter<Long[]>) factory.create(Long[].class, genson);
-		assertEquals(DefaultConverters.ArrayConverter.class, cal.getClass());
+    Converter<Boolean> cb = (Converter<Boolean>) factory.create(Boolean.class, genson);
+    assertEquals(DefaultConverters.BooleanConverter.class, cb.getClass());
 
-		Converter<Object[]> cao = (Converter<Object[]>) factory.create(Object[].class, genson);
-		assertEquals(DefaultConverters.ArrayConverter.class, cao.getClass());
+    assertNotNull(factory.create(int.class, genson));
 
-		Converter<List<?>> converter = (Converter<List<?>>) factory.create(List.class, genson);
-		assertEquals(DefaultConverters.CollectionConverter.class, converter.getClass());
+    Converter<Long[]> cal = (Converter<Long[]>) factory.create(Long[].class, genson);
+    assertEquals(DefaultConverters.ArrayConverter.class, cal.getClass());
 
-		Converter<Map<String, Object>> cm = (Converter<Map<String, Object>>) factory.create(
-				new GenericType<Map<String, Object>>() {
-				}.getType(), genson);
-		assertEquals(DefaultConverters.HashMapConverter.class, cm.getClass());
-	}
+    Converter<Object[]> cao = (Converter<Object[]>) factory.create(Object[].class, genson);
+    assertEquals(DefaultConverters.ArrayConverter.class, cao.getClass());
 
-	@Test
-	public void testCircularReferencingClasses() {
-		Genson genson = new Genson();
-		Converter<A> converter = genson.provideConverter(A.class);
-		assertNotNull(converter);
-	}
+    Converter<List<?>> converter = (Converter<List<?>>) factory.create(List.class, genson);
+    assertEquals(DefaultConverters.CollectionConverter.class, converter.getClass());
 
-	@Test
-	public void testUnwrapAnnotations() throws Exception {
-		Genson genson = new GensonBuilder().withConverters(new ClassMetadataConverter()).create();
-		@SuppressWarnings({ "unchecked", "rawtypes" }) // argh its ugly with those warnings...
-		Wrapper<Converter<A>> wrapper = (Wrapper) genson.provideConverter(A.class);
-		Converter<A> converter = wrapper.unwrap();
-		assertTrue(converter instanceof ClassMetadataConverter);
-		assertFalse(ClassMetadataConverter.used);
-		converter.serialize(new A(), null, null);
-		assertTrue(ClassMetadataConverter.used);
-	}
+    Converter<Map<String, Object>> cm = (Converter<Map<String, Object>>) factory.create(
+      new GenericType<Map<String, Object>>() {
+      }.getType(), genson);
+    assertEquals(DefaultConverters.HashMapConverter.class, cm.getClass());
+  }
 
-	@HandleClassMetadata
-	static class ClassMetadataConverter implements Converter<A> {
-		static boolean used = false;
+  @Test
+  public void testCircularReferencingClasses() {
+    Genson genson = new Genson();
+    Converter<A> converter = genson.provideConverter(A.class);
+    assertNotNull(converter);
+  }
 
-		public void serialize(A obj, ObjectWriter writer, Context ctx) {
-			used = true;
-		}
+  @Test
+  public void testUnwrapAnnotations() throws Exception {
+    Genson genson = new GensonBuilder().withConverters(new ClassMetadataConverter()).create();
+    @SuppressWarnings({"unchecked", "rawtypes"}) // argh its ugly with those warnings...
+      Wrapper<Converter<A>> wrapper = (Wrapper) genson.provideConverter(A.class);
+    Converter<A> converter = wrapper.unwrap();
+    assertTrue(converter instanceof ClassMetadataConverter);
+    assertFalse(ClassMetadataConverter.used);
+    converter.serialize(new A(), null, null);
+    assertTrue(ClassMetadataConverter.used);
+  }
 
-		public A deserialize(ObjectReader reader, Context ctx) {
-			return null;
-		}
-	}
+  @HandleClassMetadata
+  static class ClassMetadataConverter implements Converter<A> {
+    static boolean used = false;
 
-	static class A {
-		A a;
-		B b;
-		C c;
-	}
+    public void serialize(A obj, ObjectWriter writer, Context ctx) {
+      used = true;
+    }
 
-	static class B {
-		B b;
-		A a;
-	}
+    public A deserialize(ObjectReader reader, Context ctx) {
+      return null;
+    }
+  }
 
-	static class C {
-		B b;
-	}
+  static class A {
+    A a;
+    B b;
+    C c;
+  }
+
+  static class B {
+    B b;
+    A a;
+  }
+
+  static class C {
+    B b;
+  }
 }

@@ -7,7 +7,7 @@ import java.io.IOException;
  * ObjectReader is part of the streaming api, it's implementations allow you to read data from the
  * stream. The root of the input should always be a object, an array or a literal. There may be some
  * differences between implementations if they try to be compliant with their format specification.
- * 
+ * <p/>
  * <ul>
  * <li>To read an array call {@link #beginArray()} then use {@link #hasNext()} to check if there is
  * a next element and then call {@link #next()} to advance. When you call next in an array it will
@@ -37,21 +37,21 @@ import java.io.IOException;
  * <li>To skip a value use {@link #skipValue()}. If the value is an object or an array it will skip
  * all its content.
  * </ul>
- * 
+ * <p/>
  * Here is an example if you want to use directly the streaming api instead of the databind api (or
  * if you write a custom converter or deserializer).
- * 
+ * <p/>
  * <pre>
  * public static void main(String[] args) {
  * 	// we will read from json to Person
  * 	Person.read(new JsonReader(&quot;{\&quot;name\&quot;:\&quot;eugen\&quot;,\&quot;age\&quot;:26, \&quot;childrenYearOfBirth\&quot;:[]}&quot;));
  * }
- * 
+ *
  * class Person {
  * 	String name;
  * 	int age;
  * 	List&lt;Integer&gt; childrenYearOfBirth;
- * 
+ *
  * 	public static Person read(ObjectReader reader) {
  * 		Person p = new Person();
  * 		for (; reader.hasNext();) {
@@ -68,174 +68,169 @@ import java.io.IOException;
  * 					for (int i = 0; reader.hasNext(); i++)
  * 						p.childrenYearOfBirth.add(reader.valueAsInt());
  * 					reader.endArray();
- * 				}
- * 			}
- * 		}
+ *        }
+ *      }
+ *    }
  * 		return p;
- * 	}
+ *  }
  * }
  * </pre>
- * 
+ *
+ * @author eugen
  * @see ValueType
  * @see JsonReader
  * @see ObjectWriter
  * @see JsonWriter
- * 
- * @author eugen
- * 
  */
 public interface ObjectReader extends Closeable {
-	/**
-	 * Starts reading a object. Objects contain name/value pairs. Call {@link #endObject()} when the
-	 * objects contains no more properties.
-	 * 
-	 * @return a reference to the reader.
-	 * @throws JsonStreamException
-	 */
-	public ObjectReader beginObject();
+  /**
+   * Starts reading a object. Objects contain name/value pairs. Call {@link #endObject()} when the
+   * objects contains no more properties.
+   *
+   * @return a reference to the reader.
+   * @throws JsonStreamException
+   */
+  public ObjectReader beginObject();
 
-	/**
-	 * Ends the object. If you were not in an object or the object contains more data, an exception
-	 * will be thrown.
-	 * 
-	 * @return a reference to the reader.
-	 * @throws JsonStreamException
-	 */
-	public ObjectReader endObject();
+  /**
+   * Ends the object. If you were not in an object or the object contains more data, an exception
+   * will be thrown.
+   *
+   * @return a reference to the reader.
+   * @throws JsonStreamException
+   */
+  public ObjectReader endObject();
 
-	/**
-	 * Starts reading an array. Arrays contain only values. Call {@link #endArray()} when the array
-	 * contains no more values.
-	 * 
-	 * @return a reference to the reader.
-	 * @throws JsonStreamException
-	 */
-	public ObjectReader beginArray();
+  /**
+   * Starts reading an array. Arrays contain only values. Call {@link #endArray()} when the array
+   * contains no more values.
+   *
+   * @return a reference to the reader.
+   * @throws JsonStreamException
+   */
+  public ObjectReader beginArray();
 
-	/**
-	 * Ends the array. If you were not in an array or the array contains more data, an exception
-	 * will be thrown.
-	 * 
-	 * @return a reference to the reader.
-	 * @throws JsonStreamException
-	 */
-	public ObjectReader endArray();
+  /**
+   * Ends the array. If you were not in an array or the array contains more data, an exception
+   * will be thrown.
+   *
+   * @return a reference to the reader.
+   * @throws JsonStreamException
+   */
+  public ObjectReader endArray();
 
-	/**
-	 * Will read nexts object metadata. You can call this method as many times as you want, with the
-	 * condition that you use only {@link #metadata(String)} method. For example if you call
-	 * {@link #beginObject()} you wont be able to do it anymore (however you still can retrieve the
-	 * metadata!).
-	 * 
-	 * @return a reference to the reader.
-	 * @throws JsonStreamException
-	 */
-	public ObjectReader nextObjectMetadata();
+  /**
+   * Will read nexts object metadata. You can call this method as many times as you want, with the
+   * condition that you use only {@link #metadata(String)} method. For example if you call
+   * {@link #beginObject()} you wont be able to do it anymore (however you still can retrieve the
+   * metadata!).
+   *
+   * @return a reference to the reader.
+   * @throws JsonStreamException
+   */
+  public ObjectReader nextObjectMetadata();
 
-	/**
-	 * If we are in a object it will read the next name/value pair and if we are in an array it will
-	 * read the next value (except if value is of complex type, in that case after the call to
-	 * next() you must use one of beginXXX methods).
-	 * 
-	 * @return the type of the value, see {@link ValueType} for possible types.
-	 * @throws JsonStreamException
-	 */
-	public ValueType next();
+  /**
+   * If we are in a object it will read the next name/value pair and if we are in an array it will
+   * read the next value (except if value is of complex type, in that case after the call to
+   * next() you must use one of beginXXX methods).
+   *
+   * @return the type of the value, see {@link ValueType} for possible types.
+   * @throws JsonStreamException
+   */
+  public ValueType next();
 
-	/**
-	 * 
-	 * @return true if there is a next property or value, false otherwise.
-	 * @throws JsonStreamException
-	 */
-	public boolean hasNext();
+  /**
+   * @return true if there is a next property or value, false otherwise.
+   * @throws JsonStreamException
+   */
+  public boolean hasNext();
 
-	/**
-	 * If the value is of complex type it will skip its content.
-	 * 
-	 * @return a reference to the reader.
-	 * @throws JsonStreamException
-	 */
-	public ObjectReader skipValue();
+  /**
+   * If the value is of complex type it will skip its content.
+   *
+   * @return a reference to the reader.
+   * @throws JsonStreamException
+   */
+  public ObjectReader skipValue();
 
-	/**
-	 * @return The type of current value.
-	 * @see ValueType
-	 */
-	public ValueType getValueType();
+  /**
+   * @return The type of current value.
+   * @see ValueType
+   */
+  public ValueType getValueType();
 
-	/**
-	 * 
-	 * @param name the name of the metadata to retrieve.
-	 * @return value of metadata with name as key or null if there is no such metadata.
-	 * @throws JsonStreamException
-	 */
-	public String metadata(String name);
+  /**
+   * @param name the name of the metadata to retrieve.
+   * @return value of metadata with name as key or null if there is no such metadata.
+   * @throws JsonStreamException
+   */
+  public String metadata(String name);
 
-	/**
-	 * @return the name of current property, valid only if we are in a object and you called
-	 *         {@link #next()} before.
-	 * @throws JsonStreamException
-	 */
-	public String name();
+  /**
+   * @return the name of current property, valid only if we are in a object and you called
+   * {@link #next()} before.
+   * @throws JsonStreamException
+   */
+  public String name();
 
-	/**
-	 * 
-	 * @return the current value as a String. It will try to convert the actual value to String if
-	 *         its not of that type.
-	 * @throws JsonStreamException
-	 */
-	public String valueAsString();
+  /**
+   * @return the current value as a String. It will try to convert the actual value to String if
+   * its not of that type.
+   * @throws JsonStreamException
+   */
+  public String valueAsString();
 
-	/**
-	 * @see #valueAsString()
-	 * @throws JsonStreamException
-	 * @throws NumberFormatException
-	 */
-	public int valueAsInt();
+  /**
+   * @throws JsonStreamException
+   * @throws NumberFormatException
+   * @see #valueAsString()
+   */
+  public int valueAsInt();
 
-	/**
-	 * @see #valueAsString()
-	 * @throws JsonStreamException
-	 * @throws NumberFormatException
-	 */
-	public long valueAsLong();
+  /**
+   * @throws JsonStreamException
+   * @throws NumberFormatException
+   * @see #valueAsString()
+   */
+  public long valueAsLong();
 
-	/**
-	 * @see #valueAsString()
-	 * @throws JsonStreamException
-	 * @throws NumberFormatException
-	 */
-	public double valueAsDouble();
+  /**
+   * @throws JsonStreamException
+   * @throws NumberFormatException
+   * @see #valueAsString()
+   */
+  public double valueAsDouble();
 
-	/**
-	 * @see #valueAsString()
-	 * @throws JsonStreamException
-	 * @throws NumberFormatException
-	 */
-	public short valueAsShort();
+  /**
+   * @throws JsonStreamException
+   * @throws NumberFormatException
+   * @see #valueAsString()
+   */
+  public short valueAsShort();
 
-	/**
-	 * @see #valueAsString()
-	 * @throws JsonStreamException
-	 * @throws NumberFormatException
-	 */
-	public float valueAsFloat();
+  /**
+   * @throws JsonStreamException
+   * @throws NumberFormatException
+   * @see #valueAsString()
+   */
+  public float valueAsFloat();
 
-	/**
-	 * @see #valueAsString()
-     * @throws JsonStreamException
-	 */
-	public boolean valueAsBoolean();
-	
-	/**
-	 * @return the incoming base64 string converted to a byte array.
-	 * @throws JsonStreamException
-	 */
-	public byte[] valueAsByteArray();
-	
-	public JsonType enclosingType();
-	
-	public int column();
-    
-    public int row();
+  /**
+   * @throws JsonStreamException
+   * @see #valueAsString()
+   */
+  public boolean valueAsBoolean();
+
+  /**
+   * @return the incoming base64 string converted to a byte array.
+   * @throws JsonStreamException
+   */
+  public byte[] valueAsByteArray();
+
+  public JsonType enclosingType();
+
+  public int column();
+
+  public int row();
 }

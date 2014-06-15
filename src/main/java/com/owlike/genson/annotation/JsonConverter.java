@@ -14,14 +14,13 @@ import com.owlike.genson.Converter;
  * but do not want to use it for all properties of that type. When you put this annotation on a
  * field, constructor parameter or setter/getter, Genson will use this Converter instead of any other.
  * <b>The Converter must have a default no arg constructor.</b>
- * 
+ *
  * @author eugen
- * 
  */
-@Target({ ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER })
+@Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
 public @interface JsonConverter {
-	Class<? extends Converter<?>> value();
+  Class<? extends Converter<?>> value();
 }

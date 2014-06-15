@@ -16,157 +16,154 @@ import com.owlike.genson.stream.ObjectWriter;
  * BeanDescriptors are used to serialize/deserialize objects based on their fields, methods and
  * constructors. By default it is supposed to work on JavaBeans, however it can be configured and
  * extended to support different kind of objects.
- * 
+ * <p/>
  * In most cases BeanDescriptors should not be used directly as it is used internally to support
  * objects not handled by the default Converters. The most frequent case when you will use directly
  * a BeanDescriptor is when you want to deserialize into an existing instance. Here is an example :
- * 
+ * <p/>
  * <pre>
  * Genson genson = new Genson();
  * BeanDescriptorProvider provider = genson.getBeanDescriptorFactory();
  * BeanDescriptor&lt;MyClass&gt; descriptor = provider.provide(MyClass.class, genson);
- * 
+ *
  * MyClass existingInstance = descriptor.deserialize(existingInstance, new JsonReader(&quot;{}&quot;),
  * 		new Context(genson));
  * </pre>
- * 
- * @see BeanDescriptorProvider
- * 
+ *
+ * @param <T> type that this BeanDescriptor can serialize and deserialize.
  * @author eugen
- * 
- * @param <T>
- *            type that this BeanDescriptor can serialize and deserialize.
+ * @see BeanDescriptorProvider
  */
 public class BeanDescriptor<T> implements Converter<T> {
-	final Class<?> fromDeclaringClass;
-	final Class<T> ofClass;
-	final Map<String, PropertyMutator> mutableProperties;
-	final List<PropertyAccessor> accessibleProperties;
+  final Class<?> fromDeclaringClass;
+  final Class<T> ofClass;
+  final Map<String, PropertyMutator> mutableProperties;
+  final List<PropertyAccessor> accessibleProperties;
 
-	private final BeanCreator _creator;
-	private final boolean _noArgCtr;
+  private final BeanCreator _creator;
+  private final boolean _noArgCtr;
 
-	private final static Comparator<BeanProperty> _readablePropsComparator = new Comparator<BeanProperty>() {
-		public int compare(BeanProperty o1, BeanProperty o2) {
-			return o1.name.compareToIgnoreCase(o2.name);
-		}
-	};
+  private final static Comparator<BeanProperty> _readablePropsComparator = new Comparator<BeanProperty>() {
+    public int compare(BeanProperty o1, BeanProperty o2) {
+      return o1.name.compareToIgnoreCase(o2.name);
+    }
+  };
 
-	public BeanDescriptor(Class<T> forClass, Class<?> fromDeclaringClass,
-			List<PropertyAccessor> readableBps,
-			Map<String, PropertyMutator> writableBps, BeanCreator creator) {
-		this.ofClass = forClass;
-		this.fromDeclaringClass = fromDeclaringClass;
-		this._creator = creator;
-		mutableProperties = writableBps;
+  public BeanDescriptor(Class<T> forClass, Class<?> fromDeclaringClass,
+                        List<PropertyAccessor> readableBps,
+                        Map<String, PropertyMutator> writableBps, BeanCreator creator) {
+    this.ofClass = forClass;
+    this.fromDeclaringClass = fromDeclaringClass;
+    this._creator = creator;
+    mutableProperties = writableBps;
 
-		Collections.sort(readableBps, _readablePropsComparator);
+    Collections.sort(readableBps, _readablePropsComparator);
 
-		accessibleProperties = Collections.unmodifiableList(readableBps);
-		if (_creator != null)
-			_noArgCtr = _creator.parameters.size() == 0;
-		else
-			_noArgCtr = false;
-	}
+    accessibleProperties = Collections.unmodifiableList(readableBps);
+    if (_creator != null)
+      _noArgCtr = _creator.parameters.size() == 0;
+    else
+      _noArgCtr = false;
+  }
 
-	public boolean isReadable() {
-		return !accessibleProperties.isEmpty();
-	}
+  public boolean isReadable() {
+    return !accessibleProperties.isEmpty();
+  }
 
-	public boolean isWritable() {
-		return _creator != null;
-	}
+  public boolean isWritable() {
+    return _creator != null;
+  }
 
-	public void serialize(T obj, ObjectWriter writer, Context ctx) {
-		writer.beginObject();
-		for (PropertyAccessor accessor : accessibleProperties) {
-			accessor.serialize(obj, writer, ctx);
-		}
-		writer.endObject();
-	}
+  public void serialize(T obj, ObjectWriter writer, Context ctx) {
+    writer.beginObject();
+    for (PropertyAccessor accessor : accessibleProperties) {
+      accessor.serialize(obj, writer, ctx);
+    }
+    writer.endObject();
+  }
 
-	public T deserialize(ObjectReader reader, Context ctx) {
-		T bean = null;
-		// optimization for default ctr
-		if (_noArgCtr) {
-			bean = ofClass.cast(_creator.create());
-			deserialize(bean, reader, ctx);
-		} else {
-			if (_creator == null)
-				throw new JsonBindingException("No constructor has been found for type "
-						+ ofClass);
-			bean = _deserWithCtrArgs(reader, ctx);
-		}
-		return bean;
-	}
+  public T deserialize(ObjectReader reader, Context ctx) {
+    T bean = null;
+    // optimization for default ctr
+    if (_noArgCtr) {
+      bean = ofClass.cast(_creator.create());
+      deserialize(bean, reader, ctx);
+    } else {
+      if (_creator == null)
+        throw new JsonBindingException("No constructor has been found for type "
+          + ofClass);
+      bean = _deserWithCtrArgs(reader, ctx);
+    }
+    return bean;
+  }
 
-	public void deserialize(T into, ObjectReader reader, Context ctx) {
-		reader.beginObject();
-		for (; reader.hasNext();) {
-			reader.next();
-			String propName = reader.name();
-			PropertyMutator mutator = mutableProperties.get(propName);
-			if (mutator != null) {
-				mutator.deserialize(into, reader, ctx);
-			} else {
-				// TODO make it configurable
-				reader.skipValue();
-			}
-		}
-		reader.endObject();
-	}
+  public void deserialize(T into, ObjectReader reader, Context ctx) {
+    reader.beginObject();
+    for (; reader.hasNext(); ) {
+      reader.next();
+      String propName = reader.name();
+      PropertyMutator mutator = mutableProperties.get(propName);
+      if (mutator != null) {
+        mutator.deserialize(into, reader, ctx);
+      } else {
+        // TODO make it configurable
+        reader.skipValue();
+      }
+    }
+    reader.endObject();
+  }
 
-	protected T _deserWithCtrArgs(ObjectReader reader, Context ctx) {
-		List<String> names = new ArrayList<String>();
-		List<Object> values = new ArrayList<Object>();
+  protected T _deserWithCtrArgs(ObjectReader reader, Context ctx) {
+    List<String> names = new ArrayList<String>();
+    List<Object> values = new ArrayList<Object>();
 
-		reader.beginObject();
-		for (; reader.hasNext();) {
-			reader.next();
-			String propName = reader.name();
-			PropertyMutator muta = mutableProperties.get(propName);
+    reader.beginObject();
+    for (; reader.hasNext(); ) {
+      reader.next();
+      String propName = reader.name();
+      PropertyMutator muta = mutableProperties.get(propName);
 
-			if (muta != null) {
-				Object param = muta.deserialize(reader, ctx);
-				names.add(propName);
-				values.add(param);
-			} else {
-				// TODO make it configurable
-				reader.skipValue();
-			}
-		}
+      if (muta != null) {
+        Object param = muta.deserialize(reader, ctx);
+        names.add(propName);
+        values.add(param);
+      } else {
+        // TODO make it configurable
+        reader.skipValue();
+      }
+    }
 
-		int size = names.size();
-		int settersToCallCnt = size - _creator.parameters.size();
-		if (settersToCallCnt < 0) settersToCallCnt = 0;
-		Object[] creatorArgs = new Object[_creator.parameters.size()];
-		String[] newNames = new String[size];
-		Object[] newValues = new Object[size];
-		// TODO if field for ctr is missing what to do? make it also configurable...?
-		for (int i = 0, j = 0; i < size; i++) {
-		    // FIXME fails if we have multiple times the same name, possible only in @JsonProperty
-			BeanCreatorProperty mp = _creator.parameters.get(names.get(i));
-			if (mp != null) {
-				creatorArgs[mp.index] = values.get(i);
-			} else {
-				newNames[j] = names.get(i);
-				newValues[j] = values.get(i);
-				j++;
-			}
-		}
+    int size = names.size();
+    int settersToCallCnt = size - _creator.parameters.size();
+    if (settersToCallCnt < 0) settersToCallCnt = 0;
+    Object[] creatorArgs = new Object[_creator.parameters.size()];
+    String[] newNames = new String[size];
+    Object[] newValues = new Object[size];
+    // TODO if field for ctr is missing what to do? make it also configurable...?
+    for (int i = 0, j = 0; i < size; i++) {
+      // FIXME fails if we have multiple times the same name, possible only in @JsonProperty
+      BeanCreatorProperty mp = _creator.parameters.get(names.get(i));
+      if (mp != null) {
+        creatorArgs[mp.index] = values.get(i);
+      } else {
+        newNames[j] = names.get(i);
+        newValues[j] = values.get(i);
+        j++;
+      }
+    }
 
-		T bean = ofClass.cast(_creator.create(creatorArgs));
-		for (int i = 0; i < size; i++) {
-			PropertyMutator property = mutableProperties
-					.get(newNames[i]);
-			if (property != null) property.mutate(bean, newValues[i]);
-		}
-		reader.endObject();
-		return bean;
-	}
+    T bean = ofClass.cast(_creator.create(creatorArgs));
+    for (int i = 0; i < size; i++) {
+      PropertyMutator property = mutableProperties
+        .get(newNames[i]);
+      if (property != null) property.mutate(bean, newValues[i]);
+    }
+    reader.endObject();
+    return bean;
+  }
 
-	public Class<T> getOfClass() {
-		return ofClass;
-	}
+  public Class<T> getOfClass() {
+    return ofClass;
+  }
 
 }

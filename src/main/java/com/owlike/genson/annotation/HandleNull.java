@@ -13,14 +13,12 @@ import java.lang.annotation.Target;
  * {@link com.owlike.genson.convert.NullConverter NullConverter}). In that case you will have to
  * write the code that handles nulls during serialization and deserialization of your type (and not
  * of its content). This feature is mainly for internal use.
- * 
+ *
+ * @author eugen
  * @see HandleClassMetadata
  * @see com.owlike.genson.convert.NullConverter NullConverter
- * 
- * @author eugen
- * 
  */
-@Target({ ElementType.TYPE })
+@Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented

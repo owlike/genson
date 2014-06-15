@@ -21,78 +21,76 @@ import com.owlike.genson.stream.ValueType;
  * in the generated stream. You should use it as it is more "secure" and provides you more flexibility.
  * Indeed if you change the name or package of your class you will still be able to deserialize to it.
  * An example allowing to serialize a object and then deserialize it back without knowing its type would be:
- * 
+ * <p/>
  * <pre>
  * class Foo {
  * }
- * 
+ *
  * Genson genson = new GensonBuilder().useClassMetadata(true).addAlias("foo", Foo.class).create();
  * String json = genson.serialize(new Foo());
  * // json value will be {&quot;@class&quot;:&quot;Foo&quot;}
  * Foo foo = (Foo) genson.deserialize(json, Object.class);
  * </pre>
- * 
+ *
+ * @param <T>
+ * @author eugen
  * @see com.owlike.genson.stream.ObjectWriter#writeMetadata(String, String) ObjectWriter.metadata(key, value)
  * @see com.owlike.genson.stream.ObjectReader#metadata(String) ObjectReader.metadata("class")
  * @see com.owlike.genson.Genson#aliasFor(Class) Genson.aliasFor(Class)
- * 
- * @author eugen
- * 
- * @param <T>
  */
 public class ClassMetadataConverter<T> extends Wrapper<Converter<T>> implements Converter<T> {
-	public static class ClassMetadataConverterFactory extends ChainedFactory {
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		@Override
-		protected Converter<?> create(Type type, Genson genson, Converter<?> nextConverter) {
-			if (nextConverter == null)
-				throw new IllegalArgumentException(
-						"nextConverter must be not null for ClassMetadataConverter, "
-								+ "as ClassMetadataConverter can not be the last converter in the chain!");
-			
-			Class<?> rawClass = TypeUtil.getRawClass(type);
-			if (genson.isWithClassMetadata()
-					&& !Wrapper.toAnnotatedElement(nextConverter).isAnnotationPresent(
-							HandleClassMetadata.class))
-				return new ClassMetadataConverter(rawClass, nextConverter);
-			else
-				return nextConverter;
-		}
-	}
+  public static class ClassMetadataConverterFactory extends ChainedFactory {
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Override
+    protected Converter<?> create(Type type, Genson genson, Converter<?> nextConverter) {
+      if (nextConverter == null)
+        throw new IllegalArgumentException(
+          "nextConverter must be not null for ClassMetadataConverter, "
+            + "as ClassMetadataConverter can not be the last converter in the chain!");
 
-	private final Class<T> tClass;
+      Class<?> rawClass = TypeUtil.getRawClass(type);
+      if (genson.isWithClassMetadata()
+        && !Wrapper.toAnnotatedElement(nextConverter).isAnnotationPresent(
+        HandleClassMetadata.class))
+        return new ClassMetadataConverter(rawClass, nextConverter);
+      else
+        return nextConverter;
+    }
+  }
 
-	public ClassMetadataConverter(Class<T> tClass, Converter<T> delegate) {
-		super(delegate);
-		this.tClass = tClass;
-	}
+  private final Class<T> tClass;
 
-	public void serialize(T obj, ObjectWriter writer, Context ctx) throws Exception {
-		// obj != null allows to not fail in case when the NullConverter is not in the chain
-		if (!Object.class.equals(tClass) && obj != null) {
-			writer.beginNextObjectMetadata()
-				.writeMetadata("class", ctx.genson.aliasFor(obj.getClass()));
-		}
-		wrapped.serialize(obj, writer, ctx);
-	}
+  public ClassMetadataConverter(Class<T> tClass, Converter<T> delegate) {
+    super(delegate);
+    this.tClass = tClass;
+  }
 
-	public T deserialize(ObjectReader reader, Context ctx) throws Exception {
-		if (ValueType.OBJECT.equals(reader.getValueType())) {
-			String className = reader.nextObjectMetadata().metadata("class");
-			if (className != null) {
-				try {
-					Class<?> classFromMetadata = ctx.genson.classFor(className);
-					if (!classFromMetadata.equals(tClass)) {
-						Converter<T> deser = ctx.genson.provideConverter(classFromMetadata);
-						return deser.deserialize(reader, ctx);
-					}
-				} catch (ClassNotFoundException e) {
-					throw new JsonBindingException(
-							"Could not use @class metadata, no such class: " + className);
-				}
-			}
-		}
-		return wrapped.deserialize(reader, ctx);
-	}
+  public void serialize(T obj, ObjectWriter writer, Context ctx) throws Exception {
+    // obj != null allows to not fail in case when the NullConverter is not in the chain
+    if (!Object.class.equals(tClass) && obj != null) {
+      writer.beginNextObjectMetadata()
+        .writeMetadata("class", ctx.genson.aliasFor(obj.getClass()));
+    }
+    wrapped.serialize(obj, writer, ctx);
+  }
+
+  public T deserialize(ObjectReader reader, Context ctx) throws Exception {
+    if (ValueType.OBJECT.equals(reader.getValueType())) {
+      String className = reader.nextObjectMetadata().metadata("class");
+      if (className != null) {
+        try {
+          Class<?> classFromMetadata = ctx.genson.classFor(className);
+          if (!classFromMetadata.equals(tClass)) {
+            Converter<T> deser = ctx.genson.provideConverter(classFromMetadata);
+            return deser.deserialize(reader, ctx);
+          }
+        } catch (ClassNotFoundException e) {
+          throw new JsonBindingException(
+            "Could not use @class metadata, no such class: " + className);
+        }
+      }
+    }
+    return wrapped.deserialize(reader, ctx);
+  }
 
 }

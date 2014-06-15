@@ -5,7 +5,9 @@ import java.util.List;
 
 import com.owlike.genson.GensonBuilder;
 import org.junit.Test;
+
 import static org.junit.Assert.*;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -22,32 +24,34 @@ import com.owlike.genson.ext.spring.ExtendedReqRespBodyMethodProcessor;
 import com.owlike.genson.ext.spring.GensonMessageConverter;
 
 public class SpringIntegrationTest {
-	@Test public void testFromAndTwoJson() throws Exception {
-		MockHttpServletRequest req = new MockHttpServletRequest();
-		MockHttpServletResponse resp = new MockHttpServletResponse();
-		resp.setContentType("application/json");
-		
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
-		converters.add(new GensonMessageConverter(new GensonBuilder().setSkipNull(false).create()));
-		ExtendedReqRespBodyMethodProcessor handler = new ExtendedReqRespBodyMethodProcessor(converters);
-		handler.handleReturnValue(get(), new MethodParameter(SpringIntegrationTest.class.getMethod("get"), -1), new ModelAndViewContainer(), new ServletWebRequest(req, resp));
-		assertEquals(get().jsonString(), resp.getContentAsString());
-		
-		req = new MockHttpServletRequest();
-		req.setContent("[1,2,3]".getBytes());
-		req.setContentType("application/json");
-		resp = new MockHttpServletResponse();
-		Object o = handler.resolveArgument(new MethodParameter(SpringIntegrationTest.class.getMethod("set", int[].class), 0), new ModelAndViewContainer(), new ServletWebRequest(req, resp), new DefaultDataBinderFactory(null));
-		assertArrayEquals(new int[]{1, 2, 3}, (int[])o);
-	}
+  @Test
+  public void testFromAndTwoJson() throws Exception {
+    MockHttpServletRequest req = new MockHttpServletRequest();
+    MockHttpServletResponse resp = new MockHttpServletResponse();
+    resp.setContentType("application/json");
 
-	public void set(@RequestBody int[] data) {
-		
-	}
-	
-	public @ResponseBody
-	Primitives get() {
-		return new Primitives(923456789, new Integer(861289603), 54566544.0998891, null, null,
-				false, true);
-	}
+    List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+    converters.add(new GensonMessageConverter(new GensonBuilder().setSkipNull(false).create()));
+    ExtendedReqRespBodyMethodProcessor handler = new ExtendedReqRespBodyMethodProcessor(converters);
+    handler.handleReturnValue(get(), new MethodParameter(SpringIntegrationTest.class.getMethod("get"), -1), new ModelAndViewContainer(), new ServletWebRequest(req, resp));
+    assertEquals(get().jsonString(), resp.getContentAsString());
+
+    req = new MockHttpServletRequest();
+    req.setContent("[1,2,3]".getBytes());
+    req.setContentType("application/json");
+    resp = new MockHttpServletResponse();
+    Object o = handler.resolveArgument(new MethodParameter(SpringIntegrationTest.class.getMethod("set", int[].class), 0), new ModelAndViewContainer(), new ServletWebRequest(req, resp), new DefaultDataBinderFactory(null));
+    assertArrayEquals(new int[]{1, 2, 3}, (int[]) o);
+  }
+
+  public void set(@RequestBody int[] data) {
+
+  }
+
+  public
+  @ResponseBody
+  Primitives get() {
+    return new Primitives(923456789, new Integer(861289603), 54566544.0998891, null, null,
+      false, true);
+  }
 }

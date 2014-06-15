@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 import com.owlike.genson.Context;
@@ -15,64 +16,64 @@ import com.owlike.genson.stream.ObjectReader;
 import com.owlike.genson.stream.ObjectWriter;
 
 public class ContextualFactoryFeatureTest {
-	private final Genson genson = new Genson();
+  private final Genson genson = new Genson();
 
-	@Test
-	public void testJsonDateFormat() {
-		ABean bean = new ABean();
-		bean.milis = new Date();
-		bean.date = new Date();
+  @Test
+  public void testJsonDateFormat() {
+    ABean bean = new ABean();
+    bean.milis = new Date();
+    bean.date = new Date();
 
-		String json = genson.serialize(bean);
+    String json = genson.serialize(bean);
 
-		SimpleDateFormat dateFormat = new SimpleDateFormat("dd/mm/yyyy");
-		assertEquals(
-				"{\"date\":\"" + dateFormat.format(bean.date) + "\",\"milis\":"
-						+ bean.milis.getTime() + "}", json);
+    SimpleDateFormat dateFormat = new SimpleDateFormat("dd/mm/yyyy");
+    assertEquals(
+      "{\"date\":\"" + dateFormat.format(bean.date) + "\",\"milis\":"
+        + bean.milis.getTime() + "}", json);
 
-		ABean bean2 = genson.deserialize(json, ABean.class);
-		assertEquals(bean.milis, bean2.milis);
-		assertEquals(dateFormat.format(bean.date), dateFormat.format(bean2.date));
-	}
+    ABean bean2 = genson.deserialize(json, ABean.class);
+    assertEquals(bean.milis, bean2.milis);
+    assertEquals(dateFormat.format(bean.date), dateFormat.format(bean2.date));
+  }
 
-	@Test
-	public void testPropertyConverter() {
-		assertEquals("{\"value\":1}", genson.serialize(new BBean()));
-		assertEquals("1", genson.deserialize("{\"value\":1}", BBean.class).value);
-	}
+  @Test
+  public void testPropertyConverter() {
+    assertEquals("{\"value\":1}", genson.serialize(new BBean()));
+    assertEquals("1", genson.deserialize("{\"value\":1}", BBean.class).value);
+  }
 
-	@Test(expected = ClassCastException.class)
-	public void testExceptionWhenPropertyTypeDoesNotMatch() {
-		genson.serialize(new ExceptionBean());
-	}
+  @Test(expected = ClassCastException.class)
+  public void testExceptionWhenPropertyTypeDoesNotMatch() {
+    genson.serialize(new ExceptionBean());
+  }
 
-	static class ABean {
-		@JsonDateFormat(asTimeInMillis = true)
-		public Date milis;
-		@JsonDateFormat("dd/mm/yyyy")
-		public Date date;
-	}
+  static class ABean {
+    @JsonDateFormat(asTimeInMillis = true)
+    public Date milis;
+    @JsonDateFormat("dd/mm/yyyy")
+    public Date date;
+  }
 
-	static class ExceptionBean {
-		@JsonConverter(DummyConverter.class)
-		Object value;
-	}
+  static class ExceptionBean {
+    @JsonConverter(DummyConverter.class)
+    Object value;
+  }
 
-	static class BBean {
-		@JsonConverter(DummyConverter.class)
-		String value = "foo";
-	}
+  static class BBean {
+    @JsonConverter(DummyConverter.class)
+    String value = "foo";
+  }
 
-	public static class DummyConverter implements Converter<String> {
-		@Override
-		public void serialize(String object, ObjectWriter writer, Context ctx) {
-			writer.writeValue(1);
-		}
+  public static class DummyConverter implements Converter<String> {
+    @Override
+    public void serialize(String object, ObjectWriter writer, Context ctx) {
+      writer.writeValue(1);
+    }
 
-		@Override
-		public String deserialize(ObjectReader reader, Context ctx) {
-			return reader.valueAsString();
-		}
+    @Override
+    public String deserialize(ObjectReader reader, Context ctx) {
+      return reader.valueAsString();
+    }
 
-	}
+  }
 }

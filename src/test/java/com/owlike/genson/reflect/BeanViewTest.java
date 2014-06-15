@@ -11,88 +11,88 @@ import com.owlike.genson.annotation.JsonProperty;
 import static org.junit.Assert.*;
 
 public class BeanViewTest {
-	Genson genson = new GensonBuilder()
-			.useBeanViews(true)
-			.useConstructorWithArguments(true)
-			.set(new BeanMutatorAccessorResolver.StandardMutaAccessorResolver(VisibilityFilter.ALL,
-					VisibilityFilter.PACKAGE_PUBLIC, VisibilityFilter.PACKAGE_PUBLIC)).create();
-	
-	@Test
-	public void testSerializeWithInheritedView() {
-		MyClass c = new MyClass();
-		c.name = "toto";
+  Genson genson = new GensonBuilder()
+    .useBeanViews(true)
+    .useConstructorWithArguments(true)
+    .set(new BeanMutatorAccessorResolver.StandardMutaAccessorResolver(VisibilityFilter.ALL,
+      VisibilityFilter.PACKAGE_PUBLIC, VisibilityFilter.PACKAGE_PUBLIC)).create();
 
-		String json = genson.serialize(c, ExtendedView.class);
-		assertEquals("{\"forName\":\"his name is : " + c.name + "\",\"value\":1}", json);
+  @Test
+  public void testSerializeWithInheritedView() {
+    MyClass c = new MyClass();
+    c.name = "toto";
 
-		json = genson.serialize(c, ExtendedBeanView2Class.class);
-		assertEquals(json, "{\"value\":2}");
+    String json = genson.serialize(c, ExtendedView.class);
+    assertEquals("{\"forName\":\"his name is : " + c.name + "\",\"value\":1}", json);
 
-		json = genson.serialize(c, ConcreteView.class);
-		assertEquals(json, "{\"value\":3}");
-	}
+    json = genson.serialize(c, ExtendedBeanView2Class.class);
+    assertEquals(json, "{\"value\":2}");
 
-	@Test
-	public void testDeserializeWithInheritedView() {
-		String json = "{\"forName\": \"titi\", \"value\": 123}";
-		MyClass mc = genson.deserialize(json, MyClass.class, ExtendedView.class);
-		assertTrue(ExtendedView.usedCtr);
-		assertFalse(ExtendedView.usedForNameMethod);
-		assertEquals(ExtendedView.val, 123);
-		assertEquals("titi", mc.name);
-	}
+    json = genson.serialize(c, ConcreteView.class);
+    assertEquals(json, "{\"value\":3}");
+  }
 
-	public static class MyClass {
-		public String name;
-	}
+  @Test
+  public void testDeserializeWithInheritedView() {
+    String json = "{\"forName\": \"titi\", \"value\": 123}";
+    MyClass mc = genson.deserialize(json, MyClass.class, ExtendedView.class);
+    assertTrue(ExtendedView.usedCtr);
+    assertFalse(ExtendedView.usedForNameMethod);
+    assertEquals(ExtendedView.val, 123);
+    assertEquals("titi", mc.name);
+  }
 
-	public static class MyClassView implements BeanView<MyClass> {
-		static boolean usedCtr = false;
-		static boolean usedForNameMethod = false;
-		static int val;
+  public static class MyClass {
+    public String name;
+  }
 
-		@JsonCreator
-		public static MyClass create(String forName, @JsonProperty(value = "value") Integer theValue) {
-			usedCtr = true;
-			MyClass mc = new MyClass();
-			mc.name = forName;
-			val = theValue;
-			return mc;
-		}
+  public static class MyClassView implements BeanView<MyClass> {
+    static boolean usedCtr = false;
+    static boolean usedForNameMethod = false;
+    static int val;
 
-		public void setForName(String name, MyClass target) {
-			target.name = name;
-			usedForNameMethod = true;
-		}
+    @JsonCreator
+    public static MyClass create(String forName, @JsonProperty(value = "value") Integer theValue) {
+      usedCtr = true;
+      MyClass mc = new MyClass();
+      mc.name = forName;
+      val = theValue;
+      return mc;
+    }
 
-		@JsonProperty(value = "forName")
-		public String getHisName(MyClass b) {
-			return "his name is : " + b.name;
-		}
-	}
+    public void setForName(String name, MyClass target) {
+      target.name = name;
+      usedForNameMethod = true;
+    }
 
-	public static class ExtendedView extends MyClassView {
-		public int getValue(MyClass b) {
-			return 1;
-		}
-	}
+    @JsonProperty(value = "forName")
+    public String getHisName(MyClass b) {
+      return "his name is : " + b.name;
+    }
+  }
 
-	public static interface ExtendedBeanView2<T extends MyClass> extends BeanView<T> {
-	}
+  public static class ExtendedView extends MyClassView {
+    public int getValue(MyClass b) {
+      return 1;
+    }
+  }
 
-	public static class ExtendedBeanView2Class implements ExtendedBeanView2<MyClass> {
-		public int getValue(MyClass t) {
-			return 2;
-		}
-	}
+  public static interface ExtendedBeanView2<T extends MyClass> extends BeanView<T> {
+  }
 
-	public static class AbstractView<T> implements BeanView<T> {
-		public int getValue(T t) {
-			return 3;
-		}
-	}
+  public static class ExtendedBeanView2Class implements ExtendedBeanView2<MyClass> {
+    public int getValue(MyClass t) {
+      return 2;
+    }
+  }
 
-	public static class ConcreteView extends AbstractView<MyClass> {
+  public static class AbstractView<T> implements BeanView<T> {
+    public int getValue(T t) {
+      return 3;
+    }
+  }
 
-	}
+  public static class ConcreteView extends AbstractView<MyClass> {
+
+  }
 }

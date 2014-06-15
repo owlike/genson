@@ -134,7 +134,7 @@ class CaseClassDescriptorProvider(ctxConverterFactory: AbstractBeanDescriptorPro
   protected override def mergeAccessorsWithCreatorProperties(ofType: JType,
                                                              accessors: JList[PropertyAccessor],
                                                              creator: BeanCreator) {
-    
+
     super.mergeAccessorsWithCreatorProperties(ofType, accessors, creator)
 
     if (useOnlyConstructorFields) {

@@ -16,15 +16,13 @@ import java.lang.annotation.Target;
  * class metadata is disabled by default. To enable it
  * {@link com.owlike.genson.GensonBuilder#useClassMetadata(boolean)}
  * GensonBuilder.useClassMetadata(true)}
- * 
+ *
+ * @author eugen
  * @see com.owlike.genson.convert.ClassMetadataConverter ClassMetadataConverter
  * @see com.owlike.genson.GensonBuilder#useClassMetadata(boolean)
- *      Genson.Builder.setWithClassMetadata(true)
- * 
- * @author eugen
- * 
+ * Genson.Builder.setWithClassMetadata(true)
  */
-@Target({ ElementType.TYPE })
+@Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented

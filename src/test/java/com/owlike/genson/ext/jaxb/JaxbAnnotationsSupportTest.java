@@ -21,205 +21,205 @@ import org.junit.Test;
 import com.owlike.genson.Genson;
 
 public class JaxbAnnotationsSupportTest {
-	private Genson genson;
+  private Genson genson;
 
-	@Before
-	public void setUp() {
-		genson = new GensonBuilder().withBundle(new JAXBBundle()).create();
-	}
+  @Before
+  public void setUp() {
+    genson = new GensonBuilder().withBundle(new JAXBBundle()).create();
+  }
 
-	@Test
-	public void testXmlAccessorTypeSerialization() {
-		assertEquals("{\"a\":1}", genson.serialize(new XmlAccessorTypeBean()));
-	}
+  @Test
+  public void testXmlAccessorTypeSerialization() {
+    assertEquals("{\"a\":1}", genson.serialize(new XmlAccessorTypeBean()));
+  }
 
-	@Test
-	public void testXmlAccessorTypeDeserialization() {
-		XmlAccessorTypeBean bean = genson.deserialize(
-				"{\"a\": 10, \"b\": 5, \"transientField\": 9}", XmlAccessorTypeBean.class);
-		assertEquals(10, bean.a);
-		assertEquals(0, bean.b);
-		assertEquals(2, bean.transientField);
-	}
+  @Test
+  public void testXmlAccessorTypeDeserialization() {
+    XmlAccessorTypeBean bean = genson.deserialize(
+      "{\"a\": 10, \"b\": 5, \"transientField\": 9}", XmlAccessorTypeBean.class);
+    assertEquals(10, bean.a);
+    assertEquals(0, bean.b);
+    assertEquals(2, bean.transientField);
+  }
 
-	@Test
-	public void testXmlAttributeSerialization() {
-		assertEquals("{\"a\":0,\"c\":1,\"d\":null}", genson.serialize(new XmlAttributeBean()));
-	}
+  @Test
+  public void testXmlAttributeSerialization() {
+    assertEquals("{\"a\":0,\"c\":1,\"d\":null}", genson.serialize(new XmlAttributeBean()));
+  }
 
-	@Test
-	public void testXmlAttributeDeserialization() {
-		XmlAttributeBean bean = genson.deserialize("{\"a\":2,\"d\":3,\"c\":4}",
-				XmlAttributeBean.class);
-		assertEquals(2, bean.a);
-		assertEquals(3, bean.b.intValue());
-		assertEquals(4, bean.c);
-	}
+  @Test
+  public void testXmlAttributeDeserialization() {
+    XmlAttributeBean bean = genson.deserialize("{\"a\":2,\"d\":3,\"c\":4}",
+      XmlAttributeBean.class);
+    assertEquals(2, bean.a);
+    assertEquals(3, bean.b.intValue());
+    assertEquals(4, bean.c);
+  }
 
-	@Test
-	public void testXmlElementSerialization() {
-		assertEquals("{\"b\":0,\"bean\":{\"a\":0},\"c\":0}", genson.serialize(new XmlElementBean()));
-	}
+  @Test
+  public void testXmlElementSerialization() {
+    assertEquals("{\"b\":0,\"bean\":{\"a\":0},\"c\":0}", genson.serialize(new XmlElementBean()));
+  }
 
-	@Test
-	public void testXmlElementDeserialization() {
-		XmlElementBean bean = genson.deserialize("{\"b\":1,\"bean\":{\"a\":2},\"c\":3}",
-				XmlElementBean.class);
-		assertEquals(1, bean.b);
-		assertEquals(2, ((EmptyBean) bean.a).a);
-		assertEquals(3, bean.c);
-	}
+  @Test
+  public void testXmlElementDeserialization() {
+    XmlElementBean bean = genson.deserialize("{\"b\":1,\"bean\":{\"a\":2},\"c\":3}",
+      XmlElementBean.class);
+    assertEquals(1, bean.b);
+    assertEquals(2, ((EmptyBean) bean.a).a);
+    assertEquals(3, bean.c);
+  }
 
-	@Test
-	public void testXmlEnumValue() {
-		String json = genson.serialize(XmlEnumValueBean.ONE);
-		assertEquals("\"1\"", json);
-		assertEquals(XmlEnumValueBean.ONE, genson.deserialize(json, XmlEnumValueBean.class));
+  @Test
+  public void testXmlEnumValue() {
+    String json = genson.serialize(XmlEnumValueBean.ONE);
+    assertEquals("\"1\"", json);
+    assertEquals(XmlEnumValueBean.ONE, genson.deserialize(json, XmlEnumValueBean.class));
 
-		json = genson.serialize(XmlEnumValueBean.TWO);
-		assertEquals("\"TWO\"", json);
-		assertEquals(XmlEnumValueBean.TWO, genson.deserialize(json, XmlEnumValueBean.class));
-	}
+    json = genson.serialize(XmlEnumValueBean.TWO);
+    assertEquals("\"TWO\"", json);
+    assertEquals(XmlEnumValueBean.TWO, genson.deserialize(json, XmlEnumValueBean.class));
+  }
 
-	@Test
-	public void testXmlJavaTypeAdapter() {
-		assertEquals("{\"v\":\"0\"}", genson.serialize(new XmlJavaTypeAdapterBean()));
-	}
+  @Test
+  public void testXmlJavaTypeAdapter() {
+    assertEquals("{\"v\":\"0\"}", genson.serialize(new XmlJavaTypeAdapterBean()));
+  }
 
-	@Test
-	public void testXmlTransientSerialization() {
-		XmlTransientContainer container = new XmlTransientContainer();
-		container.bean = new XmlTransientBean();
-		assertEquals("{}", genson.serialize(container));
-	}
+  @Test
+  public void testXmlTransientSerialization() {
+    XmlTransientContainer container = new XmlTransientContainer();
+    container.bean = new XmlTransientBean();
+    assertEquals("{}", genson.serialize(container));
+  }
 
-	@Test
-	public void testXmlTransientDeserialization() {
-		XmlTransientContainer container = genson.deserialize("{\"a\":1,\"b\":2,\"bean\":{}}",
-				XmlTransientContainer.class);
-		assertEquals(0, container.a);
-		assertEquals(0, container.b);
-		assertEquals(null, container.bean);
-	}
+  @Test
+  public void testXmlTransientDeserialization() {
+    XmlTransientContainer container = genson.deserialize("{\"a\":1,\"b\":2,\"bean\":{}}",
+      XmlTransientContainer.class);
+    assertEquals(0, container.a);
+    assertEquals(0, container.b);
+    assertEquals(null, container.bean);
+  }
 
-	public static class XmlAttributeBean {
-		@XmlAttribute
-		private int a;
-		@XmlAttribute(name = "d", required = true)
-		private Integer b;
-		public transient int c = 1;
+  public static class XmlAttributeBean {
+    @XmlAttribute
+    private int a;
+    @XmlAttribute(name = "d", required = true)
+    private Integer b;
+    public transient int c = 1;
 
-		@XmlAttribute
-		private int getC() {
-			return c;
-		}
+    @XmlAttribute
+    private int getC() {
+      return c;
+    }
 
-		@XmlAttribute
-		private void setC(int c) {
-			this.c = c;
-		}
-	}
+    @XmlAttribute
+    private void setC(int c) {
+      this.c = c;
+    }
+  }
 
-	public static class XmlElementBean {
-		@XmlElement(name = "bean", type = EmptyBean.class)
-		private Object a = new EmptyBean();
-		@XmlElement(name = "c")
-		private int c;
-		private transient int b;
+  public static class XmlElementBean {
+    @XmlElement(name = "bean", type = EmptyBean.class)
+    private Object a = new EmptyBean();
+    @XmlElement(name = "c")
+    private int c;
+    private transient int b;
 
-		@XmlElement
-		private int getB() {
-			return b;
-		}
+    @XmlElement
+    private int getB() {
+      return b;
+    }
 
-		@XmlElement
-		private void setB(int b) {
-			this.b = b;
-		}
-	}
+    @XmlElement
+    private void setB(int b) {
+      this.b = b;
+    }
+  }
 
-	public static class EmptyBean {
-		public int a;
-	}
+  public static class EmptyBean {
+    public int a;
+  }
 
-	public static class XmlJavaTypeAdapterBean {
-		@XmlJavaTypeAdapter(MyXmlAdapter.class)
-		public int v;
-	}
+  public static class XmlJavaTypeAdapterBean {
+    @XmlJavaTypeAdapter(MyXmlAdapter.class)
+    public int v;
+  }
 
-	public static class MyXmlAdapter extends XmlAdapter<String, Integer> {
+  public static class MyXmlAdapter extends XmlAdapter<String, Integer> {
 
-		@Override
-		public Integer unmarshal(String v) throws Exception {
-			return Integer.valueOf(v);
-		}
+    @Override
+    public Integer unmarshal(String v) throws Exception {
+      return Integer.valueOf(v);
+    }
 
-		@Override
-		public String marshal(Integer v) throws Exception {
-			return v.toString();
-		}
+    @Override
+    public String marshal(Integer v) throws Exception {
+      return v.toString();
+    }
 
-	}
+  }
 
-	@XmlEnum(Integer.class)
-	public static enum XmlEnumValueBean {
-		@XmlEnumValue("1")
-		ONE, TWO
-	}
+  @XmlEnum(Integer.class)
+  public static enum XmlEnumValueBean {
+    @XmlEnumValue("1")
+    ONE, TWO
+  }
 
-	@XmlAccessorType(XmlAccessType.FIELD)
-	public static class XmlElementRefBean {
+  @XmlAccessorType(XmlAccessType.FIELD)
+  public static class XmlElementRefBean {
 
-		// TODO not yet implemented, does really someone use such feature in JSON world?
-		@XmlElementRef
-		private XmlRootElementBean a;
-		@XmlElementRef
-		private XmlRootElementDefaultBean b;
-	}
+    // TODO not yet implemented, does really someone use such feature in JSON world?
+    @XmlElementRef
+    private XmlRootElementBean a;
+    @XmlElementRef
+    private XmlRootElementDefaultBean b;
+  }
 
-	@XmlRootElement
-	public static class XmlRootElementDefaultBean {
+  @XmlRootElement
+  public static class XmlRootElementDefaultBean {
 
-	}
+  }
 
-	@XmlRootElement(name = "oo")
-	public static class XmlRootElementBean {
+  @XmlRootElement(name = "oo")
+  public static class XmlRootElementBean {
 
-	}
+  }
 
-	@XmlAccessorType(XmlAccessType.FIELD)
-	public static class XmlAccessorTypeBean {
-		private int a = 1;
-		private transient int transientField = 2;
-		private transient int b;
+  @XmlAccessorType(XmlAccessType.FIELD)
+  public static class XmlAccessorTypeBean {
+    private int a = 1;
+    private transient int transientField = 2;
+    private transient int b;
 
-		public void setB(int b) {
-			this.b = b;
-		}
+    public void setB(int b) {
+      this.b = b;
+    }
 
-		public int getB() {
-			return 3;
-		}
-	}
+    public int getB() {
+      return 3;
+    }
+  }
 
-	public static class XmlTransientContainer {
-		@XmlTransient
-		public int a;
-		public XmlTransientBean bean;
-		private int b;
+  public static class XmlTransientContainer {
+    @XmlTransient
+    public int a;
+    public XmlTransientBean bean;
+    private int b;
 
-		public int getB() {
-			return b;
-		}
+    public int getB() {
+      return b;
+    }
 
-		@XmlTransient
-		public void setB(int b) {
-			this.b = b;
-		}
-	}
+    @XmlTransient
+    public void setB(int b) {
+      this.b = b;
+    }
+  }
 
-	@XmlTransient
-	public static class XmlTransientBean {
+  @XmlTransient
+  public static class XmlTransientBean {
 
-	}
+  }
 }

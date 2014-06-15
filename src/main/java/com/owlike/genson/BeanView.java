@@ -3,7 +3,7 @@ package com.owlike.genson;
 /**
  * Interface to be implemented by classes who want to act as a view on objects of type T during
  * serialization and deserializaiton.
- * 
+ * <p/>
  * To understand what a BeanView is we must first understand one of the problems it is intended to
  * solve. Imagine you store some business objects in a cache and you have internal and external
  * webservices that all return a different json representation of those objects (filtered properties
@@ -18,7 +18,7 @@ package com.owlike.genson;
  * data from the cached objects to the DTOs and serialize them. As a result your cache has lost some
  * of its interest (you will create new instances of DTOs).</li>
  * </ul>
- * <p>
+ * <p/>
  * The BeanView tries to solve this kind of problem by taking the second approach. Indeed
  * implementations of BeanView will act as a stateless bean that will extract data (and could apply
  * transformations) during serialization and as a factory and data aggregator during
@@ -34,69 +34,69 @@ package com.owlike.genson;
  * method {@link com.owlike.genson.GensonBuilder#useBeanViews(boolean)}
  * setWithBeanViewConverter(true)} from Genson.Builder. Lets have a look at this example to better
  * understand how it works.
- * 
+ * <p/>
  * <pre>
  * public static class Person {
  * 	private String lastName;
  * 	String name;
  * 	int birthYear;
  * 	String thisFieldWontBeSerialized;
- * 
+ *
  * 	Person(String lastName) {
  * 		this.lastName = lastName;
- * 	}
- * 
+ *  }
+ *
  * public String getLastName() {
  * 	return lastName;
  * }
- * 
+ *
  * // instead of serializing and deserializing Person based on the fields and methods it contains those
  * // and only those from the BeanView will be used
  * public static class ViewOfPerson implements BeanView&lt;Person&gt; {
  * 	public ViewOfPerson() {
- * 	}
- * 
+ *  }
+ *
  * 	// This method will be called to create an instance of Person instead of using the constructor
  * 	// or annotated @Creator method from Person
  * 	&#064;JsonCreator
  * 	public static Person createNewPerson(String lastName) {
  * 		return new Person(lastName);
- * 	}
- * 
+ *  }
+ *
  * 	public String getLastName(Person p) {
  * 		return p.getLastName();
- * 	}
- * 
+ *  }
+ *
  * 	public @JsonProperty(&quot;name&quot;)
  * 	String getNameOf(Person p) {
  * 		return p.name;
- * 	}
- * 
+ *  }
+ *
  * 	// here we will transform the birth year of the person into its age and change the serialized
  * 	// name from &quot;birthYear&quot; to &quot;age&quot;
  * 	public int getAge(Person p) {
  * 		return GregorianCalendar.getInstance().get(Calendar.YEAR) - p.birthYear;
- * 	}
- * 
+ *  }
+ *
  * 	public void setName(String name, Person p) {
  * 		p.name = name;
- * 	}
- * 
+ *  }
+ *
  * 	// here it will match the property named &quot;age&quot; from the json stream and transform it into birth
  * 	// year of Person
  * 	&#064;JsonProperty(&quot;age&quot;)
  * 	public void setBirthYear(int personBirthYear, Person p) {
  * 		p.birthYear = GregorianCalendar.getInstance().get(Calendar.YEAR) - personBirthYear;
- * 	}
+ *  }
  * }
- * 
+ *
  * public static void main(String[] args) {
  * 	Genson genson = new Genson.Builder().setWithBeanViewConverter(true).create();
  * 	genson.serialize(new Person("eugen"), ViewOfPerson.class);
  * }
  * </pre>
- * 
- * <p>
+ * <p/>
+ * <p/>
  * Implementations of BeanView must be stateless, thread safe and have a default no arg constructor.
  * BeanViews will be applied at <u>runtime before the standard Converter</u>. If a view for the
  * current type is present in the context it will be used instead of the corresponding Converter. If
@@ -105,13 +105,12 @@ package com.owlike.genson;
  * >BeanViewConverter</a> and <a href=
  * "http://code.google.com/p/genson/source/browse/src/main/java/com/owlike/genson/reflect/BeanViewDescriptorProvider.java"
  * >BeanViewDescriptorProvider</a>.
- * 
+ *
+ * @param <T> the type of objects on which this view will be applied.
  * @see com.owlike.genson.convert.BeanViewConverter BeanViewConverter
  * @see com.owlike.genson.reflect.BeanViewDescriptorProvider BeanViewDescriptorProvider
  * @see com.owlike.genson.annotation.JsonCreator JsonCreator
  * @see com.owlike.genson.annotation.JsonProperty JsonProperty
- * 
- * @param <T> the type of objects on which this view will be applied.
  */
 public interface BeanView<T> {
 

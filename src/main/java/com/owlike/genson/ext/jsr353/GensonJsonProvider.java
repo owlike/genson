@@ -14,86 +14,86 @@ import java.util.Collections;
 import java.util.Map;
 
 public class GensonJsonProvider extends JsonProvider {
-    private final GensonJsonGeneratorFactory generatorFactory = new GensonJsonGeneratorFactory();
-    private final GensonJsonParserFactory parserFactory = new GensonJsonParserFactory();
-    private final GensonJsonReaderFactory readerFactory = new GensonJsonReaderFactory(
-            Collections.singletonMap(GensonJsonParser.STRICT_DOUBLE_PARSE, true)
-    );
-    private final GensonJsonWriterFactory writerFactory = new GensonJsonWriterFactory();
-    private final GensonJsonBuilderFactory builderFactory = new GensonJsonBuilderFactory();
+  private final GensonJsonGeneratorFactory generatorFactory = new GensonJsonGeneratorFactory();
+  private final GensonJsonParserFactory parserFactory = new GensonJsonParserFactory();
+  private final GensonJsonReaderFactory readerFactory = new GensonJsonReaderFactory(
+    Collections.singletonMap(GensonJsonParser.STRICT_DOUBLE_PARSE, true)
+  );
+  private final GensonJsonWriterFactory writerFactory = new GensonJsonWriterFactory();
+  private final GensonJsonBuilderFactory builderFactory = new GensonJsonBuilderFactory();
 
-    @Override
-    public JsonParser createParser(Reader reader) {
-        return parserFactory.createParser(reader);
-    }
+  @Override
+  public JsonParser createParser(Reader reader) {
+    return parserFactory.createParser(reader);
+  }
 
-    @Override
-    public JsonParser createParser(InputStream in) {
-        return parserFactory.createParser(in);
-    }
+  @Override
+  public JsonParser createParser(InputStream in) {
+    return parserFactory.createParser(in);
+  }
 
-    @Override
-    public JsonParserFactory createParserFactory(Map<String, ?> config) {
-        return new GensonJsonParserFactory(config);
-    }
+  @Override
+  public JsonParserFactory createParserFactory(Map<String, ?> config) {
+    return new GensonJsonParserFactory(config);
+  }
 
-    @Override
-    public JsonGenerator createGenerator(Writer writer) {
-        return generatorFactory.createGenerator(writer);
-    }
+  @Override
+  public JsonGenerator createGenerator(Writer writer) {
+    return generatorFactory.createGenerator(writer);
+  }
 
-    @Override
-    public JsonGenerator createGenerator(OutputStream out) {
-        return generatorFactory.createGenerator(out);
-    }
+  @Override
+  public JsonGenerator createGenerator(OutputStream out) {
+    return generatorFactory.createGenerator(out);
+  }
 
-    @Override
-    public JsonGeneratorFactory createGeneratorFactory(Map<String, ?> config) {
-        return new GensonJsonGeneratorFactory(config);
-    }
+  @Override
+  public JsonGeneratorFactory createGeneratorFactory(Map<String, ?> config) {
+    return new GensonJsonGeneratorFactory(config);
+  }
 
-    @Override
-    public JsonReader createReader(Reader reader) {
-        return readerFactory.createReader(reader);
-    }
+  @Override
+  public JsonReader createReader(Reader reader) {
+    return readerFactory.createReader(reader);
+  }
 
-    @Override
-    public JsonReader createReader(InputStream in) {
-        return readerFactory.createReader(in);
-    }
+  @Override
+  public JsonReader createReader(InputStream in) {
+    return readerFactory.createReader(in);
+  }
 
-    @Override
-    public JsonWriter createWriter(Writer writer) {
-        return writerFactory.createWriter(writer);
-    }
+  @Override
+  public JsonWriter createWriter(Writer writer) {
+    return writerFactory.createWriter(writer);
+  }
 
-    @Override
-    public JsonWriter createWriter(OutputStream out) {
-        return writerFactory.createWriter(out);
-    }
+  @Override
+  public JsonWriter createWriter(OutputStream out) {
+    return writerFactory.createWriter(out);
+  }
 
-    @Override
-    public JsonWriterFactory createWriterFactory(Map<String, ?> config) {
-        return new GensonJsonWriterFactory(config);
-    }
+  @Override
+  public JsonWriterFactory createWriterFactory(Map<String, ?> config) {
+    return new GensonJsonWriterFactory(config);
+  }
 
-    @Override
-    public JsonReaderFactory createReaderFactory(Map<String, ?> config) {
-        return new GensonJsonReaderFactory(config);
-    }
+  @Override
+  public JsonReaderFactory createReaderFactory(Map<String, ?> config) {
+    return new GensonJsonReaderFactory(config);
+  }
 
-    @Override
-    public JsonObjectBuilder createObjectBuilder() {
-        return builderFactory.createObjectBuilder();
-    }
+  @Override
+  public JsonObjectBuilder createObjectBuilder() {
+    return builderFactory.createObjectBuilder();
+  }
 
-    @Override
-    public JsonArrayBuilder createArrayBuilder() {
-        return builderFactory.createArrayBuilder();
-    }
+  @Override
+  public JsonArrayBuilder createArrayBuilder() {
+    return builderFactory.createArrayBuilder();
+  }
 
-    @Override
-    public JsonBuilderFactory createBuilderFactory(Map<String, ?> config) {
-        return builderFactory;
-    }
+  @Override
+  public JsonBuilderFactory createBuilderFactory(Map<String, ?> config) {
+    return builderFactory;
+  }
 }

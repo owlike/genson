@@ -10,11 +10,9 @@ import java.lang.annotation.Target;
 /**
  * Annotated Serializer/Deserializer/Converter will be excluded from the BeanView mechanism.
  * Most default converters are annotated with HandleBeanView (IntegerConverter, BooleanConverter etc).
- * 
- * @see com.owlike.genson.convert.BeanViewConverter BeanViewConverter
- * 
- * @author eugen
  *
+ * @author eugen
+ * @see com.owlike.genson.convert.BeanViewConverter BeanViewConverter
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)

@@ -5,55 +5,60 @@ import com.owlike.genson.GenericType;
 import com.owlike.genson.Genson;
 import com.owlike.genson.GensonBuilder;
 import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.List;
 
 public class OptionalSerDeserTest {
-    private Genson genson = new GensonBuilder().withBundle(new GuavaBundle()).create();
+  private Genson genson = new GensonBuilder().withBundle(new GuavaBundle()).create();
 
-    @Test public void roundTripListOfOptionals() {
-        List<Optional<String>> expected = Arrays.asList(Optional.<String>absent(), Optional.fromNullable("hey"), Optional.of("you"));
-        GenericType<List<Optional<String>>> type = new GenericType<List<Optional<String>>>() {};
-        String json = genson.serialize(expected, type);
-        List<Optional<String>> actual = genson.deserialize(json, type);
-        assertEquals(expected, actual);
+  @Test
+  public void roundTripListOfOptionals() {
+    List<Optional<String>> expected = Arrays.asList(Optional.<String>absent(), Optional.fromNullable("hey"), Optional.of("you"));
+    GenericType<List<Optional<String>>> type = new GenericType<List<Optional<String>>>() {
+    };
+    String json = genson.serialize(expected, type);
+    List<Optional<String>> actual = genson.deserialize(json, type);
+    assertEquals(expected, actual);
+  }
+
+  @Test
+  public void roundTripPojoWithOptionals() {
+    Pojo expected = new Pojo(Optional.of(1), Optional.<Pojo>absent(), "foo bar");
+    String json = genson.serialize(expected);
+    Pojo actual = genson.deserialize(json, Pojo.class);
+
+    assertEquals(expected, actual);
+  }
+
+  public static class Pojo {
+    public Optional<Integer> optInt;
+    public Optional<Pojo> optPojo;
+    public String other;
+
+    public Pojo() {
     }
 
-    @Test public void roundTripPojoWithOptionals() {
-        Pojo expected = new Pojo(Optional.of(1), Optional.<Pojo>absent(), "foo bar");
-        String json = genson.serialize(expected);
-        Pojo actual = genson.deserialize(json, Pojo.class);
-
-        assertEquals(expected, actual);
+    public Pojo(Optional<Integer> optInt, Optional<Pojo> optPojo, String other) {
+      this.optInt = optInt;
+      this.optPojo = optPojo;
+      this.other = other;
     }
 
-    public static class Pojo {
-        public Optional<Integer> optInt;
-        public Optional<Pojo> optPojo;
-        public String other;
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
 
-        public Pojo() {}
+      Pojo pojo = (Pojo) o;
 
-        public Pojo(Optional<Integer> optInt, Optional<Pojo> optPojo, String other) {
-            this.optInt = optInt;
-            this.optPojo = optPojo;
-            this.other = other;
-        }
+      if (optInt != null ? !optInt.equals(pojo.optInt) : pojo.optInt != null) return false;
+      if (optPojo != null ? !optPojo.equals(pojo.optPojo) : pojo.optPojo != null) return false;
+      if (other != null ? !other.equals(pojo.other) : pojo.other != null) return false;
 
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            Pojo pojo = (Pojo) o;
-
-            if (optInt != null ? !optInt.equals(pojo.optInt) : pojo.optInt != null) return false;
-            if (optPojo != null ? !optPojo.equals(pojo.optPojo) : pojo.optPojo != null) return false;
-            if (other != null ? !other.equals(pojo.other) : pojo.other != null) return false;
-
-            return true;
-        }
+      return true;
     }
+  }
 }

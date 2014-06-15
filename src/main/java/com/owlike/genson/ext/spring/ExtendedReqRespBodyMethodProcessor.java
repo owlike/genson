@@ -15,34 +15,34 @@ import com.owlike.genson.ThreadLocalHolder;
 
 public class ExtendedReqRespBodyMethodProcessor extends RequestResponseBodyMethodProcessor {
 
-	public ExtendedReqRespBodyMethodProcessor(List<HttpMessageConverter<?>> messageConverters) {
-		super(messageConverters);
-	}
+  public ExtendedReqRespBodyMethodProcessor(List<HttpMessageConverter<?>> messageConverters) {
+    super(messageConverters);
+  }
 
-	@Override
-	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
-		Object object = null;
-		try {
-			ThreadLocalHolder.store("__GENSON$method_param", parameter);
-			object = super.resolveArgument(parameter, mavContainer, webRequest, binderFactory);
-		} finally {
-			ThreadLocalHolder.remove("__GENSON$method_param", MethodParameter.class);
-		}
+  @Override
+  public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+                                NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+    Object object = null;
+    try {
+      ThreadLocalHolder.store("__GENSON$method_param", parameter);
+      object = super.resolveArgument(parameter, mavContainer, webRequest, binderFactory);
+    } finally {
+      ThreadLocalHolder.remove("__GENSON$method_param", MethodParameter.class);
+    }
 
-		return object;
-	}
+    return object;
+  }
 
-	@Override
-	public void handleReturnValue(Object returnValue, MethodParameter returnType,
-			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws IOException,
-			HttpMediaTypeNotAcceptableException {
+  @Override
+  public void handleReturnValue(Object returnValue, MethodParameter returnType,
+                                ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws IOException,
+    HttpMediaTypeNotAcceptableException {
 
-		try {
-			ThreadLocalHolder.store("__GENSON$return_param", returnType);
-			super.handleReturnValue(returnValue, returnType, mavContainer, webRequest);
-		} finally {
-			ThreadLocalHolder.remove("__GENSON$return_param", MethodParameter.class);
-		}
-	}
+    try {
+      ThreadLocalHolder.store("__GENSON$return_param", returnType);
+      super.handleReturnValue(returnValue, returnType, mavContainer, webRequest);
+    } finally {
+      ThreadLocalHolder.remove("__GENSON$return_param", MethodParameter.class);
+    }
+  }
 }
