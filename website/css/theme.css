@@ -205,3 +205,11 @@ pre {
 .content > .container [role=main] h2:not(:first-child) {
     padding-top: 35px;
 }
+
+.sep {
+    background-color: #E5E5E5;
+    border-bottom: 1px solid #FFFFFF;
+    height: 2px;
+    margin: 9px 1px;
+    overflow: hidden;
+}
