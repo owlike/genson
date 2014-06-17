@@ -21,7 +21,7 @@ To get you started with Genson in Scala you only have to import com.owlike.genso
 and you are done!
 
 {% highlight scala %}
-import com.owlike.genson.ext.scala._
+import com.owlike.genson.ext.scala.defaultGenson_
 
 val jsonString = toJson(someValue)
 val actualValue = fromJson[SomeType](json)

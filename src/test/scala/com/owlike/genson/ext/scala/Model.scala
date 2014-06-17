@@ -1,7 +1,5 @@
 package com.owlike.genson.ext.scala
 
-import com.owlike.genson.annotation.JsonCreator
-
 case class BasicPoso(val aString: String, val aInt: Int, val aBoolean: Boolean) {
   val shouldBeIgnored: Int = 10
   var other: String = _

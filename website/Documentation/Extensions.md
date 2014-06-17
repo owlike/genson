@@ -10,8 +10,7 @@ quick-overview: Genson provides out of the box integrations with some common fra
 
 At the moment you can find two kind of extensions in Genson,
 
- - Integrations of Genson in common frameworks to handle the JSON ser/deser. This kind of integration tries to be done automatically by Genson,
- but it is not always possible if the framework does not provide extension points.
+ - Integrations of Genson in common frameworks to handle the JSON ser/deser.
  - Integration in Genson of types defined in widely used libraries, ie. support JSR 353 JsonObject, JsonArray, etc types.
  This is done through the GensonBundle system.
 
@@ -57,7 +56,7 @@ By default Genson JAX-RS integration enables JAXB annotations support.
 
 ##JSR 353 - Java API for Json Processing##
 
-Genson provides two kind of integrations with the JSR. You can use Genson as the JSR implementation or use Genson
+Genson provides two kind of integrations with the JSR. You can use it as the JSR implementation or
 to work with the DOM structures defined in the JSR.
 
 
@@ -104,7 +103,7 @@ Since version 0.95 Genson provides support for JAXB annotations.
 All annotations are not supported as some do not make sense in the JSON world.
 enson annotations can be used to override Jaxb annotations.
 
-*In Jersey JAXB bundle is enabled by default*. If you are using Genson outside Jersey you have to register JAXB bundle:
+In Jersey JAXB bundle is enabled by default. If you are using Genson outside Jersey you have to register JAXB bundle:
 
 {% highlight java %}
 Genson genson = new Genson.Builder().with(new JAXBBundle()).create();

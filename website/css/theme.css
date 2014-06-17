@@ -1,18 +1,47 @@
-
-
 body {
-    margin-bottom: 50px;
     background-color: #f8f8f8;
     color: #333333;
     font-weight: 500;
+    font-family: Helvetica,arial,freesans,clean,sans-serif;
+    line-height: 1.7;
     letter-spacing: .1;
 }
 
-pre {
-    font-size: 12px;
+footer {
+  height: 120px;
+  margin-top: 60px;
+}
+
+footer a {
+  color: #595959;
+  font-size: 24px;
+}
+
+footer a:hover, footer a:focus, footer a:active {
+  color: #262626;
+}
+
+.highlight > pre {
+    font-size: 14px;
     overflow: auto;
     word-wrap: normal;
+    word-break: normal;
     white-space: pre;
+    margin: 0px;
+    padding: 10px;
+}
+
+.highlight {
+  padding: 10px 0;
+}
+
+h2 {
+  color: #333333;
+  text-shadow: 0px -1px 0px #e5e5ee;
+  font-weight: bolder;
+  font-size: 40px;
+
+  margin-bottom: 30px;
 }
 
 a {
@@ -69,7 +98,6 @@ header:after {
     background-color: inherit;
 }
 
-
 .jumbotron {
     background-color: rgba(46, 123,207, 0.80);
     border-bottom: 1px solid #275DA1;
@@ -82,12 +110,12 @@ header:after {
 .jumbotron, h1, .h1 {
     font-family: 'Architects Daughter','Helvetica Neue',Helvetica,Arial,serif;
     color: #FFFFFF;
-    text-shadow: 0 1px 0 #000000;
+    text-shadow: 0px -1px 0px #374683;
 }
 
 .jumbotron h1, .jumbotron .h1 {
     font-size: 60px !important;
-    text-shadow: 4px 3px 0 #275DA1, 9px 8px 0 rgba(0, 0, 0, 0.15);
+    text-shadow: 0px -1px 0px #374683;
 }
 
 .jumbotron .btn {
@@ -123,7 +151,7 @@ header:after {
     font-size: 55px !important;
 }
 
-pre {
+.featurette-detail pre {
     font-size: 1.1em;
     padding: 20px !important;
 }
@@ -197,13 +225,12 @@ pre {
     border-left: 1px solid #428BCA;
 }
 
-.content > .container [role=main] .highlight {
-    /*padding-bottom: 15px;*/
-    font-size: 12px;
-}
-
 .content > .container [role=main] h2:not(:first-child) {
     padding-top: 35px;
+}
+
+.content p {
+    margin: 15px 0;
 }
 
 .sep {
