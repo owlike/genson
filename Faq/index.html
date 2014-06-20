@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <title>Genson</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Fast & extensible Java <> Json library">
+    <meta name="description" content="Fast & easy to use Java <> Json library">
 
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
 
@@ -62,6 +62,13 @@
 
 
 <header>
+    <div class="modal fade" id="shareDialog" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <iframe></iframe>
+        </div>
+      </div>
+    </div>
     <div class="container">
         <div class="navbar-header">
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#menu-navbar-collapse-1">
@@ -75,6 +82,9 @@
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-book"></i> Documentation <b class="caret"></b></a>
                     <ul class="dropdown-menu">
+                        <li><a href="/genson/Documentation/UserGuide">User Guide</a></li>
+                        <li><a href="/genson/Documentation/ScalaGuide">Scala Guide</a></li>
+                        <li class="sep"></li>
                         <li><a href="/genson/Documentation/Extensions">Extensions</a></li>
                         <li><a href="/genson/Documentation/Configuration">Configuration</a></li>
                         <li><a href="/genson/Documentation/Javadoc">Javadoc</a></li>
@@ -84,6 +94,62 @@
                 <li><a href="/genson/Community"><i class="fa fa-group"></i> Community</a></li>
                 <li><a href="/genson/Faq"><i class="fa fa-question"></i> FAQ</a></li>
             </ul>
+          <ul class="nav navbar-nav navbar-right">
+            <li>
+              <a class="share-button twitter-share-button" href="https://twitter.com/intent/tweet"
+                 data-toggle="tooltip" data-placement="bottom" title="Share on Twitter">
+                <i class="fa fa-twitter-square"></i>
+              </a>
+              <a class="share-button google-plus-share-button" href="https://twitter.com/intent/tweet"
+                 data-toggle="tooltip" data-placement="bottom" title="Share on Google+">
+                <i class="fa fa-google-plus-square"></i>
+              </a>
+              <a class="share-button linkedin-share-button" href="https://www.linkedin.com/cws/share"
+                 data-toggle="tooltip" data-placement="bottom" title="Share on LinkedIn">
+                <i class="fa fa-linkedin-square"></i>
+              </a>
+            </li>
+            <script>
+              var linkedInParams = {
+                url: 'http://owlike.github.io/genson/',
+                original_referer: document.URL,
+                isFramed: false,
+                lang: 'en_US',
+                token: ''
+              }
+
+              var twitterParams = {
+                original_referer: document.URL,
+                text: '#Genson, fast and easy to use Java <> JSON library.',
+                tw_p: 'tweetbutton',
+                url: 'http://owlike.github.io/genson/',
+                via: 'EugenCepoi'
+              }
+
+              var googlePlusParams = {
+                url: 'http://owlike.github.io/genson/'
+              }
+
+              $('.share-button').tooltip({delay: { show: 500, hide: 100 }});
+
+              share('a.twitter-share-button', 'https://twitter.com/intent/tweet?', twitterParams);
+              share('a.linkedin-share-button', 'https://www.linkedin.com/cws/share?', linkedInParams);
+              share('a.google-plus-share-button', 'https://plus.google.com/share?', googlePlusParams);
+
+              function share(selector, shareUrl, params) {
+                $(selector).click(function(evt) {
+                  evt.preventDefault();
+
+                  var url = shareUrl + $.map(params, function(value, key) {
+                    return key+'='+encodeURIComponent(value);
+                  }).join('&');
+
+                  var t="scrollbars=yes,resizable=yes,toolbar=no,location=yes",n=550,r=420,i=screen.height,s=screen.width,o=Math.round(s/2-n/2),u=0;
+                  window.open(url,null,t+",width="+n+",height="+r+",left="+o+",top="+u);
+                });
+              }
+            </script>
+          </ul>
         </div>
     </div>
 </header>
@@ -164,5 +230,15 @@ For example if you want to accept public, protected and private fields :</p>
 
 
 
+<footer>
+  <div class="text-center">
+    <div class="row">
+      <a href="https://github.com/owlike/genson"><i class="fa fa-github"></i></a>
+    </div>
+    <div class="row">
+      Copyright &copy; 2012-2014, Eugen Cepoi
+    </div>
+  </div>
+</footer>
 </body>
 </html>

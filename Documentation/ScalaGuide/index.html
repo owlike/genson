@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Genson</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Fast & easy to use Java <> Json library">
+
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-theme.min.css">
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <link href='/genson/css/theme.css' rel='stylesheet' type='text/css' />
+    <link href='/genson/css/pygments-default.css' rel='stylesheet' type='text/css' />
+
+    <script>
+
+        $(function() {
+          $('a[href*=#]:not([href=#])').click(function() {
+            if (location.pathname.replace(/^\//,'') == this.pathname.replace(/^\//,'') && location.hostname == this.hostname) {
+              var target = $(this.hash);
+              target = target.length ? target : $('[name=' + this.hash.slice(1) +']');
+              if (target.length) {
+                $('html,body').animate({
+                  scrollTop: target.offset().top
+                }, 500);
+                return false;
+              }
+            }
+          });
+        });
+
+        
+          (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+          })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+          ga('create', 'UA-33280683-2', 'owlike.github.io');
+          ga('send', 'pageview');
+        
+    </script>
+</head>
+
+<body>
+
+
+
+<header>
+    <div class="modal fade" id="shareDialog" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <iframe></iframe>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#menu-navbar-collapse-1">
+                <i class="fa fa-bars menu-item"></i>
+            </button>
+            <a class="navbar-brand" href="/genson/">Genson</a>
+        </div>
+        <div class="collapse navbar-collapse" id="menu-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="/genson/GettingStarted"><i class="fa fa-compass"></i> Getting started</a></li>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-book"></i> Documentation <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/genson/Documentation/UserGuide">User Guide</a></li>
+                        <li><a href="/genson/Documentation/ScalaGuide">Scala Guide</a></li>
+                        <li class="sep"></li>
+                        <li><a href="/genson/Documentation/Extensions">Extensions</a></li>
+                        <li><a href="/genson/Documentation/Configuration">Configuration</a></li>
+                        <li><a href="/genson/Documentation/Javadoc">Javadoc</a></li>
+                        <li><a href="/genson/Documentation/Benchmarks & Metrics">Benchmarks & Metrics</a></li>
+                    </ul>
+                </li>
+                <li><a href="/genson/Community"><i class="fa fa-group"></i> Community</a></li>
+                <li><a href="/genson/Faq"><i class="fa fa-question"></i> FAQ</a></li>
+            </ul>
+          <ul class="nav navbar-nav navbar-right">
+            <li>
+              <a class="share-button twitter-share-button" href="https://twitter.com/intent/tweet"
+                 data-toggle="tooltip" data-placement="bottom" title="Share on Twitter">
+                <i class="fa fa-twitter-square"></i>
+              </a>
+              <a class="share-button google-plus-share-button" href="https://twitter.com/intent/tweet"
+                 data-toggle="tooltip" data-placement="bottom" title="Share on Google+">
+                <i class="fa fa-google-plus-square"></i>
+              </a>
+              <a class="share-button linkedin-share-button" href="https://www.linkedin.com/cws/share"
+                 data-toggle="tooltip" data-placement="bottom" title="Share on LinkedIn">
+                <i class="fa fa-linkedin-square"></i>
+              </a>
+            </li>
+            <script>
+              var linkedInParams = {
+                url: 'http://owlike.github.io/genson/',
+                original_referer: document.URL,
+                isFramed: false,
+                lang: 'en_US',
+                token: ''
+              }
+
+              var twitterParams = {
+                original_referer: document.URL,
+                text: '#Genson, fast and easy to use Java <> JSON library.',
+                tw_p: 'tweetbutton',
+                url: 'http://owlike.github.io/genson/',
+                via: 'EugenCepoi'
+              }
+
+              var googlePlusParams = {
+                url: 'http://owlike.github.io/genson/'
+              }
+
+              $('.share-button').tooltip({delay: { show: 500, hide: 100 }});
+
+              share('a.twitter-share-button', 'https://twitter.com/intent/tweet?', twitterParams);
+              share('a.linkedin-share-button', 'https://www.linkedin.com/cws/share?', linkedInParams);
+              share('a.google-plus-share-button', 'https://plus.google.com/share?', googlePlusParams);
+
+              function share(selector, shareUrl, params) {
+                $(selector).click(function(evt) {
+                  evt.preventDefault();
+
+                  var url = shareUrl + $.map(params, function(value, key) {
+                    return key+'='+encodeURIComponent(value);
+                  }).join('&');
+
+                  var t="scrollbars=yes,resizable=yes,toolbar=no,location=yes",n=550,r=420,i=screen.height,s=screen.width,o=Math.round(s/2-n/2),u=0;
+                  window.open(url,null,t+",width="+n+",height="+r+",left="+o+",top="+u);
+                });
+              }
+            </script>
+          </ul>
+        </div>
+    </div>
+</header>
+
+
+<div class="jumbotron">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>Scala User Guide</h1>
+                <p class="catch-phrase">
+                    Genson provides an out of the box integration with Scala for the high level databinding API.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="content">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-9" role="main">
+                <h2 id="overview">Overview</h2>
+
+<p>Genson provides an easy to use boiler free integration with Scala.
+It supports common Scala mutable and immutable collections, Option, tuples, case classes and even functions
+(when <a href="/Documentation/UserGuide/#polymorphic-types">class metadata ser/de is enabled</a>)!</p>
+
+<p>Standard classes will be ser/de with the classic Genson behaviour for Java.
+Genson classic features and annotations are supported (JsonIgnore, JsonProperty, JsonConverter, etc),
+bringing the power of Genson to Scala.</p>
+
+<p>To get you started with Genson in Scala you only have to import com.owlike.genson.ext.scala.defaultGenson_
+and you are done!</p>
+
+<div class="highlight"><pre><code class="scala"><span class="k">import</span> <span class="nn">com.owlike.genson.ext.scala.defaultGenson_</span>
+
+<span class="k">val</span> <span class="n">jsonString</span> <span class="k">=</span> <span class="n">toJson</span><span class="o">(</span><span class="n">someValue</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">actualValue</span> <span class="k">=</span> <span class="n">fromJson</span><span class="o">[</span><span class="kt">SomeType</span><span class="o">](</span><span class="n">json</span><span class="o">)</span>
+</code></pre></div>
+
+<p>Of course if the default configuration does not fit your needs you can make a custom Genson instance and then use it.
+For example lets say we want to enable indentation, serialize objects based on their runtime type and want to ser/de
+dates as timestamps and all fields from case classes (not only the ones present in the constructor or the vars).</p>
+
+<div class="highlight"><pre><code class="scala"><span class="k">import</span> <span class="nn">com.owlike.genson.ext.scala._</span>
+
+<span class="k">object</span> <span class="nc">CustomGenson</span> <span class="o">{</span>
+  <span class="k">val</span> <span class="n">customGenson</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">ScalaGenson</span><span class="o">(</span>
+    <span class="k">new</span> <span class="nc">GensonBuilder</span><span class="o">()</span>
+      <span class="o">.</span><span class="n">useIndentation</span><span class="o">(</span><span class="kc">true</span><span class="o">)</span>
+      <span class="o">.</span><span class="n">useRuntimeType</span><span class="o">(</span><span class="kc">true</span><span class="o">)</span>
+      <span class="o">.</span><span class="n">useTimeInMillis</span><span class="o">(</span><span class="kc">true</span><span class="o">)</span>
+      <span class="o">.</span><span class="n">withBundle</span><span class="o">(</span><span class="nc">ScalaBundle</span><span class="o">().</span><span class="n">useOnlyConstructorFields</span><span class="o">(</span><span class="kc">false</span><span class="o">))</span>
+      <span class="o">.</span><span class="n">create</span><span class="o">()</span>
+  <span class="o">)</span>
+<span class="o">}</span>
+
+<span class="c1">// then just import it in the places you want to use this instance instead of the default one</span>
+<span class="k">import</span> <span class="nn">CustomGenson.customGenson._</span>
+
+<span class="c1">// and use it!</span>
+<span class="n">toJson</span><span class="o">(...)</span>
+<span class="n">fromJson</span><span class="o">[</span><span class="kt">SomeType</span><span class="o">](</span><span class="n">json</span><span class="o">)</span>
+</code></pre></div>
+
+<h2 id="collections--tuples">Collections &amp; Tuples</h2>
+
+<p>Genson provides a set of defaults converters for most scala collections (mutable and immutable).
+Scala provides some optimized types for maps and collections of few elements, Genson will respect it
+and deserialize to the optimized type.</p>
+
+<div class="highlight"><pre><code class="scala"><span class="k">import</span> <span class="nn">com.owlike.genson.ext.scala.defaultGenson_</span>
+
+<span class="c1">// [1,2,3]</span>
+<span class="k">val</span> <span class="n">jsonArray</span> <span class="k">=</span> <span class="n">toJson</span><span class="o">(</span><span class="nc">Seq</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span><span class="mi">2</span><span class="o">,</span><span class="mi">3</span><span class="o">))</span>
+<span class="k">val</span> <span class="n">seqOfInt</span> <span class="k">=</span> <span class="n">fromJson</span><span class="o">[</span><span class="kt">Seq</span><span class="o">](</span><span class="n">jsonArray</span><span class="o">)</span>
+
+<span class="c1">// {&quot;name&quot;:&quot;foo bar&quot;}</span>
+<span class="k">val</span> <span class="n">jsonMap</span> <span class="k">=</span> <span class="n">toJson</span><span class="o">(</span><span class="nc">Map</span><span class="o">(</span><span class="s">&quot;name&quot;</span> <span class="o">-&gt;</span> <span class="s">&quot;foo bar&quot;</span><span class="o">))</span>
+<span class="k">val</span> <span class="n">mapOfString</span> <span class="k">=</span> <span class="n">fromJson</span><span class="o">[</span><span class="kt">Map</span><span class="o">[</span><span class="kt">String</span>,<span class="kt">String</span><span class="o">]](</span><span class="n">jsonMap</span><span class="o">)</span>
+</code></pre></div>
+
+<p>Genson will serialize scala Tuples1 to 22, as json arrays.
+There is no restriction on the complexity of the tuples (may contain options, case classes, etc).</p>
+
+<div class="highlight"><pre><code class="scala"><span class="c1">// [&quot;foo&quot;,&quot;bar&quot;]</span>
+<span class="k">val</span> <span class="n">json</span> <span class="k">=</span> <span class="n">toJson</span><span class="o">((</span><span class="s">&quot;foo&quot;</span><span class="o">,</span> <span class="s">&quot;bar&quot;</span><span class="o">))</span>
+<span class="k">val</span> <span class="n">tuple</span> <span class="k">=</span> <span class="n">fromJson</span><span class="o">[(</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">)](</span><span class="n">json</span><span class="o">)</span>
+</code></pre></div>
+
+<h2 id="deserilizing-unknown-types">Deserilizing Unknown Types</h2>
+
+<p>When you don’t specify the type to use, Genson will deserialize:</p>
+
+<ul>
+  <li>Integer json numbers to Long</li>
+  <li>Double json numbers to Double</li>
+  <li>Json objects to scala immutable Map</li>
+  <li>Json arrays to scala immutable List</li>
+  <li>null to null</li>
+</ul>
+
+<div class="highlight"><pre><code class="scala"><span class="n">fromJson</span><span class="o">[</span><span class="kt">Any</span><span class="o">](</span><span class="s">&quot;&quot;&quot;{&quot;name&quot;:&quot;foo bar&quot;, &quot;age&quot;: 28, &quot;address&quot;:{}}&quot;&quot;&quot;</span><span class="o">)</span> <span class="k">match</span> <span class="o">{</span>
+ <span class="k">case</span> <span class="n">map</span><span class="k">:</span> <span class="kt">Map</span><span class="o">[</span><span class="kt">String</span>, <span class="k">_</span><span class="o">]</span> <span class="k">=&gt;</span> <span class="n">println</span><span class="o">(</span><span class="n">map</span><span class="o">)</span>
+ <span class="k">case</span> <span class="n">list</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="k">_</span><span class="o">]</span> <span class="k">=&gt;</span> <span class="n">list</span><span class="o">.</span><span class="n">foreach</span><span class="o">(</span><span class="n">println</span><span class="o">)</span>
+ <span class="k">case</span> <span class="k">_</span> <span class="k">=&gt;</span> <span class="k">throw</span> <span class="k">new</span> <span class="nc">IllegalStateException</span><span class="o">()</span>
+<span class="o">}</span>
+
+<span class="c1">// or you can wrap the values in options</span>
+<span class="k">val</span> <span class="n">mapWithOptionalValues</span> <span class="k">=</span> <span class="n">fromJson</span><span class="o">[</span><span class="kt">Map</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">Option</span><span class="o">[</span><span class="k">_</span><span class="o">]]](</span>
+  <span class="s">&quot;&quot;&quot;{&quot;name&quot;:&quot;foo bar&quot;, &quot;age&quot;: 28, &quot;address&quot;:null}&quot;&quot;&quot;</span>
+<span class="o">)</span>
+</code></pre></div>
+
+<h2 id="case-classes">Case classes</h2>
+
+<p>Genson has also out of the box support for case classes. By default Case classes ser/de will follow these rules:</p>
+
+<ul>
+  <li>Serialize only attributes defined in the main constructor and vars defined in the class,
+ ex: if you define a val in the class but not in the constructor, then it won’t be serialized.</li>
+  <li>If multiple constructors are defined, only the default one will be used
+ (that has a default apply method generated in its companion object)</li>
+  <li>Set/Get methods are not used as it does not make sense with case classes.
+ If you want to use java beans then use plain old java classes.</li>
+</ul>
+
+<div class="highlight"><pre><code class="scala"><span class="k">case</span> <span class="k">class</span> <span class="nc">Address</span><span class="o">(</span><span class="n">street</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">building</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span>
+<span class="k">case</span> <span class="k">class</span> <span class="nc">Person</span><span class="o">(</span><span class="n">name</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">age</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span> <span class="n">address</span><span class="k">:</span> <span class="kt">Option</span><span class="o">[</span><span class="kt">Address</span><span class="o">])</span>
+
+<span class="c1">// {&quot;name&quot;:&quot;foo bar&quot;,&quot;age&quot;:28,&quot;address&quot;:{&quot;street&quot;:&quot;rue des lapins&quot;,building:1337}}</span>
+<span class="k">val</span> <span class="n">json</span> <span class="k">=</span> <span class="n">toJson</span><span class="o">(</span><span class="nc">Person</span><span class="o">(</span><span class="s">&quot;foo bar&quot;</span><span class="o">,</span> <span class="mi">28</span><span class="o">,</span> <span class="nc">Some</span><span class="o">(</span><span class="nc">Address</span><span class="o">(</span><span class="s">&quot;rue des lapins&quot;</span><span class="o">,</span> <span class="mi">1337</span><span class="o">)))</span>
+
+<span class="c1">// {&quot;name&quot;:&quot;foo bar&quot;,&quot;age&quot;:28,&quot;address&quot;:null}</span>
+<span class="k">val</span> <span class="n">jsonWithNoAddress</span> <span class="k">=</span> <span class="n">toJson</span><span class="o">(</span><span class="nc">Person</span><span class="o">(</span><span class="s">&quot;foo bar&quot;</span><span class="o">,</span> <span class="mi">28</span><span class="o">,</span> <span class="nc">None</span><span class="o">)</span>
+
+<span class="k">val</span> <span class="n">person</span> <span class="k">=</span> <span class="n">fromJson</span><span class="o">[</span><span class="kt">Person</span><span class="o">](</span><span class="n">json</span><span class="o">)</span>
+</code></pre></div>
+
+<p>Genson will serialize None as null and null is deserialized as None.</p>
+
+
+            </div>
+            <div class="col-md-3">
+                <div class="content-nav hidden-print" data-spy="affix" data-offset-top="240" role="complementary">
+                    <ul class="nav nav-tabs nav-stacked">
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+$(function() {
+    var menuContent = $('.content-nav ul')
+    $('h2').each(function(idx, elem) {
+      var $elem = $(elem)
+
+      if ($elem.index() > 0) $elem.before('<hr />')
+
+      menuContent.append('<li><a href="#' + elem.id + '">' + elem.innerHTML + '</a></li>')
+    })
+
+
+    $('body').scrollspy({ target: '.content-nav' })
+})
+</script>
+
+
+
+<footer>
+  <div class="text-center">
+    <div class="row">
+      <a href="https://github.com/owlike/genson"><i class="fa fa-github"></i></a>
+    </div>
+    <div class="row">
+      Copyright &copy; 2012-2014, Eugen Cepoi
+    </div>
+  </div>
+</footer>
+</body>
+</html>

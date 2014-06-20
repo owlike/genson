@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <title>Genson</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Fast & extensible Java <> Json library">
+    <meta name="description" content="Fast & easy to use Java <> Json library">
 
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
 
@@ -62,6 +62,13 @@
 
 
 <header>
+    <div class="modal fade" id="shareDialog" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <iframe></iframe>
+        </div>
+      </div>
+    </div>
     <div class="container">
         <div class="navbar-header">
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#menu-navbar-collapse-1">
@@ -75,6 +82,9 @@
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-book"></i> Documentation <b class="caret"></b></a>
                     <ul class="dropdown-menu">
+                        <li><a href="/genson/Documentation/UserGuide">User Guide</a></li>
+                        <li><a href="/genson/Documentation/ScalaGuide">Scala Guide</a></li>
+                        <li class="sep"></li>
                         <li><a href="/genson/Documentation/Extensions">Extensions</a></li>
                         <li><a href="/genson/Documentation/Configuration">Configuration</a></li>
                         <li><a href="/genson/Documentation/Javadoc">Javadoc</a></li>
@@ -84,6 +94,62 @@
                 <li><a href="/genson/Community"><i class="fa fa-group"></i> Community</a></li>
                 <li><a href="/genson/Faq"><i class="fa fa-question"></i> FAQ</a></li>
             </ul>
+          <ul class="nav navbar-nav navbar-right">
+            <li>
+              <a class="share-button twitter-share-button" href="https://twitter.com/intent/tweet"
+                 data-toggle="tooltip" data-placement="bottom" title="Share on Twitter">
+                <i class="fa fa-twitter-square"></i>
+              </a>
+              <a class="share-button google-plus-share-button" href="https://twitter.com/intent/tweet"
+                 data-toggle="tooltip" data-placement="bottom" title="Share on Google+">
+                <i class="fa fa-google-plus-square"></i>
+              </a>
+              <a class="share-button linkedin-share-button" href="https://www.linkedin.com/cws/share"
+                 data-toggle="tooltip" data-placement="bottom" title="Share on LinkedIn">
+                <i class="fa fa-linkedin-square"></i>
+              </a>
+            </li>
+            <script>
+              var linkedInParams = {
+                url: 'http://owlike.github.io/genson/',
+                original_referer: document.URL,
+                isFramed: false,
+                lang: 'en_US',
+                token: ''
+              }
+
+              var twitterParams = {
+                original_referer: document.URL,
+                text: '#Genson, fast and easy to use Java <> JSON library.',
+                tw_p: 'tweetbutton',
+                url: 'http://owlike.github.io/genson/',
+                via: 'EugenCepoi'
+              }
+
+              var googlePlusParams = {
+                url: 'http://owlike.github.io/genson/'
+              }
+
+              $('.share-button').tooltip({delay: { show: 500, hide: 100 }});
+
+              share('a.twitter-share-button', 'https://twitter.com/intent/tweet?', twitterParams);
+              share('a.linkedin-share-button', 'https://www.linkedin.com/cws/share?', linkedInParams);
+              share('a.google-plus-share-button', 'https://plus.google.com/share?', googlePlusParams);
+
+              function share(selector, shareUrl, params) {
+                $(selector).click(function(evt) {
+                  evt.preventDefault();
+
+                  var url = shareUrl + $.map(params, function(value, key) {
+                    return key+'='+encodeURIComponent(value);
+                  }).join('&');
+
+                  var t="scrollbars=yes,resizable=yes,toolbar=no,location=yes",n=550,r=420,i=screen.height,s=screen.width,o=Math.round(s/2-n/2),u=0;
+                  window.open(url,null,t+",width="+n+",height="+r+",left="+o+",top="+u);
+                });
+              }
+            </script>
+          </ul>
         </div>
     </div>
 </header>
@@ -113,8 +179,7 @@
 <p>At the moment you can find two kind of extensions in Genson,</p>
 
 <ul>
-  <li>Integrations of Genson in common frameworks to handle the JSON ser/deser. This kind of integration tries to be done automatically by Genson,
- but it is not always possible if the framework does not provide extension points.</li>
+  <li>Integrations of Genson in common frameworks to handle the JSON ser/deser.</li>
   <li>Integration in Genson of types defined in widely used libraries, ie. support JSR 353 JsonObject, JsonArray, etc types.
  This is done through the GensonBundle system.</li>
 </ul>
@@ -158,7 +223,7 @@ To do that use Genson.Builder to create a custom instance and then inject it wit
 
 <h2 id="jsr-353---java-api-for-json-processing">JSR 353 - Java API for Json Processing</h2>
 
-<p>Genson provides two kind of integrations with the JSR. You can use Genson as the JSR implementation or use Genson
+<p>Genson provides two kind of integrations with the JSR. You can use it as the JSR implementation or
 to work with the DOM structures defined in the JSR.</p>
 
 <p>If the JSR API is not included in your Java version, you can still get it with Maven.</p>
@@ -200,7 +265,7 @@ This means that you can ser/deser using those types but also mix them with the d
 All annotations are not supported as some do not make sense in the JSON world.
 enson annotations can be used to override Jaxb annotations.</p>
 
-<p><em>In Jersey JAXB bundle is enabled by default</em>. If you are using Genson outside Jersey you have to register JAXB bundle:</p>
+<p>In Jersey JAXB bundle is enabled by default. If you are using Genson outside Jersey you have to register JAXB bundle:</p>
 
 <div class="highlight"><pre><code class="java"><span class="n">Genson</span> <span class="n">genson</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Genson</span><span class="o">.</span><span class="na">Builder</span><span class="o">().</span><span class="na">with</span><span class="o">(</span><span class="k">new</span> <span class="n">JAXBBundle</span><span class="o">()).</span><span class="na">create</span><span class="o">();</span>
 </code></pre></div>
@@ -280,5 +345,15 @@ $(function() {
 
 
 
+<footer>
+  <div class="text-center">
+    <div class="row">
+      <a href="https://github.com/owlike/genson"><i class="fa fa-github"></i></a>
+    </div>
+    <div class="row">
+      Copyright &copy; 2012-2014, Eugen Cepoi
+    </div>
+  </div>
+</footer>
 </body>
 </html>
