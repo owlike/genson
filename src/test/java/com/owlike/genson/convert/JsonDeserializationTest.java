@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.owlike.genson.GenericType;
 import com.owlike.genson.GensonBuilder;
 import com.owlike.genson.reflect.ASMCreatorParameterNameResolver;
 import org.junit.Before;
@@ -27,7 +28,6 @@ import com.owlike.genson.stream.JsonReader;
 
 public class JsonDeserializationTest {
   final Genson genson = new GensonBuilder().useConstructorWithArguments(true).create();
-  ;
 
   @Test
   public void testASMResolverShouldNotFailWhenUsingBootstrapClassloader() {
@@ -183,12 +183,10 @@ public class JsonDeserializationTest {
 
   @Test
   public void testMultidimensionalArray() {
-    String json = "[[\"abc\",[42,24]],[\"def\",[43,34]]]";
-    Object[][] array = genson.deserialize(json, Object[][].class);
-    assertEquals("abc", array[0][0]);
-    assertArrayEquals(new Object[]{42L, 24L}, (Object[]) array[0][1]);
-    assertEquals("def", array[1][0]);
-    assertArrayEquals(new Object[]{43L, 34L}, (Object[]) array[1][1]);
+    String json = "[[[42,24]],[[43,34]]]";
+    long[][][] array = genson.deserialize(json, long[][][].class);
+    assertArrayEquals(new long[]{42L, 24L}, array[0][0]);
+    assertArrayEquals(new long[]{43L, 34L}, array[1][0]);
 
     String json3 = "[[[\"abc\"],[42,24],[\"def\"],[43,34]]]";
     genson.deserialize(json3, Object[][][].class);
@@ -197,6 +195,12 @@ public class JsonDeserializationTest {
   @SuppressWarnings("unchecked")
   @Test
   public void testContentDrivenDeserialization() {
+
+    String jsonWithNumberAsKeys = "{\"1\":28, \"2\":\"Foo\"}";
+    Map<Integer, Object> m = genson.deserialize(jsonWithNumberAsKeys, new GenericType<Map<Integer, Object>>() {
+    });
+    System.out.println(m.get(1)+" "+m.get(2));
+
     String src = "{\"list\":[1, 2.3, 5, null]}";
     TypeVariableList<Number> tvl = genson.deserialize(src, TypeVariableList.class);
     assertArrayEquals(tvl.list.toArray(new Number[tvl.list.size()]), new Number[]{1, 2.3, 5,
@@ -227,8 +231,8 @@ public class JsonDeserializationTest {
     assertEquals(map.get("key3"), true);
     assertEquals(map.get("key4"), "string");
     assertNull(map.get("key5"));
-    Object[] list = (Object[]) map.get("list");
-    assertArrayEquals(new Number[]{1L, 2.0005, 3L}, list);
+    List<Number> list = (List<Number>) map.get("list");
+    assertEquals(Arrays.asList(1L, 2.0005, 3L), list);
   }
 
   @Test

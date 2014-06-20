@@ -1035,8 +1035,6 @@ public final class DefaultConverters {
       }
     }
 
-    ;
-
     public Converter<Object> create(Type type, Genson genson) {
       if (TypeUtil.match(type, Object.class, true)) {
         return UntypedConverter.instance;
@@ -1044,8 +1042,6 @@ public final class DefaultConverters {
       return null;
     }
   }
-
-  ;
 
   @HandleClassMetadata
   @HandleBeanView
@@ -1078,8 +1074,6 @@ public final class DefaultConverters {
         rawClass) : null;
     }
   }
-
-  ;
 
   @HandleClassMetadata
   @HandleBeanView
@@ -1211,8 +1205,6 @@ public final class DefaultConverters {
       return calendarConverter;
     }
   }
-
-  ;
 
   public static class CalendarConverter implements Converter<Calendar> {
     private final DateConverter dateConverter;
