@@ -3,7 +3,7 @@ title: User Guide
 layout: default
 menu: true
 jumbotron: true
-quick-overview: The User Guide guide gives an overview of Genson and its main features that can be enable via configuration. After reading it you should be able to do address most of your use cases.
+quick-overview: The User Guide guide introduces Gensons main components and some features that can be enabled via configuration. After reading it you should be able to do address most of your use cases.
 ---
 
 ##Overview
@@ -68,7 +68,7 @@ String json = genson.serialize(person);
 
 Deserialization however is more tricky as the type must be detected based on the content of the JSON stream.
 By default, if no type information is available during deserialization, Genson will provide a base mapping between JSON types and Java types.
-For example, JSON object will be mapped to a Map with Strings as keys, JSON arrays to Java arrays, etc.
+For example, JSON object will be mapped to a Map with Strings as keys, JSON arrays to Java List, etc.
 There is another mechanism allowing to [deserialize to polymorphic or unknown types](#polymorphic-types), but we will discuss it latter.
 
 
@@ -586,11 +586,12 @@ public class PersonConverterFactory implements Factory<Converter<Person>> {
 ###Contextual Converter###
 
 Another nice feature in Genson is the support of Contextual Converters and Factories.
-The contextual converter is used through **@JsonConverter** annotation, that you put on object properties (fields, methods, constructor arguments).
+The contextual converter is used through {% highlight java nowrap %}@JsonConverter{% endhighlight %} annotation,
+that you put on object properties (fields, methods, constructor arguments).
 This will tell Genson to use this specific Converter for that property instead of any other.
 
 
-You can also implement a ContextualFactory to create Converters based on the property
+You can also implement a {% highlight java nowrap %}ContextualFactory{% endhighlight %} to create Converters based on the property
 
  - type
  - name
@@ -598,5 +599,6 @@ You can also implement a ContextualFactory to create Converters based on the pro
  - the class in which the property is declared.
 
 This can become really handy if you want to apply some custom Converters based on such criteria.
-The @JsonConverter and @JsonDateFormat support have been implemented using Contextual Factories.
+The {% highlight java nowrap %}@JsonConverter{% endhighlight %} and {% highlight java nowrap %}@JsonDateFormat{% endhighlight %}
+support have been implemented using Contextual Factories.
 

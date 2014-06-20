@@ -8,7 +8,7 @@ body {
 }
 
 footer {
-  height: 120px;
+  height: 80px;
   margin-top: 60px;
 }
 
@@ -130,8 +130,7 @@ header:after {
 }
 
 .jumbotron .btn:hover, .jumbotron .btn:active, .jumbotron .btn:focus {
-    background-color: rgba(255, 255, 255, 0.98);
-    color: rgba(46, 123,207, 1);
+    background-color: rgba(59,125,181, 0.9);
 }
 
 .featurette-detail {
@@ -239,4 +238,27 @@ header:after {
     height: 2px;
     margin: 9px 1px;
     overflow: hidden;
+}
+
+
+/* share buttons css */
+.share-button {
+  float: left;
+  text-shadow: 0px -1px 0px #f8f8f8 !important;
+  color: #c6c6c6;
+  font-size: 34px;
+  padding: 10px !important;
+}
+
+.share-button:hover,.share-button:focus,.share-button:active {
+  color: #949494;
+}
+
+.tooltip.bottom .tooltip-arrow {
+  border-bottom-color: #ffffff;
+}
+
+.tooltip-inner {
+  color: #636363;
+  background-color: #ffffff;
 }

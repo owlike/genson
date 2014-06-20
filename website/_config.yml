@@ -1,5 +1,5 @@
 name: "Genson"
-description: "Fast & extensible Java <> Json library"
+description: "Fast & easy to use Java <> Json library"
 
 markdown: kramdown
 pygments: true
