@@ -106,6 +106,9 @@
                         <goals>
                             <goal>test</goal>
                         </goals>
+                        <configuration>
+                            <forkMode>never</forkMode>
+                        </configuration>
                     </execution>
                 </executions>
                 <dependencies>
