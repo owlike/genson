@@ -1,4 +1,4 @@
-package com.owlike.genson.ext.scala
+package com.owlike.genson
 
 import org.scalatest.FunSuite
 import org.scalatest.Matchers

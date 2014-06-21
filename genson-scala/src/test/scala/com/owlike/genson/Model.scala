@@ -1,4 +1,4 @@
-package com.owlike.genson.ext.scala
+package com.owlike.genson
 
 case class BasicPoso(val aString: String, val aInt: Int, val aBoolean: Boolean) {
   val shouldBeIgnored: Int = 10

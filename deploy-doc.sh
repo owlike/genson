@@ -37,7 +37,7 @@ runSuite "jekyll build --source ../website --destination . --config ../website/_
 
 rm _config-release.yml
 
-runSuite "cp -R ../target/site/apidocs Documentation/Javadoc"
+runSuite "cp -R ../genson/target/site/apidocs Documentation/Javadoc" "cp -R ../genson-scala/target/apidocs Documentation/Scaladoc"
 
 runSuite "git add -u ." "git add ." "git commit -m \"Documentation Release $version\"" "git push origin gh-pages"
 

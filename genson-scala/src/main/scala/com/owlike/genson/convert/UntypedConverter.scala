@@ -1,4 +1,4 @@
-package com.owlike.genson.ext.scala
+package com.owlike.genson.convert
 
 import com.owlike.genson._
 import com.owlike.genson.stream.{ValueType, ObjectWriter, ObjectReader}

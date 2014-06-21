@@ -3,7 +3,7 @@ title: Extensions
 layout: default
 menu: true
 jumbotron: true
-quick-overview: Genson provides out of the box integrations with some common frameworks and is packaged with Bundles to support types from commonly used libraries.
+quick-overview: Genson provides integrations with some common frameworks and is packaged with Bundles to support types from commonly used libraries.
 ---
 
 ##Extension types##

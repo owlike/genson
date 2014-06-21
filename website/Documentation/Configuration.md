@@ -10,7 +10,7 @@ quick-overview: Overview of Genson annotations and configuration through GensonB
 Some aspects of Genson can be configured via annotations used on your classes. This is nice since you have your configuration that
 leaves near the code that uses it.
 
-
+<div class="table-responsive">
 <table class="table table-striped table-bordered">
 <tr><th>Annotation Name</th><th>Usage</th></tr>
 <tr>
@@ -68,6 +68,7 @@ leaves near the code that uses it.
   <td>Used on Converters. Will disable the BeanView mechanism for the type handled by this Converter.</td>
 </tr>
 </table>
+</div>
 
 
 But in some cases you might not be able to modify the source code or just don't want to, in that case you can't use annotations.
@@ -79,7 +80,7 @@ GensonBuilder is the main class allowing to configure and create new instances o
 It tries to be easy to use through a fluent builder API.
 Most of those options are documented in the [Javadoc]({{base.url}}/Documentation/Javadoc).
 
-
+<div class="table-responsive">
 <table class="table table-striped table-bordered">
 <tr><th>Method Name</th><th>Default</th><th>Description</th></tr>
 <tr>
@@ -137,3 +138,4 @@ Most of those options are documented in the [Javadoc]({{base.url}}/Documentation
    When this feature is enabled, each byte will be ser/de as its numeric value.</td>
 </tr>
 </table>
+</div>

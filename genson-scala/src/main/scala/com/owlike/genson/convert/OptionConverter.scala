@@ -1,10 +1,10 @@
-package com.owlike.genson.ext.scala
+package com.owlike.genson.convert
 
 import java.lang.reflect.Type
 import com.owlike.genson.reflect.TypeUtil._
 import com.owlike.genson.stream.{ObjectReader, ObjectWriter, ValueType}
 import com.owlike.genson.annotation.{HandleClassMetadata, HandleNull}
-import com.owlike.genson.{Factory, Context, Converter}
+import com.owlike.genson.{Genson, Factory, Context, Converter}
 
 class OptionConverterFactory extends Factory[Converter[Option[AnyRef]]] {
 

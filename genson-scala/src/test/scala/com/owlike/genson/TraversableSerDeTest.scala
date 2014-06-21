@@ -1,30 +1,29 @@
-package com.owlike.genson.ext.scala
+package com.owlike.genson
 
 import org.scalatest.FunSuite
 import org.scalatest.Matchers
 
 import scala.collection.immutable.{
-HashSet,
-ListSet,
-ListMap,
-HashMap,
-Map,
-Queue
+  HashSet,
+  ListSet,
+  ListMap,
+  HashMap,
+  Map,
+  Queue
 }
 
 import scala.collection.mutable.{
-Map => MMap,
-ListMap => MListMap,
-HashMap => MHashMap,
-Set => MSet,
-HashSet => MHashSet,
-ListBuffer,
-Queue => MQueue,
-Buffer
+  Map => MMap,
+  ListMap => MListMap,
+  HashMap => MHashMap,
+  Set => MSet,
+  HashSet => MHashSet,
+  ListBuffer,
+  Queue => MQueue,
+  Buffer
 }
 
 import org.scalatest.prop.PropertyChecks
-import com.owlike.genson.GenericType
 
 class TraversableSerDeTest extends FunSuite with Matchers with PropertyChecks {
   lazy val genson = new GensonBuilder().withBundle(new ScalaBundle()).create()

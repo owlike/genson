@@ -1,8 +1,8 @@
-package com.owlike.genson.ext.scala
+package com.owlike.genson.convert
 
-import com.owlike.genson.{Context, Converter, Factory}
+import com.owlike.genson.{Genson, Context, Converter, Factory}
 
-import java.lang.reflect.Type
+import java.lang.reflect.{ParameterizedType, Type}
 import com.owlike.genson.reflect.TypeUtil._
 import com.owlike.genson.convert.DefaultConverters.{MapConverterFactory => JavaMapFactory, KeyAdapter}
 import com.owlike.genson.stream.{ObjectReader, ObjectWriter}
@@ -110,9 +110,25 @@ class TraversableConverterFactory extends Factory[Converter[_ <: Traversable[Any
     }.headOption.map {
       case (_, cbf) =>
         val castCBF = cbf.asInstanceOf[CanBuildFrom[Traversable[Any], Any, Traversable[Any]]]
-        val elemConverter: Converter[Any] = genson.provideConverter(ScalaBundle.getTraversableType(genType))
+        val elemConverter: Converter[Any] = genson.provideConverter(getTraversableType(genType))
         new TraversableConverter[Any, Traversable[Any]](elemConverter)(castCBF)
     }.getOrElse(null)
+  }
+
+  private def getTraversableType(genType: Type): Type = {
+
+    if (genType.isInstanceOf[Class[_]]) {
+      val clazz: Class[_] = genType.asInstanceOf[Class[_]]
+      if (clazz.isArray) return clazz.getComponentType
+      else if (classOf[Traversable[_]].isAssignableFrom(clazz)) {
+        val expandedType = expandType(lookupGenericType(classOf[Traversable[_]], clazz), clazz)
+        return typeOf(0, expandedType)
+      }
+    } else if (genType.isInstanceOf[ParameterizedType] && classOf[Traversable[_]].isAssignableFrom(getRawClass(genType))) {
+      return typeOf(0, genType)
+    }
+
+    throw new IllegalArgumentException("Could not extract parametrized type, are you sure it is a Traversable or an Array?")
   }
 }
 

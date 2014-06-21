@@ -1,10 +1,10 @@
-package com.owlike.genson.ext.scala
+package com.owlike.genson.convert
 
-import com.owlike.genson.{Factory, Converter, Context}
 import java.lang.reflect.{Constructor, ParameterizedType, Type}
 import com.owlike.genson.reflect.TypeUtil
 import com.owlike.genson.stream.{ObjectWriter, ObjectReader}
 import com.owlike.genson.annotation.HandleClassMetadata
+import com.owlike.genson.{Genson, Factory, Converter, Context, JsonBindingException}
 
 class TupleConverterFactory extends Factory[Converter[_ <: Any]] {
 

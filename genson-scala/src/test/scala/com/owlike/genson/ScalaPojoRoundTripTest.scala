@@ -1,7 +1,7 @@
-package com.owlike.genson.ext.scala
+package com.owlike.genson
 
-import com.owlike.genson.ext.scala.defaultGenson._
 import org.scalatest.{Matchers, FunSuite}
+import defaultGenson._
 
 class ScalaPojoRoundTripTest extends FunSuite with Matchers {
 
