@@ -147,8 +147,8 @@ Genson provides two major ways of including/excluding and naming properties, via
 
 ###Via annotations###
 
-Excluding a property can be achieved by putting a {% highlight java nowrap %}@JsonIgnore{% endhighlight %} annotation on the fields or getter/setter. The same goes for
-including a property (for example a private field that you want to be serialized) but using @JsonProperty annotation.
+Excluding a property can be achieved by putting a {% highlight java nowrap %}@JsonIgnore{% endhighlight %} annotation on the field or getter/setter. The same goes for
+including a property (for example a private field that you want to be serialized) but using {% highlight java nowrap %}@JsonProperty{% endhighlight %} annotation.
 JsonProperty can also be used to define a different name for a property than the default one {% highlight java nowrap %}@JsonProperty(name="newName"){% endhighlight %}.
 
 ###Via GensonBuilder###
@@ -204,7 +204,7 @@ public class Address {
   final int building;
   final String city;
 
-  // we could also put @Creator annotation, if we had multiple
+  // we could also put @JsonCreator annotation, if we had multiple
   // constructors and wanted Genson to use this one.
   public Address(@JsonProperty("building") int building, @JsonProperty("city") String city) {
     this.building = building;
@@ -228,7 +228,8 @@ new GensonBuilder().useConstructorWithArguments(true).create();
 
 ###Factory methods###
 Genson has also support for methods that act as factories. Those methods must be static, defined inside the class you want to
-deserialize (or a parent) and annotated with @Creator annotation. Creator annotation can also be used on Constructors when you have multiple ones
+deserialize (or a parent) and annotated with {% highlight java nowrap %}@JsonCreator{% endhighlight %} annotation.
+JsonCreator annotation can also be used on Constructors when you have multiple ones
 and want to tell Genson which one to use.
 
 
@@ -240,7 +241,7 @@ public class Address {
   final int building;
   final String city;
 
-  @Creator public static Address default() {
+  @JsonCreator public static Address default() {
     return new Address(0, "UNKNOWN");
   }
 
@@ -259,15 +260,15 @@ Since version 0.99 there are no checked exceptions anymore.
 The main reason is to avoid ugly boilerplate code for people who use Genson. Of course even if Genson makes use of unchecked exceptions you
 can still catch them if you want to handle them. Genson can throw two kind of exceptions:
 
- * JsonStreamException, thrown by the streaming API when parsing for example invalid JSON.
- * JsonBindingException, everywhere else, especially if something goes wrong at the databinding level, ex: can not instantiate some type.
+ * **JsonStreamException**, thrown by the streaming API when parsing for example invalid JSON.
+ * **JsonBindingException**, everywhere else, especially if something goes wrong at the databinding level, ex: can not instantiate some type.
 
 
 
 ##Generic types##
 
 Due to type erasure, in Java, we can not do things like List<Address>.class. Meaning that we can't tell to Genson to deserialize to a List of Addresses but only to a list of unknown objects.
-Those unknown objects being deserialized as Maps. The solution is to use what is called TypeToken in [this blog](http://gafter.blogspot.fr/2006/12/super-type-tokens.html).
+Those unknown objects being deserialized as Maps. The solution is to use what is called TypeToken, described in [this blog](http://gafter.blogspot.fr/2006/12/super-type-tokens.html).
 Gensons implementation of TypeToken is named GenericType. Why not TypeToken?
 Because this name is used in Guava library so choosing another name allows to avoid confusion and mistakes.
 
@@ -283,14 +284,15 @@ Genson has full support of Javas generics, allowing you to hava quite complex st
 Genson genson = new GensonBuilder().useConstructorWithArguments(true).create();
 
 AddressGroup addressGroup = new AddressGroup(new Container<EuropeanAddress>(
-          Arrays.asList(new EuropeanAddress("Champs Elysees", 1, "Paris")))
-        );
+    Arrays.asList(new EuropeanAddress("Champs Elysees", 1, "Paris")))
+  );
 
 // {"addressGroup":{"values":[{"building":1,"city":"Paris","street":"Champs Elysees"}]}}
 String json = genson.serialize(addressGroup);
 
 public class EuropeanAddress extends Address {
   public final String street;
+
   public EuropeanAddress(String street, int building, String city) {
     super(building, city);
     this.street = street;
@@ -299,6 +301,7 @@ public class EuropeanAddress extends Address {
 
 public class AddressGroup {
   public final Container<EuropeanAddress> addressGroup;
+
   public AddressGroup(Container<EuropeanAddress> addressGroup) {
     this.addressGroup = addressGroup;
   }
@@ -306,6 +309,7 @@ public class AddressGroup {
 
 public class Container<E extends Address> {
   public final List<E> values;
+
   public Container(List<E> values) {
     this.values = values;
   }
@@ -314,31 +318,35 @@ public class Container<E extends Address> {
 
 
 **Remark** that if in AddressGroup we were using Address type instead of the concrete type, the serialized json wouldn't contain the street property.
-Indeed it would have been ser/de using Address type, using the runtime type can be enable via {% highlight java nowrap %}builder.useRuntimeType(true){% endhighlight %}
+Indeed it would have been ser/de using Address type, using the runtime type can be enable via {% highlight java nowrap %}new GensonBuilder().useRuntimeType(true){% endhighlight %}.
 
 ##Polymorphic types
 
 Another nice feature of Genson is its ability to deserialize an object serialized with Genson back to its concrete type.
-Lets now change a bit the previous example. AddressGroup will use Address type instead of the concrete type, the serialized json would not contain the street property anymore.
-Indeed it would serialize the content of Container using Address type and not EuropeanAddress, so lets enable runtime type usage.
+Lets now enable runtime type resolution and serialize a Container of EuropeanAddress and then deserialize it back.
 
 {% highlight java %}
 // lets also enable runtime type usage
 Genson genson = new GensonBuilder().useRuntimeType(true).create();
 
-AddressGroup result = genson.deserialize(json, AddressGroup.class);
+Container<Address> addressContainer = new Container<Address>(
+    Arrays.asList(new EuropeanAddress("Champs Elysees", 1, "Paris")))
+  );
 
-public class AddressGroup {
-  public final Container<? extends Address> addressGroup;
-  public AddressGroup(Container<? extends Address> addressGroup) {
-    this.addressGroup = addressGroup;
-  }
-}
+// As we enabled runtime type resolution the street property will be serialized
+// {"values":[{"building":1,"city":"Paris","street":"Champs Elysees"}]}
+String json = genson.serialize(addressContainer);
+
+// however when we deserialize Genson does not have enough type information.
+// It will expand the content of the array to Address and not EuropeanAddress
+Container<? extends Address> result = genson.deserialize(json, Container.class);
 {% endhighlight %}
 
-The deserialized result will contain addresses and not european addresses. Why? Because Genson does not have more information about the type except that it is an Address.
-There are two kind of solutions to this problem: add information in the class with an annotation for example that would tell what the concrete type is or store in the serialized json
-the information about the concrete type. In Genson the second approach is implemented via a metadata mechanism that will serialize class name + package during serialization and use
+Of course in the previous example we could have deserialized to a {% highlight java nowrap %}new GenericType<Container<EuropeanAddress>>(){% endhighlight %},
+but if there were multiple implementations of Address or just mixed EuropeanAddress and Address instances, you won't get the correct result.
+
+The solution to this problem is to store in the serialized json the information about the concrete type.
+In Genson it is implemented via a metadata mechanism that will serialize class name + package during serialization and use
 it when deserializing back.
 
 
@@ -349,8 +357,8 @@ Genson genson = new GensonBuilder()
       .useRuntimeType(true)
     .create();
 
-// {"addressGroup":{"values":[{"@class":"my.package.EuropeanAddress","building":1,"city":"Paris","street":"Champs Elysees"}]}}
-AddressGroup result = genson.serialize(addressGroup);
+// {"values":[{"@class":"my.package.EuropeanAddress","building":1,"city":"Paris","street":"Champs Elysees"}]}
+AddressGroup result = genson.serialize(addressContainer);
 {% endhighlight %}
 
 
@@ -365,8 +373,8 @@ Genson genson = new GensonBuilder()
       .useRuntimeType(true)
     .create();
 
-// {"addressGroup":{"values":[{"@class":"europeanAddress","building":1,"city":"Paris","street":"Champs Elysees"}]}}
-AddressGroup result = genson.serialize(addressGroup);
+// {"values":[{"@class":"europeanAddress","building":1,"city":"Paris","street":"Champs Elysees"}]}
+genson.serialize(addressContainer);
 {% endhighlight %}
 
 
@@ -391,6 +399,8 @@ the output. Same during deserialization, as the JSON arrives in the stream, Gens
 This is a valuable feature in real life applications, like web applications or web services, where a client is writing/reading data through the network.
 The network is the most common bottleneck, paralleling the work while data is being transferred increases the throughput.
 
+Genson databinding uses the streaming API, but you can also directly use it without the databinding layer in case
+where you really need something extremely fast, **in most cases you don't as it is already very efficient**.
 
 The main classes of the Streaming API are ObjectWriter and ObjectReader, they are internally used by Genson to write/read JSON data.
 When implementing your own Converters to achieve custom serialization/deserialization, you will use this low level API.
@@ -407,27 +417,26 @@ For example writing some object, containing an array and some basic properties c
 {% highlight java %}
 // {"name":"Foo Bar","age":45,"childrenAges":[1,2,3]}
 writer.beginObject()
-        .writeName("name").writeValue("Foo Bar")
-        .writeName("age").writeValue(45)
-        .writeName("childrenAges").beginArray()
-          .writeValue(1)
-          .writeValue(2)
-          .writeValue(3)
-        .endArray()
-      .endObject();
+    .writeString("name", "Foo Bar")
+    .writeNumber("age", 45)
+    .writeName("childrenAges").beginArray()
+      .writeValue(1)
+      .writeValue(2)
+      .writeValue(3)
+    .endArray()
+  .endObject();
 
-/* when using directly the streaming api outside the databinding you must remember to
-flush the data, otherwise everything might not have been written to the outputstream. */
-writer.flush();
+/* when using directly the streaming api outside the databinding you are free to flush the data when
+you want allowing to reduce the memory foot print, when closing the writer everything is flushed. */
+writer.close();
 {% endhighlight %}
 
 
 Reading back the previous structure is a bit more of code, mainly because of Java verbosity. Of course you can also use Genson
-to deserialize your JSON to a map and then just extract your properties from there. But if you are using the streaming API without databinding
-probably you can't afford that. If you use this API in a Converter, then you might want to
- [use JSR 353 types with Genson]({{base.url}}/Documentation/Extensions/#using-jsr-353-types-with-genson) for intermediary
- representation and then map it to your structure. This would be OK, as it will be applied only to the part handled by your Converter, all the rest
- would still use directly the Streaming API.
+to deserialize your JSON to a map and then just extract your properties from there. If you use this API in a Converter,
+then you might want to [use JSR 353 types with Genson]({{base.url}}/Documentation/Extensions/#using-jsr-353-types-with-genson) for intermediary
+representation and then map it to your structure. This would be OK, as it will be applied only to the part handled by your Converter, all the rest
+would still use directly the Streaming API.
 
 {% highlight java %}
 String name = null;
@@ -437,7 +446,7 @@ List<Integer> childrenAges = null;
 reader.beginObject();
 while (reader.hasNext()) {
   /* return an enum corresponding to the type of the value being read (OBJECT, ARRAY, NULL...),
-  allows to implement generic parsing based on the values */
+  allows to implement generic parsing based on the json content */
   ValueType valueType = reader.next();
 
   if ("name".equals(reader.name())) {
@@ -478,6 +487,7 @@ First you should try to have a look at the different options available to you, s
 
 If nothing seems to help solve your problem, then you might want to implement your-self the way a specific type is being ser/de.
 This is achieved through implementing a custom Converter. A Converter is mainly an implementation of a Serializer and Deserializer for a specific type.
+If you don't need to provide a logic for serialization **and** deserialization, then you can implement only one of them.
 
 Lets move the previous code in a datastructure and handle it in our Converter.
 
@@ -491,8 +501,8 @@ public class PersonConverter implements Converter<Person> {
 
   public void serialize(Person person, ObjectWriter writer, Context ctx) throws Exception {
     writer.beginObject();
-    writer.writeName("name").writeValue(person.getName())
-          .writeName("age").writeValue(person.getAge())
+    writer.writeString("name", person.getName())
+          .writeNumber("age", person.getAge())
           .writeName("childrenAges");
 
     /* Delegate the serialization of a list of integer to Genson, you can pass null here.
@@ -553,7 +563,7 @@ new GensonBuilder().withConverter(personConverter, Person.class).create();
 
 
 But in some cases you may want to be able to register a Converter for a complete hierarchy of types, ie. for Person and all its subclasses.
-This is one of the reasons Converter Factory have been introduced in Genson. The main role of a Factory is to return a Converter instance for a given type or null if the
+This is one of the reasons Converter Factory has been introduced in Genson. The main role of a Factory is to return a Converter instance for a given type or null if the
 Factory does not handle this type.
 
 
@@ -599,6 +609,25 @@ You can also implement a {% highlight java nowrap %}ContextualFactory{% endhighl
  - the class in which the property is declared.
 
 This can become really handy if you want to apply some custom Converters based on such criteria.
-The {% highlight java nowrap %}@JsonConverter{% endhighlight %} and {% highlight java nowrap %}@JsonDateFormat{% endhighlight %}
-support have been implemented using Contextual Factories.
+The {% highlight java nowrap %}@JsonConverter{% endhighlight %} and {% highlight java nowrap %}@JsonDateFormat{% endhighlight %} support have been implemented using Contextual Factories.
 
+For example if you want to use some specific converter only when some custom annotation is present on the property:
+
+{% highlight java %}
+public class MyContextualFactory implements ContextualFactory {
+  @Override
+  public Converter create(BeanProperty property, Genson genson) {
+    MyCustomAnnotation ann = property.getAnnotation(MyCustomAnnotation.class);
+    if (ann != null) {
+      return myCustomConverter;
+    } else return null;
+  }
+}
+
+Genson genson = new GensonBuilder().withContextualFactory(new MyContextualFactory()).create();
+{% endhighlight %}
+
+
+A couple of other things & components can be customized, but they are a even more advanced usage and require some knowledge of how Genson works,
+thus they are not documented here. If you encounter any problems or don't know how to achieve something, don't hesitate to post a message on the mailling list.
+You can also get help there on how to extend more "internal" parts of Genson.

@@ -61,7 +61,7 @@ val actualValue = fromJson[SomeType](json)
 
 ##Collections & Tuples
 
-Genson provides a set of defaults converters for most scala collections (mutable and immutable).
+Genson provides a set of default converters for most scala collections (mutable and immutable).
 Scala provides some optimized types for maps and collections of few elements, Genson will respect it
 and deserialize to the optimized type.
 
@@ -77,7 +77,7 @@ val jsonMap = toJson(Map("name" -> "foo bar"))
 val mapOfString = fromJson[Map[String,String]](jsonMap)
 {% endhighlight %}
 
-Genson will serialize scala Tuples1 to 22, as json arrays.
+Genson will serialize scala Tuple1 to 22, as json arrays.
 There is no restriction on the complexity of the tuples (may contain options, case classes, etc).
 
 {% highlight scala %}

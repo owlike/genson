@@ -24,6 +24,20 @@ Bundles take precedence over user defined customization at the builder level.
 This means that if a bundle says you won't serialize null values and you tell the builder the contrary, the bundle will win.
 This has been designed this way because we consider that the configuration supplied by a Bundle is required by it, in order to work.
 
+For example you can implement a Bundle providing some common features for your company.
+
+{% highlight java %}
+public class MyBundle extends GensonBundle {
+  @Override
+  public void configure(GensonBuilder builder) {
+    // use the builder to configure & register your components
+  }
+}
+
+// then register your bundle
+Genson genson = new GensonBuilder().withBundle(new MyBundle()).create();
+{% endhighlight %}
+
 ##JAX-RS: Jersey & cie##
 
 To enable json support in JAX-RS implementations with Genson, just drop the jar into your classpath.
@@ -33,13 +47,13 @@ Actually it has been tested with Jersey and Resteasy. It works out of the box.
 
 ###Customization###
 In many cases you might want to customize Genson instance.
-To do that use Genson.Builder to create a custom instance and then inject it with ContextResolver.
+To do that use GensonBuilder to create a custom instance and then inject it with ContextResolver.
 
 {% highlight java %}
 @Provider
 public class GensonCustomResolver implements ContextResolver<Genson> {
   // configure the Genson instance
-  private final Genson genson = new Genson.Builder().create();
+  private final Genson genson = new GensonBuilder().create();
 
   @Override
   public Genson getContext(Class<?> type) {
@@ -81,7 +95,7 @@ you only need it on your classpath.
 Starting with release 0.98 Genson provides a bundle JSR353Bundle that enables support of JSR 353 types in Genson.
 This means that you can ser/deser using those types but also mix them with the databinding mechanism.
 {% highlight java %}
-Genson genson = new Genson.Builder().with(new JSR353Bundle()).create();
+Genson genson = new GensonBuilder().with(new JSR353Bundle()).create();
 JsonObject object = genson.deserialize(json, JsonObject.class);
 {% endhighlight %}
 
@@ -101,40 +115,41 @@ Pojo pojo = genson.deserialize(json, Pojo.class);
 
 Since version 0.95 Genson provides support for JAXB annotations.
 All annotations are not supported as some do not make sense in the JSON world.
-enson annotations can be used to override Jaxb annotations.
+Genson annotations take precedence over JAXB ones, so they can be used to override JAXB annotations.
 
 In Jersey JAXB bundle is enabled by default. If you are using Genson outside Jersey you have to register JAXB bundle:
 
 {% highlight java %}
-Genson genson = new Genson.Builder().with(new JAXBBundle()).create();
+Genson genson = new GensonBuilder().with(new JAXBBundle()).create();
 {% endhighlight %}
 
 ###Supported annotations###
 
- * XmlAttribute can be used to include a property in serialization/deserialization (can be used on fields, getter and setter).
+ * **XmlAttribute** can be used to include a property in serialization/deserialization (can be used on fields, getter and setter).
  If a name is defined it will be used instead of the one derived from the method/field.
 
- * XmlElement works as XmlAttribute, if type is defined it will be used instead of the actual one.
+ * **XmlElement** works as **XmlAttribute**, if type is defined it will be used instead of the actual one.
 
- * XmlJavaTypeAdapter can be used to define a custom XmlAdapter. This adapter must have a no arg constructor.
+ * **XmlJavaTypeAdapter** can be used to define a custom XmlAdapter. This adapter must have a no arg constructor.
 
- * XmlEnumValue can be used on enum values to map them to different values (it can be mixed with default behaviour:
+ * **XmlEnumValue** can be used on enum values to map them to different values (it can be mixed with default behaviour:
  you can use this annotation on some enum values and let the others be ser/deser using the default strategy).
 
- * XmlAccessorType can be used to define how to detect properties (fields, methods, public only etc).
+ * **XmlAccessorType** can be used to define how to detect properties (fields, methods, public only etc).
 
- * XmlTransient to exclude a field or get/set from ser/deser process.
+ * **XmlTransient** to exclude a field or get/set from ser/deser process.
 
 ###Supported types###
-Actual implementation has default converters for Duration and XMLGregorianCalendar.
+
+Actual implementation has default converters for **Duration** and **XMLGregorianCalendar**.
 
 
 ###What might come next###
 
- Support for cyclic references using XmlId and XmlIdRef, XmlType.
- Maybe XmlRootElement, even if I doubt of its pertinence in JSON...
+Support for cyclic references using XmlId and XmlIdRef, XmlType.
+Maybe XmlRootElement, even if I doubt of its pertinence in JSON...
 
- If there are other jaxb features you would like to be supported just open an issue or drop an email on the google group.
+If there are other jaxb features you would like to be supported just open an issue or drop an email on the google group.
 
 
 ##Spring MVC##

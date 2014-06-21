@@ -79,6 +79,7 @@ But in some cases you might not be able to modify the source code or just don't 
 GensonBuilder is the main class allowing to configure and create new instances of Genson.
 It tries to be easy to use through a fluent builder API.
 Most of those options are documented in the [Javadoc]({{base.url}}/Documentation/Javadoc).
+GensonBuilder provides several methods to register components such as Converters, Factories, etc, but it is not documented here.
 
 <div class="table-responsive">
 <table class="table table-striped table-bordered">
@@ -96,7 +97,8 @@ Most of those options are documented in the [Javadoc]({{base.url}}/Documentation
 <tr>
   <td>useClassMetadata</td>
   <td>False</td>
-  <td>When true, the class of values is being serialized and then used during deserialization to know the concrete type.</td>
+  <td>When true, the class of values is being serialized and then used during deserialization to know the concrete type.
+  It is useful when you are working with polymorphic types that you want to deserialize back to the concrete implementation.</td>
 </tr>
 <tr>
   <td>useDateFormat</td>

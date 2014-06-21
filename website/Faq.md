@@ -4,20 +4,19 @@ layout: default
 jumbotron: true
 ---
 
-
 ###How to exclude a property from ser/de?
-Annotate your field and getter/setter with @JsonIgnore.
+Annotate your field and getter/setter with {% highlight java nowrap %}@JsonIgnore{% endhighlight %}.
 
 
 ###How to include a field or method from ser/de?
-Annotate it with [@JsonProperty or use GensonBuilder]({{base.url}}/GettingStarted/#filterrename-properties).
+Annotate it with [{% highlight java nowrap %}@JsonProperty{% endhighlight %} or use GensonBuilder]({{base.url}}/GettingStarted/#filterrename-properties).
 You can even indicate if you want it to be included only in serialization or deserialization.
 
 
 ###How to skip null values from output?
 
 {% highlight java %}
-new Genson.Builder().setSkipNull(true).create();
+new GensonBuilder().setSkipNull(true).create();
 {% endhighlight %}
 
 
@@ -27,16 +26,17 @@ See the [custom converter section]({{base.url}}/GettingStarted/#custom-serde) of
 
 ###How to store state/share data from one converter to another?
 
-  * Use Context class (preferred solution), it is intended to be shared across all converters for a single execution and already provides some usefull methods to store/retrieve data.
+  * Use Context class (preferred solution), it is intended to be shared across all converters for a
+  single execution and already provides some usefull methods to store/retrieve data.
   * Use ThreadLocalHolder which internally uses a ThreadLocal map to store data.
 
 
 ###How to change the default visibility of fields, methods and constructors?
 
-Genson uses VisibilityFilter class to filter fields, methods and constructors by their [Modifiers](http://docs.oracle.com/javase/6/docs/api/java/lang/reflect/Modifier.html).
+Genson uses **VisibilityFilter** class to filter fields, methods and constructors by their [Modifiers](http://docs.oracle.com/javase/6/docs/api/java/lang/reflect/Modifier.html).
 For example if you want to accept public, protected and private fields :
 {% highlight java %}
-new GensonBuilder().useFields(true, VisibilityFilter.PRIVATE).create();
+new GensonBuilder().useFields(true, VisibilityFilter.PRIVATE).useMethods(true).create();
 
 // you can also define a custom visibility filter :
 new GensonBuilder().useFields(true, new VisibilityFilter(Modifier.TRANSIENT, Modifier.STATIC)).create();
@@ -60,4 +60,4 @@ See the [class metadata mechanism]({{base.url}}/GettingStarted/#polymorphic-type
 
 ###How to deserialize a class without a no argument constructor?
 The main problem in using constructors with arguments is to resolve parameter names, as they are not available through introspection.
-[See the solutions described]({{base.url}}/GettingStarted/#object-instantiation) in the Getting Started guide.
+[See the solutions described]({{base.url}}/Documentation/UserGuide/#object-instantiation) in the Getting Started guide.
