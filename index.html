@@ -78,7 +78,7 @@
         </div>
         <div class="collapse navbar-collapse" id="menu-navbar-collapse-1">
             <ul class="nav navbar-nav">
-                <li class="active"><a href="/genson/GettingStarted"><i class="fa fa-compass"></i> Getting started</a></li>
+                <li><a href="/genson/GettingStarted"><i class="fa fa-compass"></i> Getting started</a></li>
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-book"></i> Documentation <b class="caret"></b></a>
                     <ul class="dropdown-menu">
@@ -87,9 +87,16 @@
                         <li class="sep"></li>
                         <li><a href="/genson/Documentation/Extensions">Extensions</a></li>
                         <li><a href="/genson/Documentation/Configuration">Configuration</a></li>
-                        <li><a href="/genson/Documentation/Javadoc">Javadoc</a></li>
                         <li><a href="/genson/Documentation/Benchmarks & Metrics">Benchmarks & Metrics</a></li>
+                        <li><a href="/genson/Documentation/Changelog">Changelog</a></li>
                     </ul>
+                </li>
+                <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-code"></i> API Docs <b class="caret"></b></a>
+                  <ul class="dropdown-menu">
+                    <li><a href="/genson/Documentation/Javadoc">Javadoc</a></li>
+                    <li><a href="/genson/Documentation/Scaladoc">Scaladoc</a></li>
+                  </ul>
                 </li>
                 <li><a href="/genson/Community"><i class="fa fa-group"></i> Community</a></li>
                 <li><a href="/genson/Faq"><i class="fa fa-question"></i> FAQ</a></li>
@@ -198,7 +205,7 @@
 <div class="highlight"><pre><code class="java"><span class="k">new</span> <span class="nf">GensonBuilder</span><span class="o">()</span>
   <span class="o">.</span><span class="na">useDateFormat</span><span class="o">(</span><span class="k">new</span> <span class="n">SimpleDateFormat</span><span class="o">(</span><span class="s">&quot;yyyy-MM-dd&quot;</span><span class="o">))</span>
   <span class="o">.</span><span class="na">useIndentation</span><span class="o">(</span><span class="kc">true</span><span class="o">)</span>
-  <span class="o">.</span><span class="na">withSerializers</span><span class="o">(</span><span class="n">myCustomSerializer</span><span class="o">)</span>
+  <span class="o">.</span><span class="na">useConstructorWithArguments</span><span class="o">(</span><span class="kc">true</span><span class="o">)</span>
 <span class="o">.</span><span class="na">create</span><span class="o">();</span>
 </code></pre></div>
             </div>
@@ -263,13 +270,14 @@
             </div>
         </div>
         <div class="col-lg-6">
-            <div class="lead">
-                <div class="row space-bottom">
-                    <i class="fa fa-check"></i> Small memory footprint with the Streaming API.
-                </div>
-                <div class="row">
-                    <i class="fa fa-check"></i> High serialization and deserialization throughput independent from JSON size.
-                </div>
+            <div class="row">
+              <div class="lead"><i class="fa fa-check"></i> High serialization and deserialization throughput independent from JSON size.</div>
+            </div>
+            <div class="row">
+                <div class="lead"><i class="fa fa-check"></i> Small memory footprint.</div>
+            </div>
+            <div class="row">
+              <div class="lead"><i class="fa fa-check"></i> Automatically read & write data in streaming with the Streaming API.</div>
             </div>
         </div>
     </div>

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Genson</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Fast & easy to use Java <> Json library">
+
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-theme.min.css">
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <link href='/genson/css/theme.css' rel='stylesheet' type='text/css' />
+    <link href='/genson/css/pygments-default.css' rel='stylesheet' type='text/css' />
+
+    <script>
+
+        $(function() {
+          $('a[href*=#]:not([href=#])').click(function() {
+            if (location.pathname.replace(/^\//,'') == this.pathname.replace(/^\//,'') && location.hostname == this.hostname) {
+              var target = $(this.hash);
+              target = target.length ? target : $('[name=' + this.hash.slice(1) +']');
+              if (target.length) {
+                $('html,body').animate({
+                  scrollTop: target.offset().top
+                }, 500);
+                return false;
+              }
+            }
+          });
+        });
+
+        
+          (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+          })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+          ga('create', 'UA-33280683-2', 'owlike.github.io');
+          ga('send', 'pageview');
+        
+    </script>
+</head>
+
+<body>
+
+
+
+<header>
+    <div class="modal fade" id="shareDialog" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <iframe></iframe>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#menu-navbar-collapse-1">
+                <i class="fa fa-bars menu-item"></i>
+            </button>
+            <a class="navbar-brand" href="/genson/">Genson</a>
+        </div>
+        <div class="collapse navbar-collapse" id="menu-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                <li><a href="/genson/GettingStarted"><i class="fa fa-compass"></i> Getting started</a></li>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-book"></i> Documentation <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/genson/Documentation/UserGuide">User Guide</a></li>
+                        <li><a href="/genson/Documentation/ScalaGuide">Scala Guide</a></li>
+                        <li class="sep"></li>
+                        <li><a href="/genson/Documentation/Extensions">Extensions</a></li>
+                        <li><a href="/genson/Documentation/Configuration">Configuration</a></li>
+                        <li><a href="/genson/Documentation/Benchmarks & Metrics">Benchmarks & Metrics</a></li>
+                        <li><a href="/genson/Documentation/Changelog">Changelog</a></li>
+                    </ul>
+                </li>
+                <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-code"></i> API Docs <b class="caret"></b></a>
+                  <ul class="dropdown-menu">
+                    <li><a href="/genson/Documentation/Javadoc">Javadoc</a></li>
+                    <li><a href="/genson/Documentation/Scaladoc">Scaladoc</a></li>
+                  </ul>
+                </li>
+                <li><a href="/genson/Community"><i class="fa fa-group"></i> Community</a></li>
+                <li><a href="/genson/Faq"><i class="fa fa-question"></i> FAQ</a></li>
+            </ul>
+          <ul class="nav navbar-nav navbar-right">
+            <li>
+              <a class="share-button twitter-share-button" href="https://twitter.com/intent/tweet"
+                 data-toggle="tooltip" data-placement="bottom" title="Share on Twitter">
+                <i class="fa fa-twitter-square"></i>
+              </a>
+              <a class="share-button google-plus-share-button" href="https://twitter.com/intent/tweet"
+                 data-toggle="tooltip" data-placement="bottom" title="Share on Google+">
+                <i class="fa fa-google-plus-square"></i>
+              </a>
+              <a class="share-button linkedin-share-button" href="https://www.linkedin.com/cws/share"
+                 data-toggle="tooltip" data-placement="bottom" title="Share on LinkedIn">
+                <i class="fa fa-linkedin-square"></i>
+              </a>
+            </li>
+            <script>
+              var linkedInParams = {
+                url: 'http://owlike.github.io/genson/',
+                original_referer: document.URL,
+                isFramed: false,
+                lang: 'en_US',
+                token: ''
+              }
+
+              var twitterParams = {
+                original_referer: document.URL,
+                text: '#Genson, fast and easy to use Java <> JSON library.',
+                tw_p: 'tweetbutton',
+                url: 'http://owlike.github.io/genson/',
+                via: 'EugenCepoi'
+              }
+
+              var googlePlusParams = {
+                url: 'http://owlike.github.io/genson/'
+              }
+
+              $('.share-button').tooltip({delay: { show: 500, hide: 100 }});
+
+              share('a.twitter-share-button', 'https://twitter.com/intent/tweet?', twitterParams);
+              share('a.linkedin-share-button', 'https://www.linkedin.com/cws/share?', linkedInParams);
+              share('a.google-plus-share-button', 'https://plus.google.com/share?', googlePlusParams);
+
+              function share(selector, shareUrl, params) {
+                $(selector).click(function(evt) {
+                  evt.preventDefault();
+
+                  var url = shareUrl + $.map(params, function(value, key) {
+                    return key+'='+encodeURIComponent(value);
+                  }).join('&');
+
+                  var t="scrollbars=yes,resizable=yes,toolbar=no,location=yes",n=550,r=420,i=screen.height,s=screen.width,o=Math.round(s/2-n/2),u=0;
+                  window.open(url,null,t+",width="+n+",height="+r+",left="+o+",top="+u);
+                });
+              }
+            </script>
+          </ul>
+        </div>
+    </div>
+</header>
+
+
+
+
+<div class="content">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12" role="main">
+                <h2 id="release-099---13-april-2014">Release 0.99 - 13 April 2014</h2>
+
+<p>This release introduces some new features, the main being JSR 353 and some simplifications of code related to exceptions. Indeed all checked exceptions have been replaced by unchecked ones.</p>
+
+<ul>
+  <li>Complete implementation of JSR 353</li>
+  <li>Removing TransformationRuntimeException and TransformationException, removing also IOException from signatures. Replaced previous exceptions with the new JsonBindingException. Gensons uses now only unchecked exceptions</li>
+  <li>Guava Bundle, at the moment only Optional is supported</li>
+  <li>Adding ability to ser/deser byte array as array of ints instead of base 64 encoded strings</li>
+  <li>Supporting line &amp; block comments in json</li>
+  <li>Bug fix: #issue 6, fixing memory leak with tomcat (and probably websphere &amp; cie too)</li>
+  <li>Bug fix: serialization of byte array from Pojos, key was not being serialized.</li>
+  <li>Bug fix: using class classloader in ASM resolver instead of Gensons classloader</li>
+</ul>
+
+<h2 id="release-098---7-august-2013">Release 0.98 - 7 August 2013</h2>
+
+<ul>
+  <li>JSR 353 types support via a new bundle JSR353Bundle</li>
+  <li>Bugfix in JsonReader skipValue method</li>
+  <li>Bugfix when using BeanViews, introduced after some refactoring in version 0.95</li>
+</ul>
+
+<h2 id="release-097---11-june-2013">Release 0.97 - 11 June 2013</h2>
+
+<ul>
+  <li>Bugfix: Jersey messagebodywriter does not close outputstream anymore. Previously they were being closed by inadvertance, streams should be closed by the code that is managing them, not the code that reads/writes.</li>
+</ul>
+
+<h2 id="release-096---2-june-2013">Release 0.96 - 2 June 2013</h2>
+
+<ul>
+  <li>Important [http://code.google.com/p/genson/issues/detail?id=4 bug fix] related to generics getting mixed up in internal cache, you are highly encouraged to upgrade to 0.96.</li>
+</ul>
+
+<h2 id="release-095---21-may-2013">Release 0.95 - 21 May 2013</h2>
+
+<ul>
+  <li>JAXB annotations and types support, enabled by default for JAX-RS implementations.</li>
+  <li>Added Resteay integration (works as for Jersey, just drop the jar :)).</li>
+  <li>Addition of a bundle system, now users can group a set of custom features or configuration into a bundle and register all at once.</li>
+  <li>Support for serialization and deserialization of byte arrays (encoded by genson to base64).</li>
+  <li>Addition of contextual factory mechanism, allowing to define specific behaviour based on property info (name, annotations, etc).</li>
+  <li>New annotations: @JsonDateFormat and @JsonConverter, can be used on Pojo properties to define a specific date format and converter to use (while still using the default ones for the rest of the properties).</li>
+  <li>Improved map ser/deser to handle all sort of keys. Map with complex keys can now be serialized and deserialized back (however they are not represented as a json object but an array of objects).</li>
+  <li>Bug fix: Generic self referencing types.</li>
+</ul>
+
+<h2 id="release-094---5-february-2013">Release 0.94 - 5 February 2013</h2>
+
+<ul>
+  <li>corrected bug related to generics and default generic converter</li>
+  <li>added pretty printing support (enable it via the Genson.Builder)</li>
+  <li>replaced IllegalStateExceptions from JsonReader with JsonStreamException (having location information row/col, package visibility only for this version)</li>
+  <li>added UUID, Calendar, Set converters, ability to use dates/calendars as timeinmillis, unit testing, TypeUtil clean code remove unused method and ParameterizedTypeImpl, we already have ExtendedParameterizedType</li>
+  <li>tests for JsonReader column/row location in Exceptions, added type safe methods to Context and depracted old ones + test</li>
+  <li>improved spring mvc integration</li>
+  <li>ValueType.OBJECT type has been replaced with Map (as unknown object types are deserialized to maps)</li>
+  <li>ValueType.INTEGER type has been replaced with long. INTEGER meaning here a numeric value with no decimals.</li>
+  <li>More unit testing, code enhancements and internal stuff.</li>
+</ul>
+
+<h2 id="release-093---1-october-2012">Release 0.93 - 1 October 2012</h2>
+
+<ul>
+  <li>Added new methods to Genson.Builder allowing to filter and rename properties of classes without using annotations and requiring only small code</li>
+  <li>Corrected bugs related to generics</li>
+  <li>Replaced double parsing algorithm with a more accurate one</li>
+  <li>Added the possibility to choose whether to use custom double parsing algorithm (very fast) or standard Double.parse (exact)</li>
+  <li>Metadata bug corrected for attributes defined as Object.</li>
+</ul>
+
+<h2 id="release-092---27-august-2012">Release 0.92 - 27 August 2012</h2>
+
+<ul>
+  <li>Jersey integration with automatic detection (and working with DI frameworks)</li>
+  <li>Spring web integration</li>
+  <li>Enhanced filtering support and provided better user customization</li>
+  <li>Default converters for URI, BigInteger, BigDecimal, Timestamp.</li>
+</ul>
+
+<h2 id="release-091---20-august-2012">Release 0.91 - 20 August 2012</h2>
+
+<ul>
+  <li>Addition of factory methods in Genson class allowing to ease the creation of ObjectReader/Writer.</li>
+</ul>
+
+<h2 id="release-09---12-august-2012">Release 0.9 - 12 August 2012</h2>
+
+<ul>
+  <li>First stable release.</li>
+</ul>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<footer>
+  <div class="text-center">
+    <div class="row">
+      <a href="https://github.com/owlike/genson"><i class="fa fa-github"></i></a>
+    </div>
+    <div class="row">
+      Copyright &copy; 2012-2014, Eugen Cepoi
+    </div>
+  </div>
+</footer>
+</body>
+</html>

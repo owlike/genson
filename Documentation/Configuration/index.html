@@ -78,7 +78,7 @@
         </div>
         <div class="collapse navbar-collapse" id="menu-navbar-collapse-1">
             <ul class="nav navbar-nav">
-                <li class="active"><a href="/genson/GettingStarted"><i class="fa fa-compass"></i> Getting started</a></li>
+                <li><a href="/genson/GettingStarted"><i class="fa fa-compass"></i> Getting started</a></li>
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-book"></i> Documentation <b class="caret"></b></a>
                     <ul class="dropdown-menu">
@@ -87,9 +87,16 @@
                         <li class="sep"></li>
                         <li><a href="/genson/Documentation/Extensions">Extensions</a></li>
                         <li><a href="/genson/Documentation/Configuration">Configuration</a></li>
-                        <li><a href="/genson/Documentation/Javadoc">Javadoc</a></li>
                         <li><a href="/genson/Documentation/Benchmarks & Metrics">Benchmarks & Metrics</a></li>
+                        <li><a href="/genson/Documentation/Changelog">Changelog</a></li>
                     </ul>
+                </li>
+                <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-code"></i> API Docs <b class="caret"></b></a>
+                  <ul class="dropdown-menu">
+                    <li><a href="/genson/Documentation/Javadoc">Javadoc</a></li>
+                    <li><a href="/genson/Documentation/Scaladoc">Scaladoc</a></li>
+                  </ul>
                 </li>
                 <li><a href="/genson/Community"><i class="fa fa-group"></i> Community</a></li>
                 <li><a href="/genson/Faq"><i class="fa fa-question"></i> FAQ</a></li>
@@ -179,6 +186,7 @@
 <p>Some aspects of Genson can be configured via annotations used on your classes. This is nice since you have your configuration that
 leaves near the code that uses it.</p>
 
+<div class="table-responsive">
 <table class="table table-striped table-bordered">
 <tr><th>Annotation Name</th><th>Usage</th></tr>
 <tr>
@@ -236,6 +244,7 @@ leaves near the code that uses it.</p>
   <td>Used on Converters. Will disable the BeanView mechanism for the type handled by this Converter.</td>
 </tr>
 </table>
+</div>
 
 <p>But in some cases you might not be able to modify the source code or just don’t want to, in that case you can’t use annotations.</p>
 
@@ -245,6 +254,7 @@ leaves near the code that uses it.</p>
 It tries to be easy to use through a fluent builder API.
 Most of those options are documented in the <a href="/Documentation/Javadoc">Javadoc</a>.</p>
 
+<div class="table-responsive">
 <table class="table table-striped table-bordered">
 <tr><th>Method Name</th><th>Default</th><th>Description</th></tr>
 <tr>
@@ -302,6 +312,7 @@ Most of those options are documented in the <a href="/Documentation/Javadoc">Jav
    When this feature is enabled, each byte will be ser/de as its numeric value.</td>
 </tr>
 </table>
+</div>
 
             </div>
         </div>
