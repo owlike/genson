@@ -25,7 +25,7 @@ runSuite() {
 
 runCommand "git diff-index --quiet origin/HEAD --" "You have uncommited changes, please commit and push to origin everything before deploying the doc.";
 
-runSuite "mvn clean javadoc:javadoc"
+runSuite "mvn clean package -DskipTests"
 
 version=$(mvn org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version|grep -Ev '(^\[|Download\w+:)')
 
