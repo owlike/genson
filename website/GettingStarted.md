@@ -6,7 +6,7 @@ jumbotron: true
 quick-overview: An overview of Genson, how to download, configure and use it in your projects.
 ---
 
-## Downloading
+## Download
 
 Genson is provided as a all in one solution containing all the features. It provides also a couple of extensions and
 integrations with different other libraries such JAX-RS implementations, Spring, Joda time, Scala available out of the box.

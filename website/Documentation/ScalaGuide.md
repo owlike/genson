@@ -6,6 +6,38 @@ jumbotron: true
 quick-overview: Genson provides an out of the box integration with Scala for the high level databinding API.
 ---
 
+
+##Download
+
+In order to keep the main Genson jar small we chose to provide the Scala extension as a separate jar.
+The other reason is that some tools might not handle well optional dependencies, in result someone that does not use
+the Scala extension could end up with the scala language library downloaded.
+
+###SBT
+
+{% highlight scala %}
+libraryDependencies += "com.owlike" % "genson-scala" % "{{site.latest_version}}"
+{% endhighlight %}
+
+###Maven
+
+{% highlight xml %}
+<dependency>
+	<groupId>com.owlike</groupId>
+	<artifactId>genson-scala</artifactId>
+	<version>{{site.latest_version}}</version>
+</dependency>
+{% endhighlight %}
+
+###Manual Download
+
+If you don't use a dependency management tool then you can still use it, but you will have to download the Scala extension and
+the core Genson jars by hand.
+
+ * [Genson](http://repo1.maven.org/maven2/com/owlike/genson/{{site.latest_version}}/genson-{{site.latest_version}}.jar)
+ * [Genson-scala](http://repo1.maven.org/maven2/com/owlike/genson-scala/{{site.latest_version}}/genson-scala-{{site.latest_version}}.jar)
+
+
 ##Overview
 
 Genson provides an easy to use boiler free integration with Scala.
@@ -16,43 +48,15 @@ Standard classes will be ser/de with the classic Genson behaviour for Java.
 Genson classic features and annotations are supported (JsonIgnore, JsonProperty, JsonConverter, etc),
 bringing the power of Genson to Scala.
 
-
-To get you started with Genson in Scala you only have to import com.owlike.genson.ext.scala.defaultGenson_
+To get you started with Genson in Scala you only have to import com.owlike.genson.defaultGenson_
 and you are done!
 
 {% highlight scala %}
-import com.owlike.genson.ext.scala.defaultGenson_
+import com.owlike.genson.defaultGenson_
 
 val jsonString = toJson(someValue)
 val actualValue = fromJson[SomeType](json)
 {% endhighlight %}
-
-Of course if the default configuration does not fit your needs you can make a custom Genson instance and then use it.
-For example lets say we want to enable indentation, serialize objects based on their runtime type and want to ser/de
-dates as timestamps and all fields from case classes (not only the ones present in the constructor or the vars).
-
-{% highlight scala %}
-import com.owlike.genson.ext.scala._
-
-object CustomGenson {
-  val customGenson = new ScalaGenson(
-    new GensonBuilder()
-      .useIndentation(true)
-      .useRuntimeType(true)
-      .useTimeInMillis(true)
-      .withBundle(ScalaBundle().useOnlyConstructorFields(false))
-      .create()
-  )
-}
-
-// then just import it in the places you want to use this instance instead of the default one
-import CustomGenson.customGenson._
-
-// and use it!
-toJson(...)
-fromJson[SomeType](json)
-{% endhighlight %}
-
 
 
 ##Collections & Tuples
@@ -62,11 +66,11 @@ Scala provides some optimized types for maps and collections of few elements, Ge
 and deserialize to the optimized type.
 
 {% highlight scala %}
-import com.owlike.genson.ext.scala.defaultGenson_
+import com.owlike.genson.defaultGenson_
 
 // [1,2,3]
 val jsonArray = toJson(Seq(1,2,3))
-val seqOfInt = fromJson[Seq](jsonArray)
+val seqOfInt = fromJson[Seq[Int]](jsonArray)
 
 // {"name":"foo bar"}
 val jsonMap = toJson(Map("name" -> "foo bar"))
@@ -115,7 +119,7 @@ Genson has also out of the box support for case classes. By default Case classes
  * If multiple constructors are defined, only the default one will be used
  (that has a default apply method generated in its companion object)
  * Set/Get methods are not used as it does not make sense with case classes.
- If you want to use java beans then use plain old java classes.
+ If you want to work with java bean conventions then use plain old java classes.
 
 {% highlight scala %}
 case class Address(street: String, building: Int)
@@ -132,3 +136,30 @@ val person = fromJson[Person](json)
 
 Genson will serialize None as null and null is deserialized as None.
 
+##Customizing
+
+Of course if the default configuration does not fit your needs you can make a custom Genson instance and then use it.
+For example lets say we want to enable indentation, serialize objects based on their runtime type and want to ser/de
+dates as timestamps and all fields from case classes (not only the ones present in the constructor or the vars).
+
+{% highlight scala %}
+import com.owlike.genson._
+
+object CustomGenson {
+  val customGenson = new ScalaGenson(
+    new GensonBuilder()
+      .useIndentation(true)
+      .useRuntimeType(true)
+      .useTimeInMillis(true)
+      .withBundle(ScalaBundle().useOnlyConstructorFields(false))
+      .create()
+  )
+}
+
+// then just import it in the places you want to use this instance instead of the default one
+import CustomGenson.customGenson._
+
+// and use it!
+toJson(...)
+fromJson[SomeType](json)
+{% endhighlight %}
