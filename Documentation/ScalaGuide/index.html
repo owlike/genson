@@ -232,7 +232,7 @@ and you are done!</p>
 
 <h2 id="collections--tuples">Collections &amp; Tuples</h2>
 
-<p>Genson provides a set of defaults converters for most scala collections (mutable and immutable).
+<p>Genson provides a set of default converters for most scala collections (mutable and immutable).
 Scala provides some optimized types for maps and collections of few elements, Genson will respect it
 and deserialize to the optimized type.</p>
 
@@ -247,7 +247,7 @@ and deserialize to the optimized type.</p>
 <span class="k">val</span> <span class="n">mapOfString</span> <span class="k">=</span> <span class="n">fromJson</span><span class="o">[</span><span class="kt">Map</span><span class="o">[</span><span class="kt">String</span>,<span class="kt">String</span><span class="o">]](</span><span class="n">jsonMap</span><span class="o">)</span>
 </code></pre></div>
 
-<p>Genson will serialize scala Tuples1 to 22, as json arrays.
+<p>Genson will serialize scala Tuple1 to 22, as json arrays.
 There is no restriction on the complexity of the tuples (may contain options, case classes, etc).</p>
 
 <div class="highlight"><pre><code class="scala"><span class="c1">// [&quot;foo&quot;,&quot;bar&quot;]</span>
