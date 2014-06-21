@@ -6,17 +6,17 @@ Genson is a complete json <-> java conversion library, providing full databindin
 
 Gensons main strengths?
 
+ - Easy to use and just works!
  - Its modular and configurable architecture.
  - Speed and controlled small memory foot print making it scale.
- - Last but not least it is easy to use and works out of the box!
 
 ##Online Documentation
 
 Checkout our new website - <http://owlike.github.io/genson/>!
 
 
-The old website at <http://code.google.com/p/genson/>, hosts the documentation and javadoc of the latest release (0.99).
-But starting with 1.0 everything will be moved to github and the new website.
+The old website at <http://code.google.com/p/genson/>, hosts the documentation and javadoc until release 0.99 inclusive.
+But starting with 1.0 everything is be moved to github and the new website.
 
 ##Motivation
 
@@ -40,15 +40,79 @@ Gensons initial motivation is to solve those problems by trying to come with use
 
 ##Goals
 
- - Be as much extensible as possible by allowing users to add new features in a clean and easy way. Genson applies the philosophy that "We can not think of every use case, so give to users the ability to do it by them self in a easy way".
+ - Be as much extensible as possible by allowing users to add new features in a clean and easy way. Genson applies the philosophy that *"We can not think of every use case, so give to users the ability to do it by them self in a easy way*".
  - Provide an easy to use API.
  - Try to be as fast and scalable or even faster than the most performant librairies.
  - Full support of Java generics.
  - Provide the ability to work with classes of which you don't have the source code.
  - Provide an efficient streaming API.
 
+## Download
 
-##Basic example
+Genson is provided as a all in one solution containing all the features. It provides also a couple of extensions and
+integrations with different other libraries such JAX-RS implementations, Spring, Joda time, Scala available out of the box.
+These libraries are of course not included in Genson and if you are using maven won't be pulled transitively
+(they are marked as optional).
+
+To get you running you can download it manually from [maven central](http://repo1.maven.org/maven2/com/owlike/genson/)
+or add the dependency to your pom if you use Maven.
+
+```xml
+<dependency>
+  <groupId>com.owlike</groupId>
+  <artifactId>genson</artifactId>
+  <version>{{latest_version}}</version>
+</dependency>
+```
+
+You can also build it from the sources using Maven.
+
+## POJO databinding
+
+The main entry point in Genson library is the Genson class.
+It provides methods to serialize Java objects to JSON  and deserialize JSON streams to Java objects.
+Instances of Genson are immutable and thread safe, you should reuse them. In general the recommended way is to have a single instance
+per configuration type.
+
+The common way to use Genson is to read JSON and map it to some POJO and vice versa, read the POJO and write JSON.
+
+```java
+Genson genson = new Genson();
+
+// read from a String, byte array, input stream or reader
+Person person = genson.deserialize("{\"age\":28,\"name\":\"Foo\"}", Person.class);
+
+String json = genson.serialize(person);
+// or produce a byte array
+byte[] jsonBytes = genson.serializeBytes(person);
+// or serialize to a output stream or writer
+genson.serialize(person, outputStream);
+
+public class Person {
+  public String name;
+  public int age;
+}
+```
+
+
+## Java collections
+
+But you can also work with standard Java collections such as Map and Lists. If you don't tell Genson what type to use,
+it will deserialize JSON Arrays to Java List and JSON Objects to Map, numbers to Long and Double.
+
+Using Java standard types instead of POJO can be a easy way to start learning JSON. In that case you will deal only with
+List, Map, Long, Double, String, Boolean and null.
+
+```java
+// will be deserialized to a list of maps
+List<Object> persons = genson.deserialize("[{\"age\":28,\"name\":\"Foo\"}]", List.class);
+// will produce same result as
+Object persons = genson.deserialize("[{\"age\":28,\"name\":\"Foo\"}]", Object.class);
+```
+
+
+Instead of using the previous Person class we can use a Map. By default if you don't specify the type of the keys,
+Genson will deserialize to String and serialize using toString method of the key.
 
 ```java
 Map<String, Object> person = new HashMap<String, Object>() {{
@@ -56,20 +120,45 @@ Map<String, Object> person = new HashMap<String, Object>() {{
   put("age", 28);
 }};
 
-// create an instance of Genson with default configuration
-Genson genson = new Genson();
-
 // {"age":28,"name":"Foo"}
-String json = genson.serialize(person);
+String singlePersonJson = genson.serialize(person);
+// will contain a long for the age and a String for the name
+Map<String, Object> map = genson.deserialize(singlePersonJson, Map.class);
 ```
 
-##Configuration
+## Deserialize generic types
 
-You want to customize Genson? It's easy via the GensonBuilder, allowing you build customized instances of Genson.
+You can also deserialize to generic types such as a list of Pojos.
 
 ```java
-// For example we can configure Genson to output indented JSON and to deserialize to constructors with arguments
-Genson genson = new GensonBuilder().useIndentation(true).useConstructorWithArguments(true).create;
-genson.serialize(person);
+String json = "[{\"age\":28,\"name\":\"Foo\"}]";
+
+List<Person> persons = genson.deserialize(json, new GenericType<List<Person>>(){});
+
+// or lets say we want to use something else than String as the keys of our Map.
+Map<Integer, Object> map = genson.deserialize(
+  "{\"1\":28, \"2\":\"Foo\"}",
+  new GenericType<Map<Integer, Object>>(){}
+);
 ```
+
+Note in the previous example we defined the keys (1, 2) as json strings. JSON specification
+allows only strings as object property names, but Genson allows to map this keys to some - limited - other types.
+
+## Customizing Genson
+
+If the default configuration of Genson does not fit your needs you can customize it via the GensonBuilder.
+For example to enable indentation of the output, serialize all objects using their runtime type and
+deserialize to classes that don't provide a default no argument constructor can be achieved with following configuration.
+
+```java
+Genson genson = new GensonBuilder()
+  .useIndentation(true)
+  .useRuntimeType(true)
+  .useConstructorWithArguments(true)
+  .create();
+```
+
+
+You are ready to rock the JSON! :)
 
