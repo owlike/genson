@@ -151,6 +151,44 @@ Maybe XmlRootElement, even if I doubt of its pertinence in JSON...
 
 If there are other jaxb features you would like to be supported just open an issue or drop an email on the google group.
 
+##Joda-Time
+
+Genson provides JodaTimeBundle enabling joda-time types support.
+
+{% highlight java %}
+Genson genson = new GensonBuilder().withBundle(new JodaTimeBundle()).create();
+{% endhighlight %}
+
+By default dates are being ser/de using {% highlight java nowrap %}ISODateTimeFormat.dateTime(){% endhighlight %} formatter.
+You can change it and use another formatter. However take care, that this formatter will be used for serialization and deserialization,
+thus it must support the methods **print** and **parse**.
+
+{% highlight java %}
+DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy/MM/dd");
+Genson genson = new GensonBuilder()
+  .withBundle(new JodaTimeBundle().useDateFormatter(formatter))
+  .create();
+{% endhighlight %}
+
+
+Or ser/de dates as timestamps, in that case you configure it at the builder level, like for classic Java Dates.
+
+{% highlight java %}
+Genson genson = new GensonBuilder()
+  .useDateAsTimestamp(true)
+  .withBundle(new JodaTimeBundle())
+  .create();
+{% endhighlight %}
+
+###Supported types###
+
+Main Joda Time types are supported at the moment, if some are missing feel free to open an issue or even better, make a pull request :)
+
+* Implementations of ReadableInstant such as DateTime, Instant and MutableDateTime.
+* Interval as an object containing two keys start and end, using the configured DateTimeFormatter or timestamps.
+* Period is ser/de using {% highlight java nowrap %}ISOPeriodFormat.standard(){% endhighlight %}.
+* Duration is ser/de as a long representing the duration in milliseconds.
+
 
 ##Spring MVC##
 

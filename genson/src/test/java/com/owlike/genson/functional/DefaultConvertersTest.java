@@ -169,7 +169,7 @@ public class DefaultConvertersTest {
 
   @Test
   public void testCalendarConverter() {
-    Genson genson = new GensonBuilder().useTimeInMillis(true).create();
+    Genson genson = new GensonBuilder().useDateAsTimestamp(true).create();
     Calendar cal = Calendar.getInstance();
     String json = genson.serialize(cal);
     Calendar cal2 = genson.deserialize(json, Calendar.class);

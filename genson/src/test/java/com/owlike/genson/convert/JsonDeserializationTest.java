@@ -195,12 +195,6 @@ public class JsonDeserializationTest {
   @SuppressWarnings("unchecked")
   @Test
   public void testContentDrivenDeserialization() {
-
-    String jsonWithNumberAsKeys = "{\"1\":28, \"2\":\"Foo\"}";
-    Map<Integer, Object> m = genson.deserialize(jsonWithNumberAsKeys, new GenericType<Map<Integer, Object>>() {
-    });
-    System.out.println(m.get(1)+" "+m.get(2));
-
     String src = "{\"list\":[1, 2.3, 5, null]}";
     TypeVariableList<Number> tvl = genson.deserialize(src, TypeVariableList.class);
     assertArrayEquals(tvl.list.toArray(new Number[tvl.list.size()]), new Number[]{1, 2.3, 5,

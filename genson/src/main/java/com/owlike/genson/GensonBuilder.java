@@ -9,6 +9,7 @@ import com.owlike.genson.reflect.AbstractBeanDescriptorProvider.ContextualConver
 
 import java.lang.reflect.Type;
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -59,7 +60,8 @@ public class GensonBuilder {
 
   private BeanDescriptorProvider beanDescriptorProvider;
   private Converter<Object> nullConverter;
-  private DefaultConverters.DateConverter defaultDateConverter;
+  private DateFormat dateFormat = SimpleDateFormat.getDateInstance();
+  private boolean useDateAsTimestamp;
 
   // for the moment we don't allow to override
   private BeanViewDescriptorProvider beanViewDescriptorProvider;
@@ -455,7 +457,7 @@ public class GensonBuilder {
    * @return a reference to this builder.
    */
   public GensonBuilder useDateFormat(DateFormat dateFormat) {
-    defaultDateConverter = new DefaultConverters.DateConverter(dateFormat, false);
+    this.dateFormat = dateFormat;
     return this;
   }
 
@@ -585,8 +587,8 @@ public class GensonBuilder {
     return this;
   }
 
-  public GensonBuilder useTimeInMillis(boolean timeInMillis) {
-    defaultDateConverter = new DefaultConverters.DateConverter(null, timeInMillis);
+  public GensonBuilder useDateAsTimestamp(boolean enabled) {
+    this.useDateAsTimestamp = enabled;
     return this;
   }
 
@@ -775,9 +777,7 @@ public class GensonBuilder {
     converters.add(DefaultConverters.ShortConverter.instance);
     converters.add(DefaultConverters.FloatConverter.instance);
     converters.add(DefaultConverters.NumberConverter.instance);
-    if (defaultDateConverter == null)
-      defaultDateConverter = new DefaultConverters.DateConverter();
-    converters.add(defaultDateConverter);
+    converters.add(new DefaultConverters.DateConverter(dateFormat, useDateAsTimestamp));
     converters.add(DefaultConverters.URLConverter.instance);
     converters.add(DefaultConverters.URIConverter.instance);
     converters.add(DefaultConverters.TimestampConverter.instance);
@@ -800,7 +800,9 @@ public class GensonBuilder {
     factories.add(DefaultConverters.EnumConverterFactory.instance);
     factories.add(DefaultConverters.PrimitiveConverterFactory.instance);
     factories.add(DefaultConverters.UntypedConverterFactory.instance);
-    factories.add(new DefaultConverters.CalendarConverterFactory(defaultDateConverter));
+    factories.add(new DefaultConverters.CalendarConverterFactory(
+      new DefaultConverters.DateConverter(dateFormat, useDateAsTimestamp)
+    ));
   }
 
   protected void addDefaultContextualFactories(List<ContextualFactory<?>> factories) {
@@ -881,5 +883,9 @@ public class GensonBuilder {
 
   public final List<Factory<?>> getFactories() {
     return Collections.unmodifiableList(converterFactories);
+  }
+
+  public final boolean isDateAsTimestamp() {
+    return useDateAsTimestamp;
   }
 }
