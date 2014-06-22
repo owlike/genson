@@ -326,6 +326,46 @@ Maybe XmlRootElement, even if I doubt of its pertinence in JSON…</p>
 
 <p>If there are other jaxb features you would like to be supported just open an issue or drop an email on the google group.</p>
 
+<h2 id="joda-time">Joda-Time</h2>
+
+<p>Genson provides JodaTimeBundle enabling joda-time types support.</p>
+
+<div class="highlight"><pre><code class="java"><span class="n">Genson</span> <span class="n">genson</span> <span class="o">=</span> <span class="k">new</span> <span class="n">GensonBuilder</span><span class="o">().</span><span class="na">withBundle</span><span class="o">(</span><span class="k">new</span> <span class="n">JodaTimeBundle</span><span class="o">()).</span><span class="na">create</span><span class="o">();</span>
+</code></pre></div>
+
+<p>By default dates are being ser/de using 
+<span class="n">ISODateTimeFormat</span><span class="o">.</span><span class="na">dateTime</span><span class="o">()</span>
+ formatter.
+You can change it and use another formatter. However take care, that this formatter will be used for serialization and deserialization,
+thus it must support the methods <strong>print</strong> and <strong>parse</strong>.</p>
+
+<div class="highlight"><pre><code class="java"><span class="n">DateTimeFormatter</span> <span class="n">formatter</span> <span class="o">=</span> <span class="n">DateTimeFormat</span><span class="o">.</span><span class="na">forPattern</span><span class="o">(</span><span class="s">&quot;yyyy/MM/dd&quot;</span><span class="o">);</span>
+<span class="n">Genson</span> <span class="n">genson</span> <span class="o">=</span> <span class="k">new</span> <span class="n">GensonBuilder</span><span class="o">()</span>
+  <span class="o">.</span><span class="na">withBundle</span><span class="o">(</span><span class="k">new</span> <span class="n">JodaTimeBundle</span><span class="o">().</span><span class="na">useDateFormatter</span><span class="o">(</span><span class="n">formatter</span><span class="o">))</span>
+  <span class="o">.</span><span class="na">create</span><span class="o">();</span>
+</code></pre></div>
+
+<p>Or ser/de dates as timestamps, in that case you configure it at the builder level, like for classic Java Dates.</p>
+
+<div class="highlight"><pre><code class="java"><span class="n">Genson</span> <span class="n">genson</span> <span class="o">=</span> <span class="k">new</span> <span class="n">GensonBuilder</span><span class="o">()</span>
+  <span class="o">.</span><span class="na">useDateAsTimestamp</span><span class="o">(</span><span class="kc">true</span><span class="o">)</span>
+  <span class="o">.</span><span class="na">withBundle</span><span class="o">(</span><span class="k">new</span> <span class="n">JodaTimeBundle</span><span class="o">())</span>
+  <span class="o">.</span><span class="na">create</span><span class="o">();</span>
+</code></pre></div>
+
+<h3 id="supported-types-1">Supported types</h3>
+
+<p>Main Joda Time types are supported at the moment, if some are missing feel free to open an issue or even better, make a pull request :)</p>
+
+<ul>
+  <li>Implementations of ReadableInstant such as DateTime, Instant and MutableDateTime.</li>
+  <li>Interval as an object containing two keys start and end, using the configured DateTimeFormatter or timestamps.</li>
+  <li>Period is ser/de using 
+<span class="n">ISOPeriodFormat</span><span class="o">.</span><span class="na">standard</span><span class="o">()</span>
+.</li>
+  <li>Duration is ser/de as a long representing the duration in milliseconds.</li>
+</ul>
+
 <h2 id="spring-mvc">Spring MVC</h2>
 
 <p>To enable json support in Spring MVC with Genson, you need to register Gensons MessageConverter implementation.</p>

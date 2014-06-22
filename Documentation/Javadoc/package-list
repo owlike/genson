@@ -5,6 +5,7 @@ com.owlike.genson.ext
 com.owlike.genson.ext.guava
 com.owlike.genson.ext.jaxb
 com.owlike.genson.ext.jaxrs
+com.owlike.genson.ext.jodatime
 com.owlike.genson.ext.jsr353
 com.owlike.genson.ext.spring
 com.owlike.genson.reflect
