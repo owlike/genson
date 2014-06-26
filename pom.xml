@@ -28,8 +28,7 @@
         <connection>scm:git:git@github.com:owlike/genson.git</connection>
         <developerConnection>scm:git:git@github.com:owlike/genson.git</developerConnection>
         <url>https://github.com/owlike/genson</url>
-      <tag>HEAD</tag>
-  </scm>
+    </scm>
 
 	<issueManagement>
 		<system>Github Issue List</system>
