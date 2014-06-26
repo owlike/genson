@@ -6,6 +6,31 @@ jumbotron: true
 quick-overview: Genson provides an out of the box integration with Scala for the high level databinding API.
 ---
 
+##Overview
+
+Genson provides an easy to use boiler free integration with Scala.
+It supports common Scala mutable and immutable collections, Option, tuples, case classes and even functions
+(when [class metadata ser/de is enabled]({{base.url}}/Documentation/UserGuide/#polymorphic-types))!
+
+Standard classes will be ser/de with the classic Genson behaviour for Java.
+Genson classic features and annotations are supported (JsonIgnore, JsonProperty, JsonConverter, etc),
+bringing the power of Genson to Scala.
+
+To get you started with Genson in Scala you only have to import com.owlike.genson.defaultGenson_
+and you are done!
+
+{% highlight scala %}
+import com.owlike.genson.defaultGenson_
+
+val jsonString = toJson(someValue)
+val actualValue = fromJson[SomeType](json)
+{% endhighlight %}
+
+###Scala version
+
+Genson has been tested against scala 2.10 and 2.11. In theory you can use it with all releases from 2.10 and up.
+It should not work with 2.9 as we use some features that appeared in 2.10.
+
 
 ##Download
 
@@ -36,27 +61,6 @@ the core Genson jars by hand.
 
  * [Genson](http://repo1.maven.org/maven2/com/owlike/genson/{{site.latest_version}}/genson-{{site.latest_version}}.jar)
  * [Genson-scala](http://repo1.maven.org/maven2/com/owlike/genson-scala/{{site.latest_version}}/genson-scala-{{site.latest_version}}.jar)
-
-
-##Overview
-
-Genson provides an easy to use boiler free integration with Scala.
-It supports common Scala mutable and immutable collections, Option, tuples, case classes and even functions
-(when [class metadata ser/de is enabled]({{base.url}}/Documentation/UserGuide/#polymorphic-types))!
-
-Standard classes will be ser/de with the classic Genson behaviour for Java.
-Genson classic features and annotations are supported (JsonIgnore, JsonProperty, JsonConverter, etc),
-bringing the power of Genson to Scala.
-
-To get you started with Genson in Scala you only have to import com.owlike.genson.defaultGenson_
-and you are done!
-
-{% highlight scala %}
-import com.owlike.genson.defaultGenson_
-
-val jsonString = toJson(someValue)
-val actualValue = fromJson[SomeType](json)
-{% endhighlight %}
 
 
 ##Collections & Tuples
@@ -163,3 +167,5 @@ import CustomGenson.customGenson._
 toJson(...)
 fromJson[SomeType](json)
 {% endhighlight %}
+
+For a more in depth overview of Genson features and customization have a look at the User Guide and configuration sections.

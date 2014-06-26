@@ -78,7 +78,7 @@ But in some cases you might not be able to modify the source code or just don't 
 
 GensonBuilder is the main class allowing to configure and create new instances of Genson.
 It tries to be easy to use through a fluent builder API.
-Most of those options are documented in the [Javadoc]({{base.url}}/Documentation/Javadoc).
+Most of those options are documented in the [Javadoc]({{site.baseurl}}/Documentation/Javadoc).
 GensonBuilder provides several methods to register components such as Converters, Factories, etc, but it is not documented here.
 
 <div class="table-responsive">
