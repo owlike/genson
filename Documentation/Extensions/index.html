@@ -1,10 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" itemscope itemtype="http://schema.org/Product">
 <head>
     <meta charset="utf-8">
     <title>Genson</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Fast & easy to use Java <> Json library">
+
+    <meta itemprop="name" content="Genson">
+    <meta itemprop="description" content="Fast & easy to use Java <> Json library">
 
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
 
@@ -107,7 +110,7 @@
                  data-toggle="tooltip" data-placement="bottom" title="Share on Twitter">
                 <i class="fa fa-twitter-square"></i>
               </a>
-              <a class="share-button google-plus-share-button" href="https://twitter.com/intent/tweet"
+              <a class="share-button google-plus-share-button" href="https://plus.google.com/share"
                  data-toggle="tooltip" data-placement="bottom" title="Share on Google+">
                 <i class="fa fa-google-plus-square"></i>
               </a>
@@ -365,6 +368,14 @@ thus it must support the methods <strong>print</strong> and <strong>parse</stron
 .</li>
   <li>Duration is ser/de as a long representing the duration in milliseconds.</li>
 </ul>
+
+<h2 id="guava">Guava</h2>
+
+<p>At the moment the Guava bundle is still under development, it only supports the Optional type. Absent will be serialized as null and null
+will be deserialized back to Absent.</p>
+
+<div class="highlight"><pre><code class="java"><span class="n">Genson</span> <span class="n">genson</span> <span class="o">=</span> <span class="k">new</span> <span class="n">GensonBuilder</span><span class="o">().</span><span class="na">withBundle</span><span class="o">(</span><span class="k">new</span> <span class="n">GuavaBundle</span><span class="o">()).</span><span class="na">create</span><span class="o">();</span>
+</code></pre></div>
 
 <h2 id="spring-mvc">Spring MVC</h2>
 

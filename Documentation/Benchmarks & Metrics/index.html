@@ -1,10 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" itemscope itemtype="http://schema.org/Product">
 <head>
     <meta charset="utf-8">
     <title>Genson</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Fast & easy to use Java <> Json library">
+
+    <meta itemprop="name" content="Genson">
+    <meta itemprop="description" content="Fast & easy to use Java <> Json library">
 
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
 
@@ -107,7 +110,7 @@
                  data-toggle="tooltip" data-placement="bottom" title="Share on Twitter">
                 <i class="fa fa-twitter-square"></i>
               </a>
-              <a class="share-button google-plus-share-button" href="https://twitter.com/intent/tweet"
+              <a class="share-button google-plus-share-button" href="https://plus.google.com/share"
                  data-toggle="tooltip" data-placement="bottom" title="Share on Google+">
                 <i class="fa fa-google-plus-square"></i>
               </a>
@@ -182,42 +185,83 @@
         <div class="row">
             <div class="col-md-9" role="main">
                 <h2 id="overview">Overview</h2>
-<p>All the following measures were made with Genson 0.98, Jackson 1.9.9 and Gson 2.2.3 on a Intel core i7 laptop with 2GHz and 4 Gio of RAM.
-The following benchmarks take into account the latest versions of Genson and Jackson but also the recent optimizations added to Gson  improving their deserialization performances.</p>
 
-<h2 id="performance-benchmarks">Performance benchmarks</h2>
+<p>All the following measures were made with Genson 1.0, Jackson 2.4.0 and Gson 2.2.4 on a Intel core i7 laptop with 2GHz and 4 Gio of RAM.
+Genson is compared to Gson and Jackson as one has nice performances when the other is a light library with nice design.
+Genson tries to provide a solution that is well balanced between performances/features &amp; ease of use.</p>
 
-<p>This first benchmark compares Genson to others known librairies using <a href="https://github.com/eishay/jvm-serializers/wiki/">jvm-serializers</a>.
-The dataset can be found <a href="https://github.com/eishay/jvm-serializers/blob/kannan/tpc/data/media.3.cks">here</a>.</p>
+<p>Note that in order to make sure Genson benchmarks are not biased we also used datasets coming from the competitors (Gson dataset)
+and an external benchmarking project <a href="https://github.com/eishay/jvm-serializers">jvm-serializers</a>.</p>
 
-<p><img class="img-responsive" src="/genson/images/total_ser_de.png" />
-<img class="img-responsive" src="/genson/images/ser.png" />
-<img class="img-responsive" src="/genson/images/deser.png" /></p>
+<h2 id="benchmarking-methodology">Benchmarking methodology</h2>
 
-<h3 id="benchmarking-methodology">Benchmarking methodology</h3>
-<p>The following benchmarks were run in the same jvm. Before starting to measure performances, each library has been warmed up. To limit memory usage impact, an explicit call to the garbage collector has been made, followed by sleep of the running thread for some seconds between each library bench.</p>
+<p>The following benchmarks were run in the same jvm. Before starting to measure performances, each library has been warmed up.
+To limit memory usage impact, an explicit call to the garbage collector has been made, followed by sleep of the running thread
+for some seconds between each library bench.</p>
 
-<p>Here is a second benchmark using Gson benchmarks data (located in their metrics project).
-This chart represents serialization and deserialization average time of
-<a href="http://code.google.com/p/genson/source/browse/src/test/resources/READER_LONG.json">LONG_READER</a> data in milliseconds with 5000
-iterations and 50 warmup iterations. The documents weights 189Ko. Complete results in their numeric reprensentation can be
-found <a href="http://code.google.com/p/genson/source/browse/bench_results/benchmark_gson_metrics.txt">here</a>.
-Serialization source code is located <a href="http://code.google.com/p/genson/source/browse/src/test/java/com/owlike/genson/SerializationBenchmark.java">here</a>
- and deserialization <a href="http://code.google.com/p/genson/source/browse/src/test/java/com/owlike/genson/DeserializeBenchmark.java">here</a>.</p>
+<h3 id="genson-dataset">Genson dataset</h3>
 
-<p><img class="img-responsive" src="http://genson.googlecode.com/files/gson_metrics_bench.png" /></p>
+<p>This benchmark uses fictive data. The goal is to measure de/ser performances with all kind of mixed objects where you have
+got a lot of beans, big numbers, many lists, arrays and maps (small and big).
+Note that we compare two versions of Genson, the first one uses a custom algorithm allowing to parse doubles really fast,
+but with a small precision loss, the other one uses standard Double.parse. In most cases using the custom algorithm should be fine.</p>
 
-<p>The last benchmark goal is to measure performances of use cases where you have got a lot of beans (so reflection will be used), big numbers, many lists, arrays and maps (small and big). Note that we compare two versions of Genson, the first one uses a custom algorithm allowing to parse doubles really fast, but with a small precision loss, the other one uses standard Double.parse. In most cases using the custom algorithm should be fine.</p>
+<p><img class="img-responsive" src="/genson/images/genson-data-bench.png" /></p>
 
-<p><img class="img-responsive" src="http://genson.googlecode.com/files/genson_fictive_bench.png" /></p>
+<h3 id="gson-dataset">Gson dataset</h3>
 
-<p>When looking at all those benchmarks we can see that Genson and Jackson performances are relatively close and Gson latest optimizations improved nicely its performances.
-Performances are important, but at that level other things may be more important, such as library design, ease to use and ease to develop and intergrate new features by yourself.</p>
+<p>Gson also has some benchmarking dataset, that they use to measure their performances. We used it too, so we can see how Genson performs
+using competitors datasets.</p>
+
+<p>The following charts represent serialization and deserialization average time in ms of three datasets.
+We run 50000 iterations and 50 warmup iterations. The documents can be found <a href="https://github.com/owlike/genson/blob/master/genson/src/test/resources/">here</a>.
+Serialization source code is located <a href="https://github.com/owlike/genson/blob/master/genson/src/test/java/com/owlike/genson/SerializationBenchmark.java">here</a>
+ and deserialization <a href="https://github.com/owlike/genson/blob/master/genson/src/test/java/com/owlike/genson/DeserializeBenchmark.java">here</a>.</p>
+
+<p><img class="img-responsive" src="/genson/images/gson-data-deser-bench.png" />
+<img class="img-responsive" src="/genson/images/gson-data-ser-bench.png" /></p>
+
+<h2 id="jvm-serializers-benchmark">JVM Serializers Benchmark</h2>
+
+<p>This benchmark is based on the <a href="https://github.com/eishay/jvm-serializers/wiki/">jvm-serializers</a> projet. The chart bellow represents
+the result of running it on the <a href="https://github.com/eishay/jvm-serializers/blob/kannan/tpc/data/media.1.cks">media.1</a> dataset.</p>
+
+<p>The benchmark was run using the default configuration and represents the throughput of de/ser for a test time of 10000.</p>
+
+<p><img class="img-responsive" src="/genson/images/jvm-serializers-bench.png" /></p>
 
 <h2 id="artifact-size">Artifact size</h2>
-<p>Last measure that can be very important for mobile developers is the jar size. In fact Gson has the smallest archive size but Genson is faster and weights only 2Ko more (Jackson is 5 times heavier)!</p>
+<p>Last measure that can be very important for mobile developers is the jar size.
+Genson weights only 170 KB more than Gson but has greater performances and a wider set of features, and is 4 times smaller than Jackson!</p>
 
-<p><img class="img-responsive" src="http://genson.googlecode.com/files/Jarsizeinko.JPG" /></p>
+<p><img class="img-responsive" src="/genson/images/jar-size.png" /></p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>When looking at all those benchmarks we can see that Genson and Jackson performances are relatively close. In most cases Jackson is faster
+except for the deserialization benchmarks with Gson dataset, where Genson is always faster.
+Performances are important, but all three libs provide great performances, at that level other things may be more important.</p>
+
+<ul>
+  <li>
+    <p>What features are provided?
+ <em>Genson comes with many nice features out of the box and they all just work.</em></p>
+  </li>
+  <li>
+    <p>Is it easy to use, configure and get running?
+ <em>Again, Genson just works, most of the features are centralized through Genson and GensonBuilder classes, and recently more effort has been
+ put into reducing the LOC you have to write.</em></p>
+  </li>
+  <li>
+    <p>Is it easy to download/install?
+ <em>Sure, it is an all in one solution bunlded into a single jar. Easy to get even if you don’t use Maven &amp; cie.</em></p>
+  </li>
+  <li>
+    <p>How can you customize it if something does not exist in the library?
+ <em>Genson provides many extension points, making it easy to plug new components in there.</em></p>
+  </li>
+</ul>
+
 
             </div>
             <div class="col-md-3">
