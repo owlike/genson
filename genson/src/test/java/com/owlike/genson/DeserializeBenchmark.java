@@ -28,15 +28,15 @@ import com.owlike.genson.bean.Tweet;
  * @author eugen
  */
 public class DeserializeBenchmark {
-  private final int ITER = 5000;
+  private final int ITER = 50000;
   private final int WARMUP_ITER = 50;
 
   private String tweets;
   private String shortReader;
   private String longReader;
-  private Genson genson = new GensonBuilder().useDateFormat(
+  private Genson genson = new GensonBuilder().useStrictDoubleParse(true).useDateFormat(
     new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", Locale.US)).create();
-  private Gson gson = new GsonBuilder().setDateFormat("EEE MMM dd HH:mm:ss Z yyyy").create();
+  private Gson gson = new GsonBuilder().disableHtmlEscaping().serializeNulls().setDateFormat("EEE MMM dd HH:mm:ss Z yyyy").create();
   private ObjectMapper mapper = new ObjectMapper();
 
   TypeReference<List<Tweet>> tweetsType = new TypeReference<List<Tweet>>() {

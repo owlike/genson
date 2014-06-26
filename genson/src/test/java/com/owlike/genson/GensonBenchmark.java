@@ -14,32 +14,35 @@ import com.owlike.genson.bean.ComplexObject;
 import com.owlike.genson.bean.Primitives;
 
 /*
- ======= Serialization Bench ======
-Genson global serialization time=26.181 s
-Genson avg serialization time=0.52362 ms
+======= Serialization Bench ======
+Genson global serialization time=26.245 s
+Genson avg serialization time=0.5249 ms
 
-Jackson global serialization time=23.091 s
-Jackson avg serialization time=0.46182 ms
+Jackson global serialization time=22.878 s
+Jackson avg serialization time=0.45756 ms
 
-Gson global serialization time=40.913 s
-Gson avg serialization time=0.81826 ms
+Gson global serialization time=40.077 s
+Gson avg serialization time=0.80154 ms
 
 ======= Deserialization Bench ======
-Genson global deserialization time=33.973 s
-Genson avg deserialization time=0.67946 ms
+Genson global deserialization time=33.629 s
+Genson avg deserialization time=0.67258 ms
 
-Jackson global deserialization time=32.86 s
-Jackson avg deserialization time=0.65718 ms
+Genson custom double parse global deserialization time=15.969 s
+Genson custom double parse avg deserialization time=0.31938 ms
 
-Gson global deserialization time=42.768 s
-Gson avg deserialization time=0.85536 ms
+Jackson global deserialization time=31.427 s
+Jackson avg deserialization time=0.62854 ms
+
+Gson global deserialization time=42.501 s
+Gson avg deserialization time=0.85002 ms
 
 =================================
  */
 public class GensonBenchmark {
   final int ITERATION_CNT = 50000;
   private Genson genson = new GensonBuilder().useStrictDoubleParse(true).create();
-  private Gson gson = new GsonBuilder().serializeNulls().create();
+  private Gson gson = new GsonBuilder().disableHtmlEscaping().serializeNulls().create();
   private ObjectMapper om = new ObjectMapper();
   private Map<String, Object> map;
   private String json;

@@ -190,6 +190,17 @@ Main Joda Time types are supported at the moment, if some are missing feel free 
 * Duration is ser/de as a long representing the duration in milliseconds.
 
 
+##Guava
+
+At the moment the Guava bundle is still under development, it only supports the Optional type. Absent will be serialized as null and null
+will be deserialized back to Absent.
+
+{% highlight java %}
+Genson genson = new GensonBuilder().withBundle(new GuavaBundle()).create();
+{% endhighlight %}
+
+
+
 ##Spring MVC##
 
 To enable json support in Spring MVC with Genson, you need to register Gensons MessageConverter implementation.

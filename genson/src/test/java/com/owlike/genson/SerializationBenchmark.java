@@ -20,7 +20,7 @@ import com.owlike.genson.bean.Tweet;
  * @author eugen
  */
 public class SerializationBenchmark {
-  private final int ITER = 5000;
+  private final int ITER = 50000;
   private final int WARMUP_ITER = 50;
   private ObjectMapper mapper;
   private Genson genson;
@@ -36,7 +36,7 @@ public class SerializationBenchmark {
   private void setUp() throws IOException {
     genson = new GensonBuilder().useDateFormat(
       new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", Locale.US)).create();
-    gson = new GsonBuilder().setDateFormat("EEE MMM dd HH:mm:ss Z yyyy").serializeNulls().create();
+    gson = new GsonBuilder().setDateFormat("EEE MMM dd HH:mm:ss Z yyyy").disableHtmlEscaping().serializeNulls().create();
     mapper = new ObjectMapper();
     mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     mapper.configure(MapperFeature.AUTO_DETECT_FIELDS, true);

@@ -2,31 +2,30 @@ Serialization benchmark with the data used by gson benchmark (metrics project).
 The data can be found in src/test/resources. 
 The long Reader contains some large strings with a lot of escaped characters.
 
-Jackson tweets:1.737 s
-Genson tweets:1.952 s
-Gson tweets:3.638 s
+Jackson tweets:1.879 s
+Genson tweets:1.937 s
+Gson tweets:3.581 s
 **************************
-Jackson shortFeed:0.202 s
-Genson shortFeed:0.215 s
-Gson shortFeed:0.372 s
+Jackson shortFeed:0.246 s
+Genson shortFeed:0.267 s
+Gson shortFeed:0.437 s
 **************************
-Jackson longFeed:2.202 s
-Genson longFeed:4.266 s
-Gson longFeed:6.849 s
+Jackson longFeed:2.556 s
+Genson longFeed:3.767 s
+Gson longFeed:6.659 s
 
 ================================================================================
 Deserialization benchmark based on exactly the same data as the serialization with same warmup time and iteration count.
 
-Genson tweets:15.504 s
-Jackson tweets:15.751 s
-Gson tweets:16.863 s
+Genson tweets:3.464 s
+Jackson tweets:3.744 s
+Gson tweets:5.808 s
 *****************
-Genson shortReader:0.479 s
-Jackson shortReader:0.517 s
-Gson shortReader:0.398 s
+Genson shortReader:0.467 s
+Jackson shortReader:0.515 s
+Gson shortReader:0.608 s
 *****************
-Genson longReader:4.021 s
-Jackson longReader:7.408 s
-Gson longReader:4.999 s
-
+Genson longReader:3.803 s
+Jackson longReader:6.307 s
+Gson longReader:6.396 s
 
