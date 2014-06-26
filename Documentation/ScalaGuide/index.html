@@ -184,7 +184,31 @@
     <div class="container">
         <div class="row">
             <div class="col-md-9" role="main">
-                <h2 id="download">Download</h2>
+                <h2 id="overview">Overview</h2>
+
+<p>Genson provides an easy to use boiler free integration with Scala.
+It supports common Scala mutable and immutable collections, Option, tuples, case classes and even functions
+(when <a href="/Documentation/UserGuide/#polymorphic-types">class metadata ser/de is enabled</a>)!</p>
+
+<p>Standard classes will be ser/de with the classic Genson behaviour for Java.
+Genson classic features and annotations are supported (JsonIgnore, JsonProperty, JsonConverter, etc),
+bringing the power of Genson to Scala.</p>
+
+<p>To get you started with Genson in Scala you only have to import com.owlike.genson.defaultGenson_
+and you are done!</p>
+
+<div class="highlight"><pre><code class="scala"><span class="k">import</span> <span class="nn">com.owlike.genson.defaultGenson_</span>
+
+<span class="k">val</span> <span class="n">jsonString</span> <span class="k">=</span> <span class="n">toJson</span><span class="o">(</span><span class="n">someValue</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">actualValue</span> <span class="k">=</span> <span class="n">fromJson</span><span class="o">[</span><span class="kt">SomeType</span><span class="o">](</span><span class="n">json</span><span class="o">)</span>
+</code></pre></div>
+
+<h3 id="scala-version">Scala version</h3>
+
+<p>Genson has been tested against scala 2.10 and 2.11. In theory you can use it with all releases from 2.10 and up.
+It should not work with 2.9 as we use some features that appeared in 2.10.</p>
+
+<h2 id="download">Download</h2>
 
 <p>In order to keep the main Genson jar small we chose to provide the Scala extension as a separate jar.
 The other reason is that some tools might not handle well optional dependencies, in result someone that does not use
@@ -213,25 +237,6 @@ the core Genson jars by hand.</p>
   <li><a href="http://repo1.maven.org/maven2/com/owlike/genson/0.99/genson-0.99.jar">Genson</a></li>
   <li><a href="http://repo1.maven.org/maven2/com/owlike/genson-scala/0.99/genson-scala-0.99.jar">Genson-scala</a></li>
 </ul>
-
-<h2 id="overview">Overview</h2>
-
-<p>Genson provides an easy to use boiler free integration with Scala.
-It supports common Scala mutable and immutable collections, Option, tuples, case classes and even functions
-(when <a href="/Documentation/UserGuide/#polymorphic-types">class metadata ser/de is enabled</a>)!</p>
-
-<p>Standard classes will be ser/de with the classic Genson behaviour for Java.
-Genson classic features and annotations are supported (JsonIgnore, JsonProperty, JsonConverter, etc),
-bringing the power of Genson to Scala.</p>
-
-<p>To get you started with Genson in Scala you only have to import com.owlike.genson.defaultGenson_
-and you are done!</p>
-
-<div class="highlight"><pre><code class="scala"><span class="k">import</span> <span class="nn">com.owlike.genson.defaultGenson_</span>
-
-<span class="k">val</span> <span class="n">jsonString</span> <span class="k">=</span> <span class="n">toJson</span><span class="o">(</span><span class="n">someValue</span><span class="o">)</span>
-<span class="k">val</span> <span class="n">actualValue</span> <span class="k">=</span> <span class="n">fromJson</span><span class="o">[</span><span class="kt">SomeType</span><span class="o">](</span><span class="n">json</span><span class="o">)</span>
-</code></pre></div>
 
 <h2 id="collections--tuples">Collections &amp; Tuples</h2>
 
@@ -336,6 +341,7 @@ dates as timestamps and all fields from case classes (not only the ones present 
 <span class="n">fromJson</span><span class="o">[</span><span class="kt">SomeType</span><span class="o">](</span><span class="n">json</span><span class="o">)</span>
 </code></pre></div>
 
+<p>For a more in depth overview of Genson features and customization have a look at the User Guide and configuration sections.</p>
 
             </div>
             <div class="col-md-3">
@@ -372,7 +378,7 @@ $(function() {
       <a href="https://github.com/owlike/genson"><i class="fa fa-github"></i></a>
     </div>
     <div class="row">
-      Copyright &copy; 2012-2014, Eugen Cepoi
+      Copyright &copy; 2011-2014, Eugen Cepoi
     </div>
   </div>
 </footer>
