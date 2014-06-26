@@ -25,8 +25,8 @@
 	</licenses>
 
     <scm>
-        <connection>scm:git:git@github.com:genson/genson.git</connection>
-        <developerConnection>scm:git:git@github.com:genson/genson.git</developerConnection>
+        <connection>scm:git:git@github.com:owlike/genson.git</connection>
+        <developerConnection>scm:git:git@github.com:owlike/genson.git</developerConnection>
         <url>https://github.com/owlike/genson</url>
     </scm>
 
