@@ -268,7 +268,7 @@ you only need it on your classpath.</p>
 <p>Starting with release 0.98 Genson provides a bundle JSR353Bundle that enables support of JSR 353 types in Genson.
 This means that you can ser/deser using those types but also mix them with the databinding mechanism.</p>
 
-<div class="highlight"><pre><code class="java"><span class="n">Genson</span> <span class="n">genson</span> <span class="o">=</span> <span class="k">new</span> <span class="n">GensonBuilder</span><span class="o">().</span><span class="na">with</span><span class="o">(</span><span class="k">new</span> <span class="n">JSR353Bundle</span><span class="o">()).</span><span class="na">create</span><span class="o">();</span>
+<div class="highlight"><pre><code class="java"><span class="n">Genson</span> <span class="n">genson</span> <span class="o">=</span> <span class="k">new</span> <span class="n">GensonBuilder</span><span class="o">().</span><span class="na">withBunle</span><span class="o">(</span><span class="k">new</span> <span class="n">JSR353Bundle</span><span class="o">()).</span><span class="na">create</span><span class="o">();</span>
 <span class="n">JsonObject</span> <span class="n">object</span> <span class="o">=</span> <span class="n">genson</span><span class="o">.</span><span class="na">deserialize</span><span class="o">(</span><span class="n">json</span><span class="o">,</span> <span class="n">JsonObject</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
 </code></pre></div>
 
@@ -290,7 +290,7 @@ Genson annotations take precedence over JAXB ones, so they can be used to overri
 
 <p>In Jersey JAXB bundle is enabled by default. If you are using Genson outside Jersey you have to register JAXB bundle:</p>
 
-<div class="highlight"><pre><code class="java"><span class="n">Genson</span> <span class="n">genson</span> <span class="o">=</span> <span class="k">new</span> <span class="n">GensonBuilder</span><span class="o">().</span><span class="na">with</span><span class="o">(</span><span class="k">new</span> <span class="n">JAXBBundle</span><span class="o">()).</span><span class="na">create</span><span class="o">();</span>
+<div class="highlight"><pre><code class="java"><span class="n">Genson</span> <span class="n">genson</span> <span class="o">=</span> <span class="k">new</span> <span class="n">GensonBuilder</span><span class="o">().</span><span class="na">withBundle</span><span class="o">(</span><span class="k">new</span> <span class="n">JAXBBundle</span><span class="o">()).</span><span class="na">create</span><span class="o">();</span>
 </code></pre></div>
 
 <h3 id="supported-annotations">Supported annotations</h3>
