@@ -3,6 +3,21 @@ title: Changelog
 layout: default
 ---
 
+##Release 1.0 - 27 June 2014
+
+Major release and migration to GitHub with a complete new website.
+
+ * Fresh new website
+ * Scala extension & Bundle
+ * Jodatime Bundle
+ * Guava Bundle (only Optional for now)
+ * Converters for TreeSet, TreeMap, LinkedList, LinkedHashSet, LinkedHashMap, ArrayDeque, PriorityQueue, boxed float and short
+ * Moving Genson.Builder to a new class GensonBuilder in its own file. Renaming some configuration methods
+ * New writeString(name, value), writeNumber(name, value)... methods in ObjectWriter
+ * Deser. to java.util.List instead of array when no type information is available
+ * Minor bug fixes
+
+
 ##Release 0.99 - 13 April 2014
 
 This release introduces some new features, the main being JSR 353 and some simplifications of code related to exceptions. Indeed all checked exceptions have been replaced by unchecked ones.

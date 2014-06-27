@@ -95,7 +95,7 @@ you only need it on your classpath.
 Starting with release 0.98 Genson provides a bundle JSR353Bundle that enables support of JSR 353 types in Genson.
 This means that you can ser/deser using those types but also mix them with the databinding mechanism.
 {% highlight java %}
-Genson genson = new GensonBuilder().with(new JSR353Bundle()).create();
+Genson genson = new GensonBuilder().withBunle(new JSR353Bundle()).create();
 JsonObject object = genson.deserialize(json, JsonObject.class);
 {% endhighlight %}
 
@@ -120,7 +120,7 @@ Genson annotations take precedence over JAXB ones, so they can be used to overri
 In Jersey JAXB bundle is enabled by default. If you are using Genson outside Jersey you have to register JAXB bundle:
 
 {% highlight java %}
-Genson genson = new GensonBuilder().with(new JAXBBundle()).create();
+Genson genson = new GensonBuilder().withBundle(new JAXBBundle()).create();
 {% endhighlight %}
 
 ###Supported annotations###

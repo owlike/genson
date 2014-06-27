@@ -90,7 +90,7 @@ val json = toJson(("foo", "bar"))
 val tuple = fromJson[(String, String)](json)
 {% endhighlight %}
 
-##Deserilizing Unknown Types
+##Deserialize Unknown Types
 
 When you don't specify the type to use, Genson will deserialize:
 
@@ -154,7 +154,7 @@ object CustomGenson {
     new GensonBuilder()
       .useIndentation(true)
       .useRuntimeType(true)
-      .useTimeInMillis(true)
+      .useDateAsTimestamp(true)
       .withBundle(ScalaBundle().useOnlyConstructorFields(false))
       .create()
   )
