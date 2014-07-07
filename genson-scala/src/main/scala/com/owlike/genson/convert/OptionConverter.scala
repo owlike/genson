@@ -9,9 +9,25 @@ import com.owlike.genson.{Genson, Factory, Context, Converter}
 class OptionConverterFactory extends Factory[Converter[Option[AnyRef]]] {
 
   def create(genType: Type, genson: Genson): Converter[Option[AnyRef]] = {
-    val typeOfValue: Type = typeOf(0, genType)
+    if (None.getClass.equals(getRawClass(genType))) NoneConverter
+    else {
+      val typeOfValue: Type = typeOf(0, genType)
+      new OptionConverter[AnyRef](genson.provideConverter(typeOfValue))
+    }
+  }
+}
 
-    return new OptionConverter[AnyRef](genson.provideConverter(typeOfValue))
+@HandleNull
+@HandleClassMetadata
+object NoneConverter extends Converter[Option[AnyRef]] {
+  def serialize(value: Option[AnyRef], writer: ObjectWriter, ctx: Context) {
+    if (value != None) throw new IllegalStateException()
+    else writer.writeNull()
+  }
+
+  def deserialize(reader: ObjectReader, ctx: Context): Option[AnyRef] = {
+    if (reader.getValueType != ValueType.NULL) throw new IllegalStateException()
+    else None
   }
 }
 

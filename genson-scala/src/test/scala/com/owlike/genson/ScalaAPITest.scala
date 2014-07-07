@@ -55,4 +55,8 @@ class ScalaAPITest extends FunSuite with Matchers {
       case _ => fail()
     }
   }
+
+  test("serialize None") {
+    fromJson[Option[_]](toJson(None)) should be (None)
+  }
 }
