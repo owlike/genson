@@ -3,6 +3,15 @@ title: Changelog
 layout: default
 ---
 
+##Release 1.1 - 13 July 2014
+
+Minor release providing bug fixes:
+
+ * Issue #12 Avoiding to pick converters from cache when a contextual converter is available
+ * Issue #11 Accessors/Mutators/Creator Properties annotations are merged together
+ * Issue #10 ScalaBundle: Ser/de of None without parameter type was failing
+
+
 ##Release 1.0 - 27 June 2014
 
 Major release and migration to GitHub with a complete new website.
