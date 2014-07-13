@@ -2,6 +2,10 @@ package com.owlike.genson.reflect;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Represents a bean property, in practice it can be an object field, method (getter/setter) or
@@ -13,7 +17,7 @@ public abstract class BeanProperty {
   protected final String name;
   protected final Type type;
   protected final Class<?> declaringClass;
-  protected final Annotation[] annotations;
+  protected Annotation[] annotations;
   protected final int modifiers;
 
   protected BeanProperty(String name, Type type, Class<?> declaringClass, Annotation[] annotations, int modifiers) {
@@ -57,6 +61,17 @@ public abstract class BeanProperty {
     for (Annotation ann : annotations)
       if (annotationClass.isInstance(ann)) return annotationClass.cast(ann);
     return null;
+  }
+
+  void updateWith(BeanProperty otherBeanProperty) {
+    // we don't care for duplicate annotations as it should not change the behaviour
+    if (otherBeanProperty.annotations.length > 0) {
+      Annotation[] mergedAnnotations = new Annotation[annotations.length + otherBeanProperty.annotations.length];
+      System.arraycopy(annotations, 0, mergedAnnotations, 0, annotations.length);
+      System.arraycopy(otherBeanProperty.annotations, 0, mergedAnnotations, annotations.length, otherBeanProperty.annotations.length);
+
+      this.annotations = mergedAnnotations;
+    }
   }
 
   /**

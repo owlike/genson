@@ -1,6 +1,5 @@
 package com.owlike.genson.reflect;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -40,7 +39,7 @@ public class BeanDescriptor<T> implements Converter<T> {
   final Map<String, PropertyMutator> mutableProperties;
   final List<PropertyAccessor> accessibleProperties;
 
-  private final BeanCreator _creator;
+  final BeanCreator creator;
   private final boolean _noArgCtr;
 
   private final static Comparator<BeanProperty> _readablePropsComparator = new Comparator<BeanProperty>() {
@@ -54,14 +53,14 @@ public class BeanDescriptor<T> implements Converter<T> {
                         Map<String, PropertyMutator> writableBps, BeanCreator creator) {
     this.ofClass = forClass;
     this.fromDeclaringClass = fromDeclaringClass;
-    this._creator = creator;
+    this.creator = creator;
     mutableProperties = writableBps;
 
     Collections.sort(readableBps, _readablePropsComparator);
 
     accessibleProperties = Collections.unmodifiableList(readableBps);
-    if (_creator != null)
-      _noArgCtr = _creator.parameters.size() == 0;
+    if (this.creator != null)
+      _noArgCtr = this.creator.parameters.size() == 0;
     else
       _noArgCtr = false;
   }
@@ -71,7 +70,7 @@ public class BeanDescriptor<T> implements Converter<T> {
   }
 
   public boolean isWritable() {
-    return _creator != null;
+    return creator != null;
   }
 
   public void serialize(T obj, ObjectWriter writer, Context ctx) {
@@ -86,10 +85,10 @@ public class BeanDescriptor<T> implements Converter<T> {
     T bean = null;
     // optimization for default ctr
     if (_noArgCtr) {
-      bean = ofClass.cast(_creator.create());
+      bean = ofClass.cast(creator.create());
       deserialize(bean, reader, ctx);
     } else {
-      if (_creator == null)
+      if (creator == null)
         throw new JsonBindingException("No constructor has been found for type "
           + ofClass);
       bean = _deserWithCtrArgs(reader, ctx);
@@ -134,15 +133,15 @@ public class BeanDescriptor<T> implements Converter<T> {
     }
 
     int size = names.size();
-    int settersToCallCnt = size - _creator.parameters.size();
+    int settersToCallCnt = size - creator.parameters.size();
     if (settersToCallCnt < 0) settersToCallCnt = 0;
-    Object[] creatorArgs = new Object[_creator.parameters.size()];
+    Object[] creatorArgs = new Object[creator.parameters.size()];
     String[] newNames = new String[size];
     Object[] newValues = new Object[size];
     // TODO if field for ctr is missing what to do? make it also configurable...?
     for (int i = 0, j = 0; i < size; i++) {
       // FIXME fails if we have multiple times the same name, possible only in @JsonProperty
-      BeanCreatorProperty mp = _creator.parameters.get(names.get(i));
+      BeanCreatorProperty mp = creator.parameters.get(names.get(i));
       if (mp != null) {
         creatorArgs[mp.index] = values.get(i);
       } else {
@@ -152,7 +151,7 @@ public class BeanDescriptor<T> implements Converter<T> {
       }
     }
 
-    T bean = ofClass.cast(_creator.create(creatorArgs));
+    T bean = ofClass.cast(creator.create(creatorArgs));
     for (int i = 0; i < size; i++) {
       PropertyMutator property = mutableProperties
         .get(newNames[i]);

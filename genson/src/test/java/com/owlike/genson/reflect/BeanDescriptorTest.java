@@ -1,6 +1,10 @@
 package com.owlike.genson.reflect;
 
 import java.io.IOException;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.reflect.GenericArrayType;
 import java.util.Arrays;
 import java.util.Date;
@@ -107,11 +111,7 @@ public class BeanDescriptorTest {
 
   @Test
   public void genericTypeTest() {
-    BaseBeanDescriptorProvider provider = new BaseBeanDescriptorProvider(
-      new ContextualConverterFactory(null), new BeanPropertyFactory.CompositeFactory(
-      Arrays.asList(new BeanPropertyFactory.StandardFactory())),
-      new BeanMutatorAccessorResolver.StandardMutaAccessorResolver(),
-      new PropertyNameResolver.ConventionalBeanPropertyNameResolver(), true, true, true);
+    BaseBeanDescriptorProvider provider = createBaseBeanDescriptorProvider();
 
     BeanDescriptor<SpecilizedClass> bd = provider.provide(SpecilizedClass.class,
       SpecilizedClass.class, new Genson());
@@ -189,6 +189,32 @@ public class BeanDescriptorTest {
     assertTrue(ForceConstructorCreator.usedCtr);
   }
 
+  @Test public void testCandidateFieldAnnotationsShouldBeMergedWithSelectedMethodAnnotations() {
+    BaseBeanDescriptorProvider provider = createBaseBeanDescriptorProvider();
+
+    BeanDescriptor<SomeClass> bd = provider.provide(SomeClass.class, genson);
+
+    assertNotNull(getAccessor("name", bd).getAnnotation(MyAnn.class));
+    assertNotNull(getAccessor("name", bd).getAnnotation(AnotherAnn.class));
+
+    assertNotNull(bd.mutableProperties.get("name").getAnnotation(MyAnn.class));
+    assertNotNull(bd.mutableProperties.get("name").getAnnotation(AnotherAnn.class));
+
+    assertNotNull(bd.creator.getProperties().get("name").getAnnotation(MyAnn.class));
+    assertNotNull(bd.creator.getProperties().get("name").getAnnotation(AnotherAnn.class));
+  }
+
+  private BaseBeanDescriptorProvider createBaseBeanDescriptorProvider() {
+    return new BaseBeanDescriptorProvider(
+      new ContextualConverterFactory(null), new BeanPropertyFactory.CompositeFactory(
+      Arrays.asList(new BeanPropertyFactory.StandardFactory())),
+      new BeanMutatorAccessorResolver.StandardMutaAccessorResolver(),
+      new PropertyNameResolver.CompositePropertyNameResolver(Arrays.asList(
+        new ASMCreatorParameterNameResolver(true),
+        new PropertyNameResolver.ConventionalBeanPropertyNameResolver()
+      )), true, true, true);
+  }
+
   static class ForceMethodCreator {
     public static transient boolean usedMethod = false;
 
@@ -257,5 +283,43 @@ public class BeanDescriptorTest {
     private transient int q;
     @JsonProperty(deserialize = false)
     public transient int r;
+  }
+
+
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target(value = {ElementType.FIELD, ElementType.METHOD})
+  public @interface MyAnn {}
+
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target(value = {ElementType.FIELD, ElementType.METHOD})
+  public @interface AnotherAnn {}
+
+  public static class SomeClass {
+    @MyAnn
+    public String name;
+    public Integer age;
+
+    public SomeClass(String name, Integer age) {}
+
+    @AnotherAnn
+    public String getName() {
+      return name;
+    }
+
+    @AnotherAnn
+    public void setName(String name) {
+      this.name = name;
+    }
+
+    @MyAnn
+    @AnotherAnn
+    public Integer getAge() {
+      return age;
+    }
+
+    @MyAnn
+    public void setAge(Integer age) {
+      this.age = age;
+    }
   }
 }

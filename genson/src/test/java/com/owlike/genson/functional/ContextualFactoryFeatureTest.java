@@ -57,7 +57,7 @@ public class ContextualFactoryFeatureTest {
   @Test public void testFieldSerializationShouldUseContextualConverter() {
     User user = new User("hey");
 
-    Genson genson = new GensonBuilder().useRuntimeType(true).withContextualFactory(new ContextualFactory<String>() {
+    Genson genson = new GensonBuilder().withContextualFactory(new ContextualFactory<String>() {
       @Override
       public Converter<String> create(BeanProperty property, Genson genson) {
         Censor ann = property.getAnnotation(Censor.class);

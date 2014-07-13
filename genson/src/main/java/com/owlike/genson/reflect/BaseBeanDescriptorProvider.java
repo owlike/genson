@@ -304,18 +304,11 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
       T next = it.next();
       // 1 we search the most specialized class containing this property
       // with highest priority
-      if (property.declaringClass.equals(next.declaringClass)
-        && property.priority() < next.priority()) {
+      if ((property.declaringClass.equals(next.declaringClass) && property.priority() < next.priority())
+      || property.declaringClass.isAssignableFrom(next.declaringClass)) {
+        next.updateWith(property);
         property = next;
-      } else if (property.declaringClass.isAssignableFrom(next.declaringClass)) {
-        property = next;
-      } else if (next.declaringClass.isAssignableFrom(property.declaringClass)) {
-        continue;
-      } else {
-        throw new IllegalStateException("Property named '" + name
-          + "' has two properties with different types : " + property.signature()
-          + " and " + next.signature());
-      }
+      } else continue;
     }
 
     return property;
@@ -331,6 +324,9 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
         // mutator (dont exist as field or method, but only as ctr arg)
         BeanCreatorProperty ctrProperty = entry.getValue();
         mutators.put(entry.getKey(), ctrProperty);
+      } else {
+        // update the creator property annotations with mutator annotations
+        entry.getValue().updateWith(muta);
       }
     }
   }

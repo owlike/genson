@@ -150,8 +150,7 @@ public final class Genson {
    */
   @SuppressWarnings("unchecked")
   public <T> Converter<T> provideConverter(Type forType) {
-    if (!Boolean.TRUE.equals(ThreadLocalHolder.get("__GENSON$DO_NOT_CACHE_CONVERTER",
-      Boolean.class))) {
+    if (Boolean.TRUE.equals(ThreadLocalHolder.get("__GENSON$DO_NOT_CACHE_CONVERTER", Boolean.class))) {
       return (Converter<T>) converterFactory.create(forType, this);
     } else {
       Converter<T> converter = (Converter<T>) converterCache.get(forType);
