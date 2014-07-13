@@ -1,8 +1,15 @@
 package com.owlike.genson.functional;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import com.owlike.genson.GensonBuilder;
+import com.owlike.genson.convert.ContextualFactory;
+import com.owlike.genson.reflect.BeanProperty;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -47,6 +54,33 @@ public class ContextualFactoryFeatureTest {
     genson.serialize(new ExceptionBean());
   }
 
+  @Test public void testFieldSerializationShouldUseContextualConverter() {
+    User user = new User("hey");
+
+    Genson genson = new GensonBuilder().useRuntimeType(true).withContextualFactory(new ContextualFactory<String>() {
+      @Override
+      public Converter<String> create(BeanProperty property, Genson genson) {
+        Censor ann = property.getAnnotation(Censor.class);
+        if (ann != null) {
+          return new Converter<String>() {
+            @Override
+            public void serialize(String object, ObjectWriter writer, Context ctx) throws Exception {
+              writer.writeUnsafeValue("***");
+            }
+
+            @Override
+            public String deserialize(ObjectReader reader, Context ctx) throws Exception {
+              return null;
+            }
+          };
+        }
+        return null;
+      }
+    }).create();
+
+    assertEquals("{\"password\":\"***\"}", genson.serialize(user));
+  }
+
   static class ABean {
     @JsonDateFormat(asTimeInMillis = true)
     public Date milis;
@@ -74,6 +108,26 @@ public class ContextualFactoryFeatureTest {
     public String deserialize(ObjectReader reader, Context ctx) {
       return reader.valueAsString();
     }
+  }
 
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target(value = {ElementType.FIELD, ElementType.METHOD})
+  public @interface Censor {}
+
+  public class User {
+    private String password;
+
+    public User(String password) {
+      this.password = password;
+    }
+
+    @Censor
+    public String getPassword() {
+      return password;
+    }
+
+    public void setPassword(String password) {
+      this.password = password;
+    }
   }
 }

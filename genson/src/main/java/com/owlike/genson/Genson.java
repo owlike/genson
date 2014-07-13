@@ -150,15 +150,19 @@ public final class Genson {
    */
   @SuppressWarnings("unchecked")
   public <T> Converter<T> provideConverter(Type forType) {
-    Converter<T> converter = (Converter<T>) converterCache.get(forType);
-    if (converter == null) {
-      converter = (Converter<T>) converterFactory.create(forType, this);
-      if (converter == null)
-        throw new JsonBindingException("No converter found for type " + forType);
-      if (!Boolean.TRUE.equals(ThreadLocalHolder.get("__GENSON$DO_NOT_CACHE_CONVERTER",
-        Boolean.class))) converterCache.putIfAbsent(forType, converter);
+    if (!Boolean.TRUE.equals(ThreadLocalHolder.get("__GENSON$DO_NOT_CACHE_CONVERTER",
+      Boolean.class))) {
+      return (Converter<T>) converterFactory.create(forType, this);
+    } else {
+      Converter<T> converter = (Converter<T>) converterCache.get(forType);
+      if (converter == null) {
+        converter = (Converter<T>) converterFactory.create(forType, this);
+        if (converter == null)
+          throw new JsonBindingException("No converter found for type " + forType);
+        converterCache.putIfAbsent(forType, converter);
+      }
+      return converter;
     }
-    return converter;
   }
 
   /**
