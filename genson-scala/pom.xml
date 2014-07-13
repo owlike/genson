@@ -35,6 +35,13 @@
         </dependency>
 
         <dependency>
+            <groupId>org.json4s</groupId>
+            <artifactId>json4s-native_2.10</artifactId>
+            <version>3.2.10</version>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
             <groupId>asm</groupId>
             <artifactId>asm-commons</artifactId>
             <version>3.3.1</version>

@@ -10,6 +10,7 @@ import java.util.Date;
 import com.owlike.genson.GensonBuilder;
 import com.owlike.genson.convert.ContextualFactory;
 import com.owlike.genson.reflect.BeanProperty;
+import com.owlike.genson.reflect.VisibilityFilter;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -57,7 +58,9 @@ public class ContextualFactoryFeatureTest {
   @Test public void testFieldSerializationShouldUseContextualConverter() {
     User user = new User("hey");
 
-    Genson genson = new GensonBuilder().useRuntimeType(true)
+    Genson genson = new GensonBuilder()
+      .useFields(true, VisibilityFilter.PRIVATE)
+      .useRuntimeType(true)
       .withContextualFactory(new ContextualFactory<String>() {
       @Override
       public Converter<String> create(BeanProperty property, Genson genson) {
@@ -116,13 +119,13 @@ public class ContextualFactoryFeatureTest {
   public @interface Censor {}
 
   public class User {
+    @Censor
     private String password;
 
     public User(String password) {
       this.password = password;
     }
 
-    @Censor
     public String getPassword() {
       return password;
     }

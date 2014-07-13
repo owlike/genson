@@ -570,16 +570,16 @@ public class JsonReader implements ObjectReader {
           longValue = newLongValue;
           cur++;
         }
-                /* TODO we parse here Long.MIN_VALUE as a double, we had also pb in the writer
-                * the solution => instead of doing operations on positive numbers, do the inverse, use negative numbers
-                * as the min negative long holds the - max positive long.
-                */
+        /* TODO we parse here Long.MIN_VALUE as a double, we had also pb in the writer
+        * the solution => instead of doing operations on positive numbers, do the inverse, use negative numbers
+        * as the min negative long holds the - max positive long.
+        */
         // else we exceed long capacity, just continue and parse it as a double
       }
 
       if (cur < _buflen
         && ((token = _buffer[cur]) == 46 || token == 101 || token == 69 || (token > 47 && token < 58))) {
-        token = _buffer[cur];
+
         if (strictDoubleParse) {
           _cursor = begin;
           return consumeStrictNumber(cur);
