@@ -4,12 +4,6 @@ import com.owlike.genson.ext.GensonBundle
 import com.owlike.genson._
 import org.json4s.JsonAST._
 import com.owlike.genson.stream.{ValueType, ObjectWriter, ObjectReader}
-import org.json4s.JsonAST.JString
-import org.json4s.JsonAST.JDouble
-import org.json4s.JsonAST.JInt
-import org.json4s.JsonAST.JDecimal
-import org.json4s.JsonAST.JBool
-import org.json4s.JsonAST.JArray
 import java.lang.reflect.Type
 import org.json4s.JsonAST.JDouble
 import org.json4s.JsonAST.JBool
