@@ -1,7 +1,7 @@
 package com.owlike.genson
 
 import java.lang.reflect.{Type => JType, ParameterizedType}
-import java.io.{OutputStream, Writer, InputStream, StringReader, Reader => JReader}
+import java.io.{Reader => JReader, _}
 import java.net.URL
 
 import com.owlike.genson.reflect.TypeUtil._
@@ -11,7 +11,13 @@ class ScalaGenson(val genson: Genson) extends AnyVal {
 
   def toJson[T: Manifest](value: T): String = genson.serialize(value, GenericType.of(toJavaType))
 
-  def toJsonBytes[T: Manifest](value: T): Array[Byte] = genson.serializeBytes(value, GenericType.of(toJavaType))
+  def toJsonBytes[T: Manifest](value: T): Array[Byte] = {
+    val baos = new ByteArrayOutputStream()
+    val objectWriter = genson.createWriter(baos)
+
+    genson.serialize(value, toJavaType, objectWriter, new Context(genson))
+    baos.toByteArray()
+  }
 
   def toJson[T: Manifest](value: T, writer: Writer): Unit = toJson(value, genson.createWriter(writer))
 
