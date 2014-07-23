@@ -65,7 +65,17 @@ public class GensonCustomResolver implements ContextResolver<Genson> {
 
 **Note**
 
-By default Genson JAX-RS integration enables JAXB annotations support.
+* By default Genson JAX-RS integration enables JAXB annotations support.
+* Starting with Jersey 2.9, automatic discovery is disabled, in order to enable it like in previous versions you need
+ to a dependency to jersey-metainf-services.
+
+{% highlight xml %}
+<dependency>
+  <groupId>org.glassfish.jersey.ext</groupId>
+  <artifactId>jersey-metainf-services</artifactId>
+  <version>your_version</version>
+</dependency>
+{% endhighlight %}
 
 
 ##JSR 353 - Java API for Json Processing##

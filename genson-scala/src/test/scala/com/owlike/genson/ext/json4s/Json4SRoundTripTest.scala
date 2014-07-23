@@ -4,12 +4,12 @@ import org.scalatest.{Matchers, FunSuite}
 import com.owlike.genson.{ScalaBundle, GensonBuilder, ScalaGenson}
 import org.json4s._
 import org.json4s.JsonDSL._
-import org.json4s.JsonAST.{JValue, JNull}
+import org.json4s.JsonAST._
 
 class Json4SRoundTripTest extends FunSuite with Matchers {
   val genson = new ScalaGenson(
     new GensonBuilder()
-      .withBundle(ScalaBundle(), Json4SBundle)
+      .withBundle(ScalaBundle(), Json4SBundle())
       .create()
   )
 

@@ -169,3 +169,51 @@ fromJson[SomeType](json)
 {% endhighlight %}
 
 For a more in depth overview of Genson features and customization have a look at the User Guide and configuration sections.
+
+
+##AST support via json4s
+
+Instead of creating again another DOM structure like all the existing ones, Genson provides it by supporting json4s.
+Json4s defines an AST for JSON and utilities to work with it.
+
+
+{% highlight scala %}
+import com.owlike.genson._
+import org.json4s._
+import org.json4s.JsonDSL._
+import org.json4s.JsonAST._
+
+object CustomGenson {
+  val genson = new ScalaGenson(
+    new GensonBuilder()
+      .withBundle(ScalaBundle(), Json4SBundle())
+    .create()
+  )
+}
+
+// then just import it in the places you want to use this instance instead of the default one
+import CustomGenson.genson._
+
+// and use it!
+val json = fromJson[JValue]("""{"name":"foo","someDouble":28.1,"male":true,"someArray":[1,2,3],"null":null}""")
+
+{% endhighlight %}
+
+
+In order to use json4s features with Genson, you need to add a dependency to it.
+
+###SBT
+
+{% highlight scala %}
+libraryDependencies += "org.json4s" % "json4s-ast_${scala.version}" % "3.2.10"
+{% endhighlight %}
+
+###Maven
+
+{% highlight xml %}
+<dependency>
+	<groupId>org.json4s</groupId>
+	<artifactId>json4s-ast_${scala.version}</artifactId>
+	<version>${json4s.version}</version>
+</dependency>
+{% endhighlight %}

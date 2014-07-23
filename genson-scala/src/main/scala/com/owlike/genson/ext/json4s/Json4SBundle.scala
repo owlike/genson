@@ -13,13 +13,17 @@ import org.json4s.JsonAST.JDecimal
 import org.json4s.JsonAST.JArray
 import scala.collection.mutable.ArrayBuffer
 
-object Json4SBundle extends GensonBundle {
+class Json4SBundle extends GensonBundle {
 
   def configure(builder: GensonBuilder) {
     builder.withConverterFactory(new Factory[Converter[JValue]]() {
       def create(`type`: Type, genson: Genson): Converter[JValue] = JValueConverter
     })
   }
+}
+
+object Json4SBundle {
+  def apply() = new Json4SBundle()
 }
 
 object JValueConverter extends Converter[JValue] {

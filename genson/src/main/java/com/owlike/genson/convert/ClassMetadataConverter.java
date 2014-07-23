@@ -66,8 +66,7 @@ public class ClassMetadataConverter<T> extends Wrapper<Converter<T>> implements 
   }
 
   public void serialize(T obj, ObjectWriter writer, Context ctx) throws Exception {
-    // obj != null allows to not fail in case when the NullConverter is not in the chain
-    if (!Object.class.equals(tClass) && obj != null) {
+    if (obj != null) {
       writer.beginNextObjectMetadata()
         .writeMetadata("class", ctx.genson.aliasFor(obj.getClass()));
     }
