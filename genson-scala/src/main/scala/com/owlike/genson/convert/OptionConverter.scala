@@ -36,7 +36,7 @@ object NoneConverter extends Converter[Option[AnyRef]] {
 class OptionConverter[T](valueConverter: Converter[T]) extends Converter[Option[T]] {
 
   def serialize(value: Option[T], writer: ObjectWriter, ctx: Context) {
-    if (value == null || value.isDefined) {
+    if (value != null || value.isDefined) {
       valueConverter.serialize(value.get, writer, ctx)
     } else writer.writeNull
   }
