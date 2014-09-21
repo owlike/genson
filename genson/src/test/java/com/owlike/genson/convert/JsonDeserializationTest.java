@@ -4,7 +4,6 @@ import static org.junit.Assert.*;
 
 import java.awt.Rectangle;
 import java.awt.Shape;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -12,8 +11,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.owlike.genson.*;
-import com.owlike.genson.reflect.ASMCreatorParameterNameResolver;
-import org.junit.Before;
 import org.junit.Test;
 
 import com.owlike.genson.annotation.JsonProperty;
@@ -273,7 +270,7 @@ public class JsonDeserializationTest {
   @Test
   public void testDeserealizeIntoExistingBean() {
     BeanDescriptor<ClassWithConstructorFieldsAndGetters> desc = (BeanDescriptor<ClassWithConstructorFieldsAndGetters>) genson
-      .getBeanDescriptorFactory().provide(ClassWithConstructorFieldsAndGetters.class,
+      .getBeanDescriptorProvider().provide(ClassWithConstructorFieldsAndGetters.class,
         ClassWithConstructorFieldsAndGetters.class, genson);
     ClassWithConstructorFieldsAndGetters c = new ClassWithConstructorFieldsAndGetters(1, 2, "3") {
       @Override
@@ -302,7 +299,24 @@ public class JsonDeserializationTest {
       .deserialize("{\"missingKey\": 1}", Empty.class);
   }
 
+  @Test public void testDeserInExistingInstance() {
+    Pojo pojo = new Pojo();
+    pojo.a = 1;
+    pojo.b = 2;
+    genson.deserializeInto("{\"b\":3,\"str\":\"foo\"}", pojo);
+
+    assertEquals(1, pojo.a);
+    assertEquals(3, pojo.b);
+    assertEquals("foo", pojo.str);
+  }
+
   public static class Empty {}
+
+  public static class Pojo {
+    public String str;
+    public int a;
+    public int b;
+  }
 
   @SuppressWarnings("unused")
   private static class ClassWithConstructorFieldsAndGetters {

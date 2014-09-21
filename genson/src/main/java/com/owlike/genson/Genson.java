@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.owlike.genson.reflect.BeanDescriptor;
 import com.owlike.genson.reflect.BeanDescriptorProvider;
 import com.owlike.genson.stream.*;
 
@@ -398,10 +399,38 @@ public final class Genson {
     }
   }
 
+  public <T> T deserializeInto(String json, T object) {
+    return deserializeInto(createReader(new StringReader(json)), object, new Context(this));
+  }
+
+  public <T> T deserializeInto(byte[] jsonBytes, T object) {
+    return deserializeInto(createReader(jsonBytes), object, new Context(this));
+  }
+
+  public <T> T deserializeInto(InputStream is, T object) {
+    return deserializeInto(createReader(is), object, new Context(this));
+  }
+
+  public <T> T deserializeInto(Reader reader, T object) {
+    return deserializeInto(createReader(reader), object, new Context(this));
+  }
+
   /**
-   * Searches if an alias has been registered for clazz. If not will take the class full name and
-   * use it as alias. This method never returns null.
+   * Deserializes the stream in the existing object. Note however that this works only for Pojos
+   * and doesn't handle nested objects (will be overridden by the values from the stream).
+   *
+   * @return the object enriched with the properties from the stream.
    */
+  public <T> T deserializeInto(ObjectReader reader, T object, Context ctx) {
+    BeanDescriptor<T> bd = (BeanDescriptor<T>) getBeanDescriptorProvider().provide(object.getClass(), this);
+    bd.deserialize(object, reader, ctx);
+    return object;
+  }
+
+    /**
+     * Searches if an alias has been registered for clazz. If not will take the class full name and
+     * use it as alias. This method never returns null.
+     */
   public <T> String aliasFor(Class<T> clazz) {
     String alias = classAliasMap.get(clazz);
     if (alias == null) {
@@ -492,7 +521,7 @@ public final class Genson {
     return withClassMetadata;
   }
 
-  public BeanDescriptorProvider getBeanDescriptorFactory() {
+  public BeanDescriptorProvider getBeanDescriptorProvider() {
     return beanDescriptorFactory;
   }
 

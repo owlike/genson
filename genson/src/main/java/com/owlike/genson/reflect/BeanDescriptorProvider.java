@@ -3,6 +3,7 @@ package com.owlike.genson.reflect;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.owlike.genson.Genson;
 
@@ -14,18 +15,13 @@ import com.owlike.genson.Genson;
  */
 public interface BeanDescriptorProvider {
   /**
-   * Provides a BeanDescriptor for type "ofType" using current Genson instance.
+   * Provides a BeanDescriptor for "type" using current Genson instance.
    *
-   * @param ofType is the type for which we need a BeanDescriptor.
-   * @param genson is the current Genson instance.
-   * @return A BeanDescriptor instance able to serialize/deserialize objects of type ofType.
+   * @param type for which we need a BeanDescriptor.
+   * @param genson current instance.
+   * @return A BeanDescriptor instance able to serialize/deserialize objects of type T.
    */
-  public BeanDescriptor<?> provide(Type ofType, Genson genson);
-
-  /**
-   * @see BeanDescriptorProvider#provide(Type, Genson)
-   */
-  public <T> BeanDescriptor<T> provide(Class<T> ofClass, Genson genson);
+  public <T> BeanDescriptor<T> provide(Class<T> type, Genson genson);
 
   /**
    * Provides a BeanDescriptor that can serialize/deserialize "ofClass" type, based on "type"
@@ -45,37 +41,29 @@ public interface BeanDescriptorProvider {
   public static class CompositeBeanDescriptorProvider implements BeanDescriptorProvider {
     private final List<BeanDescriptorProvider> providers;
 
+    private final ConcurrentHashMap<Type, BeanDescriptor<?>> cache = new ConcurrentHashMap<Type, BeanDescriptor<?>>();
+
     public CompositeBeanDescriptorProvider(List<BeanDescriptorProvider> providers) {
       this.providers = new ArrayList<BeanDescriptorProvider>(providers);
     }
 
     @Override
-    public BeanDescriptor<?> provide(Type ofType, Genson genson) {
-      BeanDescriptor<?> desc = null;
-      for (BeanDescriptorProvider provider : providers) {
-        desc = provider.provide(ofType, genson);
-        if (desc != null) break;
-      }
-      return desc;
-    }
-
-    @Override
     public <T> BeanDescriptor<T> provide(Class<T> ofClass, Genson genson) {
-      BeanDescriptor<T> desc = null;
-      for (BeanDescriptorProvider provider : providers) {
-        desc = provider.provide(ofClass, genson);
-        if (desc != null) break;
-      }
-      return desc;
+      return provide(ofClass, ofClass, genson);
     }
 
     @Override
     public <T> BeanDescriptor<T> provide(Class<T> ofClass, Type type, Genson genson) {
-      BeanDescriptor<T> desc = null;
-      for (BeanDescriptorProvider provider : providers) {
-        desc = provider.provide(ofClass, type, genson);
-        if (desc != null) break;
+      BeanDescriptor<T> desc = (BeanDescriptor<T>) cache.get(type);
+      if (desc == null) {
+        for (BeanDescriptorProvider provider : providers) {
+          desc = provider.provide(ofClass, type, genson);
+          if (desc != null) break;
+        }
+
+        cache.putIfAbsent(type, desc);
       }
+
       return desc;
     }
   }

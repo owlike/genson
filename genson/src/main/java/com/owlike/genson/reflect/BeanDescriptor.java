@@ -22,7 +22,7 @@ import com.owlike.genson.stream.ObjectWriter;
  * <p/>
  * <pre>
  * Genson genson = new Genson();
- * BeanDescriptorProvider provider = genson.getBeanDescriptorFactory();
+ * BeanDescriptorProvider provider = genson.getBeanDescriptorProvider();
  * BeanDescriptor&lt;MyClass&gt; descriptor = provider.provide(MyClass.class, genson);
  *
  * MyClass existingInstance = descriptor.deserialize(existingInstance, new JsonReader(&quot;{}&quot;),

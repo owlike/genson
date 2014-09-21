@@ -1,6 +1,5 @@
 package com.owlike.genson.reflect;
 
-import java.io.IOException;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -52,7 +51,7 @@ public class BeanDescriptorTest {
           }
         };
       }
-    }.create().getBeanDescriptorFactory();
+    }.create().getBeanDescriptorProvider();
     try {
       provider.provide(AnotherObject.class, ThatObject.class, genson);
       fail();

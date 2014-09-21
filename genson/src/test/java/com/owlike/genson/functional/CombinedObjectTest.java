@@ -29,7 +29,7 @@ public class CombinedObjectTest {
     @Override
     public Deserializer<MyClass> create(Type type, Genson genson) {
       BeanDescriptor<MyClass> myClassDescriptor = (BeanDescriptor<MyClass>) genson
-        .getBeanDescriptorFactory().provide(MyClass.class, MyClass.class, genson);
+        .getBeanDescriptorProvider().provide(MyClass.class, MyClass.class, genson);
       return new MyClassConverter(myClassDescriptor);
     }
   }

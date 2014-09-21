@@ -83,13 +83,8 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
   }
 
   @Override
-  public <T> BeanDescriptor<T> provide(Class<T> ofClass, Genson genson) {
-    return provide(ofClass, ofClass, genson);
-  }
-
-  @Override
-  public BeanDescriptor<?> provide(Type ofType, Genson genson) {
-    return provide(getRawClass(ofType), ofType, genson);
+  public <T> BeanDescriptor<T> provide(Class<T> type, Genson genson) {
+    return provide(type, type, genson);
   }
 
   @Override
