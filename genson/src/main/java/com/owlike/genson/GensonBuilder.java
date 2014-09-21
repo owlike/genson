@@ -49,6 +49,7 @@ public class GensonBuilder {
   private boolean strictDoubleParse = false;
   private boolean indent = false;
   private boolean metadata = false;
+  private boolean failOnMissingProperty = false;
 
   private List<GensonBundle> _bundles = new ArrayList<GensonBundle>();
 
@@ -604,6 +605,11 @@ public class GensonBuilder {
     return this;
   }
 
+  public GensonBuilder failOnMissingProperty(boolean enable) {
+    this.failOnMissingProperty = enable;
+    return this;
+  }
+
   /**
    * Creates an instance of Genson. You may use this method as many times you want. It wont
    * change the state of the builder, in sense that the returned instance will have always the
@@ -693,7 +699,7 @@ public class GensonBuilder {
                           Map<String, Class<?>> classAliases) {
     return new Genson(converterFactory, getBeanDescriptorProvider(), nullConverter,
       isSkipNull(), isHtmlSafe(), classAliases, withClassMetadata,
-      strictDoubleParse, indent, metadata);
+      strictDoubleParse, indent, metadata, failOnMissingProperty);
   }
 
   /**

@@ -81,6 +81,7 @@ public final class Genson {
   private final boolean withMetadata;
   private final boolean strictDoubleParse;
   private final boolean indent;
+  private final boolean failOnMissingProperty;
 
   private final static Charset UTF8_CHARSET = Charset.forName("UTF-8");
 
@@ -92,7 +93,7 @@ public final class Genson {
     this(_default.converterFactory, _default.beanDescriptorFactory, _default.nullConverter,
       _default.skipNull, _default.htmlSafe, _default.aliasClassMap,
       _default.withClassMetadata, _default.strictDoubleParse, _default.indent,
-      _default.withMetadata);
+      _default.withMetadata, _default.failOnMissingProperty);
   }
 
   /**
@@ -120,11 +121,12 @@ public final class Genson {
    * @param indent            true if outputed json must be indented (pretty printed).
    * @param withMetadata      true if ObjectReader instances must be configured with metadata feature enabled.
    *                          if withClassMetadata is true withMetadata will be automatically true.
+   * @param failOnMissingProperty throw a JsonBindingException when a key in the json stream does not match a property in the Java Class.
    */
   public Genson(Factory<Converter<?>> converterFactory, BeanDescriptorProvider beanDescProvider,
                 Converter<Object> nullConverter, boolean skipNull, boolean htmlSafe,
                 Map<String, Class<?>> classAliases, boolean withClassMetadata,
-                boolean strictDoubleParse, boolean indent, boolean withMetadata) {
+                boolean strictDoubleParse, boolean indent, boolean withMetadata, boolean failOnMissingProperty) {
     this.converterFactory = converterFactory;
     this.beanDescriptorFactory = beanDescProvider;
     this.nullConverter = nullConverter;
@@ -139,6 +141,7 @@ public final class Genson {
     this.strictDoubleParse = strictDoubleParse;
     this.indent = indent;
     this.withMetadata = withClassMetadata || withMetadata;
+    this.failOnMissingProperty = failOnMissingProperty;
   }
 
   /**
@@ -495,6 +498,10 @@ public final class Genson {
 
   public Converter<Object> getNullConverter() {
     return nullConverter;
+  }
+
+  public boolean failOnMissingProperty() {
+    return this.failOnMissingProperty;
   }
 
   /**

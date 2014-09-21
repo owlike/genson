@@ -11,14 +11,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.owlike.genson.GenericType;
-import com.owlike.genson.GensonBuilder;
+import com.owlike.genson.*;
 import com.owlike.genson.reflect.ASMCreatorParameterNameResolver;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.owlike.genson.Context;
-import com.owlike.genson.Genson;
 import com.owlike.genson.annotation.JsonProperty;
 import com.owlike.genson.bean.ComplexObject;
 import com.owlike.genson.bean.Primitives;
@@ -297,6 +294,15 @@ public class JsonDeserializationTest {
   public void testDeserializeEnum() {
     assertEquals(Player.JAVA, genson.deserialize("\"JAVA\"", Player.class));
   }
+
+  @Test(expected = JsonBindingException.class) public void testDeserWithMissingPropertyShouldFail() {
+    new GensonBuilder()
+      .failOnMissingProperty(true)
+      .create()
+      .deserialize("{\"missingKey\": 1}", Empty.class);
+  }
+
+  public static class Empty {}
 
   @SuppressWarnings("unused")
   private static class ClassWithConstructorFieldsAndGetters {

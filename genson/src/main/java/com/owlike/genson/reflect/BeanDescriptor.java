@@ -38,6 +38,7 @@ public class BeanDescriptor<T> implements Converter<T> {
   final Class<T> ofClass;
   final Map<String, PropertyMutator> mutableProperties;
   final List<PropertyAccessor> accessibleProperties;
+  final boolean failOnMissingProperty;
 
   final BeanCreator creator;
   private final boolean _noArgCtr;
@@ -50,10 +51,12 @@ public class BeanDescriptor<T> implements Converter<T> {
 
   public BeanDescriptor(Class<T> forClass, Class<?> fromDeclaringClass,
                         List<PropertyAccessor> readableBps,
-                        Map<String, PropertyMutator> writableBps, BeanCreator creator) {
+                        Map<String, PropertyMutator> writableBps, BeanCreator creator,
+                        boolean failOnMissingProperty) {
     this.ofClass = forClass;
     this.fromDeclaringClass = fromDeclaringClass;
     this.creator = creator;
+    this.failOnMissingProperty = failOnMissingProperty;
     mutableProperties = writableBps;
 
     Collections.sort(readableBps, _readablePropsComparator);
@@ -104,10 +107,8 @@ public class BeanDescriptor<T> implements Converter<T> {
       PropertyMutator mutator = mutableProperties.get(propName);
       if (mutator != null) {
         mutator.deserialize(into, reader, ctx);
-      } else {
-        // TODO make it configurable
-        reader.skipValue();
-      }
+      } else if (failOnMissingProperty) throw missingPropertyException(propName);
+      else reader.skipValue();
     }
     reader.endObject();
   }
@@ -126,21 +127,16 @@ public class BeanDescriptor<T> implements Converter<T> {
         Object param = muta.deserialize(reader, ctx);
         names.add(propName);
         values.add(param);
-      } else {
-        // TODO make it configurable
-        reader.skipValue();
-      }
+      } else if (failOnMissingProperty) throw missingPropertyException(propName);
+      else reader.skipValue();
     }
 
     int size = names.size();
-    int settersToCallCnt = size - creator.parameters.size();
-    if (settersToCallCnt < 0) settersToCallCnt = 0;
     Object[] creatorArgs = new Object[creator.parameters.size()];
     String[] newNames = new String[size];
     Object[] newValues = new Object[size];
     // TODO if field for ctr is missing what to do? make it also configurable...?
     for (int i = 0, j = 0; i < size; i++) {
-      // FIXME fails if we have multiple times the same name, possible only in @JsonProperty
       BeanCreatorProperty mp = creator.parameters.get(names.get(i));
       if (mp != null) {
         creatorArgs[mp.index] = values.get(i);
@@ -165,4 +161,7 @@ public class BeanDescriptor<T> implements Converter<T> {
     return ofClass;
   }
 
+  private JsonBindingException missingPropertyException(String name) {
+   return new JsonBindingException("No matching property in " + getOfClass() + " for key " + name);
+  }
 }

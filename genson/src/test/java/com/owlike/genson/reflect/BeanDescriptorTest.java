@@ -38,15 +38,17 @@ public class BeanDescriptorTest {
             .asList(new BeanPropertyFactory.StandardFactory())),
           getMutatorAccessorResolver(), getPropertyNameResolver(),
           true, true, true) {
+          @Override
           @SuppressWarnings({"unchecked", "rawtypes"})
           protected <T> com.owlike.genson.reflect.BeanDescriptor<T> create(
             java.lang.Class<T> forClass,
             java.lang.reflect.Type ofType,
             com.owlike.genson.reflect.BeanCreator creator,
             java.util.List<com.owlike.genson.reflect.PropertyAccessor> accessors,
-            java.util.Map<String, com.owlike.genson.reflect.PropertyMutator> mutators) {
+            java.util.Map<String, com.owlike.genson.reflect.PropertyMutator> mutators,
+            Genson genson) {
             return new BeanDescriptor(ThatObject.class, ThatObject.class, accessors,
-              mutators, creator);
+              mutators, creator, false);
           }
         };
       }
@@ -56,25 +58,6 @@ public class BeanDescriptorTest {
       fail();
     } catch (ClassCastException cce) {
       // OK
-    }
-  }
-
-  private static class ThatObject {
-    @SuppressWarnings("unused")
-    String aString;
-    @SuppressWarnings("unused")
-    int aPrimitive;
-    @SuppressWarnings("unused")
-    List<Date> listOfDates;
-
-    @SuppressWarnings("unused")
-    public ThatObject(AnotherObject anotherObject) {
-    }
-  }
-
-  private static class AnotherObject {
-    @SuppressWarnings("unused")
-    public AnotherObject() {
     }
   }
 
@@ -320,6 +303,26 @@ public class BeanDescriptorTest {
     @MyAnn
     public void setAge(Integer age) {
       this.age = age;
+    }
+  }
+
+
+  private static class ThatObject {
+    @SuppressWarnings("unused")
+    String aString;
+    @SuppressWarnings("unused")
+    int aPrimitive;
+    @SuppressWarnings("unused")
+    List<Date> listOfDates;
+
+    @SuppressWarnings("unused")
+    public ThatObject(AnotherObject anotherObject) {
+    }
+  }
+
+  private static class AnotherObject {
+    @SuppressWarnings("unused")
+    public AnotherObject() {
     }
   }
 }
