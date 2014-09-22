@@ -3,25 +3,24 @@ title: Changelog
 layout: default
 ---
 
-##Release 1.2 - 22 September 2014
+##Release 1.1 - 22 September 2014
 
 "Medium" release providing new extensions, configuration and bug fixes. The API remains backwards compatible.
 
- * Adding support for json4s AST via the new bundle Json4SBundle
+ **Genson core**
+
  * Issue #4 Ads deserializeInto method in Genson, allowing to deserialize in an exisintg Pojo
  * Issue #13 Ads failOnMissingProperty option allowing to throw an exception when no property
  * Issue #17 Ads useClassMetadataWithStaticType option allowing to ser or not object type when it is the same the static type.
  in the class matches with the on in the json.
- * Fixes a bug in the ScalaBundle when serializing to a byte array
- * Issue #19 Handling correctly root arrays in ScalaBundle
-
-
-##Release 1.1 - 13 July 2014
-
-Minor release providing bug fixes:
-
  * Issue #12 Avoiding to pick converters from cache when a contextual converter is available
  * Issue #11 Accessors/Mutators/Creator Properties annotations are merged together
+
+ **ScalaBundle**:
+
+ * Adding support for json4s AST via the new bundle Json4SBundle
+ * Fixes a bug in the ScalaBundle when serializing to a byte array
+ * Issue #19 Handling correctly root arrays in ScalaBundle
  * Issue #10 ScalaBundle: Ser/de of None without parameter type was failing
 
 
