@@ -619,7 +619,7 @@ public class GensonBuilder {
   }
 
   /**
-   * If set to false, during serialization class metadata will not be serialized for types that are the same as the static type.
+   * If set to false, during serialization class metadata will be serialized only for types where the runtime type differs from the static one.
    * Ex:
    *
    * <pre>

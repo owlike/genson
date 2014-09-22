@@ -195,7 +195,7 @@ object CustomGenson {
 import CustomGenson.genson._
 
 // and use it!
-val json = fromJson[JValue]("""{"name":"foo","someDouble":28.1,"male":true,"someArray":[1,2,3],"null":null}""")
+val json = fromJson[JObject]("""{"name":"foo","someDouble":28.1,"male":true,"someArray":[1,2,3],"null":null}""")
 
 {% endhighlight %}
 

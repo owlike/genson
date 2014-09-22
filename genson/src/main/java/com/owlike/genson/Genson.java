@@ -399,18 +399,30 @@ public final class Genson {
     }
   }
 
+  /**
+   * @see #deserializeInto(com.owlike.genson.stream.ObjectReader, Object, Context)
+   */
   public <T> T deserializeInto(String json, T object) {
     return deserializeInto(createReader(new StringReader(json)), object, new Context(this));
   }
 
+  /**
+   * @see #deserializeInto(com.owlike.genson.stream.ObjectReader, Object, Context)
+   */
   public <T> T deserializeInto(byte[] jsonBytes, T object) {
     return deserializeInto(createReader(jsonBytes), object, new Context(this));
   }
 
+  /**
+   * @see #deserializeInto(com.owlike.genson.stream.ObjectReader, Object, Context)
+   */
   public <T> T deserializeInto(InputStream is, T object) {
     return deserializeInto(createReader(is), object, new Context(this));
   }
 
+  /**
+   * @see #deserializeInto(com.owlike.genson.stream.ObjectReader, Object, Context)
+   */
   public <T> T deserializeInto(Reader reader, T object) {
     return deserializeInto(createReader(reader), object, new Context(this));
   }

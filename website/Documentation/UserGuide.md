@@ -140,6 +140,13 @@ public class Address {
 
 **Remark** Actually inner and anonymous classes serialization is supported but not deserialization, except if it is a static inner class.
 
+You can also deserialize in an existing object. However this feature has some restrictions: it works only with Pojo like classes and does not handle nesting.
+For example if your root object contains a list or another Pojo, then it will be overriden by the one in the json (if present, otherwise it remains unchanged).
+
+{% highlight java %}
+genson.deserializeInto(json, personInstance);
+{% endhighlight %}
+
 
 ##Filter/Rename properties##
 
