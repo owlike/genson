@@ -197,11 +197,10 @@ bringing the power of Genson to Scala.</p>
 <p>To get you started with Genson in Scala you only have to import com.owlike.genson.defaultGenson_
 and you are done!</p>
 
-<div class="highlight"><pre><code class="scala"><span class="k">import</span> <span class="nn">com.owlike.genson.defaultGenson_</span>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">import</span> <span class="nn">com.owlike.genson.defaultGenson_</span>
 
 <span class="k">val</span> <span class="n">jsonString</span> <span class="k">=</span> <span class="n">toJson</span><span class="o">(</span><span class="n">someValue</span><span class="o">)</span>
-<span class="k">val</span> <span class="n">actualValue</span> <span class="k">=</span> <span class="n">fromJson</span><span class="o">[</span><span class="kt">SomeType</span><span class="o">](</span><span class="n">json</span><span class="o">)</span>
-</code></pre></div>
+<span class="k">val</span> <span class="n">actualValue</span> <span class="k">=</span> <span class="n">fromJson</span><span class="o">[</span><span class="kt">SomeType</span><span class="o">](</span><span class="n">json</span><span class="o">)</span></code></pre></div>
 
 <h3 id="scala-version">Scala version</h3>
 
@@ -216,17 +215,15 @@ the Scala extension could end up with the scala language library downloaded.</p>
 
 <h3 id="sbt">SBT</h3>
 
-<div class="highlight"><pre><code class="scala"><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">&quot;com.owlike&quot;</span> <span class="o">%</span> <span class="s">&quot;genson-scala&quot;</span> <span class="o">%</span> <span class="s">&quot;1.0&quot;</span>
-</code></pre></div>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">&quot;com.owlike&quot;</span> <span class="o">%</span> <span class="s">&quot;genson-scala&quot;</span> <span class="o">%</span> <span class="s">&quot;1.1&quot;</span></code></pre></div>
 
 <h3 id="maven">Maven</h3>
 
-<div class="highlight"><pre><code class="xml"><span class="nt">&lt;dependency&gt;</span>
+<div class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="nt">&lt;dependency&gt;</span>
 	<span class="nt">&lt;groupId&gt;</span>com.owlike<span class="nt">&lt;/groupId&gt;</span>
 	<span class="nt">&lt;artifactId&gt;</span>genson-scala<span class="nt">&lt;/artifactId&gt;</span>
-	<span class="nt">&lt;version&gt;</span>1.0<span class="nt">&lt;/version&gt;</span>
-<span class="nt">&lt;/dependency&gt;</span>
-</code></pre></div>
+	<span class="nt">&lt;version&gt;</span>1.1<span class="nt">&lt;/version&gt;</span>
+<span class="nt">&lt;/dependency&gt;</span></code></pre></div>
 
 <h3 id="manual-download">Manual Download</h3>
 
@@ -234,8 +231,8 @@ the Scala extension could end up with the scala language library downloaded.</p>
 the core Genson jars by hand.</p>
 
 <ul>
-  <li><a href="http://repo1.maven.org/maven2/com/owlike/genson/1.0/genson-1.0.jar">Genson</a></li>
-  <li><a href="http://repo1.maven.org/maven2/com/owlike/genson-scala/1.0/genson-scala-1.0.jar">Genson-scala</a></li>
+  <li><a href="http://repo1.maven.org/maven2/com/owlike/genson/1.1/genson-1.1.jar">Genson</a></li>
+  <li><a href="http://repo1.maven.org/maven2/com/owlike/genson-scala/1.1/genson-scala-1.1.jar">Genson-scala</a></li>
 </ul>
 
 <h2 id="collections--tuples">Collections &amp; Tuples</h2>
@@ -244,7 +241,7 @@ the core Genson jars by hand.</p>
 Scala provides some optimized types for maps and collections of few elements, Genson will respect it
 and deserialize to the optimized type.</p>
 
-<div class="highlight"><pre><code class="scala"><span class="k">import</span> <span class="nn">com.owlike.genson.defaultGenson_</span>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">import</span> <span class="nn">com.owlike.genson.defaultGenson_</span>
 
 <span class="c1">// [1,2,3]</span>
 <span class="k">val</span> <span class="n">jsonArray</span> <span class="k">=</span> <span class="n">toJson</span><span class="o">(</span><span class="nc">Seq</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span><span class="mi">2</span><span class="o">,</span><span class="mi">3</span><span class="o">))</span>
@@ -252,16 +249,14 @@ and deserialize to the optimized type.</p>
 
 <span class="c1">// {&quot;name&quot;:&quot;foo bar&quot;}</span>
 <span class="k">val</span> <span class="n">jsonMap</span> <span class="k">=</span> <span class="n">toJson</span><span class="o">(</span><span class="nc">Map</span><span class="o">(</span><span class="s">&quot;name&quot;</span> <span class="o">-&gt;</span> <span class="s">&quot;foo bar&quot;</span><span class="o">))</span>
-<span class="k">val</span> <span class="n">mapOfString</span> <span class="k">=</span> <span class="n">fromJson</span><span class="o">[</span><span class="kt">Map</span><span class="o">[</span><span class="kt">String</span>,<span class="kt">String</span><span class="o">]](</span><span class="n">jsonMap</span><span class="o">)</span>
-</code></pre></div>
+<span class="k">val</span> <span class="n">mapOfString</span> <span class="k">=</span> <span class="n">fromJson</span><span class="o">[</span><span class="kt">Map</span><span class="o">[</span><span class="kt">String</span>,<span class="kt">String</span><span class="o">]](</span><span class="n">jsonMap</span><span class="o">)</span></code></pre></div>
 
 <p>Genson will serialize scala Tuple1 to 22, as json arrays.
 There is no restriction on the complexity of the tuples (may contain options, case classes, etc).</p>
 
-<div class="highlight"><pre><code class="scala"><span class="c1">// [&quot;foo&quot;,&quot;bar&quot;]</span>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="c1">// [&quot;foo&quot;,&quot;bar&quot;]</span>
 <span class="k">val</span> <span class="n">json</span> <span class="k">=</span> <span class="n">toJson</span><span class="o">((</span><span class="s">&quot;foo&quot;</span><span class="o">,</span> <span class="s">&quot;bar&quot;</span><span class="o">))</span>
-<span class="k">val</span> <span class="n">tuple</span> <span class="k">=</span> <span class="n">fromJson</span><span class="o">[(</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">)](</span><span class="n">json</span><span class="o">)</span>
-</code></pre></div>
+<span class="k">val</span> <span class="n">tuple</span> <span class="k">=</span> <span class="n">fromJson</span><span class="o">[(</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">)](</span><span class="n">json</span><span class="o">)</span></code></pre></div>
 
 <h2 id="deserialize-unknown-types">Deserialize Unknown Types</h2>
 
@@ -275,7 +270,7 @@ There is no restriction on the complexity of the tuples (may contain options, ca
   <li>null to null</li>
 </ul>
 
-<div class="highlight"><pre><code class="scala"><span class="n">fromJson</span><span class="o">[</span><span class="kt">Any</span><span class="o">](</span><span class="s">&quot;&quot;&quot;{&quot;name&quot;:&quot;foo bar&quot;, &quot;age&quot;: 28, &quot;address&quot;:{}}&quot;&quot;&quot;</span><span class="o">)</span> <span class="k">match</span> <span class="o">{</span>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="n">fromJson</span><span class="o">[</span><span class="kt">Any</span><span class="o">](</span><span class="s">&quot;&quot;&quot;{&quot;name&quot;:&quot;foo bar&quot;, &quot;age&quot;: 28, &quot;address&quot;:{}}&quot;&quot;&quot;</span><span class="o">)</span> <span class="k">match</span> <span class="o">{</span>
  <span class="k">case</span> <span class="n">map</span><span class="k">:</span> <span class="kt">Map</span><span class="o">[</span><span class="kt">String</span>, <span class="k">_</span><span class="o">]</span> <span class="k">=&gt;</span> <span class="n">println</span><span class="o">(</span><span class="n">map</span><span class="o">)</span>
  <span class="k">case</span> <span class="n">list</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="k">_</span><span class="o">]</span> <span class="k">=&gt;</span> <span class="n">list</span><span class="o">.</span><span class="n">foreach</span><span class="o">(</span><span class="n">println</span><span class="o">)</span>
  <span class="k">case</span> <span class="k">_</span> <span class="k">=&gt;</span> <span class="k">throw</span> <span class="k">new</span> <span class="nc">IllegalStateException</span><span class="o">()</span>
@@ -284,8 +279,7 @@ There is no restriction on the complexity of the tuples (may contain options, ca
 <span class="c1">// or you can wrap the values in options</span>
 <span class="k">val</span> <span class="n">mapWithOptionalValues</span> <span class="k">=</span> <span class="n">fromJson</span><span class="o">[</span><span class="kt">Map</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">Option</span><span class="o">[</span><span class="k">_</span><span class="o">]]](</span>
   <span class="s">&quot;&quot;&quot;{&quot;name&quot;:&quot;foo bar&quot;, &quot;age&quot;: 28, &quot;address&quot;:null}&quot;&quot;&quot;</span>
-<span class="o">)</span>
-</code></pre></div>
+<span class="o">)</span></code></pre></div>
 
 <h2 id="case-classes">Case classes</h2>
 
@@ -300,7 +294,7 @@ There is no restriction on the complexity of the tuples (may contain options, ca
  If you want to work with java bean conventions then use plain old java classes.</li>
 </ul>
 
-<div class="highlight"><pre><code class="scala"><span class="k">case</span> <span class="k">class</span> <span class="nc">Address</span><span class="o">(</span><span class="n">street</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">building</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">case</span> <span class="k">class</span> <span class="nc">Address</span><span class="o">(</span><span class="n">street</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">building</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span>
 <span class="k">case</span> <span class="k">class</span> <span class="nc">Person</span><span class="o">(</span><span class="n">name</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">age</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span> <span class="n">address</span><span class="k">:</span> <span class="kt">Option</span><span class="o">[</span><span class="kt">Address</span><span class="o">])</span>
 
 <span class="c1">// {&quot;name&quot;:&quot;foo bar&quot;,&quot;age&quot;:28,&quot;address&quot;:{&quot;street&quot;:&quot;rue des lapins&quot;,building:1337}}</span>
@@ -309,8 +303,7 @@ There is no restriction on the complexity of the tuples (may contain options, ca
 <span class="c1">// {&quot;name&quot;:&quot;foo bar&quot;,&quot;age&quot;:28,&quot;address&quot;:null}</span>
 <span class="k">val</span> <span class="n">jsonWithNoAddress</span> <span class="k">=</span> <span class="n">toJson</span><span class="o">(</span><span class="nc">Person</span><span class="o">(</span><span class="s">&quot;foo bar&quot;</span><span class="o">,</span> <span class="mi">28</span><span class="o">,</span> <span class="nc">None</span><span class="o">)</span>
 
-<span class="k">val</span> <span class="n">person</span> <span class="k">=</span> <span class="n">fromJson</span><span class="o">[</span><span class="kt">Person</span><span class="o">](</span><span class="n">json</span><span class="o">)</span>
-</code></pre></div>
+<span class="k">val</span> <span class="n">person</span> <span class="k">=</span> <span class="n">fromJson</span><span class="o">[</span><span class="kt">Person</span><span class="o">](</span><span class="n">json</span><span class="o">)</span></code></pre></div>
 
 <p>Genson will serialize None as null and null is deserialized as None.</p>
 
@@ -320,7 +313,7 @@ There is no restriction on the complexity of the tuples (may contain options, ca
 For example lets say we want to enable indentation, serialize objects based on their runtime type and want to ser/de
 dates as timestamps and all fields from case classes (not only the ones present in the constructor or the vars).</p>
 
-<div class="highlight"><pre><code class="scala"><span class="k">import</span> <span class="nn">com.owlike.genson._</span>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">import</span> <span class="nn">com.owlike.genson._</span>
 
 <span class="k">object</span> <span class="nc">CustomGenson</span> <span class="o">{</span>
   <span class="k">val</span> <span class="n">customGenson</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">ScalaGenson</span><span class="o">(</span>
@@ -338,10 +331,48 @@ dates as timestamps and all fields from case classes (not only the ones present 
 
 <span class="c1">// and use it!</span>
 <span class="n">toJson</span><span class="o">(...)</span>
-<span class="n">fromJson</span><span class="o">[</span><span class="kt">SomeType</span><span class="o">](</span><span class="n">json</span><span class="o">)</span>
-</code></pre></div>
+<span class="n">fromJson</span><span class="o">[</span><span class="kt">SomeType</span><span class="o">](</span><span class="n">json</span><span class="o">)</span></code></pre></div>
 
 <p>For a more in depth overview of Genson features and customization have a look at the User Guide and configuration sections.</p>
+
+<h2 id="ast-support-via-json4s">AST support via json4s</h2>
+
+<p>Instead of creating again another DOM structure like all the existing ones, Genson provides it by supporting json4s.
+Json4s defines an AST for JSON and utilities to work with it.</p>
+
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">import</span> <span class="nn">com.owlike.genson._</span>
+<span class="k">import</span> <span class="nn">org.json4s._</span>
+<span class="k">import</span> <span class="nn">org.json4s.JsonDSL._</span>
+<span class="k">import</span> <span class="nn">org.json4s.JsonAST._</span>
+
+<span class="k">object</span> <span class="nc">CustomGenson</span> <span class="o">{</span>
+  <span class="k">val</span> <span class="n">genson</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">ScalaGenson</span><span class="o">(</span>
+    <span class="k">new</span> <span class="nc">GensonBuilder</span><span class="o">()</span>
+      <span class="o">.</span><span class="n">withBundle</span><span class="o">(</span><span class="nc">ScalaBundle</span><span class="o">(),</span> <span class="nc">Json4SBundle</span><span class="o">())</span>
+    <span class="o">.</span><span class="n">create</span><span class="o">()</span>
+  <span class="o">)</span>
+<span class="o">}</span>
+
+<span class="c1">// then just import it in the places you want to use this instance instead of the default one</span>
+<span class="k">import</span> <span class="nn">CustomGenson.genson._</span>
+
+<span class="c1">// and use it!</span>
+<span class="k">val</span> <span class="n">json</span> <span class="k">=</span> <span class="n">fromJson</span><span class="o">[</span><span class="kt">JObject</span><span class="o">](</span><span class="s">&quot;&quot;&quot;{&quot;name&quot;:&quot;foo&quot;,&quot;someDouble&quot;:28.1,&quot;male&quot;:true,&quot;someArray&quot;:[1,2,3],&quot;null&quot;:null}&quot;&quot;&quot;</span><span class="o">)</span></code></pre></div>
+
+<p>In order to use json4s features with Genson, you need to add a dependency to it.</p>
+
+<h3 id="sbt-1">SBT</h3>
+
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">&quot;org.json4s&quot;</span> <span class="o">%</span> <span class="s">&quot;json4s-ast_${scala.version}&quot;</span> <span class="o">%</span> <span class="s">&quot;3.2.10&quot;</span></code></pre></div>
+
+<h3 id="maven-1">Maven</h3>
+
+<div class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="nt">&lt;dependency&gt;</span>
+	<span class="nt">&lt;groupId&gt;</span>org.json4s<span class="nt">&lt;/groupId&gt;</span>
+	<span class="nt">&lt;artifactId&gt;</span>json4s-ast_${scala.version}<span class="nt">&lt;/artifactId&gt;</span>
+	<span class="nt">&lt;version&gt;</span>${json4s.version}<span class="nt">&lt;/version&gt;</span>
+<span class="nt">&lt;/dependency&gt;</span></code></pre></div>
+
 
             </div>
             <div class="col-md-3">

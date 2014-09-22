@@ -197,8 +197,7 @@ You can even indicate if you want it to be included only in serialization or des
 
 <h3 id="how-to-skip-null-values-from-output">How to skip null values from output?</h3>
 
-<div class="highlight"><pre><code class="java"><span class="k">new</span> <span class="nf">GensonBuilder</span><span class="o">().</span><span class="na">setSkipNull</span><span class="o">(</span><span class="kc">true</span><span class="o">).</span><span class="na">create</span><span class="o">();</span>
-</code></pre></div>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="k">new</span> <span class="nf">GensonBuilder</span><span class="o">().</span><span class="na">setSkipNull</span><span class="o">(</span><span class="kc">true</span><span class="o">).</span><span class="na">create</span><span class="o">();</span></code></pre></div>
 
 <h3 id="how-to-create-a-custom-converter">How to create a custom Converter?</h3>
 <p>See the <a href="/GettingStarted/#custom-serde">custom converter section</a> of the user guide.</p>
@@ -216,18 +215,16 @@ You can even indicate if you want it to be included only in serialization or des
 <p>Genson uses <strong>VisibilityFilter</strong> class to filter fields, methods and constructors by their <a href="http://docs.oracle.com/javase/6/docs/api/java/lang/reflect/Modifier.html">Modifiers</a>.
 For example if you want to accept public, protected and private fields :</p>
 
-<div class="highlight"><pre><code class="java"><span class="k">new</span> <span class="nf">GensonBuilder</span><span class="o">().</span><span class="na">useFields</span><span class="o">(</span><span class="kc">true</span><span class="o">,</span> <span class="n">VisibilityFilter</span><span class="o">.</span><span class="na">PRIVATE</span><span class="o">).</span><span class="na">useMethods</span><span class="o">(</span><span class="kc">true</span><span class="o">).</span><span class="na">create</span><span class="o">();</span>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="k">new</span> <span class="nf">GensonBuilder</span><span class="o">().</span><span class="na">useFields</span><span class="o">(</span><span class="kc">true</span><span class="o">,</span> <span class="n">VisibilityFilter</span><span class="o">.</span><span class="na">PRIVATE</span><span class="o">).</span><span class="na">useMethods</span><span class="o">(</span><span class="kc">true</span><span class="o">).</span><span class="na">create</span><span class="o">();</span>
 
 <span class="c1">// you can also define a custom visibility filter :</span>
-<span class="k">new</span> <span class="nf">GensonBuilder</span><span class="o">().</span><span class="na">useFields</span><span class="o">(</span><span class="kc">true</span><span class="o">,</span> <span class="k">new</span> <span class="n">VisibilityFilter</span><span class="o">(</span><span class="n">Modifier</span><span class="o">.</span><span class="na">TRANSIENT</span><span class="o">,</span> <span class="n">Modifier</span><span class="o">.</span><span class="na">STATIC</span><span class="o">)).</span><span class="na">create</span><span class="o">();</span>
-</code></pre></div>
+<span class="k">new</span> <span class="nf">GensonBuilder</span><span class="o">().</span><span class="na">useFields</span><span class="o">(</span><span class="kc">true</span><span class="o">,</span> <span class="k">new</span> <span class="nf">VisibilityFilter</span><span class="o">(</span><span class="n">Modifier</span><span class="o">.</span><span class="na">TRANSIENT</span><span class="o">,</span> <span class="n">Modifier</span><span class="o">.</span><span class="na">STATIC</span><span class="o">)).</span><span class="na">create</span><span class="o">();</span></code></pre></div>
 
 <h3 id="how-to-use-only-fields-or-methods">How to use only fields or methods?</h3>
 
 <p>For example if you want to use only fields :</p>
 
-<div class="highlight"><pre><code class="java"><span class="k">new</span> <span class="nf">GensonBuilder</span><span class="o">().</span><span class="na">useMethods</span><span class="o">(</span><span class="kc">false</span><span class="o">).</span><span class="na">useFields</span><span class="o">(</span><span class="kc">true</span><span class="o">,</span> <span class="n">VisibilityFilter</span><span class="o">.</span><span class="na">PRIVATE</span><span class="o">).</span><span class="na">create</span><span class="o">();</span>
-</code></pre></div>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="k">new</span> <span class="nf">GensonBuilder</span><span class="o">().</span><span class="na">useMethods</span><span class="o">(</span><span class="kc">false</span><span class="o">).</span><span class="na">useFields</span><span class="o">(</span><span class="kc">true</span><span class="o">,</span> <span class="n">VisibilityFilter</span><span class="o">.</span><span class="na">PRIVATE</span><span class="o">).</span><span class="na">create</span><span class="o">();</span></code></pre></div>
 
 <p>You need to change the visibility filter for fields as by default it will only use fields with public/package visibility.</p>
 

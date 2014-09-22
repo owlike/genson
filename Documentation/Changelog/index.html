@@ -171,7 +171,31 @@
     <div class="container">
         <div class="row">
             <div class="col-md-12" role="main">
-                <h2 id="release-10---27-june-2014">Release 1.0 - 27 June 2014</h2>
+                <h2 id="release-11---22-september-2014">Release 1.1 - 22 September 2014</h2>
+
+<p>“Medium” release providing new extensions, configuration and bug fixes. The API remains backwards compatible.</p>
+
+<p><strong>Genson core</strong></p>
+
+<ul>
+  <li>Issue #4 Ads deserializeInto method in Genson, allowing to deserialize in an exisintg Pojo</li>
+  <li>Issue #13 Ads failOnMissingProperty option allowing to throw an exception when no property</li>
+  <li>Issue #17 Ads useClassMetadataWithStaticType option allowing to ser or not object type when it is the same the static type.
+ in the class matches with the on in the json.</li>
+  <li>Issue #12 Avoiding to pick converters from cache when a contextual converter is available</li>
+  <li>Issue #11 Accessors/Mutators/Creator Properties annotations are merged together</li>
+</ul>
+
+<p><strong>ScalaBundle</strong>:</p>
+
+<ul>
+  <li>Adding support for json4s AST via the new bundle Json4SBundle</li>
+  <li>Fixes a bug in the ScalaBundle when serializing to a byte array</li>
+  <li>Issue #19 Handling correctly root arrays in ScalaBundle</li>
+  <li>Issue #10 ScalaBundle: Ser/de of None without parameter type was failing</li>
+</ul>
+
+<h2 id="release-10---27-june-2014">Release 1.0 - 27 June 2014</h2>
 
 <p>Major release and migration to GitHub with a complete new website.</p>
 

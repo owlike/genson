@@ -316,6 +316,18 @@ GensonBuilder provides several methods to register components such as Converters
   <td>By default byte arrays are ser/de as base64 encoded strings.
    When this feature is enabled, each byte will be ser/de as its numeric value.</td>
 </tr>
+<tr>
+  <td>useClassMetadataWithStaticType</td>
+  <td>True</td>
+  <td>If set to false, during serialization class metadata will be serialized only for types where
+  the runtime type differs from the static one.</td>
+</tr>
+<tr>
+  <td>failOnMissingProperty</td>
+  <td>False</td>
+  <td>If set to true, Genson will throw a JsonBindingException when it encounters a property in the incoming json that does not match
+   a property in the class. By default it skips this value silently.</td>
+</tr>
 </table>
 </div>
 
