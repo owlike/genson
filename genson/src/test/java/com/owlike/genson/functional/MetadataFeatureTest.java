@@ -36,6 +36,14 @@ public class MetadataFeatureTest {
     assertTrue(bean.value instanceof Bean);
   }
 
+  @Test public void testClassMetadataShouldNotBeSerializedForStaticTypes() {
+    Genson genson = new GensonBuilder().useClassMetadata(true).useClassMetadataWithStaticType(false).create();
+
+    Bean bean = new Bean();
+
+    assertEquals("{\"value\":null}", genson.serialize(bean));
+  }
+
   static class Bean {
     Object value;
   }

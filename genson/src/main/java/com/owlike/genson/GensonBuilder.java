@@ -63,6 +63,7 @@ public class GensonBuilder {
   private Converter<Object> nullConverter;
   private DateFormat dateFormat = SimpleDateFormat.getDateInstance();
   private boolean useDateAsTimestamp;
+  private boolean classMetadataWithStaticType = true;
 
   // for the moment we don't allow to override
   private BeanViewDescriptorProvider beanViewDescriptorProvider;
@@ -605,8 +606,35 @@ public class GensonBuilder {
     return this;
   }
 
+  /**
+   * If set to true, Genson will throw a JsonBindingException when it encounters a property in the incoming json that does not match
+   * a property in the class.
+   * False by default.
+   * @param enable
+   * @return
+   */
   public GensonBuilder failOnMissingProperty(boolean enable) {
     this.failOnMissingProperty = enable;
+    return this;
+  }
+
+  /**
+   * If set to false, during serialization class metadata will not be serialized for types that are the same as the static type.
+   * Ex:
+   *
+   * <pre>
+   * class Person {
+   *   public Address address;
+   * }
+   * </pre>
+   *
+   * Here if the concrete instance of address is Address then this type will not be serialized as metadata, but if they differ then
+   * it is serialized. By default this option is true, all types are serialized.
+   * @param enable
+   * @return
+   */
+  public GensonBuilder useClassMetadataWithStaticType(boolean enable) {
+    this.classMetadataWithStaticType = enable;
     return this;
   }
 
@@ -720,7 +748,7 @@ public class GensonBuilder {
       .withNext(new RuntimeTypeConverter.RuntimeTypeConverterFactory());
 
     chainTail = chainTail
-      .withNext(new ClassMetadataConverter.ClassMetadataConverterFactory());
+      .withNext(new ClassMetadataConverter.ClassMetadataConverterFactory(classMetadataWithStaticType));
 
     if (withBeanViewConverter) chainTail = chainTail
       .withNext(new BeanViewConverter.BeanViewConverterFactory(

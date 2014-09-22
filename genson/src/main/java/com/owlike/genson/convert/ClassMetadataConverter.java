@@ -1,6 +1,5 @@
 package com.owlike.genson.convert;
 
-import java.io.IOException;
 import java.lang.reflect.Type;
 
 import com.owlike.genson.*;
@@ -40,6 +39,12 @@ import com.owlike.genson.stream.ValueType;
  */
 public class ClassMetadataConverter<T> extends Wrapper<Converter<T>> implements Converter<T> {
   public static class ClassMetadataConverterFactory extends ChainedFactory {
+    private final boolean classMetadataWithStaticType;
+
+    public ClassMetadataConverterFactory(boolean classMetadataWithStaticType) {
+      this.classMetadataWithStaticType = classMetadataWithStaticType;
+    }
+
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     protected Converter<?> create(Type type, Genson genson, Converter<?> nextConverter) {
@@ -52,21 +57,24 @@ public class ClassMetadataConverter<T> extends Wrapper<Converter<T>> implements 
       if (genson.isWithClassMetadata()
         && !Wrapper.toAnnotatedElement(nextConverter).isAnnotationPresent(
         HandleClassMetadata.class))
-        return new ClassMetadataConverter(rawClass, nextConverter);
+        return new ClassMetadataConverter(rawClass, nextConverter, classMetadataWithStaticType);
       else
         return nextConverter;
     }
   }
 
+  private final boolean classMetadataWithStaticType;
   private final Class<T> tClass;
 
-  public ClassMetadataConverter(Class<T> tClass, Converter<T> delegate) {
+  public ClassMetadataConverter(Class<T> tClass, Converter<T> delegate, boolean classMetadataWithStaticType) {
     super(delegate);
     this.tClass = tClass;
+    this.classMetadataWithStaticType = classMetadataWithStaticType;
   }
 
   public void serialize(T obj, ObjectWriter writer, Context ctx) throws Exception {
-    if (obj != null) {
+    if (obj != null &&
+      (classMetadataWithStaticType || (!classMetadataWithStaticType && !tClass.equals(obj.getClass())))) {
       writer.beginNextObjectMetadata()
         .writeMetadata("class", ctx.genson.aliasFor(obj.getClass()));
     }
