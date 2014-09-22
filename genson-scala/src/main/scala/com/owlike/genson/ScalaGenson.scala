@@ -1,6 +1,6 @@
 package com.owlike.genson
 
-import java.lang.reflect.{Type => JType, ParameterizedType}
+import java.lang.reflect.{Type => JType, GenericArrayType, ParameterizedType}
 import java.io.{Reader => JReader, _}
 import java.net.URL
 
@@ -40,13 +40,22 @@ class ScalaGenson(val genson: Genson) extends AnyVal {
   }
 
   private def toJavaType(implicit m: Manifest[_]): JType = {
-    if (m.typeArguments.nonEmpty) {
+    if (m.runtimeClass.isArray) {
+      m.typeArguments
+        .headOption
+        .map(m => new ScalaGenericArrayType(toJavaType(m)))
+        .getOrElse(m.runtimeClass)
+    } else if (m.typeArguments.nonEmpty) {
       new ScalaParameterizedType(None, m.runtimeClass, m.typeArguments.map(m => toJavaType(m)).toArray)
     } else {
       if (m.runtimeClass.isPrimitive) wrap(m.runtimeClass)
       else m.runtimeClass
     }
   }
+}
+
+private class ScalaGenericArrayType(componentType: JType) extends GenericArrayType {
+  def getGenericComponentType: JType = componentType
 }
 
 private class ScalaParameterizedType(val ownerType: Option[JType], val rawType: JType, val typeArgs: Array[JType])

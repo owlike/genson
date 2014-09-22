@@ -40,4 +40,14 @@ class ScalaPojoRoundTripTest extends FunSuite with Matchers {
     val actual = fromJson[PosoWithMultipleCtrs](json)
     actual should be (expected)
   }
+
+  test("Ser/de root array") {
+    val expected = Array(1, 2, 3)
+    fromJson[Array[Int]](toJson(expected)) should be (expected)
+  }
+
+  test("Ser/de root complex array") {
+    val expected = Array(Array(Seq(BasicPoso("foo", 2, true))))
+    fromJson[Array[Array[Seq[BasicPoso]]]](toJson(expected)) should be (expected)
+  }
 }
