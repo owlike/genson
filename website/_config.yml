@@ -2,7 +2,7 @@ name: "Genson"
 description: "Fast & easy to use Java <> Json library"
 
 markdown: kramdown
-pygments: true
+highlighter: pygments
 permalink: pretty
 
 baseurl: /genson

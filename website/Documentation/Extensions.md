@@ -48,36 +48,26 @@ Actually it has been tested with Jersey and Resteasy. It works out of the box.
 
 **Note**
 
-* By default Genson JAX-RS integration enables JAXB annotations support.
-* Starting with Jersey 2.9, automatic discovery is disabled, at the moment you have two solutions to make it work:
+ - By default Genson JAX-RS integration enables JAXB annotations support.
 
 
- 1) Enable it programmatically (preferred way).
+###Manual registration###
 
- On the server side:
+You can also manually register Genson in Jersey.
+On the server side:
 
 {% highlight java %}
+// Note that you can also provide an instance of GensonJsonConverter.
 final ResourceConfig config = new ResourceConfig().register(GensonJsonConverter.class);
 {% endhighlight %}
 
- On the client side:
+On the client side:
 
 {% highlight java %}
 final ClientConfig clientConfig = new ClientConfig().register(GensonJsonConverter.class);
 {% endhighlight %}
 
-Adding a customized Genson instance can be achieved through the same registeration mechanism.
-
- 2) In order to detect it automatically like in previous versions you can add a dependency to jersey-metainf-services
- (I discourage this option as the jersey-metainf-services package seems to be there only for backwards compatibility).
-
-{% highlight xml %}
-<dependency>
-  <groupId>org.glassfish.jersey.ext</groupId>
-  <artifactId>jersey-metainf-services</artifactId>
-  <version>your_version</version>
-</dependency>
-{% endhighlight %}
+Adding a customized Genson instance can be achieved through the same registration mechanism.
 
 ###Customization###
 In many cases you might want to customize Genson instance.

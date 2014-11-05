@@ -1,33 +1,28 @@
 package com.owlike.genson.ext;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.servlet.Servlet;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 
-import com.sun.jersey.spi.container.servlet.ServletContainer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.glassfish.jersey.client.ClientConfig;
+import org.glassfish.jersey.server.JSONP;
+import org.glassfish.jersey.servlet.ServletContainer;
 import org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
 import com.owlike.genson.ext.jaxrs.GensonJsonConverter;
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.config.ClientConfig;
-import com.sun.jersey.api.client.config.DefaultClientConfig;
-import com.sun.jersey.api.json.JSONWithPadding;
 
 public class JaxRSIntegrationTest {
   private Server server;
@@ -35,9 +30,7 @@ public class JaxRSIntegrationTest {
   @Test
   public void testJerseyJsonConverter() throws Exception {
     Map<String, String> jerseyParams = new HashMap<String, String>();
-    jerseyParams.put("com.sun.jersey.config.property.resourceConfigClass",
-      "com.sun.jersey.api.core.PackagesResourceConfig");
-    jerseyParams.put("com.sun.jersey.config.property.packages", "com.owlike.genson.ext");
+    jerseyParams.put("javax.ws.rs.Application", RestEasyApp.class.getName());
     startServer(ServletContainer.class, jerseyParams);
     try {
       testIntegration();
@@ -49,15 +42,13 @@ public class JaxRSIntegrationTest {
   @Test
   public void testJerseyJsonPConverter() throws Exception {
     Map<String, String> jerseyParams = new HashMap<String, String>();
-    jerseyParams.put("com.sun.jersey.config.property.resourceConfigClass",
-      "com.sun.jersey.api.core.PackagesResourceConfig");
-    jerseyParams.put("com.sun.jersey.config.property.packages", "com.owlike.genson.ext");
+    jerseyParams.put("javax.ws.rs.Application", RestEasyApp.class.getName());
     startServer(ServletContainer.class, jerseyParams);
     try {
-      ClientConfig cfg = new DefaultClientConfig(GensonJsonConverter.class);
-      Client client = Client.create(cfg);
-      assertEquals("someCallback([1,2,3])", client.resource("http://localhost:9999/get")
-        .accept("application/x-javascript").get(String.class));
+      ClientConfig cfg = new ClientConfig(GensonJsonConverter.class);
+      Client client = ClientBuilder.newClient(cfg);
+      assertEquals("someCallback([1,2,3])", client.target("http://localhost:9999/get")
+        .request("application/x-javascript").get(String.class));
     } finally {
       stopServer();
     }
@@ -77,11 +68,11 @@ public class JaxRSIntegrationTest {
   }
 
   private void testIntegration() {
-    ClientConfig cfg = new DefaultClientConfig(GensonJsonConverter.class);
-    Client client = Client.create(cfg);
+    ClientConfig cfg = new ClientConfig(GensonJsonConverter.class);
+    Client client = ClientBuilder.newClient(cfg);
     @SuppressWarnings("unchecked")
     Map<String, Long> map =
-      client.resource("http://localhost:9999/get").accept(MediaType.APPLICATION_JSON)
+      client.target("http://localhost:9999/get").request(MediaType.APPLICATION_JSON)
         .get(Map.class);
     assertEquals(map.get("key1"), new Long(1));
     assertEquals(map.get("key2"), new Long(2));
@@ -134,10 +125,11 @@ public class JaxRSIntegrationTest {
       return dummy;
     }
 
+    @JSONP(callback = "someCallback")
     @GET
     @Produces("application/x-javascript")
-    public JSONWithPadding getJSONP() {
-      return new JSONWithPadding(Arrays.asList(1, 2, 3), "someCallback");
+    public List<Integer> getJSONP() {
+      return Arrays.asList(1, 2, 3);
     }
   }
 
