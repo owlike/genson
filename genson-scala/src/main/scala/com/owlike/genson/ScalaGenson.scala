@@ -1,6 +1,6 @@
 package com.owlike.genson
 
-import java.lang.reflect.{Type => JType, GenericArrayType, ParameterizedType}
+import java.lang.reflect.{Type => JType, GenericDeclaration, TypeVariable, GenericArrayType, ParameterizedType}
 import java.io.{Reader => JReader, _}
 import java.net.URL
 
@@ -39,7 +39,7 @@ class ScalaGenson(val genson: Genson) extends AnyVal {
     genson.deserialize(GenericType.of(toJavaType), reader, new Context(genson)).asInstanceOf[T]
   }
 
-  private def toJavaType(implicit m: Manifest[_]): JType = {
+  private[genson] def toJavaType(implicit m: Manifest[_]): JType = {
     if (m.runtimeClass.isArray) {
       m.typeArguments
         .headOption
@@ -54,11 +54,21 @@ class ScalaGenson(val genson: Genson) extends AnyVal {
   }
 }
 
-private class ScalaGenericArrayType(componentType: JType) extends GenericArrayType {
+private[genson] class ScalaTypeVariable(name: String, bounds: Array[JType], decl: Class[_])
+  extends TypeVariable[Class[_]] {
+
+  def getBounds: Array[JType] = bounds
+
+  def getGenericDeclaration: Class[_] = decl
+
+  def getName: String = name
+}
+
+private[genson] class ScalaGenericArrayType(componentType: JType) extends GenericArrayType {
   def getGenericComponentType: JType = componentType
 }
 
-private class ScalaParameterizedType(val ownerType: Option[JType], val rawType: JType, val typeArgs: Array[JType])
+private[genson] class ScalaParameterizedType(val ownerType: Option[JType], val rawType: JType, val typeArgs: Array[JType])
   extends ParameterizedType {
 
   def getOwnerType: JType = ownerType.getOrElse(null)
@@ -67,14 +77,14 @@ private class ScalaParameterizedType(val ownerType: Option[JType], val rawType: 
 
   def getActualTypeArguments: Array[JType] = typeArgs
 
-  def canEqual(other: Any): Boolean = other.isInstanceOf[ScalaParameterizedType]
+  def canEqual(other: Any): Boolean = other.isInstanceOf[ParameterizedType]
 
   override def equals(other: Any): Boolean = other match {
-    case that: ScalaParameterizedType =>
-      (that canEqual this) &&
-        ownerType == that.ownerType &&
-        rawType == that.rawType &&
-        typeArgs == that.typeArgs
+    case that: ParameterizedType =>
+      (this canEqual that) &&
+        ownerType == that.getOwnerType &&
+        rawType == that.getRawType &&
+        typeArgs == that.getActualTypeArguments
     case _ => false
   }
 

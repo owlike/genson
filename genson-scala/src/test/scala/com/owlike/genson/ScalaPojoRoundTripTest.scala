@@ -5,6 +5,49 @@ import defaultGenson._
 
 class ScalaPojoRoundTripTest extends FunSuite with Matchers {
 
+  test("should serialize correctly case class containing a property of type Any") {
+    val expected = "{\"any\":1,\"anyRef\":{\"aInt\":2},\"anyVal\":3}"
+    toJson(CaseClassWithAny(1, BaseClass(2), 3)) should be (expected)
+  }
+
+  test("deser of tuple with Optional primitive") {
+    val expected = (1, Option(2), "foo")
+    fromJson[(Int, Option[Int], String)](toJson(expected)) should be (expected)
+  }
+
+  test("round trip of ClassWithGetterAndFiels should work with generics of primitive using get/set") {
+    val expected = new ClassWithGetterAndFiels("foo", Array(Option(1), None, Option(2)))
+    expected.setAInt(Option(2))
+
+    val actual = fromJson[ClassWithGetterAndFiels](toJson(expected))
+    actual.aStr should be (expected.aStr)
+    actual.anArray.toSeq should be (expected.anArray.toSeq)
+    actual.getAInt() should be (expected.getAInt())
+  }
+
+  test("deser poso using upper type bound") {
+    val json = toJson(PosoWithBoundedGenericHolder(GenericHolder(BaseClass(1))))
+    fromJson[PosoWithBoundedGenericHolder](json).arrayHolder.v.aInt == 1 should be (true)
+  }
+
+  test("deser poso with nested generics") {
+    val expected = PosoWithNestedGenerics(GenericHolder(GenericHolder(1)))
+    expected.genValue.v.v.getClass should be (classOf[Int])
+    fromJson[PosoWithNestedGenerics](toJson(expected)) should be (expected)
+  }
+
+  test("deser poso with array of primitive int") {
+    val expected = PosoWithArrayOfPrimitives(Array(1, 2, 3))
+    fromJson[PosoWithArrayOfPrimitives](toJson(expected)).array.toSeq should be (expected.array.toSeq)
+  }
+
+  test("deser generic primitive scala type") {
+    val expected = PosoWithOption(Some(BasicPoso("foo", 3, true)), Some(2))
+
+    val v = fromJson[PosoWithOption](toJson(expected)).optInt.get
+    v should be (2)
+  }
+
   test("case class with primitive val attributes") {
     val expected = BasicPoso("foo", 3, true)
     expected.other = "bar"

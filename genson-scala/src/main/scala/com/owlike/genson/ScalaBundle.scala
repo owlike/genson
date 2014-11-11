@@ -18,6 +18,7 @@ class ScalaBundle extends GensonBundle {
       .withConverterFactory(ScalaUntypedConverterFactory)
       .withConverterFactory(new TupleConverterFactory())
       .withConverterFactory(new OptionConverterFactory())
+      .withBeanPropertyFactory(new ScalaBeanPropertyFactory())
   }
 
   def useOnlyConstructorFields(enable: Boolean): ScalaBundle = {

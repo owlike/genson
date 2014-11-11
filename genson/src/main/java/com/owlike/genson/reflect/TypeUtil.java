@@ -404,7 +404,6 @@ public final class TypeUtil {
    * ExpandedType must implement hashcode and equals using only the original type
    * The root class is not significant here as a type expanded in different root classes can yield to the same expanded type.
    * Very important, hashcode and equals must also be implemented in subclasses and also use those from ExpandedType.
-   * Was done previously but incorrectly and then removed, my fault :/
    *
    * http://code.google.com/p/genson/issues/detail?id=4
    */
