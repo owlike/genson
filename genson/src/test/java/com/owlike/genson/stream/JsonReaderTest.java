@@ -19,6 +19,7 @@ import static org.junit.Assert.*;
 public class JsonReaderTest {
   private boolean strictDoubleParse;
   private boolean readMetadata;
+  private boolean permissiveParsing = false;
 
   public JsonReaderTest(boolean strictDoubleParse, boolean readMetadata) {
     this.strictDoubleParse = strictDoubleParse;
@@ -30,6 +31,22 @@ public class JsonReaderTest {
   public static Collection<Boolean[]> data() {
     return Arrays.asList(new Boolean[]{true, true}, new Boolean[]{true, false},
       new Boolean[]{false, true}, new Boolean[]{false, false});
+  }
+
+  @Test public void testReadManyValuesNotEnclosedInArrayWithSameReader() {
+    StringReader strReader = new StringReader("{\"k1\":1}\n{\"k2\":2}{\"k3\":3}");
+    JsonReader reader = new JsonReader(strReader, false, false, true);
+    int i = 1;
+    while(reader.hasNext()) {
+      reader.next();
+      reader.beginObject();
+      reader.next();
+      assertEquals(reader.name(), "k" + i);
+      assertEquals(reader.valueAsInt(), i);
+      i++;
+      reader.endObject();
+    }
+    assertEquals(i, 4);
   }
 
   @Test
@@ -59,8 +76,7 @@ public class JsonReaderTest {
   @Test
   public void testParsingErrorPositionSameRow() throws IOException {
     @SuppressWarnings("resource")
-    JsonReader reader = new JsonReader(new StringReader("[" + "}"), strictDoubleParse,
-      readMetadata);
+    JsonReader reader = createReader("[" + "}");
     try {
       reader.beginArray().endArray();
       fail();
@@ -73,8 +89,7 @@ public class JsonReaderTest {
   @Test
   public void testParsingErrorPositionDifferentRow() throws IOException {
     @SuppressWarnings("resource")
-    JsonReader reader = new JsonReader(new StringReader("  [\n\n    \n" + "}"),
-      strictDoubleParse, readMetadata);
+    JsonReader reader = createReader("  [\n\n    \n" + "}");
     try {
       reader.beginArray().endArray();
       fail();
@@ -87,8 +102,7 @@ public class JsonReaderTest {
   @Test
   public void testParsingErrorPositionDifferentRowWithContent() throws IOException {
     @SuppressWarnings("resource")
-    JsonReader reader = new JsonReader(new StringReader("  [1, 2\n, \"aa vb\",\n4330833    \n"
-      + "}"), strictDoubleParse, readMetadata);
+    JsonReader reader = createReader("  [1, 2\n, \"aa vb\",\n4330833    \n}");
     try {
       reader.beginArray().endArray();
       fail();
@@ -102,8 +116,7 @@ public class JsonReaderTest {
   @Test
   public void testParsingErrorPositionDifferentRowWithContent2() throws IOException {
     @SuppressWarnings("resource")
-    JsonReader reader = new JsonReader(new StringReader("  [1, 2\n, \"aa vb\",\n4330833    \n"
-      + "}"), strictDoubleParse, readMetadata);
+    JsonReader reader = createReader("  [1, 2\n, \"aa vb\",\n4330833    \n}");
     try {
       reader.beginArray().next();
       reader.next();
@@ -140,7 +153,7 @@ public class JsonReaderTest {
 		 */
 
     @SuppressWarnings("resource")
-    JsonReader reader = new JsonReader(new CharArrayReader(in), strictDoubleParse, readMetadata);
+    JsonReader reader = new JsonReader(new CharArrayReader(in), strictDoubleParse, readMetadata, permissiveParsing);
     try {
       for (reader.beginArray(); reader.hasNext(); ) {
         reader.next();
@@ -157,7 +170,7 @@ public class JsonReaderTest {
   @Test
   public void testReader() throws IOException {
     String src = "{\"nom\" : \"toto titi, tu\", \"prenom\" : \"albert  \", \"entier\" : 1322.6}";
-    JsonReader reader = new JsonReader(new StringReader(src), strictDoubleParse, readMetadata);
+    JsonReader reader = createReader(src);
     reader.beginObject();
 
     assertTrue(reader.hasNext());
@@ -181,7 +194,7 @@ public class JsonReaderTest {
   @Test
   public void testTokenTypesAndHasNext() throws IOException {
     String src = "[{\"a\": 1, \"b\": \"a\", \"c\":1.1,\"d\":null,\"e\":false, \"f\":[]},[1, 1.1], null, false, true, \"tt\"]";
-    JsonReader reader = new JsonReader(new StringReader(src), strictDoubleParse, readMetadata);
+    JsonReader reader = createReader(src);
 
     reader.beginArray();
 
@@ -231,7 +244,7 @@ public class JsonReaderTest {
     String src = "[" + String.valueOf(Double.MAX_VALUE) + ","
       + String.valueOf(Double.MIN_VALUE) + "," + Double.MAX_VALUE + "" + 1 + ","
       + -Double.MAX_VALUE + "" + 1 + "]";
-    JsonReader reader = new JsonReader(new StringReader(src), strictDoubleParse, readMetadata);
+    JsonReader reader = createReader(src);
     reader.beginArray();
     reader.next();
     assertTrue(Double.MAX_VALUE == reader.valueAsDouble());
@@ -249,8 +262,7 @@ public class JsonReaderTest {
 
   @Test
   public void testNumberConversion() throws IOException {
-    String src = "[1, 1.1, 1e-32, 12345678901234567890]";
-    JsonReader reader = new JsonReader(new StringReader(src), strictDoubleParse, readMetadata);
+    JsonReader reader = createReader("[1, 1.1, 1e-32, 12345678901234567890]");
     reader.beginArray();
 
     reader.next();
@@ -296,7 +308,7 @@ public class JsonReaderTest {
   @Test
   public void testReadExtremeDoubles() throws IOException {
     String src = "[1111e-4, 1e-4, 0.11111111111111111111, 2.2250738585072014e-308, 1.2345678901234567e22]";
-    JsonReader reader = new JsonReader(new StringReader(src), strictDoubleParse, readMetadata);
+    JsonReader reader = createReader(src);
     reader.beginArray();
     reader.next();
     assertEquals(1111e-4, reader.valueAsDouble(), 0);
@@ -316,7 +328,7 @@ public class JsonReaderTest {
   public void testReadLong() throws IOException {
     String src = "[" + String.valueOf(Long.MAX_VALUE) + "," + String.valueOf(Long.MIN_VALUE)
       + "," + 999999999999999990l + "]";
-    JsonReader reader = new JsonReader(new StringReader(src), strictDoubleParse, readMetadata);
+    JsonReader reader = createReader(src);
     reader.beginArray();
     reader.next();
     assertTrue(Long.MAX_VALUE == reader.valueAsLong());
@@ -330,8 +342,7 @@ public class JsonReaderTest {
 
   @Test
   public void testPrimitivesArray() throws IOException {
-    String src = "[\"\\u0019\",\"abcde ..u\",null,12222.0101,true,false,9.0E-7]";
-    JsonReader reader = new JsonReader(new StringReader(src), strictDoubleParse, readMetadata);
+    JsonReader reader = createReader("[\"\\u0019\",\"abcde ..u\",null,12222.0101,true,false,9.0E-7]");
 
     reader.beginArray();
 
@@ -360,7 +371,7 @@ public class JsonReaderTest {
   @Test
   public void testPrimitivesObject() throws IOException {
     String src = "{\"a\":1.0,\"b\":\"abcde ..u\",\"c\":null,\"d\":12222.0101,\"e\":true,\"f\":false,\"h\":-0.9}";
-    JsonReader reader = new JsonReader(new StringReader(src), strictDoubleParse, readMetadata);
+    JsonReader reader = createReader(src);
 
     reader.beginObject();
 
@@ -392,8 +403,7 @@ public class JsonReaderTest {
 
   @Test
   public void testEmptyArrayAndObjects() throws IOException {
-    String src = "[{},[]]";
-    JsonReader reader = new JsonReader(new StringReader(src), strictDoubleParse, readMetadata);
+    JsonReader reader = createReader("[{},[]]");
 
     assertTrue(reader.beginArray().hasNext());
     assertEquals(reader.next(), ValueType.OBJECT);
@@ -411,7 +421,7 @@ public class JsonReaderTest {
     String src = "[{},      " + "	[]," + "	[\"a a\", -9.9909], " + "false, " + "{"
       + "	\"nom\": \"toto\", " + "\"tab\":[5,6,7], "
       + "\"nestedObj\":	   	 {\"prenom\":\"titi\"}" + "}" + "]";
-    JsonReader reader = new JsonReader(new StringReader(src), strictDoubleParse, readMetadata);
+    JsonReader reader = createReader(src);
 
     assertTrue(reader.beginArray().hasNext());
 
@@ -475,7 +485,7 @@ public class JsonReaderTest {
   @Test
   public void testSkipValue() throws IOException {
     String src = "{\"a\":[], \"b\":{}, \"c\": [{\"c\":null, \"d\":121212.02}, 4, null], \"e\":1234, \"end\":\"the end\"}";
-    JsonReader reader = new JsonReader(new StringReader(src), strictDoubleParse, readMetadata);
+    JsonReader reader = createReader(src);
 
     reader.beginObject();
 
@@ -507,8 +517,7 @@ public class JsonReaderTest {
 
   @Test
   public void testIllegalReadObjectInstedOfArray() throws IOException {
-    String src = "[1,2]";
-    JsonReader reader = new JsonReader(new StringReader(src), strictDoubleParse, readMetadata);
+    JsonReader reader = createReader("[1,2]");
     try {
       reader.beginObject();
       fail();
@@ -519,8 +528,7 @@ public class JsonReaderTest {
 
   @Test
   public void testIllegalOperationCallNext() throws IOException {
-    String src = "[1,2]";
-    JsonReader reader = new JsonReader(new StringReader(src), strictDoubleParse, readMetadata);
+    JsonReader reader = createReader("[1,2]");
     try {
       reader.beginArray();
       reader.next();
@@ -534,8 +542,7 @@ public class JsonReaderTest {
 
   @Test
   public void testIncompleteSource() throws IOException {
-    String src = "[1,";
-    JsonReader reader = new JsonReader(new StringReader(src), strictDoubleParse, readMetadata);
+    JsonReader reader = createReader("[1,");
     try {
       reader.beginArray();
       reader.next();
@@ -551,7 +558,7 @@ public class JsonReaderTest {
     String src = "{\"@class\"	: \"theclass\"" + ",     \"@author\":\"me\""
       + ", \"@comment\":\"no comment\"" + ", \"obj\" :      	"
       + "			{\"@class\":\"anotherclass\"}}";
-    JsonReader reader = new JsonReader(new StringReader(src), false, true);
+    JsonReader reader = new JsonReader(new StringReader(src), false, true, false);
     assertTrue(reader.beginObject().hasNext());
     assertEquals("theclass", reader.metadata("class"));
     assertEquals("me", reader.metadata("author"));
@@ -569,7 +576,7 @@ public class JsonReaderTest {
   public void testMultipleCallsTonextObjectMetadata() throws IOException {
     String src = "{\"@class\"	: \"theclass\"" + ",     \"@author\":\"me\""
       + ", \"@comment\":\"no comment\"}";
-    JsonReader reader = new JsonReader(new StringReader(src), false, true);
+    JsonReader reader = new JsonReader(new StringReader(src), false, true, false);
     assertEquals("theclass", reader.nextObjectMetadata().nextObjectMetadata().metadata("class"));
     assertEquals("theclass", reader.nextObjectMetadata().metadata("class"));
     assertEquals("no comment", reader.metadata("comment"));
@@ -581,8 +588,7 @@ public class JsonReaderTest {
 
   @Test
   public void testReadMalformedJson() throws IOException {
-    String src = "";
-    JsonReader reader = new JsonReader(new StringReader(src), strictDoubleParse, readMetadata);
+    JsonReader reader = createReader("");
     try {
       reader.beginObject();
       fail();
@@ -600,8 +606,7 @@ public class JsonReaderTest {
     for (int i = 1; i < array.length - 1; i++) {
       array[i] = (char) (i % 10 + 48);
     }
-    String json = new String(array);
-    JsonReader reader = new JsonReader(new StringReader(json), strictDoubleParse, readMetadata);
+    JsonReader reader = createReader(new String(array));
     reader.beginArray();
     reader.next();
     reader.endArray();
@@ -610,8 +615,12 @@ public class JsonReaderTest {
 
   @Test
   public void testSkipValueDeepObject() throws IOException {
-    JsonReader reader = new JsonReader(new StringReader("{\"a\":{}}"), strictDoubleParse, readMetadata);
+    JsonReader reader = new JsonReader(new StringReader("{\"a\":{}}"), strictDoubleParse, readMetadata, permissiveParsing);
     reader.skipValue();
     reader.close();
+  }
+
+  private JsonReader createReader(String json) {
+    return new JsonReader(new StringReader(json), strictDoubleParse, readMetadata, permissiveParsing);
   }
 }

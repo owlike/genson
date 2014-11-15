@@ -129,6 +129,13 @@ GensonBuilder provides several methods to register components such as Converters
   Double.parse then you can enable strict double parsing.</td>
 </tr>
 <tr>
+  <td>usePermissiveParsing</td>
+  <td>False</td>
+  <td>Tells the ObjectReader to be more permissive on the validity of the incoming json.
+  As of release 1.2, it allows to parse multiple root json values (not enclosed in an array)
+  with a same ObjectReader. More could be added in the future.</td>
+</tr>
+<tr>
   <td>useIndentation</td>
   <td>False</td>
   <td>Enable it if you want to output nicely formatted Json.</td>

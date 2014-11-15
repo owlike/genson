@@ -4,13 +4,11 @@ import static org.junit.Assert.*;
 
 import java.awt.Rectangle;
 import java.awt.Shape;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.StringReader;
+import java.util.*;
 
 import com.owlike.genson.*;
+import com.owlike.genson.stream.ObjectReader;
 import org.junit.Test;
 
 import com.owlike.genson.annotation.JsonProperty;
@@ -22,6 +20,32 @@ import com.owlike.genson.stream.JsonReader;
 
 public class JsonDeserializationTest {
   final Genson genson = new GensonBuilder().useConstructorWithArguments(true).create();
+
+  @Test public void testReadMultipleRootObjectsNotEnclosedInArrayAndMapManually() {
+    Genson genson = new GensonBuilder().usePermissiveParsing(true).create();
+    GenericType<Pojo> type = GenericType.of(Pojo.class);
+    Context ctx = new Context(genson);
+
+    int i = 1;
+    for (ObjectReader reader = genson.createReader(new StringReader("{\"a\":1}{\"a\":2}"));
+      reader.hasNext(); reader.next(), i++) {
+      Pojo p = genson.deserialize(type, reader, ctx);
+      assertEquals(p.a, i);
+    }
+    assertEquals(i, 3);
+  }
+
+  @Test public void testReadMultipleRootObjectsNotEnclosedInArrayAndBind() {
+    Genson genson = new GensonBuilder().usePermissiveParsing(true).create();
+    ObjectReader reader = genson.createReader(new StringReader("{\"a\":1}{\"a\":2}"));
+    int i = 1;
+    for (Iterator<Pojo> it = genson.deserializeValues(reader, GenericType.of(Pojo.class));
+      it.hasNext(); i++) {
+      Pojo p = it.next();
+      assertEquals(p.a, i);
+    }
+    assertEquals(i, 3);
+  }
 
   @Test
   public void testASMResolverShouldNotFailWhenUsingBootstrapClassloader() {

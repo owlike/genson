@@ -27,17 +27,17 @@ public class GensonJsonParserFactory implements JsonParserFactory {
 
   @Override
   public JsonParser createParser(Reader reader) {
-    return new GensonJsonParser(new JsonReader(reader, strictDoubleParse, false));
+    return new GensonJsonParser(new JsonReader(reader, strictDoubleParse, false, false));
   }
 
   @Override
   public JsonParser createParser(InputStream in) {
-    return new GensonJsonParser(new JsonReader(new InputStreamReader(in), strictDoubleParse, false));
+    return new GensonJsonParser(new JsonReader(new InputStreamReader(in), strictDoubleParse, false, false));
   }
 
   @Override
   public JsonParser createParser(InputStream in, Charset charset) {
-    return new GensonJsonParser(new JsonReader(new InputStreamReader(in, charset), strictDoubleParse, false));
+    return new GensonJsonParser(new JsonReader(new InputStreamReader(in, charset), strictDoubleParse, false, false));
   }
 
   @Override

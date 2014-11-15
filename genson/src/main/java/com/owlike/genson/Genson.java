@@ -12,11 +12,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.owlike.genson.reflect.BeanDescriptor;
@@ -81,6 +77,7 @@ public final class Genson {
   private final boolean withClassMetadata;
   private final boolean withMetadata;
   private final boolean strictDoubleParse;
+  private final boolean permissiveParsing;
   private final boolean indent;
   private final boolean failOnMissingProperty;
 
@@ -94,7 +91,7 @@ public final class Genson {
     this(_default.converterFactory, _default.beanDescriptorFactory, _default.nullConverter,
       _default.skipNull, _default.htmlSafe, _default.aliasClassMap,
       _default.withClassMetadata, _default.strictDoubleParse, _default.indent,
-      _default.withMetadata, _default.failOnMissingProperty);
+      _default.withMetadata, _default.failOnMissingProperty, _default.permissiveParsing);
   }
 
   /**
@@ -123,11 +120,13 @@ public final class Genson {
    * @param withMetadata      true if ObjectReader instances must be configured with metadata feature enabled.
    *                          if withClassMetadata is true withMetadata will be automatically true.
    * @param failOnMissingProperty throw a JsonBindingException when a key in the json stream does not match a property in the Java Class.
+   * @param permissiveParsing When set to true, the ObjectParser will be more permissive on the incoming json content.
    */
   public Genson(Factory<Converter<?>> converterFactory, BeanDescriptorProvider beanDescProvider,
                 Converter<Object> nullConverter, boolean skipNull, boolean htmlSafe,
                 Map<String, Class<?>> classAliases, boolean withClassMetadata,
-                boolean strictDoubleParse, boolean indent, boolean withMetadata, boolean failOnMissingProperty) {
+                boolean strictDoubleParse, boolean indent, boolean withMetadata, boolean failOnMissingProperty,
+                boolean permissiveParsing) {
     this.converterFactory = converterFactory;
     this.beanDescriptorFactory = beanDescProvider;
     this.nullConverter = nullConverter;
@@ -143,6 +142,7 @@ public final class Genson {
     this.indent = indent;
     this.withMetadata = withClassMetadata || withMetadata;
     this.failOnMissingProperty = failOnMissingProperty;
+    this.permissiveParsing = permissiveParsing;
   }
 
   /**
@@ -439,6 +439,41 @@ public final class Genson {
     return object;
   }
 
+  public <T> Iterator<T> deserializeValues(final ObjectReader reader, final GenericType<T> type) {
+    final boolean isArray = reader.getValueType() == ValueType.ARRAY;
+    if (isArray == true) {
+      reader.beginArray();
+    }
+
+    return new Iterator<T>() {
+      final Converter<T> converter = provideConverter(type.getType());
+      final Context ctx = new Context(Genson.this);
+
+      @Override
+      public boolean hasNext() {
+        boolean hasMore = reader.hasNext();
+        if (isArray && !hasMore) reader.endArray();
+        return hasMore;
+      }
+
+      @Override
+      public T next() {
+        if (!hasNext()) throw new NoSuchElementException();
+        reader.next();
+        try {
+          return converter.deserialize(reader, ctx);
+        } catch (Exception e) {
+          throw new JsonBindingException("Could not deserialize to type " + type.getRawClass(), e);
+        }
+      }
+
+      @Override
+      public void remove() {
+        throw new UnsupportedOperationException();
+      }
+    };
+  }
+
     /**
      * Searches if an alias has been registered for clazz. If not will take the class full name and
      * use it as alias. This method never returns null.
@@ -518,7 +553,7 @@ public final class Genson {
    * Creates a new ObjectReader with this Genson instance configuration.
    */
   public ObjectReader createReader(Reader reader) {
-    return new JsonReader(reader, strictDoubleParse, withMetadata);
+    return new JsonReader(reader, strictDoubleParse, withMetadata, permissiveParsing);
   }
 
   public boolean isSkipNull() {

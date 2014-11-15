@@ -50,6 +50,7 @@ public class GensonBuilder {
   private boolean indent = false;
   private boolean metadata = false;
   private boolean failOnMissingProperty = false;
+  private boolean permissiveParsing = false;
 
   private List<GensonBundle> _bundles = new ArrayList<GensonBundle>();
 
@@ -639,6 +640,19 @@ public class GensonBuilder {
   }
 
   /**
+   * When enabled tells the ObjectReader to be less strict on the incoming json.
+   * As of release 1.2, it allows to parse multiple root json values (not enclosed in array an array)
+   * with same ObjectReader. More could be added in the future.
+   * Disabled by default.
+   * @param enable
+   * @return
+   */
+  public GensonBuilder usePermissiveParsing(boolean enable) {
+    this.permissiveParsing = enable;
+    return this;
+  }
+
+  /**
    * Creates an instance of Genson. You may use this method as many times you want. It wont
    * change the state of the builder, in sense that the returned instance will have always the
    * same configuration.
@@ -727,7 +741,7 @@ public class GensonBuilder {
                           Map<String, Class<?>> classAliases) {
     return new Genson(converterFactory, getBeanDescriptorProvider(), nullConverter,
       isSkipNull(), isHtmlSafe(), classAliases, withClassMetadata,
-      strictDoubleParse, indent, metadata, failOnMissingProperty);
+      strictDoubleParse, indent, metadata, failOnMissingProperty, permissiveParsing);
   }
 
   /**
