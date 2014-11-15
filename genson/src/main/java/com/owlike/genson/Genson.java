@@ -439,6 +439,28 @@ public final class Genson {
     return object;
   }
 
+  /**
+   * This can be used to deserialize in an efficient streaming fashion a sequence of objects.
+   * Note that you can use this method when your values are wrapped in an array (valid json) but also
+   * when they all are root values (not enclosed in an array). However for this second use case make sure
+   * to enable the usePermissiveParsing option in GensonBuilder. For example:
+   *
+   * <pre>
+   *   Genson genson = new GensonBuilder().usePermissiveParsing(true).create();
+   *   ObjectReader reader = genson.createReader(json);
+   *
+   *   for (Iterator&lt;LogEntry> it = genson.deserializeValues(reader, GenericType.of(LogEntry.class));
+   *    it.hasNext(); ) {
+   *      // do something
+   *      LogEntry p = it.next();
+   *   }
+   * </pre>
+   * @param reader an instance of the ObjectReader to use (obtained with genson.createReader(...) for ex.),
+   *               note that you are responsible of closing it.
+   * @param type to deserialize to
+   * @param <T>
+   * @return an iterator of T
+   */
   public <T> Iterator<T> deserializeValues(final ObjectReader reader, final GenericType<T> type) {
     final boolean isArray = reader.getValueType() == ValueType.ARRAY;
     if (isArray == true) {
