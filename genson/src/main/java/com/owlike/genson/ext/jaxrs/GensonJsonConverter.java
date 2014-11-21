@@ -106,8 +106,11 @@ public class GensonJsonConverter implements MessageBodyReader<Object>, MessageBo
   }
 
   private <T extends Annotation> T find(Class<T> annotationClass, Annotation[] inAnnotations) {
-    for (Annotation anno : inAnnotations)
-      if (annotationClass.isInstance(anno)) return annotationClass.cast(anno);
+    if (inAnnotations != null) {
+      for (Annotation anno : inAnnotations)
+        if (annotationClass.isInstance(anno))
+          return annotationClass.cast(anno);
+    }
     return null;
   }
 

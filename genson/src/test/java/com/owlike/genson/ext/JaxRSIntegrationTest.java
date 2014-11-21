@@ -6,10 +6,12 @@ import javax.servlet.Servlet;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -67,6 +69,26 @@ public class JaxRSIntegrationTest {
     }
   }
 
+  @Test
+  public void testResteasyThrowException() throws Exception {
+    Map<String, String> resteasy = new HashMap<String, String>();
+    resteasy.put("resteasy.scan", "true");
+    resteasy.put("javax.ws.rs.Application", RestEasyApp.class.getName());
+    startServer(HttpServletDispatcher.class, resteasy);
+    try {
+      ClientConfig cfg = new ClientConfig(GensonJsonConverter.class);
+      Client client = ClientBuilder.newClient(cfg);
+      @SuppressWarnings("unchecked")
+      Map<String, Long> map =
+        client.target("http://localhost:9999/get/throwException").request(MediaType.APPLICATION_JSON)
+          .get(Map.class);
+      assertEquals(map.get("key1"), new Long(1));
+      assertEquals(map.get("key2"), new Long(2));
+    } finally {
+      stopServer();
+    }
+  }
+
   private void testIntegration() {
     ClientConfig cfg = new ClientConfig(GensonJsonConverter.class);
     Client client = ClientBuilder.newClient(cfg);
@@ -115,6 +137,19 @@ public class JaxRSIntegrationTest {
   public static class DummyRessource {
     public DummyRessource() {
     }
+
+    @GET
+    @Path("/throwException")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Dummy throwException() {
+
+      Dummy dummy = new Dummy();
+      dummy.setKey1(1);
+      dummy.setKey2(2);
+
+      throw new WebApplicationException(Response.ok(dummy).build());
+    }
+
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
