@@ -12,12 +12,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.owlike.genson.JsonBindingException;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.commons.EmptyVisitor;
+import org.objectweb.asm.*;
 
 /**
  * This class uses ASM library to resolve method and constructor parameter names from debug symbols
@@ -125,7 +120,7 @@ public final class ASMCreatorParameterNameResolver implements PropertyNameResolv
         + " has been compiled with no debug information, so we can not deduce constructor/method parameter names.");
   }
 
-  private class ClassConstructorsVisitor extends EmptyVisitor {
+  private class ClassConstructorsVisitor extends ClassVisitor {
     private final static String CONSTRUCTOR_METHOD_NAME = "<init>";
 
     private final Class<?> forClass;
@@ -135,6 +130,7 @@ public final class ASMCreatorParameterNameResolver implements PropertyNameResolv
     public ClassConstructorsVisitor(Class<?> forClass,
                                     Map<Constructor<?>, String[]> ctrParameterNames,
                                     Map<Method, String[]> methodParameterNames) {
+      super(Opcodes.ASM5);
       this.forClass = forClass;
       this.ctrParameterNames = ctrParameterNames;
       this.methodParameterNames = methodParameterNames;
@@ -155,7 +151,7 @@ public final class ASMCreatorParameterNameResolver implements PropertyNameResolv
 
   }
 
-  private abstract class BaseMethodVisitor extends EmptyVisitor {
+  private abstract class BaseMethodVisitor extends MethodVisitor {
     protected Type[] paramTypes;
     protected ArrayList<String> paramNames;
     protected final Class<?> forClass;
@@ -163,6 +159,7 @@ public final class ASMCreatorParameterNameResolver implements PropertyNameResolv
 
     public BaseMethodVisitor(Class<?> forClass, boolean ztatic, String desc,
                              Map<Method, String[]> parameterNamesMap) {
+      super(Opcodes.ASM5);
       this.forClass = forClass;
       this.ztatic = ztatic;
       paramTypes = Type.getArgumentTypes(desc);

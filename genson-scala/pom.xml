@@ -42,9 +42,9 @@
         </dependency>
 
         <dependency>
-            <groupId>asm</groupId>
+            <groupId>org.ow2.asm</groupId>
             <artifactId>asm-commons</artifactId>
-            <version>3.3.1</version>
+            <version>5.0.3</version>
             <scope>test</scope>
         </dependency>
 
@@ -98,6 +98,7 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <sendJavaToScalac>false</sendJavaToScalac>
                     <args>
                         <arg>-target:jvm-1.6</arg>
                         <arg>-feature</arg>

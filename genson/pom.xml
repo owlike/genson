@@ -27,9 +27,9 @@
         </dependency>
 
         <dependency>
-            <groupId>asm</groupId>
+            <groupId>org.ow2.asm</groupId>
             <artifactId>asm-commons</artifactId>
-            <version>3.3.1</version>
+            <version>5.0.3</version>
             <optional>true</optional>
         </dependency>
 
@@ -224,7 +224,7 @@
 									<shadedPattern>com.owlike.genson.internal.asm</shadedPattern>
 								</relocation>
 							</relocations>
-							<shadedGroupFilter>asm</shadedGroupFilter>
+							<shadedGroupFilter>org.ow2.asm</shadedGroupFilter>
 						</configuration>
 					</execution>
 				</executions>
