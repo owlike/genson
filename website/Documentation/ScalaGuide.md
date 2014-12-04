@@ -28,8 +28,10 @@ val actualValue = fromJson[SomeType](json)
 
 ###Scala version
 
-Genson has been tested against scala 2.10 and 2.11. In theory you can use it with all releases from 2.10 and up.
-Older releases than 2.10 are not supported (and will not work).
+Genson has been tested against scala 2.11. In theory you can use it with all releases from 2.11 and up.
+It also works with scala 2.10, but at the moment we don't provide an artifact for scala 2.10. If you want
+to use Genson against 2.10 you will have to build the source code your self. If you are using/want to use Genson with scala 2.10,
+please drop an email on the user list so we can find a better way to provide a distribution for different scala versions.
 
 
 ##Download

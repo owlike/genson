@@ -35,8 +35,7 @@ public class JsonSerDeserSymetricTest {
   public void testSerDeserByteArray() throws IOException {
     Primitives expected = createPrimitives();
     List<Integer> is = Arrays.asList(1, 2);
-    genson.serialize(is, new GenericType<List<Number>>() {
-    });
+    genson.serialize(is, new GenericType<List<Number>>() {});
     byte[] json = genson.serializeBytes(expected);
     Primitives.assertComparePrimitives(expected, genson.deserialize(json, Primitives.class));
   }
