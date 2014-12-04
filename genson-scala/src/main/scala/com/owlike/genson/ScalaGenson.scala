@@ -82,7 +82,7 @@ private[genson] class ScalaParameterizedType(val ownerType: Option[JType], val r
   override def equals(other: Any): Boolean = other match {
     case that: ParameterizedType =>
       (this canEqual that) &&
-        ownerType == that.getOwnerType &&
+        ownerType.exists(_== that.getOwnerType) &&
         rawType == that.getRawType &&
         typeArgs == that.getActualTypeArguments
     case _ => false
