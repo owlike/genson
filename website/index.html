@@ -6,13 +6,14 @@ layout: home
 <div class="jumbotron">
     <div class="container">
         <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-5">
             <h1>Genson</h1>
             <p class="catch-phrase">Fast and easy to use Java <> JSON library.</p>
         </div>
-        <div class="col-md-6 space-top">
+        <div class="col-md-7 space-top">
             <a href="#download-section" class="btn btn-primary btn-lg"><i class="fa fa-cloud-download fa-med"></i> Download</a>
             <a href="https://github.com/owlike/genson" class="btn btn-primary btn-lg"><i class="fa fa-github fa-med"></i> View on Github</a>
+            <a href="{{ site.baseurl }}/GettingStarted" class="btn btn-default btn-lg">Get started <i class="fa fa-angle-double-right"></i></a>
         </div>
         </div>
     </div>
@@ -159,10 +160,10 @@ public class Bean {
                 </div>
         </div>
 
-        <div class="row">
+        <div class="row featurette-detail">
             <div class="col-lg-6">
                 <div class="text-center">
-                    <a href="http://repo1.maven.org/maven2/com/owlike/genson/{{site.latest_version}}/genson-{{site.latest_version}}.jar" class="btn">
+                    <a href="http://repo1.maven.org/maven2/com/owlike/genson/{{site.latest_version}}/genson-{{site.latest_version}}.jar" class="btn download-btn">
                         <i class="fa fa-cloud-download fa-big"></i>
                         <br>Download genson-{{site.latest_version}}.jar
                     </a>
@@ -179,6 +180,11 @@ public class Bean {
                 </div>
             </div>
         </div>
+    </div>
+    <div class="row featurette-detail">
+      <div class="col-lg-2 col-lg-offset-5">
+        <a href="{{ site.baseurl }}/GettingStarted" class="btn btn-primary btn-lg">Get started <i class="fa fa-angle-double-right"></i></a>
+      </div>
     </div>
 </div>
 </div>
