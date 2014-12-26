@@ -3,6 +3,21 @@ title: Changelog
 layout: default
 ---
 
+##Release 1.2 - 26 December 2014
+ 
+ **Genson**
+ 
+  * Issue #24 - Automatic discovery of Genson with Jersey v2
+  * Issue #26 - Iterate over sequential root json values not enclosed in an array, enabled via usePermissiveParsing
+  * Issue #28 - Avoiding NPE with Resteasy when an exception is being thrown
+  * Issue #30 - Handle primitive short and float
+  * Issue #31 - Handle primitive and boxed single byte and char
+  
+ **Genson Scala**
+ 
+  * Handling erased primitive types in generics, requires scala 2.11
+ 
+
 ##Release 1.1 - 22 September 2014
 
 "Medium" release providing new extensions, configuration and bug fixes. The API remains backwards compatible.
