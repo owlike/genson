@@ -252,17 +252,13 @@ public class JsonSerDeserSymetricTest {
   }
 
   @Test public void testRoundTripOfPojoWithPrimitiveNumbers() {
-    PojoWithPrimitiveNumbers expected = new PojoWithPrimitiveNumbers(2.1f, (short) 3);
-    String json = genson.serialize(expected);
-    assertEquals("{\"aFloat\":2.1,\"aShort\":3}", json);
-    assertEquals(expected, genson.deserialize(json, PojoWithPrimitiveNumbers.class));
+    PojoWithPrimitives expected = new PojoWithPrimitives(2.1f, (short) 3, (byte) 11, 'a');
+    assertEquals(expected, genson.deserialize(genson.serialize(expected), PojoWithPrimitives.class));
   }
 
   @Test public void testRoundTripOfPojoWithNumbers() {
-    PojoWithNumbers expected = new PojoWithNumbers(2.1f, (short) 3);
-    String json = genson.serialize(expected);
-    assertEquals("{\"aFloat\":2.1,\"aShort\":3}", json);
-    assertEquals(expected, genson.deserialize(json, PojoWithNumbers.class));
+    PojoWithBoxedPrimitives expected = new PojoWithBoxedPrimitives(2.1f, (short) 3, 'a', Byte.MAX_VALUE);
+    assertEquals(expected, genson.deserialize(genson.serialize(expected), PojoWithBoxedPrimitives.class));
   }
 
   public class InnerClass {
@@ -321,13 +317,17 @@ public class JsonSerDeserSymetricTest {
     }
   }
 
-  public static class PojoWithNumbers {
+  public static class PojoWithBoxedPrimitives {
     public final Float aFloat;
     public final Short aShort;
+    public final Character aChar;
+    public final Byte aByte;
 
-    public PojoWithNumbers(Float aFloat, Short aShort) {
+    public PojoWithBoxedPrimitives(Float aFloat, Short aShort, Character aChar, Byte aByte) {
       this.aFloat = aFloat;
       this.aShort = aShort;
+      this.aChar = aChar;
+      this.aByte = aByte;
     }
 
     @Override
@@ -335,7 +335,7 @@ public class JsonSerDeserSymetricTest {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
 
-      PojoWithNumbers that = (PojoWithNumbers) o;
+      PojoWithBoxedPrimitives that = (PojoWithBoxedPrimitives) o;
 
       if (aFloat != null ? !aFloat.equals(that.aFloat) : that.aFloat != null) return false;
       if (aShort != null ? !aShort.equals(that.aShort) : that.aShort != null) return false;
@@ -344,13 +344,17 @@ public class JsonSerDeserSymetricTest {
     }
   }
 
-  public static class PojoWithPrimitiveNumbers {
+  public static class PojoWithPrimitives {
     public final float aFloat;
     public final short aShort;
+    public final byte aByte;
+    public final char aChar;
 
-    public PojoWithPrimitiveNumbers(float aFloat, short aShort) {
+    public PojoWithPrimitives(float aFloat, short aShort, byte aByte, char aChar) {
       this.aFloat = aFloat;
       this.aShort = aShort;
+      this.aByte = aByte;
+      this.aChar = aChar;
     }
 
     @Override
@@ -358,7 +362,7 @@ public class JsonSerDeserSymetricTest {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
 
-      PojoWithPrimitiveNumbers that = (PojoWithPrimitiveNumbers) o;
+      PojoWithPrimitives that = (PojoWithPrimitives) o;
 
       if (Float.compare(that.aFloat, aFloat) != 0) return false;
       if (aShort != that.aShort) return false;

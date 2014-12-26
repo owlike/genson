@@ -825,6 +825,8 @@ public class GensonBuilder {
     converters.add(DefaultConverters.ShortConverter.instance);
     converters.add(DefaultConverters.FloatConverter.instance);
     converters.add(DefaultConverters.NumberConverter.instance);
+    converters.add(DefaultConverters.CharConverter.instance);
+    converters.add(DefaultConverters.ByteConverter.instance);
     converters.add(new DefaultConverters.DateConverter(dateFormat, useDateAsTimestamp));
     converters.add(DefaultConverters.URLConverter.instance);
     converters.add(DefaultConverters.URIConverter.instance);

@@ -229,8 +229,6 @@ public final class DefaultConverters {
     }
   }
 
-  ;
-
   @HandleClassMetadata
   public static class ArrayConverter<E> implements Converter<Object> {
     private final Class<E> eClass;
@@ -350,8 +348,6 @@ public final class DefaultConverters {
     }
   }
 
-  ;
-
   @HandleClassMetadata
   @HandleBeanView
   public final static class StringConverter implements Converter<String> {
@@ -368,8 +364,6 @@ public final class DefaultConverters {
       return reader.valueAsString();
     }
   }
-
-  ;
 
   @HandleClassMetadata
   @HandleBeanView
@@ -392,8 +386,6 @@ public final class DefaultConverters {
     }
   }
 
-  ;
-
   @HandleClassMetadata
   @HandleBeanView
   public final static class IntegerConverter implements Converter<Integer> {
@@ -414,8 +406,6 @@ public final class DefaultConverters {
       return reader.valueAsInt();
     }
   }
-
-  ;
 
   @HandleClassMetadata
   @HandleBeanView
@@ -438,8 +428,6 @@ public final class DefaultConverters {
     }
   }
 
-  ;
-
   @HandleClassMetadata
   @HandleBeanView
   public final static class ShortConverter implements Converter<Short> {
@@ -460,8 +448,6 @@ public final class DefaultConverters {
       writer.writeValue(obj.shortValue());
     }
   }
-
-  ;
 
   @HandleClassMetadata
   @HandleBeanView
@@ -484,8 +470,6 @@ public final class DefaultConverters {
     }
   }
 
-  ;
-
   @HandleClassMetadata
   @HandleBeanView
   public final static class FloatConverter implements Converter<Float> {
@@ -506,8 +490,6 @@ public final class DefaultConverters {
       writer.writeValue(obj.floatValue());
     }
   }
-
-  ;
 
   @HandleClassMetadata
   @HandleBeanView
@@ -550,7 +532,49 @@ public final class DefaultConverters {
     }
   }
 
-  ;
+  @HandleClassMetadata
+  @HandleBeanView
+  public final static class CharConverter implements Converter<Character> {
+    public final static CharConverter instance = new CharConverter();
+
+    private CharConverter() {
+    }
+
+    public void serialize(Character obj, ObjectWriter writer, Context ctx) {
+      writer.writeValue(obj.toString());
+    }
+
+    public Character deserialize(ObjectReader reader, Context ctx) {
+      String str = reader.valueAsString();
+      if (str.length() > 1) throw new JsonBindingException(
+        "Could not convert a string with length greater than 1 to a single char."
+      );
+
+      return str.charAt(0);
+    }
+  }
+
+  @HandleClassMetadata
+  @HandleBeanView
+  public final static class ByteConverter implements Converter<Byte> {
+    public final static ByteConverter instance = new ByteConverter();
+
+    private ByteConverter() {
+    }
+
+    public void serialize(Byte obj, ObjectWriter writer, Context ctx) {
+      writer.writeValue(new byte[]{obj.byteValue()});
+    }
+
+    public Byte deserialize(ObjectReader reader, Context ctx) {
+      byte[] bytes = reader.valueAsByteArray();
+      if (bytes.length > 1) throw new JsonBindingException(
+        "Could not convert a byte array with length greater than 1 to a single byte."
+      );
+
+      return bytes[0];
+    }
+  }
 
   public final static class PrimitiveConverterFactory implements Factory<Converter<?>> {
     public final static PrimitiveConverterFactory instance = new PrimitiveConverterFactory();
@@ -567,6 +591,8 @@ public final class DefaultConverters {
         if (rawClass.equals(long.class)) return longConverter.instance;
         if (rawClass.equals(short.class)) return ShortConverter.instance;
         if (rawClass.equals(float.class)) return FloatConverter.instance;
+        if (rawClass.equals(char.class)) return CharConverter.instance;
+        if (rawClass.equals(byte.class)) return ByteConverter.instance;
       }
       return null;
     }
@@ -589,8 +615,6 @@ public final class DefaultConverters {
       }
     }
 
-    ;
-
     @HandleClassMetadata
     @HandleNull
     @HandleBeanView
@@ -608,8 +632,6 @@ public final class DefaultConverters {
         return reader.valueAsInt();
       }
     }
-
-    ;
 
     @HandleClassMetadata
     @HandleNull
@@ -629,8 +651,6 @@ public final class DefaultConverters {
       }
     }
 
-    ;
-
     @HandleClassMetadata
     @HandleNull
     @HandleBeanView
@@ -648,11 +668,7 @@ public final class DefaultConverters {
         return reader.valueAsLong();
       }
     }
-
-    ;
   }
-
-  ;
 
   @HandleClassMetadata
   public static abstract class MapConverter<K, V> implements Converter<Map<K, V>> {

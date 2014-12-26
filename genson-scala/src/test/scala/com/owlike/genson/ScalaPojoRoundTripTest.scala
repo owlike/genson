@@ -5,6 +5,11 @@ import defaultGenson._
 
 class ScalaPojoRoundTripTest extends FunSuite with Matchers {
 
+  test("poso with scala primitives should be same after round trip") {
+    val expected = PosoWithPrimitives(1, 2.3f, Byte.MinValue, 'o')
+    fromJson[PosoWithPrimitives](toJson(expected)) should be (expected)
+  }
+
   test("should serialize correctly case class containing a property of type Any") {
     val expected = "{\"any\":1,\"anyRef\":{\"aInt\":2},\"anyVal\":3}"
     toJson(CaseClassWithAny(1, BaseClass(2), 3)) should be (expected)
