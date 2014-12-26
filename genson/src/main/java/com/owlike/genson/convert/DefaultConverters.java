@@ -565,6 +565,8 @@ public final class DefaultConverters {
         if (rawClass.equals(int.class)) return intConverter.instance;
         if (rawClass.equals(double.class)) return doubleConverter.instance;
         if (rawClass.equals(long.class)) return longConverter.instance;
+        if (rawClass.equals(short.class)) return ShortConverter.instance;
+        if (rawClass.equals(float.class)) return FloatConverter.instance;
       }
       return null;
     }

@@ -251,6 +251,20 @@ public class JsonSerDeserSymetricTest {
     assertEquals(jacksonContent, gensonContent);
   }
 
+  @Test public void testRoundTripOfPojoWithPrimitiveNumbers() {
+    PojoWithPrimitiveNumbers expected = new PojoWithPrimitiveNumbers(2.1f, (short) 3);
+    String json = genson.serialize(expected);
+    assertEquals("{\"aFloat\":2.1,\"aShort\":3}", json);
+    assertEquals(expected, genson.deserialize(json, PojoWithPrimitiveNumbers.class));
+  }
+
+  @Test public void testRoundTripOfPojoWithNumbers() {
+    PojoWithNumbers expected = new PojoWithNumbers(2.1f, (short) 3);
+    String json = genson.serialize(expected);
+    assertEquals("{\"aFloat\":2.1,\"aShort\":3}", json);
+    assertEquals(expected, genson.deserialize(json, PojoWithNumbers.class));
+  }
+
   public class InnerClass {
     private final int value;
 
@@ -288,9 +302,8 @@ public class JsonSerDeserSymetricTest {
         : "Mrs".equalsIgnoreCase(p.civility) ? "F" : "UNKNOWN";
     }
 
-    public
     @JsonProperty(value = "name")
-    String getNameOf(Person p) {
+    public String getNameOf(Person p) {
       return p.name;
     }
 
@@ -305,6 +318,57 @@ public class JsonSerDeserSymetricTest {
     @JsonProperty(value = "age")
     public void setBirthYear(int personBirthYear, Person p) {
       p.birthYear = GregorianCalendar.getInstance().get(Calendar.YEAR) - personBirthYear;
+    }
+  }
+
+  public static class PojoWithNumbers {
+    public final Float aFloat;
+    public final Short aShort;
+
+    public PojoWithNumbers(Float aFloat, Short aShort) {
+      this.aFloat = aFloat;
+      this.aShort = aShort;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+
+      PojoWithNumbers that = (PojoWithNumbers) o;
+
+      if (aFloat != null ? !aFloat.equals(that.aFloat) : that.aFloat != null) return false;
+      if (aShort != null ? !aShort.equals(that.aShort) : that.aShort != null) return false;
+
+      return true;
+    }
+  }
+
+  public static class PojoWithPrimitiveNumbers {
+    public final float aFloat;
+    public final short aShort;
+
+    public PojoWithPrimitiveNumbers(float aFloat, short aShort) {
+      this.aFloat = aFloat;
+      this.aShort = aShort;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+
+      PojoWithPrimitiveNumbers that = (PojoWithPrimitiveNumbers) o;
+
+      if (Float.compare(that.aFloat, aFloat) != 0) return false;
+      if (aShort != that.aShort) return false;
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      return 0;
     }
   }
 
