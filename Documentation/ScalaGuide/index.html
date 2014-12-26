@@ -2,12 +2,15 @@
 <html lang="en" itemscope itemtype="http://schema.org/Product">
 <head>
     <meta charset="utf-8">
-    <title>Genson</title>
+    <title>Scala User Guide Genson - Fast and easy to use Java and Scala to Json conversion library</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Fast & easy to use Java <> Json library">
+    <meta name="description" content="Genson, fast and easy to use library converting Java and Scala to Json and vice versa.">
+    <meta name="keywords" content="java json, scala json, jersey json, convert json java, android json
+    , json web service, json databind, json streaming">
+    <meta name="author" content="Eugen Cepoi">
 
     <meta itemprop="name" content="Genson">
-    <meta itemprop="description" content="Fast & easy to use Java <> Json library">
+    <meta itemprop="description" content="Genson, fast and easy to use library converting Java and Scala to Json and vice versa.">
 
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
 
@@ -204,8 +207,10 @@ and you are done!</p>
 
 <h3 id="scala-version">Scala version</h3>
 
-<p>Genson has been tested against scala 2.10 and 2.11. In theory you can use it with all releases from 2.10 and up.
-It should not work with 2.9 as we use some features that appeared in 2.10.</p>
+<p>Genson has been tested against scala 2.11. In theory you can use it with all releases from 2.11 and up.
+It also works with scala 2.10, but at the moment we don’t provide an artifact for scala 2.10. If you want
+to use Genson against 2.10 you will have to build the source code your self. If you are using/want to use Genson with scala 2.10,
+please drop an email on the user list so we can find a better way to provide a distribution for different scala versions.</p>
 
 <h2 id="download">Download</h2>
 
@@ -215,14 +220,14 @@ the Scala extension could end up with the scala language library downloaded.</p>
 
 <h3 id="sbt">SBT</h3>
 
-<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">&quot;com.owlike&quot;</span> <span class="o">%</span> <span class="s">&quot;genson-scala&quot;</span> <span class="o">%</span> <span class="s">&quot;1.1&quot;</span></code></pre></div>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">&quot;com.owlike&quot;</span> <span class="o">%</span> <span class="s">&quot;genson-scala&quot;</span> <span class="o">%</span> <span class="s">&quot;1.2&quot;</span></code></pre></div>
 
 <h3 id="maven">Maven</h3>
 
 <div class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="nt">&lt;dependency&gt;</span>
 	<span class="nt">&lt;groupId&gt;</span>com.owlike<span class="nt">&lt;/groupId&gt;</span>
 	<span class="nt">&lt;artifactId&gt;</span>genson-scala<span class="nt">&lt;/artifactId&gt;</span>
-	<span class="nt">&lt;version&gt;</span>1.1<span class="nt">&lt;/version&gt;</span>
+	<span class="nt">&lt;version&gt;</span>1.2<span class="nt">&lt;/version&gt;</span>
 <span class="nt">&lt;/dependency&gt;</span></code></pre></div>
 
 <h3 id="manual-download">Manual Download</h3>
@@ -231,8 +236,8 @@ the Scala extension could end up with the scala language library downloaded.</p>
 the core Genson jars by hand.</p>
 
 <ul>
-  <li><a href="http://repo1.maven.org/maven2/com/owlike/genson/1.1/genson-1.1.jar">Genson</a></li>
-  <li><a href="http://repo1.maven.org/maven2/com/owlike/genson-scala/1.1/genson-scala-1.1.jar">Genson-scala</a></li>
+  <li><a href="http://repo1.maven.org/maven2/com/owlike/genson/1.2/genson-1.2.jar">Genson</a></li>
+  <li><a href="http://repo1.maven.org/maven2/com/owlike/genson-scala/1.2/genson-scala-1.2.jar">Genson-scala</a></li>
 </ul>
 
 <h2 id="collections--tuples">Collections &amp; Tuples</h2>

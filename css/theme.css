@@ -120,16 +120,18 @@ header:after {
 
 .jumbotron .btn {
     margin-bottom: 10px;
-    width: 210px;
-
+    width: 200px;
     background-image: none !important;
+}
+
+.jumbotron .btn-primary {
     background-color: rgba(0, 0, 0, 0);
     border-color: white;
     color: #FFFFFF;
     box-shadow: 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
-.jumbotron .btn:hover, .jumbotron .btn:active, .jumbotron .btn:focus {
+.jumbotron .btn-primary:hover, .jumbotron .btn-primary:active, .jumbotron .btn-primary:focus {
     background-color: rgba(59,125,181, 0.9);
 }
 
@@ -137,7 +139,7 @@ header:after {
     padding-top: 30px;
 }
 
-.promotion-details .btn:hover, .promotion-details .btn:focus, .promotion-details .btn:active {
+.download-btn:hover, .download-btn:focus, .download-btn:active {
     color: #5695da;
     box-shadow: none;
 }

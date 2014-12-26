@@ -2,12 +2,15 @@
 <html lang="en" itemscope itemtype="http://schema.org/Product">
 <head>
     <meta charset="utf-8">
-    <title>Genson</title>
+    <title>Extensions Genson - Fast and easy to use Java and Scala to Json conversion library</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Fast & easy to use Java <> Json library">
+    <meta name="description" content="Genson, fast and easy to use library converting Java and Scala to Json and vice versa.">
+    <meta name="keywords" content="java json, scala json, jersey json, convert json java, android json
+    , json web service, json databind, json streaming">
+    <meta name="author" content="Eugen Cepoi">
 
     <meta itemprop="name" content="Genson">
-    <meta itemprop="description" content="Fast & easy to use Java <> Json library">
+    <meta itemprop="description" content="Genson, fast and easy to use library converting Java and Scala to Json and vice versa.">
 
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
 
@@ -227,29 +230,21 @@ The implementation will detect it and use Genson for json conversions.</p>
 
 <ul>
   <li>By default Genson JAX-RS integration enables JAXB annotations support.</li>
-  <li>Starting with Jersey 2.9, automatic discovery is disabled, at the moment you have two solutions to make it work:</li>
 </ul>
 
-<p>1) Enable it programmatically (preferred way).</p>
+<h3 id="manual-registration">Manual registration</h3>
 
-<p>On the server side:</p>
+<p>You can also manually register Genson in Jersey.
+On the server side:</p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">final</span> <span class="n">ResourceConfig</span> <span class="n">config</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">ResourceConfig</span><span class="o">().</span><span class="na">register</span><span class="o">(</span><span class="n">GensonJsonConverter</span><span class="o">.</span><span class="na">class</span><span class="o">);</span></code></pre></div>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="c1">// Note that you can also provide an instance of GensonJsonConverter.</span>
+<span class="kd">final</span> <span class="n">ResourceConfig</span> <span class="n">config</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">ResourceConfig</span><span class="o">().</span><span class="na">register</span><span class="o">(</span><span class="n">GensonJsonConverter</span><span class="o">.</span><span class="na">class</span><span class="o">);</span></code></pre></div>
 
 <p>On the client side:</p>
 
 <div class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">final</span> <span class="n">ClientConfig</span> <span class="n">clientConfig</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">ClientConfig</span><span class="o">().</span><span class="na">register</span><span class="o">(</span><span class="n">GensonJsonConverter</span><span class="o">.</span><span class="na">class</span><span class="o">);</span></code></pre></div>
 
-<p>Adding a customized Genson instance can be achieved through the same registeration mechanism.</p>
-
-<p>2) In order to detect it automatically like in previous versions you can add a dependency to jersey-metainf-services
- (I discourage this option as the jersey-metainf-services package seems to be there only for backwards compatibility).</p>
-
-<div class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="nt">&lt;dependency&gt;</span>
-  <span class="nt">&lt;groupId&gt;</span>org.glassfish.jersey.ext<span class="nt">&lt;/groupId&gt;</span>
-  <span class="nt">&lt;artifactId&gt;</span>jersey-metainf-services<span class="nt">&lt;/artifactId&gt;</span>
-  <span class="nt">&lt;version&gt;</span>your_version<span class="nt">&lt;/version&gt;</span>
-<span class="nt">&lt;/dependency&gt;</span></code></pre></div>
+<p>Adding a customized Genson instance can be achieved through the same registration mechanism.</p>
 
 <h3 id="customization">Customization</h3>
 <p>In many cases you might want to customize Genson instance.
