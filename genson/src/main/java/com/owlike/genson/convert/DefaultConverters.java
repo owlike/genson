@@ -563,16 +563,11 @@ public final class DefaultConverters {
     }
 
     public void serialize(Byte obj, ObjectWriter writer, Context ctx) {
-      writer.writeValue(new byte[]{obj.byteValue()});
+      writer.writeValue(obj.byteValue());
     }
 
     public Byte deserialize(ObjectReader reader, Context ctx) {
-      byte[] bytes = reader.valueAsByteArray();
-      if (bytes.length > 1) throw new JsonBindingException(
-        "Could not convert a byte array with length greater than 1 to a single byte."
-      );
-
-      return bytes[0];
+      return (byte) reader.valueAsInt();
     }
   }
 
