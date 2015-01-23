@@ -1,15 +1,6 @@
 package com.owlike.genson;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.Writer;
+import java.io.*;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.util.*;
@@ -82,6 +73,8 @@ public final class Genson {
   private final boolean failOnMissingProperty;
 
   private final static Charset UTF8_CHARSET = Charset.forName("UTF-8");
+
+  private final EncodingAwareReaderFactory readerFactory = new EncodingAwareReaderFactory();
 
   /**
    * The default constructor will use the default configuration provided by the {@link GensonBuilder}.
@@ -550,18 +543,26 @@ public final class Genson {
   }
 
   /**
-   * Creates a new ObjectWriter with this Genson instance configuration.
+   * @see #createReader(java.io.InputStream)
    */
   public ObjectReader createReader(byte[] in) {
-    return createReader(new ByteArrayInputStream(in));
+    try {
+      return createReader(readerFactory.createReader(new ByteArrayInputStream(in)));
+    } catch (IOException e) {
+      throw new JsonStreamException("Failed to detect encoding.", e);
+    }
   }
 
   /**
-   * Creates a new ObjectReader with this Genson instance configuration and default encoding to
-   * UTF8.
+   * Creates a new ObjectReader with this Genson instance configuration and tries to detect the encoding
+   * from the stream content.
    */
   public ObjectReader createReader(InputStream is) {
-    return createReader(is, UTF8_CHARSET);
+    try {
+      return createReader(readerFactory.createReader(is));
+    } catch (IOException e) {
+      throw new JsonStreamException("Failed to detect encoding.", e);
+    }
   }
 
   /**
