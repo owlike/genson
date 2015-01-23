@@ -82,9 +82,9 @@ public class GensonJsonConverter implements MessageBodyReader<Object>, MessageBo
     Genson genson = getInstance(type);
     String charset = mediaType.getParameters().get("charset");
     if (charset == null) charset = "UTF-8";
-    if (charset != "UTF-8"
-      && charset != "UTF-16BE" && charset != "UTF-16LE"
-      && charset != "UTF-32BE" && charset != "UTF-32LE")
+    if (!charset.equalsIgnoreCase("UTF-8")
+      && !charset.equalsIgnoreCase("UTF-16BE") && !charset.equalsIgnoreCase("UTF-16LE")
+      && !charset.equalsIgnoreCase("UTF-32BE") && !charset.equalsIgnoreCase("UTF-32LE"))
       throw new UnsupportedEncodingException("JSON spec allows only UTF-8/16/32 encodings.");
 
     ObjectWriter writer = genson.createWriter(new OutputStreamWriter(entityStream, charset));
