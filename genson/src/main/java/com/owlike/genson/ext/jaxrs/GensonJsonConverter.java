@@ -1,10 +1,6 @@
 package com.owlike.genson.ext.jaxrs;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Arrays;
@@ -84,7 +80,14 @@ public class GensonJsonConverter implements MessageBodyReader<Object>, MessageBo
                       MediaType mediaType, MultivaluedMap<String, Object> httpHeaders,
                       OutputStream entityStream) throws IOException, WebApplicationException {
     Genson genson = getInstance(type);
-    ObjectWriter writer = genson.createWriter(new OutputStreamWriter(entityStream, "UTF-8"));
+    String charset = mediaType.getParameters().get("charset");
+    if (charset == null) charset = "UTF-8";
+    if (charset != "UTF-8"
+      && charset != "UTF-16BE" && charset != "UTF-16LE"
+      && charset != "UTF-32BE" && charset != "UTF-32LE")
+      throw new UnsupportedEncodingException("JSON spec allows only UTF-8/16/32 encodings.");
+
+    ObjectWriter writer = genson.createWriter(new OutputStreamWriter(entityStream, charset));
     try {
       genson.serialize(t, rawIfNullGenericType(type, genericType), writer, createContext(annotations, genson));
       writer.flush();
@@ -124,7 +127,7 @@ public class GensonJsonConverter implements MessageBodyReader<Object>, MessageBo
                          InputStream entityStream) throws IOException, WebApplicationException {
     try {
       Genson genson = getInstance(type);
-      ObjectReader reader = genson.createReader(new InputStreamReader(entityStream, "UTF-8"));
+      ObjectReader reader = genson.createReader(entityStream);
       return genson.deserialize(GenericType.of(rawIfNullGenericType(type, genericType)), reader, createContext(annotations, genson));
     } catch (JsonBindingException e) {
       throw new WebApplicationException(e);
