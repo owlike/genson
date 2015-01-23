@@ -1,15 +1,14 @@
 package com.owlike.genson.ext.jsr353;
 
+import com.owlike.genson.EncodingAwareReaderFactory;
+
 import javax.json.*;
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
 
 import static javax.json.stream.JsonParser.Event.*;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.Map;
@@ -17,6 +16,7 @@ import java.util.Map;
 public class GensonJsonReaderFactory implements javax.json.JsonReaderFactory {
   private final GensonJsonParserFactory parserFactory;
   private final GensonJsonBuilderFactory builderFactory;
+  private final EncodingAwareReaderFactory encodingAwareReaderFactory = new EncodingAwareReaderFactory();
 
   public GensonJsonReaderFactory() {
     this(Collections.<String, Object>emptyMap());
@@ -177,9 +177,9 @@ public class GensonJsonReaderFactory implements javax.json.JsonReaderFactory {
   @Override
   public JsonReader createReader(InputStream in) {
     try {
-      return createReader(new InputStreamReader(in, "UTF-8"));
-    } catch (UnsupportedEncodingException e) {
-      throw new JsonException("Charset UTF-8 is not supported.", e);
+      return createReader(encodingAwareReaderFactory.createReader(in));
+    } catch (IOException e) {
+      throw new JsonException("Failed to detect encoding.", e);
     }
   }
 

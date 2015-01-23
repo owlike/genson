@@ -6,16 +6,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.json.JsonArray;
+import javax.json.JsonException;
 import javax.json.JsonObject;
 import javax.json.JsonStructure;
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParserFactory;
 
+import com.owlike.genson.EncodingAwareReaderFactory;
 import com.owlike.genson.stream.JsonReader;
 import com.owlike.genson.stream.JsonWriter;
 
 public class GensonJsonParserFactory implements JsonParserFactory {
   private final boolean strictDoubleParse;
+  private final EncodingAwareReaderFactory encodingAwareReaderFactory = new EncodingAwareReaderFactory();
 
   public GensonJsonParserFactory() {
     strictDoubleParse = false;
@@ -32,7 +35,13 @@ public class GensonJsonParserFactory implements JsonParserFactory {
 
   @Override
   public JsonParser createParser(InputStream in) {
-    return new GensonJsonParser(new JsonReader(new InputStreamReader(in), strictDoubleParse, false, false));
+
+    try {
+      return new GensonJsonParser(new JsonReader(encodingAwareReaderFactory.createReader(in)
+        , strictDoubleParse, false, false));
+    } catch (IOException e) {
+      throw new JsonException("Failed to detect encoding");
+    }
   }
 
   @Override

@@ -4,10 +4,9 @@ import java.io.*;
 
 /**
  * This is an internal class that might evolve in the future into a JsonReader Factory and be moved
- * to the stream package. For the moment we restrict its visibility in order to prevent external use
- * and make future changes easier.
+ * to the stream package.
  */
-final class EncodingAwareReaderFactory {
+public final class EncodingAwareReaderFactory {
 
   static enum UTFEncoding {
     UTF_32BE(4), UTF_32LE(4), UTF_16BE(2), UTF_16LE(2), UTF_8(1), UNKNOWN(-1);
@@ -34,7 +33,7 @@ final class EncodingAwareReaderFactory {
    * @throws IOException
    * @throws UnsupportedEncodingException
    */
-  Reader createReader(InputStream is) throws IOException {
+  public Reader createReader(InputStream is) throws IOException {
     byte[] bytes = new byte[4];
     int len = fetchBytes(bytes, is);
 
