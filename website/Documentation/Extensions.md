@@ -50,6 +50,18 @@ Actually it has been tested with Jersey and Resteasy. It works out of the box.
 
  - By default Genson JAX-RS integration enables JAXB annotations support.
 
+###Disabling Genson in Jersey 2###
+
+ In Jersey 2+ Genson can be disabled by setting jersey.genson.disable property 
+ to true on your client/server configuration.
+
+{% highlight java %}
+// client
+ClientBuilder.newClient(new ClientConfig().property("jersey.genson.disable", true));
+// server
+new ResourceConfig().property("jersey.genson.disable", true);
+{% endhighlight %}
+
 
 ###Manual registration###
 
@@ -71,7 +83,7 @@ Adding a customized Genson instance can be achieved through the same registratio
 
 ###Customization###
 In many cases you might want to customize Genson instance.
-To do that use GensonBuilder to create a custom instance and then inject it with ContextResolver.
+To do that use GensonBuilder to create a custom instance and then provide it by implementing ContextResolver.
 
 {% highlight java %}
 @Provider
