@@ -1008,10 +1008,12 @@ public final class DefaultConverters {
 
     public Date deserialize(ObjectReader reader, Context ctx) {
       try {
-        if (asTimeInMillis)
+        ValueType valueType = reader.getValueType();
+        if (valueType == ValueType.INTEGER)
           return new Date(reader.valueAsLong());
-        else
+        else if (valueType == ValueType.STRING)
           return read(reader.valueAsString());
+        else throw new JsonBindingException(String.format("Can not deserialize type %s to Date, only numeric and string accepted.", valueType));
       } catch (ParseException e) {
         throw new JsonBindingException("Could not parse date " + reader.valueAsString(),
           e);
@@ -1219,6 +1221,8 @@ public final class DefaultConverters {
     }
   }
 
+  @HandleClassMetadata
+  @HandleBeanView
   public static class CalendarConverter implements Converter<Calendar> {
     private final DateConverter dateConverter;
 

@@ -164,7 +164,17 @@ public class DefaultConvertersTest {
     String json = genson.serialize(date);
     Date dateDeserialized = genson.deserialize(json, Date.class);
     assertEquals(date.toString(), dateDeserialized.toString());
+  }
 
+  @Test public void dateConverterShouldAcceptStringAndNumeric() {
+    long now = System.currentTimeMillis();
+
+    Date date1 = genson.deserialize(""+now, Date.class);
+    assertEquals(now, date1.getTime());
+
+    String strDate = SimpleDateFormat.getDateInstance().format(new Date(now));
+    Date date2 = genson.deserialize(String.format("\"%s\"", strDate), Date.class);
+    assertEquals(strDate, SimpleDateFormat.getDateInstance().format(date2));
   }
 
   @Test
