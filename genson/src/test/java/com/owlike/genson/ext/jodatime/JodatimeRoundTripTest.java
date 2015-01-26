@@ -2,6 +2,7 @@ package com.owlike.genson.ext.jodatime;
 
 import com.owlike.genson.Genson;
 import com.owlike.genson.GensonBuilder;
+import com.owlike.genson.annotation.JsonDateFormat;
 import org.joda.time.*;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -71,5 +72,19 @@ public class JodatimeRoundTripTest {
     String json = genson.serialize(interval);
     Assert.assertEquals("{\"start\":\"2014/01/01\",\"end\":\"2014/01/02\"}", json);
     Assert.assertEquals(interval, genson.deserialize(json, Interval.class));
+  }
+
+  @Test public void testJsonDateFormatAnnotationShouldBeUsed() {
+    PojoWithCustomDateFormat pojo = new PojoWithCustomDateFormat();
+    pojo.dateTime = DateTime.now().withYear(2010);
+
+    String json = genson.serialize(pojo);
+    Assert.assertEquals("{\"dateTime\":\"2010\"}", json);
+    Assert.assertEquals(2010, genson.deserialize(json, PojoWithCustomDateFormat.class).dateTime.getYear());
+  }
+
+  static class PojoWithCustomDateFormat {
+    @JsonDateFormat("yyyy")
+    public DateTime dateTime;
   }
 }

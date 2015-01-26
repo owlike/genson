@@ -14,23 +14,19 @@ public class JodaTimeBundle extends GensonBundle {
 
   @Override
   public void configure(GensonBuilder builder) {
-    ReadableInstantSer readableInstantSer = new ReadableInstantSer(builder.isDateAsTimestamp(), formatter);
-
-    builder.withSerializer(readableInstantSer, DateTime.class)
-      .withSerializer(readableInstantSer, MutableDateTime.class)
-      .withSerializer(readableInstantSer, Instant.class)
+    builder.withContextualFactory(new ReadableDateTimeConverterContextualFactory(formatter))
       .withConverters(new DurationConverter(), new PeriodConverter())
       .withConverterFactory(new IntervalConverter.ConverterFactory());
 
-    setupAndRegister(builder, ReadableInstantSerDe.readableInstantDesers());
+    setupAndRegister(builder, ReadableInstantSerDe.readableInstantConverters());
   }
 
-  protected void setupAndRegister(GensonBuilder builder, List<ReadableInstantDeser<? extends ReadableInstant>> desers) {
-    for (ReadableInstantDeser<? extends ReadableInstant> deser : desers) {
-      deser.setDateAsMillis(builder.isDateAsTimestamp());
-      deser.setFormatter(formatter);
+  protected void setupAndRegister(GensonBuilder builder, List<ReadableInstantConverter<? extends ReadableInstant>> converters) {
+    for (ReadableInstantConverter<? extends ReadableInstant> converter : converters) {
+      converter.setDateAsMillis(builder.isDateAsTimestamp());
+      converter.setFormatter(formatter);
 
-      builder.withDeserializers(deser);
+      builder.withConverters(converter);
     }
   }
 
@@ -38,5 +34,4 @@ public class JodaTimeBundle extends GensonBundle {
     this.formatter = formatter;
     return this;
   }
-
 }

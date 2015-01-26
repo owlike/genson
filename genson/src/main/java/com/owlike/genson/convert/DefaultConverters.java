@@ -968,7 +968,9 @@ public final class DefaultConverters {
       if (ann != null) {
         Locale locale = ann.lang().isEmpty() ? Locale.getDefault() : new Locale(
           ann.lang());
-        SimpleDateFormat dateFormat = new SimpleDateFormat(ann.value(), locale);
+        DateFormat dateFormat = ann.value() != null && !ann.value().isEmpty() ?
+          new SimpleDateFormat(ann.value(), locale) : SimpleDateFormat.getInstance();
+
         if (Date.class.isAssignableFrom(property.getRawClass()))
           return new DateConverter(dateFormat, ann.asTimeInMillis());
         if (Calendar.class.isAssignableFrom(property.getRawClass()))
