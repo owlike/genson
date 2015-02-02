@@ -4,6 +4,8 @@ import com.owlike.genson.Context;
 import com.owlike.genson.Converter;
 import com.owlike.genson.Factory;
 import com.owlike.genson.Genson;
+import com.owlike.genson.annotation.HandleBeanView;
+import com.owlike.genson.annotation.HandleClassMetadata;
 import com.owlike.genson.stream.ObjectReader;
 import com.owlike.genson.stream.ObjectWriter;
 import org.joda.time.DateTime;
@@ -11,6 +13,7 @@ import org.joda.time.Interval;
 
 import java.lang.reflect.Type;
 
+@HandleBeanView
 public class IntervalConverter implements Converter<Interval> {
 
   public static class ConverterFactory implements Factory<Converter<Interval>> {

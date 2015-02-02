@@ -190,32 +190,31 @@ Genson provides JodaTimeBundle enabling joda-time types support.
 Genson genson = new GensonBuilder().withBundle(new JodaTimeBundle()).create();
 {% endhighlight %}
 
-By default dates are being ser/de using {% highlight java nowrap %}ISODateTimeFormat.dateTime(){% endhighlight %} formatter.
+By default subclasses of ReadableInstant are being ser/de using {% highlight java nowrap %}ISODateTimeFormat.dateTime(){% endhighlight %} formatter.
 You can change it and use another formatter. However take care, that this formatter will be used for serialization and deserialization,
 thus it must support the methods **print** and **parse**.
 
 {% highlight java %}
 DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy/MM/dd");
 Genson genson = new GensonBuilder()
-  .withBundle(new JodaTimeBundle().useDateFormatter(formatter))
+  .useDateAsTimestamp(false)
+  .withBundle(new JodaTimeBundle().useDateTimeFormatter(formatter))
   .create();
 {% endhighlight %}
 
+LocalDate/DateTime/Time are serialized using their ISODateTimeFormat.date/dateTime/time formats with default DateTimeZone.
+However LocalDateTime and LocalTime are being deserialized using localDateOptionalTimeParser and localTimeParser.
+In most cases you won't need to configure the deserialization format for these types.
 
-Or ser/de dates as timestamps, in that case you configure it at the builder level, like for classic Java Dates.
 
-{% highlight java %}
-Genson genson = new GensonBuilder()
-  .useDateAsTimestamp(true)
-  .withBundle(new JodaTimeBundle())
-  .create();
-{% endhighlight %}
+JsonDateFormat annotation can also be used with DateTime, MutableDateTime, LocalDate, LocalDateTime and LocalTime classes.
 
 ###Supported types###
 
 Main Joda Time types are supported at the moment, if some are missing feel free to open an issue or even better, make a pull request :)
 
 * Implementations of ReadableInstant such as DateTime, Instant and MutableDateTime.
+* LocalDate, LocalDateTime and LocalTime
 * Interval as an object containing two keys start and end, using the configured DateTimeFormatter or timestamps.
 * Period is ser/de using {% highlight java nowrap %}ISOPeriodFormat.standard(){% endhighlight %}.
 * Duration is ser/de as a long representing the duration in milliseconds.
