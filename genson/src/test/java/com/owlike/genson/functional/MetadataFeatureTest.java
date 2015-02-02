@@ -23,8 +23,7 @@ public class MetadataFeatureTest {
   public void testSerializeUnknownType() {
     Bean bean = new Bean();
     bean.value = new Date();
-    String dateFormated = SimpleDateFormat.getDateInstance().format((Date) bean.value);
-    assertEquals("{\"@class\":\"bean\",\"value\":\"" + dateFormated + "\"}", genson.serialize(bean));
+    assertEquals("{\"@class\":\"bean\",\"value\":" + ((Date) bean.value).getTime() + "}", genson.serialize(bean));
   }
 
   @Test
@@ -32,7 +31,7 @@ public class MetadataFeatureTest {
     Bean bean = (Bean) genson.deserialize("{\"@class\":\"bean\",\"value\":{\"@class\":\"bean\"}}", Object.class);
     assertTrue(bean.value instanceof Bean);
 
-    bean = (Bean) genson.deserialize("{\"@class\":\"bean\",\"value\":{\"@class\":\"bean\"}}", Bean.class);
+    bean = genson.deserialize("{\"@class\":\"bean\",\"value\":{\"@class\":\"bean\"}}", Bean.class);
     assertTrue(bean.value instanceof Bean);
   }
 

@@ -102,12 +102,13 @@ GensonBuilder provides several methods to register components such as Converters
 </tr>
 <tr>
   <td>useDateFormat</td>
-  <td>The default date formatting style for the default locale.</td>
+  <td>The default date formatting style for the default locale. 
+  By default dates are being ser. as a timestamp in milliseconds.</td>
   <td>A DateFormat to be used when converting Dates, Calendars...</td>
 </tr>
 <tr>
   <td>useDateAsTimestamp</td>
-  <td>False</td>
+  <td>True</td>
   <td>When enabled, will ser/de dates as long representing the time in milliseconds.</td>
 </tr>
 <tr>

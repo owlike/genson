@@ -62,8 +62,8 @@ public class GensonBuilder {
 
   private BeanDescriptorProvider beanDescriptorProvider;
   private Converter<Object> nullConverter;
-  private DateFormat dateFormat = SimpleDateFormat.getDateInstance();
-  private boolean useDateAsTimestamp;
+  private DateFormat dateFormat = SimpleDateFormat.getDateTimeInstance();
+  private boolean useDateAsTimestamp = true;
   private boolean classMetadataWithStaticType = true;
 
   // for the moment we don't allow to override

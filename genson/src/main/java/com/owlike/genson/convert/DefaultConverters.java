@@ -988,11 +988,11 @@ public final class DefaultConverters {
     private final boolean asTimeInMillis;
 
     public DateConverter() {
-      this(SimpleDateFormat.getDateInstance(), false);
+      this(SimpleDateFormat.getDateTimeInstance(), true);
     }
 
     public DateConverter(DateFormat dateFormat, boolean asTimeInMillis) {
-      if (dateFormat == null) dateFormat = SimpleDateFormat.getDateInstance();
+      if (dateFormat == null) dateFormat = SimpleDateFormat.getDateTimeInstance();
       this.dateFormat = dateFormat;
       this.asTimeInMillis = asTimeInMillis;
     }
@@ -1015,7 +1015,8 @@ public final class DefaultConverters {
           return new Date(reader.valueAsLong());
         else if (valueType == ValueType.STRING)
           return read(reader.valueAsString());
-        else throw new JsonBindingException(String.format("Can not deserialize type %s to Date, only numeric and string accepted.", valueType));
+        else throw new JsonBindingException(String.format("Can not deserialize type %s to Date, " +
+            "only numeric and string accepted.", valueType));
       } catch (ParseException e) {
         throw new JsonBindingException("Could not parse date " + reader.valueAsString(),
           e);

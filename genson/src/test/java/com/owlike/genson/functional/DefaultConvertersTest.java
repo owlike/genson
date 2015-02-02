@@ -1,6 +1,7 @@
 package com.owlike.genson.functional;
 
 import java.io.UnsupportedEncodingException;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -172,9 +173,10 @@ public class DefaultConvertersTest {
     Date date1 = genson.deserialize(""+now, Date.class);
     assertEquals(now, date1.getTime());
 
-    String strDate = SimpleDateFormat.getDateInstance().format(new Date(now));
+    DateFormat df = SimpleDateFormat.getDateTimeInstance();
+    String strDate = df.format(new Date(now));
     Date date2 = genson.deserialize(String.format("\"%s\"", strDate), Date.class);
-    assertEquals(strDate, SimpleDateFormat.getDateInstance().format(date2));
+    assertEquals(strDate, df.format(date2));
   }
 
   @Test
