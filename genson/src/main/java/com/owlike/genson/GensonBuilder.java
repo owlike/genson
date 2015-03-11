@@ -260,11 +260,15 @@ public class GensonBuilder {
    * builder.withBundle(new JAXBExtension());
    * </pre>
    *
+   * <b>All bundles should be registered before any other customization.</b>
+   *
    * @see GensonBundle
    */
   public GensonBuilder withBundle(GensonBundle... bundles) {
-    for (GensonBundle ext : bundles)
-      _bundles.add(ext);
+    for (GensonBundle bundle : bundles) {
+      bundle.configure(this);
+      _bundles.add(bundle);
+    }
     return this;
   }
 
@@ -660,9 +664,6 @@ public class GensonBuilder {
    * @return a new instance of Genson built for the current configuration.
    */
   public Genson create() {
-    for (GensonBundle bundle : _bundles)
-      bundle.configure(this);
-
     if (nullConverter == null) nullConverter = new NullConverter();
     if (propertyNameResolver == null) propertyNameResolver = createPropertyNameResolver();
     if (mutatorAccessorResolver == null)

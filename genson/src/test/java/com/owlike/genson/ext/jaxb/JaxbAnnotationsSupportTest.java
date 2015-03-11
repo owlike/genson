@@ -15,6 +15,7 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import com.owlike.genson.GensonBuilder;
+import com.owlike.genson.annotation.JsonIgnore;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -100,6 +101,24 @@ public class JaxbAnnotationsSupportTest {
     assertEquals(0, container.a);
     assertEquals(0, container.b);
     assertEquals(null, container.bean);
+  }
+
+  @Test public void shouldFavorGensonAnnotationsOverJaxb() {
+    PojoWithJaxbAndGensonAnnotations pojo = new PojoWithJaxbAndGensonAnnotations();
+    pojo.value = 1;
+
+    assertEquals("{}", genson.serialize(pojo));
+  }
+
+  @Test public void shouldFavorFilteringAndRenamingFromBuilderOverJaxb() {
+    Genson genson = new GensonBuilder()
+      .withBundle(new JAXBBundle())
+      .exclude("a")
+      .exclude("c")
+      .rename("b", "foo")
+      .create();
+
+    assertEquals("{\"foo\":null}", genson.serialize(new XmlAttributeBean()));
   }
 
   public static class XmlAttributeBean {
@@ -221,5 +240,11 @@ public class JaxbAnnotationsSupportTest {
   @XmlTransient
   public static class XmlTransientBean {
 
+  }
+
+  public static class PojoWithJaxbAndGensonAnnotations {
+    @XmlElement
+    @JsonIgnore
+    public int value;
   }
 }

@@ -19,6 +19,9 @@ import com.owlike.genson.reflect.PropertyNameResolver;
  * however user custom config. has preference over bundle configuration. This means that you can
  * override bundle configuration with custom one.
  * <p/>
+ *
+ * <b>Important note, bundles must be registered first before any other configuration.</b>
+ *
  * This part of the API is still in beta, it could change in the future in order to make it more
  * powerful.
  *
@@ -26,8 +29,9 @@ import com.owlike.genson.reflect.PropertyNameResolver;
  */
 public abstract class GensonBundle {
   /**
-   * This method is called when all custom configuration has been registered. Use the builder to
-   * register your bundles.
+   * This method does not provide any guarantee to when it is called: before user config, during,
+   * or after. Thus it should not rely on accessor methods from GensonBuilder they might not reflect
+   * the final configuration. Use the builder to register your components.
    */
   public abstract void configure(GensonBuilder builder);
 
