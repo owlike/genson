@@ -125,8 +125,17 @@ public class JAXBBundle extends GensonBundle {
         if (getRawClass(propertyType).isPrimitive())
           propertyType = wrap(getRawClass(propertyType));
 
+        XmlElement el = property.getAnnotation(XmlElement.class);  
+        Type xmlElementType = el != null && el.type() != XmlElement.DEFAULT.class ? el.type() : null;
+
         // checking type consistency
-        if (!match(propertyType, originalType, false))
+        if (xmlElementType != null) {
+          if (!match(adaptedType, xmlElementType, false))
+            throw new ClassCastException("The BoundType of XMLAdapter " + adapterClass
+              + " is not assignable from property " + property.getName()
+              + " declared in " + property.getDeclaringClass());
+            
+        } else if (!match(propertyType, originalType, false))
           throw new ClassCastException("The BoundType of XMLAdapter " + adapterClass
             + " is not assignable from property " + property.getName()
             + " declared in " + property.getDeclaringClass());
@@ -134,7 +143,8 @@ public class JAXBBundle extends GensonBundle {
         try {
           XmlAdapter<Object, Object> adapter = adapterClass.newInstance();
           // we also need to find a converter for the adapted type
-          Converter<Object> adaptedTypeConverter = genson.provideConverter(adaptedType);
+          Converter<Object> adaptedTypeConverter = genson.provideConverter(
+            xmlElementType != null ? xmlElementType : adaptedType);
           converter = new AdaptedConverter(adapter, adaptedTypeConverter);
         } catch (InstantiationException e) {
           throw new JsonBindingException(
@@ -303,9 +313,12 @@ public class JAXBBundle extends GensonBundle {
     private Type getType(AccessibleObject object, Type objectType, Type contextType) {
       XmlElement el = object.getAnnotation(XmlElement.class);
       if (el != null && el.type() != XmlElement.DEFAULT.class) {
-        if (!TypeUtil.getRawClass(objectType).isAssignableFrom(el.type()))
+        if (!TypeUtil.getRawClass(objectType).isAssignableFrom(el.type())) {
+          XmlJavaTypeAdapter ad = object.getAnnotation(XmlJavaTypeAdapter.class);
+          if (ad == null) 
           throw new ClassCastException("Inavlid XmlElement annotation, " + objectType
             + " is not assignable from " + el.type());
+        }
         return el.type();
       } else
         return null;
