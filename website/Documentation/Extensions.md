@@ -20,9 +20,12 @@ A GensonBundle is a way to group a set of features in a single registrable compo
 explicitly. This is used internally to support types and annotations defined in other libraries and is intended to allow users to group their customizations
 behind a logical abstraction - the bundle.
 
-Bundles take precedence over user defined customization at the builder level.
-This means that if a bundle says you won't serialize null values and you tell the builder the contrary, the bundle will win.
-This has been designed this way because we consider that the configuration supplied by a Bundle is required by it, in order to work.
+User config takes precedence over bundle config. This means that you can override the configuration
+that a bundle defined, but at your own risk. Maybe the bundle did need this specific configuration
+in order to work properly.
+
+
+**Bundles must be registered first, before any other configuration.**
 
 For example you can implement a Bundle providing some common features for your company.
 
@@ -37,6 +40,7 @@ public class MyBundle extends GensonBundle {
 // then register your bundle
 Genson genson = new GensonBuilder().withBundle(new MyBundle()).create();
 {% endhighlight %}
+ 
 
 ##JAX-RS: Jersey & cie##
 
