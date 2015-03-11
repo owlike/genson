@@ -88,6 +88,11 @@ public class JaxbAnnotationsSupportTest {
   }
 
   @Test
+  public void testXmlJavaTypeAdapterWithXmlElement() {
+    assertEquals("{\"v\":\"0\"}", genson.serialize(new XmlJavaTypeAdapterWithXmlElementBean()));
+  }
+  
+  @Test
   public void testXmlTransientSerialization() {
     XmlTransientContainer container = new XmlTransientContainer();
     container.bean = new XmlTransientBean();
@@ -166,6 +171,12 @@ public class JaxbAnnotationsSupportTest {
     public int v;
   }
 
+  public static class XmlJavaTypeAdapterWithXmlElementBean {
+    @XmlElement(type=String.class)
+    @XmlJavaTypeAdapter(MyXmlAdapter.class)
+    public int v;
+  }
+  
   public static class MyXmlAdapter extends XmlAdapter<String, Integer> {
 
     @Override
