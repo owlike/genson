@@ -1,0 +1,62 @@
+
+<div class="contributor-list container">
+</div>
+
+
+<script>
+  // https://api.github.com/users/
+  var contributors = [
+   {fullName: "Jesse Crossley", login: "jessecrossley", avatarUrl: "https://avatars.githubusercontent.com/u/6665119?v=3"},
+   {fullName: "Nilseu Padilha", login: "ragnarokkrr", avatarUrl: "https://avatars.githubusercontent.com/u/601297?v=3"},
+   {fullName: "Mykel Alvis", login: "mykelalvis", avatarUrl: "https://avatars.githubusercontent.com/u/104666?v=3"},
+   {fullName: "softwareresearchwork", login: "softwareresearchwork", avatarUrl: "https://avatars.githubusercontent.com/u/453002?v=3"}
+  ];
+
+  var template = '<div class="col-md-5"><div class="github-card user-card"><div class="header">\
+        <a href="https://github.com/{login}" class="avatar" target="_top">\
+          <img src="{avatarUrl}&amp;s=48">\
+          <strong>{fullName}</strong>\
+          <span>@{login}</span>\
+        </a>\
+        <a href="https://github.com/{login}" class="button" target="_top">Follow</a>\
+      </div>\
+    </div></div>';
+
+  var html = '';
+
+  $.each(grouped(contributors, 2), function(idx, contribs) {
+    html += '<div class="row">'
+
+    $.each(contribs, function(subIdx, contrib) {
+      html += contribToHtml(contrib);
+    });
+    html += '</div>';
+  });
+
+  $('.contributor-list').html(html);
+
+  function contribToHtml(contrib) {
+    return template.replace(/{fullName}/g, contrib.fullName)
+      .replace(/{login}/g, contrib.login)
+      .replace(/{avatarUrl}/g, contrib.avatarUrl);
+  }
+
+  function grouped(array, groupSize) {
+    var subArray = [];
+    var resultArray = [];
+    $.each(array, function(idx, v) {
+      subArray.push(v);
+
+      if ((idx+1)%groupSize == 0) {
+        resultArray.push(subArray);
+        subArray = [];
+      }
+    });
+
+    if ((array - array/groupSize) > 0) {
+      resultArray.push(subArray);
+    }
+
+    return resultArray;
+  }
+</script>

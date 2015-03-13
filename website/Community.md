@@ -29,3 +29,10 @@ then you can directly open an issue.
 Of course contributions are very welcome, there is plenty of work to be done :)
 
 If you want to get started just drop an email on the mailing list or to cepoi.eugen@gmail.com.
+
+##Contributors##
+
+{% capture includeGuts %}
+{% include contributors.html %} 
+{% endcapture %}
+{{ includeGuts | replace: '    ', ''}}
