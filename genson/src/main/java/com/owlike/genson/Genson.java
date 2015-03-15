@@ -433,6 +433,13 @@ public final class Genson {
   }
 
   /**
+   * @see #deserializeValues(com.owlike.genson.stream.ObjectReader, GenericType)
+   */
+  public <T> Iterator<T> deserializeValues(final InputStream is, final Class<T> type) {
+    return deserializeValues(createReader(is), GenericType.of(type));
+  }
+
+  /**
    * This can be used to deserialize in an efficient streaming fashion a sequence of objects.
    * Note that you can use this method when your values are wrapped in an array (valid json) but also
    * when they all are root values (not enclosed in an array). However for this second use case make sure
