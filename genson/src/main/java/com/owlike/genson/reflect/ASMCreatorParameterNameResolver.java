@@ -67,7 +67,9 @@ public final class ASMCreatorParameterNameResolver implements PropertyNameResolv
       // C'est ok pas grave, cette technique n'est pas cense marcher dans tous les cas
     } finally {
       try {
-        is.close();
+        if (is != null) {
+          is.close();
+        }
       } catch (IOException e) {
       }
     }
