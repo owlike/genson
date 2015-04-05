@@ -21,6 +21,7 @@ import com.owlike.genson.stream.JsonReader;
 public class JsonDeserializationTest {
   final Genson genson = new GensonBuilder().useConstructorWithArguments(true).create();
 
+
   @Test public void testReadMultipleRootObjectsNotEnclosedInArrayAndMapManually() {
     Genson genson = new GensonBuilder().usePermissiveParsing(true).create();
     GenericType<Pojo> type = GenericType.of(Pojo.class);
