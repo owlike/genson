@@ -28,10 +28,8 @@ val actualValue = fromJson[SomeType](json)
 
 ###Scala version
 
-Genson has been tested against scala 2.11. In theory you can use it with all releases from 2.11 and up.
-It also works with scala 2.10, but at the moment we don't provide an artifact for scala 2.10. If you want
-to use Genson against 2.10 you will have to build the source code your self. If you are using/want to use Genson with scala 2.10,
-please drop an email on the user list so we can find a better way to provide a distribution for different scala versions.
+Genson has been tested against scala 2.10 and 2.11. In theory you can use it with all releases from 2.10 and up.
+We follow the standard cross build conventions for scala projects ex: genson-scala_2.10 and genson-scala_2.11.
 
 
 ##Download
@@ -43,7 +41,7 @@ the Scala extension could end up with the scala language library downloaded.
 ###SBT
 
 {% highlight scala %}
-libraryDependencies += "com.owlike" % "genson-scala" % "{{site.latest_version}}"
+libraryDependencies += "com.owlike" % "genson-scala_2.10" % "{{site.latest_version}}"
 {% endhighlight %}
 
 ###Maven
@@ -51,7 +49,7 @@ libraryDependencies += "com.owlike" % "genson-scala" % "{{site.latest_version}}"
 {% highlight xml %}
 <dependency>
 	<groupId>com.owlike</groupId>
-	<artifactId>genson-scala</artifactId>
+	<artifactId>genson-scala_${scala_version}</artifactId>
 	<version>{{site.latest_version}}</version>
 </dependency>
 {% endhighlight %}
@@ -62,7 +60,8 @@ If you don't use a dependency management tool then you can still use it, but you
 the core Genson jars by hand.
 
  * [Genson](http://repo1.maven.org/maven2/com/owlike/genson/{{site.latest_version}}/genson-{{site.latest_version}}.jar)
- * [Genson-scala](http://repo1.maven.org/maven2/com/owlike/genson-scala/{{site.latest_version}}/genson-scala-{{site.latest_version}}.jar)
+ * [Genson-scala_2.10](http://repo1.maven.org/maven2/com/owlike/genson-scala_2.10/{{site.latest_version}}/genson-scala_2.10-{{site.latest_version}}.jar)
+ * [Genson-scala_2.11](http://repo1.maven.org/maven2/com/owlike/genson-scala_2.11/{{site.latest_version}}/genson-scala_2.11-{{site.latest_version}}.jar)
 
 
 ##Collections & Tuples

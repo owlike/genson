@@ -2,8 +2,6 @@
 
 set -e
 
-: ${1?"Usage: $0 -c or --comand test|install|deploy|release|website-only -v or --v"}
-
 # All global default vars used in this script
 ######################################################################################
 BASE_DIR=$PWD
@@ -12,7 +10,7 @@ ACTUAL_VERSION=$(sed -n 's|[ \t]*<version>\(.*\)</version>|\1|p' pom.xml|head -1
 RELEASE_VERSION=$(echo $ACTUAL_VERSION|sed 's/-SNAPSHOT//')
 NEXT_VERSION=
 BASE_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-CHECK_CLEAN_GIT=true
+DIRTY_SCM=false
 ######################################################################################
 
 while [[ $# > 1 ]]; do
@@ -30,10 +28,19 @@ case $key in
       __MVN_DEV_VERSION="-DdevelopmentVersion=$2"
       ;;
     -d|--dirty-scm)
-      CHECK_CLEAN_GIT="$2"
+      DIRTY_SCM="$2"
       ;;
     *)
       echo "Unknown parameter $key"
+      echo "Usage: ./make-release.sh [OPTION]
+-c,--comand commandName
+    possible values test|install|deploy|release|website-only
+-v,--release-version versionNumber
+    will be used to deploy the artifacts and make the release branch
+-n,--next-version versionNumber
+    will be used as the new version after the release
+-d,--dirty-scm true/false
+    false by default, all changes must be in sync with origin"
       exit 1
       ;;
 esac
@@ -45,7 +52,7 @@ done
 #######################################################################################################################
 
 function checkNoUncommitedChanges {
-  if [ "$CHECK_CLEAN_GIT" == "true" ]; then
+  if [ "$DIRTY_SCM" == "false" ]; then
     echo "Checking that there are no uncommited changes"
     git diff-index --quiet origin/$BASE_BRANCH --
     local RET=$?
