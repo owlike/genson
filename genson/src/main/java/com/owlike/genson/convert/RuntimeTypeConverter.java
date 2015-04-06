@@ -29,7 +29,6 @@ public class RuntimeTypeConverter<T> extends Wrapper<Converter<T>> implements Co
     }
   }
 
-  ;
   private final Class<T> tClass;
 
   public RuntimeTypeConverter(Class<T> tClass, Converter<T> next) {

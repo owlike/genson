@@ -195,8 +195,7 @@ public final class DefaultConverters {
     }
   }
 
-  public final static class CollectionConverterFactory implements
-    Factory<Converter<Collection<?>>> {
+  public final static class CollectionConverterFactory implements Factory<Converter<Collection<?>>> {
     public final static CollectionConverterFactory instance = new CollectionConverterFactory();
 
     private CollectionConverterFactory() {
@@ -204,8 +203,7 @@ public final class DefaultConverters {
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     public Converter<Collection<?>> create(Type forType, Genson genson) {
-      Converter<?> elementConverter = genson.provideConverter(TypeUtil
-        .getCollectionType(forType));
+      Converter<?> elementConverter = genson.provideConverter(TypeUtil.getCollectionType(forType));
 
       Class<?> parameterRawClass = TypeUtil.getRawClass(TypeUtil.getCollectionType(forType));
       Class<?> rawClass = getRawClass(forType);

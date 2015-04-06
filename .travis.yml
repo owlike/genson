@@ -1,1 +1,7 @@
+sudo: false
+
 language: java
+
+script:
+  # for now not testing the cross build because the used lib xmlstarlet is not available for install...
+  - mvn test
