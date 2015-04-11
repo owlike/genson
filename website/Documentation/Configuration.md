@@ -132,9 +132,15 @@ GensonBuilder provides several methods to register components such as Converters
 <tr>
   <td>usePermissiveParsing</td>
   <td>False</td>
-  <td>Tells the ObjectReader to be more permissive on the validity of the incoming json.
-  As of release 1.2, it allows to parse multiple root json values (not enclosed in an array)
-  with a same ObjectReader. More could be added in the future.</td>
+  <td>
+    When enabled tells Genson to be less strict on the incoming json and the mapping to Java types.
+    It allows to
+      <ul>
+       <li>Parse multiple root json values (not enclosed in an array) with same ObjectReader.</li>
+       <li>Wrap a single value into a list when a list is expected. Useful when dealing with APIs that unwrap 
+     arrays containing a single value.</li>
+     </ul>
+ </td>
 </tr>
 <tr>
   <td>useIndentation</td>

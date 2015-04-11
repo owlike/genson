@@ -21,6 +21,14 @@ import com.owlike.genson.stream.JsonReader;
 public class JsonDeserializationTest {
   final Genson genson = new GensonBuilder().useConstructorWithArguments(true).create();
 
+  @Test public void testDeserializeSingleObjectAsList() {
+        PojoWithList actual = new GensonBuilder()
+            .usePermissiveParsing(true)
+            .create()
+          .deserialize("{\"listOfInt\": 1}", PojoWithList.class);
+
+      assertEquals(1, actual.listOfInt.get(0).intValue());
+  }
 
   @Test public void testReadMultipleRootObjectsNotEnclosedInArrayAndMapManually() {
     Genson genson = new GensonBuilder().usePermissiveParsing(true).create();
@@ -173,24 +181,6 @@ public class JsonDeserializationTest {
     assertEquals(bean.other.name, "TITI");
   }
 
-  public static class BeanWithConstructor {
-    final String name;
-    final int age;
-    final BeanWithConstructor other;
-
-    public BeanWithConstructor(@JsonProperty(value = "name") String name,
-                               @JsonProperty(value = "age") int age,
-                               @JsonProperty(value = "other") BeanWithConstructor other) {
-      this.name = name;
-      this.age = age;
-      this.other = other;
-    }
-
-    public void setName(String name) {
-      fail();
-    }
-  }
-
   @SuppressWarnings("unchecked")
   @Test
   public void testJsonToUntypedList() {
@@ -335,6 +325,24 @@ public class JsonDeserializationTest {
     assertEquals("foo", pojo.str);
   }
 
+    public static class BeanWithConstructor {
+        final String name;
+        final int age;
+        final BeanWithConstructor other;
+
+        public BeanWithConstructor(@JsonProperty(value = "name") String name,
+                                   @JsonProperty(value = "age") int age,
+                                   @JsonProperty(value = "other") BeanWithConstructor other) {
+            this.name = name;
+            this.age = age;
+            this.other = other;
+        }
+
+        public void setName(String name) {
+            fail();
+        }
+    }
+
   public static class Empty {}
 
   public static class Pojo {
@@ -386,6 +394,10 @@ public class JsonDeserializationTest {
       this.list = list;
     }
 
+  }
+
+  public static class PojoWithList {
+      public List<Integer> listOfInt;
   }
 
   @SuppressWarnings("unused")

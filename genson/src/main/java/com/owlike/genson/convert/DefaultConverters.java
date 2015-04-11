@@ -195,6 +195,37 @@ public final class DefaultConverters {
     }
   }
 
+  public final static class SingleValueAsListFactory implements Factory<Converter<Collection<?>>> {
+    public final static SingleValueAsListFactory instance = new SingleValueAsListFactory();
+
+    Factory<Converter<Collection<?>>> defaultFactory = CollectionConverterFactory.instance;
+
+    private SingleValueAsListFactory() {}
+
+    @Override
+    public Converter<Collection<?>> create(Type type, Genson genson) {
+      final CollectionConverter defaultConverter = (CollectionConverter) defaultFactory.create(type, genson);
+
+      return new Converter<Collection<?>>() {
+        @Override
+        public void serialize(Collection object, ObjectWriter writer, Context ctx) throws Exception {
+          defaultConverter.serialize(object, writer, ctx);
+        }
+
+        @Override
+        public Collection deserialize(ObjectReader reader, Context ctx) throws Exception {
+          ValueType vt = reader.getValueType();
+          if (vt != ValueType.ARRAY && vt != ValueType.NULL ) {
+            Object object = defaultConverter.getElementConverter().deserialize(reader, ctx);
+            Collection result = defaultConverter.create();
+            result.add(object);
+            return result;
+          } else return defaultConverter.deserialize( reader, ctx );
+        }
+      };
+    }
+  }
+
   public final static class CollectionConverterFactory implements Factory<Converter<Collection<?>>> {
     public final static CollectionConverterFactory instance = new CollectionConverterFactory();
 

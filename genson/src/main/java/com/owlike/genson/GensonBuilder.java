@@ -644,15 +644,17 @@ public class GensonBuilder {
   }
 
   /**
-   * When enabled tells the ObjectReader to be less strict on the incoming json.
-   * As of release 1.2, it allows to parse multiple root json values (not enclosed in array an array)
-   * with same ObjectReader. More could be added in the future.
+   * When enabled tells Genson to be less strict on the incoming json and the mapping to Java types.
+   * It allows to
+   *  - Parse multiple root json values (not enclosed in an array) with same ObjectReader.
+   *  - Wrap a single value into a list when a list is expected. Useful when dealing with APIs that unwrap
+   *  arrays containing a single value.
+   *
    * Disabled by default.
-   * @param enable
-   * @return
    */
   public GensonBuilder usePermissiveParsing(boolean enable) {
     this.permissiveParsing = enable;
+    if (enable) withConverterFactory(DefaultConverters.SingleValueAsListFactory.instance);
     return this;
   }
 
