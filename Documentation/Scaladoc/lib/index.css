@@ -206,17 +206,13 @@ h1 {
   border-right:0;
 }
 
-#letters > a, #letters > span {
+#letters > a {
 /*  font-family: monospace;*/
   color: #858484;
   font-weight: bold;
   font-size: 8pt;
   text-shadow: #ffffff 0 1px 0;
   padding-right: 2px;
-}
-
-#letters > span {
-  color: #bbb;
 }
   
 #tpl {
@@ -310,7 +306,6 @@ h1 {
   position: fixed;
   margin-left: 300px;
   display: block;
-  -webkit-overflow-scrolling: touch;
 }
 
 #content > iframe {

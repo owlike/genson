@@ -16,7 +16,7 @@
 
     <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
 
-    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
 
     <!-- Optional theme -->
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-theme.min.css">
@@ -28,7 +28,7 @@
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
-    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 
     <link href='/genson/css/theme.css' rel='stylesheet' type='text/css' />
@@ -282,12 +282,13 @@ GensonBuilder provides several methods to register components such as Converters
 </tr>
 <tr>
   <td>useDateFormat</td>
-  <td>The default date formatting style for the default locale.</td>
+  <td>The default date formatting style for the default locale. 
+  By default dates are being ser. as a timestamp in milliseconds.</td>
   <td>A DateFormat to be used when converting Dates, Calendars...</td>
 </tr>
 <tr>
   <td>useDateAsTimestamp</td>
-  <td>False</td>
+  <td>True</td>
   <td>When enabled, will ser/de dates as long representing the time in milliseconds.</td>
 </tr>
 <tr>
@@ -311,9 +312,15 @@ GensonBuilder provides several methods to register components such as Converters
 <tr>
   <td>usePermissiveParsing</td>
   <td>False</td>
-  <td>Tells the ObjectReader to be more permissive on the validity of the incoming json.
-  As of release 1.2, it allows to parse multiple root json values (not enclosed in an array)
-  with a same ObjectReader. More could be added in the future.</td>
+  <td>
+    When enabled tells Genson to be less strict on the incoming json and the mapping to Java types.
+    It allows to
+      <ul>
+       <li>Parse multiple root json values (not enclosed in an array) with same ObjectReader.</li>
+       <li>Wrap a single value into a list when a list is expected. Useful when dealing with APIs that unwrap 
+     arrays containing a single value.</li>
+     </ul>
+ </td>
 </tr>
 <tr>
   <td>useIndentation</td>
@@ -337,6 +344,14 @@ GensonBuilder provides several methods to register components such as Converters
   <td>False</td>
   <td>If set to true, Genson will throw a JsonBindingException when it encounters a property in the incoming json that does not match
    a property in the class. By default it skips this value silently.</td>
+</tr>
+<tr>
+  <td>wrapRootValues(inputKey, outputKey)</td>
+  <td>Disabled</td>
+  <td>Allows to wrap all the root objects in another object using outputKey during serialization and unwrap during 
+  deserialization the value under inputKey. 
+  Use this only if you need to communicate with some 3rd party library that needs this kind of json.
+  A more flexible strategy to wrap root values is to use @XmlRootElement with JaxbBundle, see Extensions section.</td>
 </tr>
 </table>
 </div>

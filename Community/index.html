@@ -16,7 +16,7 @@
 
     <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
 
-    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
 
     <!-- Optional theme -->
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-theme.min.css">
@@ -28,7 +28,7 @@
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
-    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 
     <link href='/genson/css/theme.css' rel='stylesheet' type='text/css' />
@@ -213,6 +213,74 @@ then you can directly open an issue.</p>
 <p>Of course contributions are very welcome, there is plenty of work to be done :)</p>
 
 <p>If you want to get started just drop an email on the mailing list or to cepoi.eugen@gmail.com.</p>
+
+<h2 id="contributors">Contributors</h2>
+
+<div class="contributor-list container">
+</div>
+
+<script>
+  // https://api.github.com/users/
+  var contributors = [
+   {fullName: "Jesse Crossley", login: "jessecrossley", avatarUrl: "https://avatars.githubusercontent.com/u/6665119?v=3"},
+   {fullName: "Nilseu Padilha", login: "ragnarokkrr", avatarUrl: "https://avatars.githubusercontent.com/u/601297?v=3"},
+   {fullName: "Mykel Alvis", login: "mykelalvis", avatarUrl: "https://avatars.githubusercontent.com/u/104666?v=3"},
+   {fullName: "softwareresearchwork", login: "softwareresearchwork", avatarUrl: "https://avatars.githubusercontent.com/u/453002?v=3"},
+   {fullName: "Simen Rokaas", login: "SimenRokaas", avatarUrl: "https://avatars.githubusercontent.com/u/5219898?v=3"}
+  ].sort(function(l, r) {
+return l.fullName.toUpperCase().localeCompare(r.fullName.toUpperCase());
+  });
+
+  var template = '<div class="col-md-5"><div class="github-card user-card"><div class="header">\
+<a href="https://github.com/{login}" class="avatar" target="_top">\
+  <img src="{avatarUrl}&amp;s=48">\
+  <strong>{fullName}</strong>\
+  <span>@{login}</span>\
+</a>\
+<a href="https://github.com/{login}" class="button" target="_top">Follow</a>\
+  </div>\
+</div></div>';
+
+  var html = '';
+
+  $.each(grouped(contributors, 2), function(idx, contribs) {
+html += '<div class="row">'
+
+$.each(contribs, function(subIdx, contrib) {
+  html += contribToHtml(contrib);
+});
+html += '</div>';
+  });
+
+  $('.contributor-list').html(html);
+
+  function contribToHtml(contrib) {
+return template.replace(/{fullName}/g, contrib.fullName)
+  .replace(/{login}/g, contrib.login)
+  .replace(/{avatarUrl}/g, contrib.avatarUrl);
+  }
+
+  function grouped(array, groupSize) {
+var subArray = [];
+var resultArray = [];
+
+$.each(array, function(idx, v) {
+  subArray.push(v);
+
+  if (subArray.length == groupSize) {
+resultArray.push(subArray);
+subArray = [];
+  }
+});
+
+if (subArray.length > 0) {
+  resultArray.push(subArray);
+}
+
+return resultArray;
+  }
+</script>
+
 
             </div>
         </div>

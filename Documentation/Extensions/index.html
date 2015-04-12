@@ -16,7 +16,7 @@
 
     <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
 
-    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
 
     <!-- Optional theme -->
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-theme.min.css">
@@ -28,7 +28,7 @@
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
-    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 
     <link href='/genson/css/theme.css' rel='stylesheet' type='text/css' />
@@ -203,9 +203,11 @@
 explicitly. This is used internally to support types and annotations defined in other libraries and is intended to allow users to group their customizations
 behind a logical abstraction - the bundle.</p>
 
-<p>Bundles take precedence over user defined customization at the builder level.
-This means that if a bundle says you won’t serialize null values and you tell the builder the contrary, the bundle will win.
-This has been designed this way because we consider that the configuration supplied by a Bundle is required by it, in order to work.</p>
+<p>User config takes precedence over bundle config. This means that you can override the configuration
+that a bundle defined, but at your own risk. Maybe the bundle did need this specific configuration
+in order to work properly.</p>
+
+<p><strong>Bundles must be registered first, before any other configuration.</strong></p>
 
 <p>For example you can implement a Bundle providing some common features for your company.</p>
 
@@ -229,15 +231,18 @@ The implementation will detect it and use Genson for json conversions.</p>
 <p><strong>Note</strong></p>
 
 <ul>
-  <li>By default Genson JAX-RS integration enables JAXB annotations support.</li>
+  <li>By default Genson JAX-RS integration enables JAXB annotations and constructors without arguments support.</li>
 </ul>
 
 <h3 id="manual-registration">Manual registration</h3>
 
-<p>You can also manually register Genson in Jersey.
-On the server side:</p>
+<p>The examples above are for Jersey, but ResourceConfig is just an implementation of Application interface.
+So you can achieve the same result without using Jersey but any other implementation of Jax-RS spec.
+You basically only have to implement getSingletons to return a Set containing your GensonJaxRSFeature instance or GensonJsonConverter.</p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="c1">// Note that you can also provide an instance of GensonJsonConverter.</span>
+<p>To manually register Genson in Jersey, on the server side:</p>
+
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="c1">// You can also provide an instance of GensonJsonConverter.</span>
 <span class="kd">final</span> <span class="n">ResourceConfig</span> <span class="n">config</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">ResourceConfig</span><span class="o">().</span><span class="na">register</span><span class="o">(</span><span class="n">GensonJsonConverter</span><span class="o">.</span><span class="na">class</span><span class="o">);</span></code></pre></div>
 
 <p>On the client side:</p>
@@ -247,19 +252,23 @@ On the server side:</p>
 <p>Adding a customized Genson instance can be achieved through the same registration mechanism.</p>
 
 <h3 id="customization">Customization</h3>
-<p>In many cases you might want to customize Genson instance.
-To do that use GensonBuilder to create a custom instance and then inject it with ContextResolver.</p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="nd">@Provider</span>
-<span class="kd">public</span> <span class="kd">class</span> <span class="nc">GensonCustomResolver</span> <span class="kd">implements</span> <span class="n">ContextResolver</span><span class="o">&lt;</span><span class="n">Genson</span><span class="o">&gt;</span> <span class="o">{</span>
-  <span class="c1">// configure the Genson instance</span>
-  <span class="kd">private</span> <span class="kd">final</span> <span class="n">Genson</span> <span class="n">genson</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">GensonBuilder</span><span class="o">().</span><span class="na">create</span><span class="o">();</span>
+<p>In many cases you might want to customize the Genson instance being used. 
+To do so, you only have to create your custom instance with GensonBuilder and then register a 
+GensonJaxRSFeature configured with this Genson instance.</p>
 
-  <span class="nd">@Override</span>
-  <span class="kd">public</span> <span class="n">Genson</span> <span class="nf">getContext</span><span class="o">(</span><span class="n">Class</span><span class="o">&lt;?&gt;</span> <span class="n">type</span><span class="o">)</span> <span class="o">{</span>
-      <span class="k">return</span> <span class="n">genson</span><span class="o">;</span>
-  <span class="o">}</span>
-<span class="o">}</span></code></pre></div>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="k">new</span> <span class="nf">ResourceConfig</span><span class="o">().</span><span class="na">register</span><span class="o">(</span><span class="k">new</span> <span class="nf">GensonJaxRSFeature</span><span class="o">().</span><span class="na">use</span><span class="o">(</span><span class="n">myCustomGenson</span><span class="o">));</span></code></pre></div>
+
+<p>GensonJaxRSFeature is supposed to be the centralized place containing the config related to Genson and Jax-RS.</p>
+
+<h3 id="disabling-genson-in-jax-rs">Disabling Genson in JAX-RS</h3>
+
+<p>Disabling Genson is achieved via GensonJaxRSFeature mechanism we have seen above. </p>
+
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="c1">// client</span>
+<span class="n">ClientBuilder</span><span class="o">.</span><span class="na">newClient</span><span class="o">(</span><span class="k">new</span> <span class="nf">ClientConfig</span><span class="o">().</span><span class="na">register</span><span class="o">(</span><span class="k">new</span> <span class="nf">GensonJaxRSFeature</span><span class="o">().</span><span class="na">disable</span><span class="o">()));</span>
+<span class="c1">// server</span>
+<span class="k">new</span> <span class="nf">ResourceConfig</span><span class="o">().</span><span class="na">register</span><span class="o">(</span><span class="k">new</span> <span class="nf">GensonJaxRSFeature</span><span class="o">().</span><span class="na">disable</span><span class="o">());</span></code></pre></div>
 
 <h2 id="jsr-353---java-api-for-json-processing">JSR 353 - Java API for Json Processing</h2>
 
@@ -329,6 +338,11 @@ Genson annotations take precedence over JAXB ones, so they can be used to overri
   <li>
     <p><strong>XmlTransient</strong> to exclude a field or get/set from ser/deser process.</p>
   </li>
+  <li>
+    <p><strong>XmlRootElement</strong> by default has no effect, but when used with new JAXBBundle().wrapRootValues(true) allows
+ to wrap/unwrap the root classes annotated with @XmlRootElement in another object. By default the key used is the class name with
+ first letter to lower case.</p>
+  </li>
 </ul>
 
 <h3 id="supported-types">Supported types</h3>
@@ -337,8 +351,7 @@ Genson annotations take precedence over JAXB ones, so they can be used to overri
 
 <h3 id="what-might-come-next">What might come next</h3>
 
-<p>Support for cyclic references using XmlId and XmlIdRef, XmlType.
-Maybe XmlRootElement, even if I doubt of its pertinence in JSON…</p>
+<p>Support for cyclic references using XmlId and XmlIdRef, XmlType.</p>
 
 <p>If there are other jaxb features you would like to be supported just open an issue or drop an email on the google group.</p>
 
@@ -348,7 +361,7 @@ Maybe XmlRootElement, even if I doubt of its pertinence in JSON…</p>
 
 <div class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">Genson</span> <span class="n">genson</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">GensonBuilder</span><span class="o">().</span><span class="na">withBundle</span><span class="o">(</span><span class="k">new</span> <span class="nf">JodaTimeBundle</span><span class="o">()).</span><span class="na">create</span><span class="o">();</span></code></pre></div>
 
-<p>By default dates are being ser/de using 
+<p>By default subclasses of ReadableInstant are being ser/de using 
 <span class="n">ISODateTimeFormat</span><span class="o">.</span><span class="na">dateTime</span><span class="o">()</span>
  formatter.
 You can change it and use another formatter. However take care, that this formatter will be used for serialization and deserialization,
@@ -356,15 +369,15 @@ thus it must support the methods <strong>print</strong> and <strong>parse</stron
 
 <div class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">DateTimeFormatter</span> <span class="n">formatter</span> <span class="o">=</span> <span class="n">DateTimeFormat</span><span class="o">.</span><span class="na">forPattern</span><span class="o">(</span><span class="s">&quot;yyyy/MM/dd&quot;</span><span class="o">);</span>
 <span class="n">Genson</span> <span class="n">genson</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">GensonBuilder</span><span class="o">()</span>
-  <span class="o">.</span><span class="na">withBundle</span><span class="o">(</span><span class="k">new</span> <span class="nf">JodaTimeBundle</span><span class="o">().</span><span class="na">useDateFormatter</span><span class="o">(</span><span class="n">formatter</span><span class="o">))</span>
+  <span class="o">.</span><span class="na">useDateAsTimestamp</span><span class="o">(</span><span class="kc">false</span><span class="o">)</span>
+  <span class="o">.</span><span class="na">withBundle</span><span class="o">(</span><span class="k">new</span> <span class="nf">JodaTimeBundle</span><span class="o">().</span><span class="na">useDateTimeFormatter</span><span class="o">(</span><span class="n">formatter</span><span class="o">))</span>
   <span class="o">.</span><span class="na">create</span><span class="o">();</span></code></pre></div>
 
-<p>Or ser/de dates as timestamps, in that case you configure it at the builder level, like for classic Java Dates.</p>
+<p>LocalDate/DateTime/Time are serialized using their ISODateTimeFormat.date/dateTime/time formats with default DateTimeZone.
+However LocalDateTime and LocalTime are being deserialized using localDateOptionalTimeParser and localTimeParser.
+In most cases you won’t need to configure the deserialization format for these types.</p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">Genson</span> <span class="n">genson</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">GensonBuilder</span><span class="o">()</span>
-  <span class="o">.</span><span class="na">useDateAsTimestamp</span><span class="o">(</span><span class="kc">true</span><span class="o">)</span>
-  <span class="o">.</span><span class="na">withBundle</span><span class="o">(</span><span class="k">new</span> <span class="nf">JodaTimeBundle</span><span class="o">())</span>
-  <span class="o">.</span><span class="na">create</span><span class="o">();</span></code></pre></div>
+<p>JsonDateFormat annotation can also be used with DateTime, MutableDateTime, LocalDate, LocalDateTime and LocalTime classes.</p>
 
 <h3 id="supported-types-1">Supported types</h3>
 
@@ -372,6 +385,7 @@ thus it must support the methods <strong>print</strong> and <strong>parse</stron
 
 <ul>
   <li>Implementations of ReadableInstant such as DateTime, Instant and MutableDateTime.</li>
+  <li>LocalDate, LocalDateTime and LocalTime</li>
   <li>Interval as an object containing two keys start and end, using the configured DateTimeFormatter or timestamps.</li>
   <li>Period is ser/de using 
 <span class="n">ISOPeriodFormat</span><span class="o">.</span><span class="na">standard</span><span class="o">()</span>

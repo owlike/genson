@@ -264,3 +264,130 @@ header:after {
   color: #636363;
   background-color: #ffffff;
 }
+
+/* contributors github cards */
+
+.github-card {
+    font-family: "Helvetica Nenu",Hevetica,Arial,sans-serif;
+    font-size: 14px;
+
+    background: none repeat scroll 0 0 #fff;
+    border-radius: 5px;
+    color: #555;
+    padding: 8px;
+    position: relative;
+
+    border-color: #eee #ddd #bbb;
+    border-image: none;
+    border-style: solid;
+    border-width: 1px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.14);
+
+    width: 384px;
+    height: 75px;
+
+    margin-bottom: 10px;
+  }
+
+.github-card a {
+  color: #4183c4;
+  outline: 0 none;
+  text-decoration: none;
+}
+.github-card a:hover {
+  text-decoration: underline;
+}
+.github-card .header {
+  position: relative;
+}
+.github-card .button {
+  background-color: #e6e6e6;
+  background-image: linear-gradient(#fafafa, #eaeaea);
+  border: 1px solid #d4d4d4;
+  border-radius: 3px;
+  color: #555;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 14px;
+  padding: 4px 8px 4px 7px;
+  position: absolute;
+  right: 0;
+  text-shadow: 0 1px 0 #fff;
+  top: 0;
+}
+.github-card .button:hover {
+  background-color: #3072b3;
+  background-image: linear-gradient(#599bdc, #3072b3);
+  border-color: #518cc6 #518cc6 #2a65a0;
+  color: #fff;
+  text-decoration: none;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+}
+.user-card .header {
+  min-height: 48px;
+  padding: 3px 0 4px 57px;
+}
+.user-card .header a {
+  color: #707070;
+  text-decoration: none;
+}
+.user-card .header a:hover strong {
+  text-decoration: underline;
+}
+.user-card img {
+  background: none repeat scroll 0 0 #fff;
+  border-radius: 4px;
+  height: 48px;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 48px;
+}
+
+.user-card strong {
+  color: #292f33;
+  display: block;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.user-card ul {
+  border-bottom: 1px solid #eee;
+  border-top: 1px solid #eee;
+  color: #707070;
+  font-size: 12px;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  text-transform: uppercase;
+}
+.user-card ul:after {
+  clear: both;
+  content: "";
+  display: block;
+}
+.user-card .status a {
+  color: #707070;
+  text-decoration: none;
+}
+.user-card .status a:hover {
+  color: #4183c4;
+}
+.user-card .status li {
+  border-left: 1px solid #eee;
+  float: left;
+  padding: 4px 18px;
+}
+.user-card .status li:first-child {
+  border-left: 0 none;
+  padding-left: 0;
+}
+.user-card .footer {
+  color: #646464;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 11px 0 10px;
+}
+.user-card .footer a {
+  color: #646464;
+}
