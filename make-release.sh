@@ -207,7 +207,8 @@ case "$COMMAND" in
     __NEXT_VERSION=$(sed -n 's|[ \t]*<version>\(.*\)</version>|\1|p' pom.xml|head -1)
     git commit --allow-empty -m "[Release] - $RELEASE_VERSION, update from dev version $ACTUAL_VERSION to $__NEXT_VERSION"
 
-    # Now move on to releasing the current version on the release branch
+    # Now move on to releasing the current version on the release branch,
+    # we don't want to push the generated code so people can merge patches from newer branches into that old one
     git checkout "genson-$RELEASE_VERSION"
     git commit --allow-empty -m "Release $RELEASE_VERSION"
 
@@ -221,6 +222,9 @@ case "$COMMAND" in
 
     # We are already on the release branch, directly deploy the website
     deployWebsite
+
+    # forget about the changed pom with the release versions, we now want to push the updated pom for next dev version
+    git stash
 
     # Only now push the changes to the original branches and update the clone from which we initiated the release
     git checkout $BASE_BRANCH
