@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.owlike</groupId>
 	<artifactId>genson-parent</artifactId>
-	<version>1.3-SNAPSHOT</version>
+	<version>1.4-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Genson Parent</name>
 	<description>Genson library parent and aggregator</description>
