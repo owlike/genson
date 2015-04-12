@@ -16,12 +16,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlEnumValue;
-import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -32,7 +27,9 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import com.owlike.genson.*;
 import com.owlike.genson.annotation.HandleClassMetadata;
 import com.owlike.genson.annotation.HandleBeanView;
+import com.owlike.genson.convert.ChainedFactory;
 import com.owlike.genson.convert.ContextualFactory;
+import com.owlike.genson.convert.DefaultConverters.WrappedRootValueConverter;
 import com.owlike.genson.convert.DefaultConverters.DateConverter;
 import com.owlike.genson.ext.GensonBundle;
 import com.owlike.genson.reflect.*;
@@ -46,6 +43,7 @@ import com.owlike.genson.stream.ObjectWriter;
  */
 public class JAXBBundle extends GensonBundle {
   private final DatatypeFactory dateFactory;
+  private boolean wrapRootValues = false;
 
   public JAXBBundle() {
     try {
@@ -53,6 +51,15 @@ public class JAXBBundle extends GensonBundle {
     } catch (DatatypeConfigurationException dce) {
       throw new IllegalStateException("Could not obtain an instance of DatatypeFactory.", dce);
     }
+  }
+
+  /**
+   * When enabled allows to use @XmlRootElement annotation on root objects to wrap them inside a object under some key.
+   * The key by default will be the class name with the first letter to lower case.
+   */
+  public JAXBBundle wrapRootValues(boolean enable) {
+    wrapRootValues = enable;
+    return this;
   }
 
   @Override
@@ -66,6 +73,25 @@ public class JAXBBundle extends GensonBundle {
       .withConverterFactory(new EnumConverterFactory())
       .withBeanPropertyFactory(new JaxbBeanPropertyFactory())
       .withContextualFactory(new XmlTypeAdapterFactory());
+
+    if (wrapRootValues)
+      builder.withConverterFactory(new ChainedFactory() {
+        @Override
+        protected Converter<?> create(Type type, Genson genson, Converter<?> nextConverter) {
+          Class<?> clazz = TypeUtil.getRawClass(type);
+          XmlRootElement ann = clazz.getAnnotation(XmlRootElement.class);
+
+          if (ann != null) {
+            String name = "##default".equals(ann.name()) ? firstCharToLower(clazz.getSimpleName()) : ann.name();
+            return new WrappedRootValueConverter<Object>(name, name, (Converter<Object>) nextConverter);
+          }
+          return null;
+        }
+      });
+  }
+
+  private String firstCharToLower(String str) {
+    return Character.toLowerCase(str.charAt(0)) + (str.length() > 0 ? str.substring(1) : "");
   }
 
   private class DurationConveter implements Converter<Duration> {
@@ -113,9 +139,7 @@ public class JAXBBundle extends GensonBundle {
       Converter<Object> converter = null;
 
       if (ann != null) {
-        @SuppressWarnings("unchecked")
-        Class<? extends XmlAdapter<Object, Object>> adapterClass = (Class<? extends XmlAdapter<Object, Object>>) ann
-          .value();
+        Class<? extends XmlAdapter> adapterClass = ann.value();
         Type adapterExpandedType = expandType(
           lookupGenericType(XmlAdapter.class, adapterClass), adapterClass);
         Type adaptedType = typeOf(0, adapterExpandedType);
@@ -141,7 +165,7 @@ public class JAXBBundle extends GensonBundle {
             + " declared in " + property.getDeclaringClass());
 
         try {
-          XmlAdapter<Object, Object> adapter = adapterClass.newInstance();
+          XmlAdapter adapter = adapterClass.newInstance();
           // we also need to find a converter for the adapted type
           Converter<Object> adaptedTypeConverter = genson.provideConverter(
             xmlElementType != null ? xmlElementType : adaptedType);

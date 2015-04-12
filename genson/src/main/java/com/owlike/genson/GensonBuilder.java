@@ -72,6 +72,8 @@ public class GensonBuilder {
   private final Map<String, Class<?>> withClassAliases = new HashMap<String, Class<?>>();
   private final Map<Class<?>, BeanView<?>> registeredViews = new HashMap<Class<?>, BeanView<?>>();
 
+  private ChainedFactory customFactoryChain;
+
   public GensonBuilder() {
   }
 
@@ -240,6 +242,25 @@ public class GensonBuilder {
    */
   public GensonBuilder withContextualFactory(ContextualFactory<?>... factories) {
     contextualFactories.addAll(Arrays.asList(factories));
+    return this;
+  }
+
+  /**
+   * A ChainedFactory provides a way to use custom Converters that have access to the default Converters.
+   * An example of use is to wrap incoming/outgoing json in a root object and delegate then the ser/de to the default
+   * Converter.
+   *
+   * This mechanism is internally used by Genson to decorate the different Converters with additional behaviour
+   * (null handling, ser/de of polymorphic types with class info, runtime type based ser/de, etc).
+   *
+   * Note that you can't use it in situations where you want to start reading/writing some partial infos and want to
+   * delegate the rest to the default Converter.
+   */
+  public GensonBuilder withConverterFactory(ChainedFactory chainedFactory) {
+    if (customFactoryChain == null) customFactoryChain = chainedFactory;
+    else {
+      customFactoryChain.append(chainedFactory);
+    }
     return this;
   }
 
@@ -659,6 +680,33 @@ public class GensonBuilder {
   }
 
   /**
+   * Will wrap all the root objects under outputKey during serializaiton and unwrap the content under
+   * inputKey during deserializaiton. For example:
+   *
+   * <code>
+   *   Genson genson = new GensonBuilder().wrapRootValues("request", "response").create();
+   *
+   *   // would produce: {"response": {... person properties ...}}
+   *   genson.serialize(person);
+   *
+   *   Person p = genson.deserialize("{\"request\":{...}}", Person.class);
+   * </code>
+   */
+  public GensonBuilder wrapRootValues(final String inputKey, final String outputKey) {
+    return withConverterFactory(new ChainedFactory() {
+      @Override
+      protected Converter<?> create(Type type, Genson genson, Converter<?> nextConverter) {
+
+        return new DefaultConverters.WrappedRootValueConverter<Object>(
+            inputKey,
+            outputKey,
+            (Converter<Object>) nextConverter
+        );
+      }
+    });
+  }
+
+  /**
    * Creates an instance of Genson. You may use this method as many times you want. It wont
    * change the state of the builder, in sense that the returned instance will have always the
    * same configuration.
@@ -757,25 +805,23 @@ public class GensonBuilder {
    */
   protected Factory<Converter<?>> createConverterFactory() {
     ChainedFactory chainHead = new CircularClassReferenceConverterFactory();
-    ChainedFactory chainTail = chainHead;
 
-    chainTail = chainTail.withNext(new NullConverter.NullConverterFactory());
+    chainHead.append(new NullConverter.NullConverterFactory());
 
-    if (useRuntimeTypeForSerialization) chainTail = chainTail
-      .withNext(new RuntimeTypeConverter.RuntimeTypeConverterFactory());
+    if (useRuntimeTypeForSerialization) chainHead.append(new RuntimeTypeConverter.RuntimeTypeConverterFactory());
 
-    chainTail = chainTail
-      .withNext(new ClassMetadataConverter.ClassMetadataConverterFactory(classMetadataWithStaticType));
+    chainHead.append(new ClassMetadataConverter.ClassMetadataConverterFactory(classMetadataWithStaticType));
 
-    if (withBeanViewConverter) chainTail = chainTail
-      .withNext(new BeanViewConverter.BeanViewConverterFactory(
+    if (customFactoryChain != null) chainHead.append(customFactoryChain);
+
+    if (withBeanViewConverter) chainHead.append(new BeanViewConverter.BeanViewConverterFactory(
         getBeanViewDescriptorProvider()));
 
     ContextualFactoryDecorator ctxFactoryDecorator = new ContextualFactoryDecorator(
       new BasicConvertersFactory(getSerializersMap(), getDeserializersMap(),
         getFactories(), getBeanDescriptorProvider()));
 
-    chainTail.withNext(ctxFactoryDecorator);
+    chainHead.append(ctxFactoryDecorator);
 
     return chainHead;
   }

@@ -113,7 +113,7 @@ public final class Genson {
    * @param withMetadata      true if ObjectReader instances must be configured with metadata feature enabled.
    *                          if withClassMetadata is true withMetadata will be automatically true.
    * @param failOnMissingProperty throw a JsonBindingException when a key in the json stream does not match a property in the Java Class.
-   * @param permissiveParsing When set to true, the ObjectParser will be more permissive on the incoming json content.
+   * @param permissiveParsing When set to true, Genson will be more permissive on the incoming json content and the mapping to Java types.
    */
   public Genson(Factory<Converter<?>> converterFactory, BeanDescriptorProvider beanDescProvider,
                 Converter<Object> nullConverter, boolean skipNull, boolean htmlSafe,

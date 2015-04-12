@@ -173,6 +173,10 @@ Genson genson = new GensonBuilder().withBundle(new JAXBBundle()).create();
  * **XmlAccessorType** can be used to define how to detect properties (fields, methods, public only etc).
 
  * **XmlTransient** to exclude a field or get/set from ser/deser process.
+ 
+ * **XmlRootElement** by default has no effect, but when used with new JAXBBundle().wrapRootValues(true) allows
+ to wrap/unwrap the root classes annotated with @XmlRootElement in another object. By default the key used is the class name with
+ first letter to lower case.
 
 ###Supported types###
 
@@ -182,7 +186,6 @@ Actual implementation has default converters for **Duration** and **XMLGregorian
 ###What might come next###
 
 Support for cyclic references using XmlId and XmlIdRef, XmlType.
-Maybe XmlRootElement, even if I doubt of its pertinence in JSON...
 
 If there are other jaxb features you would like to be supported just open an issue or drop an email on the google group.
 

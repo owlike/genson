@@ -120,6 +120,18 @@ public abstract class ChainedFactory implements Factory<Converter<?>> {
     return next;
   }
 
+  public final <T extends Factory<? extends Converter<?>>> T append(T next) {
+    ChainedFactory f = this;
+    while(f.next() != null) {
+      if (!(f.next() instanceof ChainedFactory)) {
+        throw new UnsupportedOperationException("Last element in the chain is not a ChainedFactory");
+      }
+      f = (ChainedFactory) f.next();
+    }
+
+    return f.withNext(next);
+  }
+
   /**
    * @return a reference to the next factory, may be null.
    */

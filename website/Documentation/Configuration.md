@@ -165,5 +165,12 @@ GensonBuilder provides several methods to register components such as Converters
   <td>If set to true, Genson will throw a JsonBindingException when it encounters a property in the incoming json that does not match
    a property in the class. By default it skips this value silently.</td>
 </tr>
+<tr>
+  <td>wrapRootValues(inputKey, outputKey)</td>
+  <td>Disabled</td>
+  <td>Allows to wrap all the root objects in another object using outputKey during serialization and unwrap during 
+  deserialization the value under inputKey. 
+  Use this only if you need to communicate with some 3rd party library that needs this kind of json.</td>
+</tr>
 </table>
 </div>

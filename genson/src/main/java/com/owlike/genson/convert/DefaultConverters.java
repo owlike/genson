@@ -22,6 +22,7 @@ import com.owlike.genson.annotation.*;
 import com.owlike.genson.annotation.HandleBeanView;
 import com.owlike.genson.reflect.BeanProperty;
 import com.owlike.genson.reflect.TypeUtil;
+import com.owlike.genson.stream.JsonType;
 import com.owlike.genson.stream.ObjectReader;
 import com.owlike.genson.stream.ObjectWriter;
 import com.owlike.genson.stream.ValueType;
@@ -1340,6 +1341,52 @@ public final class DefaultConverters {
       }
       return null;
     }
+  }
 
+  public static class WrappedRootValueConverter<T> implements Converter<T> {
+    private final String inputName;
+    private final String outputName;
+    private final Converter<T> delegateConverter;
+
+    public WrappedRootValueConverter(String inputName, String outputName, Converter<T> delegateConverter) {
+      this.inputName = inputName;
+      this.outputName = outputName;
+      this.delegateConverter = delegateConverter;
+    }
+
+    @Override
+    public void serialize(T object, ObjectWriter writer, Context ctx) throws Exception {
+      if (writer.enclosingType() == JsonType.EMPTY) {
+        writer.beginObject().writeName(outputName);
+        delegateConverter.serialize(object, writer, ctx);
+        writer.endObject();
+      }
+    }
+
+    @Override
+    public T deserialize(ObjectReader reader, Context ctx) throws Exception {
+      T value = null;
+      if (reader.enclosingType() == JsonType.EMPTY) {
+        reader.beginObject();
+        // Lets accept the case where the key is missing
+        if (reader.hasNext()) {
+          reader.next();
+
+          if (!inputName.equalsIgnoreCase(reader.name())) {
+            throw new JsonBindingException(
+                String.format(
+                    "Expected key %s for unwrapping the value, but encountered key %s",
+                    inputName,
+                    reader.name()
+                )
+            );
+          }
+
+          value = delegateConverter.deserialize(reader, ctx);
+        }
+        reader.endObject();
+      }
+      return value;
+    }
   }
 }

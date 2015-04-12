@@ -297,4 +297,6 @@ public interface ObjectWriter {
   public void flush();
 
   public void close();
+
+  public JsonType enclosingType();
 }

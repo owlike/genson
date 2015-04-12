@@ -126,6 +126,28 @@ public class JaxbAnnotationsSupportTest {
     assertEquals("{\"foo\":null}", genson.serialize(new XmlAttributeBean()));
   }
 
+  @Test public void roundTripWithWrappedRootElement() {
+    XmlRootElementDefaultBean expected = new XmlRootElementDefaultBean();
+    expected.i = 1;
+
+    Genson genson = new GensonBuilder().withBundle(new JAXBBundle().wrapRootValues(true)).create();
+    String json = genson.serialize(expected);
+
+    assertEquals("{\"xmlRootElementDefaultBean\":{\"i\":1}}", json);
+    assertEquals(expected.i, genson.deserialize(json, XmlRootElementDefaultBean.class).i);
+  }
+
+  @Test public void roundTripWithWrappedRenamedRootElement() {
+    XmlRootElementBean expected = new XmlRootElementBean();
+    expected.i = 1;
+
+    Genson genson = new GensonBuilder().withBundle(new JAXBBundle().wrapRootValues(true)).create();
+    String json = genson.serialize(expected);
+
+    assertEquals("{\"oo\":{\"i\":1}}", json);
+    assertEquals(expected.i, genson.deserialize(json, XmlRootElementBean.class).i);
+  }
+
   public static class XmlAttributeBean {
     @XmlAttribute
     private int a;
@@ -209,12 +231,12 @@ public class JaxbAnnotationsSupportTest {
 
   @XmlRootElement
   public static class XmlRootElementDefaultBean {
-
+    public int i;
   }
 
   @XmlRootElement(name = "oo")
   public static class XmlRootElementBean {
-
+    public int i;
   }
 
   @XmlAccessorType(XmlAccessType.FIELD)

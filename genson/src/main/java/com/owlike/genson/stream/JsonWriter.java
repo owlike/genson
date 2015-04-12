@@ -88,6 +88,10 @@ public class JsonWriter implements ObjectWriter {
     _ctx.push(JsonType.EMPTY);
   }
 
+  public JsonType enclosingType() {
+    return _ctx.peek();
+  }
+
   public void close() {
     flush();
     try {
