@@ -170,7 +170,8 @@ GensonBuilder provides several methods to register components such as Converters
   <td>Disabled</td>
   <td>Allows to wrap all the root objects in another object using outputKey during serialization and unwrap during 
   deserialization the value under inputKey. 
-  Use this only if you need to communicate with some 3rd party library that needs this kind of json.</td>
+  Use this only if you need to communicate with some 3rd party library that needs this kind of json.
+  A more flexible strategy to wrap root values is to use @XmlRootElement with JaxbBundle, see Extensions section.</td>
 </tr>
 </table>
 </div>

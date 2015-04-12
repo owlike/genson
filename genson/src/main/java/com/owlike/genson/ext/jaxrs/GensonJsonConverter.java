@@ -27,43 +27,35 @@ import com.owlike.genson.stream.ObjectWriter;
 @Consumes({MediaType.APPLICATION_JSON, "text/json", "application/*+json"})
 @Produces({MediaType.APPLICATION_JSON, "text/json", "application/*+json"})
 public class GensonJsonConverter implements MessageBodyReader<Object>, MessageBodyWriter<Object> {
-  private static class GensonStandardResolver implements ContextResolver<Genson> {
-    private final Genson genson;
 
-    public GensonStandardResolver() {
-      this.genson = createDefaultInstance();
-    }
-
-    @Override
-    public Genson getContext(Class<?> type) {
-      return genson;
-    }
-
-    private final Genson createDefaultInstance() {
-      return new GensonBuilder().withBundle(new JAXBBundle()).useConstructorWithArguments(true).create();
-    }
-  }
-
-  private final ContextResolver<Genson> _gensonResolver;
+  private final ContextResolver<GensonJaxRSFeature> _gensonResolver;
 
   public GensonJsonConverter() {
-    this(new GensonStandardResolver());
+    this(new GensonJaxRSFeature());
   }
 
   public GensonJsonConverter(@javax.ws.rs.core.Context Providers providers) {
-    ContextResolver<Genson> gensonResolver = providers.getContextResolver(Genson.class, null);
+    ContextResolver<GensonJaxRSFeature> gensonResolver = providers.getContextResolver(GensonJaxRSFeature.class, null);
+    if (gensonResolver == null) {
+      // This allows us to remain compatible with existing user code that would register a custom resolver.
+      ContextResolver<Genson> oldResolver = providers.getContextResolver(Genson.class, null);
+      if (oldResolver != null) {
+        gensonResolver = new GensonJaxRSFeature().use(oldResolver.getContext(Object.class));
+      }
+    }
+
     if (gensonResolver == null)
-      _gensonResolver = new GensonStandardResolver();
+      _gensonResolver = new GensonJaxRSFeature();
     else
       _gensonResolver = gensonResolver;
   }
 
-  public GensonJsonConverter(ContextResolver<Genson> gensonResolver) {
+  public GensonJsonConverter(ContextResolver<GensonJaxRSFeature> gensonResolver) {
     this._gensonResolver = gensonResolver;
   }
 
   private Genson getInstance(Class<?> type) {
-    Genson genson = _gensonResolver.getContext(type);
+    Genson genson = _gensonResolver.getContext(type).genson();
     if (genson == null)
       throw new NullPointerException("Could not resolve a Genson instance for type " + type
         + " using ContextResolver " + _gensonResolver.getClass());
@@ -72,7 +64,7 @@ public class GensonJsonConverter implements MessageBodyReader<Object>, MessageBo
 
   public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations,
                              MediaType mediaType) {
-    return true;
+    return _gensonResolver.getContext(type).isEnabled();
   }
 
   public void writeTo(Object t, Class<?> type, Type genericType, Annotation[] annotations,
@@ -118,7 +110,7 @@ public class GensonJsonConverter implements MessageBodyReader<Object>, MessageBo
 
   public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations,
                             MediaType mediaType) {
-    return true;
+    return _gensonResolver.getContext(type).isEnabled();
   }
 
   public Object readFrom(Class<Object> type, Type genericType, Annotation[] annotations,

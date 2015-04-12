@@ -12,12 +12,15 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.ExceptionMapper;
 
+import com.owlike.genson.ext.jaxrs.GensonJaxRSFeature;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.server.JSONP;
+import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher;
 import org.junit.Test;
@@ -84,6 +87,38 @@ public class JaxRSIntegrationTest {
           .get(Map.class);
       assertEquals(map.get("key1"), new Long(1));
       assertEquals(map.get("key2"), new Long(2));
+    } finally {
+      stopServer();
+    }
+  }
+
+  @Test
+  public void testDisableGenson() throws Exception {
+    ResourceConfig serverCfg = new ResourceConfig()
+        .register(new DummyRessource())
+        .register(new GensonJaxRSFeature().disable())
+        .register(new ExceptionMapper<Throwable>() {
+          @Override
+          public Response toResponse(Throwable exception) {
+            return Response.ok(exception.getCause().getMessage()).build();
+          }
+        });
+
+    ServletHolder servletHolder = new ServletHolder(new ServletContainer(serverCfg));
+    ServletContextHandler ctxHandler = new ServletContextHandler();
+    ctxHandler.addServlet(servletHolder, "/*");
+    ctxHandler.setContextPath("/");
+
+    server = new Server(9999);
+    server.setHandler(ctxHandler);
+    server.start();
+
+    try {
+      ClientConfig clientCfg = new ClientConfig(GensonJsonConverter.class);
+      Client client = ClientBuilder.newClient(clientCfg);
+
+      String res = client.target("http://localhost:9999/get").request(MediaType.APPLICATION_JSON).get(String.class);
+      assertTrue(res.contains("MessageBodyWriter not found for media type=application/json"));
     } finally {
       stopServer();
     }

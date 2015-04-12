@@ -52,28 +52,20 @@ Actually it has been tested with Jersey and Resteasy. It works out of the box.
 
 **Note**
 
- - By default Genson JAX-RS integration enables JAXB annotations support.
-
-###Disabling Genson in Jersey 2###
-
- In Jersey 2+ Genson can be disabled by setting jersey.genson.disable property 
- to true on your client/server configuration.
-
-{% highlight java %}
-// client
-ClientBuilder.newClient(new ClientConfig().property("jersey.genson.disable", true));
-// server
-new ResourceConfig().property("jersey.genson.disable", true);
-{% endhighlight %}
+ - By default Genson JAX-RS integration enables JAXB annotations and constructors without arguments support.
 
 
 ###Manual registration###
 
-You can also manually register Genson in Jersey.
-On the server side:
+
+The examples above are for Jersey, but ResourceConfig is just an implementation of Application interface.
+So you can achieve the same result without using Jersey but any other implementation of Jax-RS spec.
+You basically only have to implement getSingletons to return a Set containing your GensonJaxRSFeature instance or GensonJsonConverter.
+
+To manually register Genson in Jersey, on the server side:
 
 {% highlight java %}
-// Note that you can also provide an instance of GensonJsonConverter.
+// You can also provide an instance of GensonJsonConverter.
 final ResourceConfig config = new ResourceConfig().register(GensonJsonConverter.class);
 {% endhighlight %}
 
@@ -86,20 +78,28 @@ final ClientConfig clientConfig = new ClientConfig().register(GensonJsonConverte
 Adding a customized Genson instance can be achieved through the same registration mechanism.
 
 ###Customization###
-In many cases you might want to customize Genson instance.
-To do that use GensonBuilder to create a custom instance and then provide it by implementing ContextResolver.
+
+In many cases you might want to customize the Genson instance being used. 
+To do so, you only have to create your custom instance with GensonBuilder and then register a 
+GensonJaxRSFeature configured with this Genson instance.
+
 
 {% highlight java %}
-@Provider
-public class GensonCustomResolver implements ContextResolver<Genson> {
-  // configure the Genson instance
-  private final Genson genson = new GensonBuilder().create();
+new ResourceConfig().register(new GensonJaxRSFeature().use(myCustomGenson));
+{% endhighlight %}
 
-  @Override
-  public Genson getContext(Class<?> type) {
-      return genson;
-  }
-}
+GensonJaxRSFeature is supposed to be the centralized place containing the config related to Genson and Jax-RS.
+
+
+###Disabling Genson in JAX-RS###
+
+Disabling Genson is achieved via GensonJaxRSFeature mechanism we have seen above. 
+
+{% highlight java %}
+// client
+ClientBuilder.newClient(new ClientConfig().register(new GensonJaxRSFeature().disable()));
+// server
+new ResourceConfig().register(new GensonJaxRSFeature().disable());
 {% endhighlight %}
 
 

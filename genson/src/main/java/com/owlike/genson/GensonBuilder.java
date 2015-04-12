@@ -691,6 +691,9 @@ public class GensonBuilder {
    *
    *   Person p = genson.deserialize("{\"request\":{...}}", Person.class);
    * </code>
+   *
+   * If you need this mechanism only for some types or using different root keys, then you can register JaxbBundle with
+   * wrapRootValues(true) and annotate the specific classes with XmlRootElement.
    */
   public GensonBuilder wrapRootValues(final String inputKey, final String outputKey) {
     return withConverterFactory(new ChainedFactory() {
