@@ -118,6 +118,8 @@ function deployWebsite {
   # but also without it (not sure we should allow this)
   if [ ! -d ../genson-scala_2.10 ]; then
     local __GENSON_SCALA_DIR=../genson-scala
+  else
+    local __GENSON_SCALA_DIR=../genson-scala_2.10
   fi
 
   cp -R $__GENSON_SCALA_DIR/target/apidocs Documentation/Scaladoc
@@ -212,7 +214,7 @@ case "$COMMAND" in
     prepareProjects
     updateReleaseVersions .
 
-    mvn deploy
+    mvn deploy -DperformRelease=true
 
     # Releasing the artifacts succeeded, we can now push our changes to the remote repo
     git push origin "genson-$RELEASE_VERSION"
