@@ -3,6 +3,44 @@ title: Changelog
 layout: default
 ---
 
+##Release 1.3 - 12 April 2015
+
+ **Core**
+ 
+  * Issue #49 - Wrap/Unwrap root values in an enclosing object
+  * Issue #51 - Deserialize single value as list
+  * Issue #50 - Improved deserializeValues usability
+  * Issue #45 - Genson annotations overriding Jaxb annotations
+  * Allowing user config to override bundle config
+  * Fix issue #53 - NPE in ASMCreatorParameterNameResolver
+  * Issue #41 - Accept to deserialize timestamps and string dates
+  * Issue #36 - Automatic encoding detection (UTF-8/16/32)
+  * Fixes #38 - Ser/de single byte as int instead of base64 encoded string 
+  
+ **Scala**
+ 
+  * Issue #52 - Supporting releases for multiple scala versions (2.10 and 2.11) using std versioning scheme.
+  
+ **Jodatime**
+ 
+  * Issue #40 - Converters for LocalDate, LocalDateTime and LocalTime
+  * Default serialization of dates as timestamp - **WARN might introduce regression in user code**
+  * Issue #16 - Supporting JsonDateFormat annotation with Jodatime (Mutable)DateTime types
+ 
+ **Jaxb**
+ 
+  * Support XmlRootElement annotation as part of Issue #49
+  * Issue #46 - Improved use when mixing XmlAdapter and XmlElement
+ 
+ **Jax-RS**
+ 
+  * New configuration system, making it easier to customize Genson in Jax-RS apps
+  * Issue #42, #39 - Support for disabling/enabling Genson in any Jax-RS apps
+ 
+ **Jsr 353 - Jsonp**
+ 
+  * Issue #36 - Automatic encoding detection (UTF-8/16/32)
+ 
 ##Release 1.2 - 26 December 2014
  
  **Genson**
