@@ -174,7 +174,57 @@
     <div class="container">
         <div class="row">
             <div class="col-md-12" role="main">
-                <h2 id="release-12---26-december-2014">Release 1.2 - 26 December 2014</h2>
+                <h2 id="release-13---12-april-2015">Release 1.3 - 12 April 2015</h2>
+
+<p><strong>Core</strong></p>
+
+<ul>
+  <li>Issue #49 - Wrap/Unwrap root values in an enclosing object</li>
+  <li>Issue #51 - Deserialize single value as list</li>
+  <li>Issue #50 - Improved deserializeValues usability</li>
+  <li>Issue #45 - Genson annotations overriding Jaxb annotations</li>
+  <li>Allowing user config to override bundle config</li>
+  <li>Fix issue #53 - NPE in ASMCreatorParameterNameResolver</li>
+  <li>Issue #41 - Accept to deserialize timestamps and string dates</li>
+  <li>Issue #36 - Automatic encoding detection (UTF-8/16/32)</li>
+  <li>Fixes #38 - Ser/de single byte as int instead of base64 encoded string </li>
+</ul>
+
+<p><strong>Scala</strong></p>
+
+<ul>
+  <li>Issue #52 - Supporting releases for multiple scala versions (2.10 and 2.11) using std versioning scheme.</li>
+</ul>
+
+<p><strong>Jodatime</strong></p>
+
+<ul>
+  <li>Issue #40 - Converters for LocalDate, LocalDateTime and LocalTime</li>
+  <li>Default serialization of dates as timestamp - <strong>WARN might introduce regression in user code</strong></li>
+  <li>Issue #16 - Supporting JsonDateFormat annotation with Jodatime (Mutable)DateTime types</li>
+</ul>
+
+<p><strong>Jaxb</strong></p>
+
+<ul>
+  <li>Support XmlRootElement annotation as part of Issue #49</li>
+  <li>Issue #46 - Improved use when mixing XmlAdapter and XmlElement</li>
+</ul>
+
+<p><strong>Jax-RS</strong></p>
+
+<ul>
+  <li>New configuration system, making it easier to customize Genson in Jax-RS apps</li>
+  <li>Issue #42, #39 - Support for disabling/enabling Genson in any Jax-RS apps</li>
+</ul>
+
+<p><strong>Jsr 353 - Jsonp</strong></p>
+
+<ul>
+  <li>Issue #36 - Automatic encoding detection (UTF-8/16/32)</li>
+</ul>
+
+<h2 id="release-12---26-december-2014">Release 1.2 - 26 December 2014</h2>
 
 <p><strong>Genson</strong></p>
 
