@@ -12,9 +12,9 @@ import com.owlike.genson.stream.ObjectWriter;
 public abstract class PropertyAccessor extends BeanProperty implements Comparable<PropertyAccessor> {
   Serializer<Object> propertySerializer;
 
-  protected PropertyAccessor(String name, Type type, Class<?> declaringClass,
+  protected PropertyAccessor(String name, Type type, Class<?> declaringClass, Class<?> concreteClass,
                              Annotation[] annotations, int modifiers) {
-    super(name, type, declaringClass, annotations, modifiers);
+    super(name, type, declaringClass, concreteClass, annotations, modifiers);
   }
 
   public void serialize(Object propertySource, ObjectWriter writer, Context ctx) {
@@ -47,8 +47,8 @@ public abstract class PropertyAccessor extends BeanProperty implements Comparabl
   public static class MethodAccessor extends PropertyAccessor {
     protected final Method _getter;
 
-    public MethodAccessor(String name, Method getter, Type type, Class<?> declaringClass) {
-      super(name, type, declaringClass, getter.getAnnotations(), getter.getModifiers());
+    public MethodAccessor(String name, Method getter, Type type, Class<?> concreteClass) {
+      super(name, type, getter.getDeclaringClass(), concreteClass, getter.getAnnotations(), getter.getModifiers());
       this._getter = getter;
       if (!_getter.isAccessible()) {
         _getter.setAccessible(true);
@@ -82,8 +82,8 @@ public abstract class PropertyAccessor extends BeanProperty implements Comparabl
   public static class FieldAccessor extends PropertyAccessor {
     protected final Field _field;
 
-    public FieldAccessor(String name, Field field, Type type, Class<?> declaringClass) {
-      super(name, type, declaringClass, field.getAnnotations(), field.getModifiers());
+    public FieldAccessor(String name, Field field, Type type, Class<?> concreteClass) {
+      super(name, type, field.getDeclaringClass(), concreteClass, field.getAnnotations(), field.getModifiers());
       this._field = field;
       if (!_field.isAccessible()) {
         _field.setAccessible(true);

@@ -63,7 +63,7 @@ private[genson] class ScalaBeanPropertyFactory extends BeanPropertyFactory {
         .flatMap(p => expandToJavaType(p.typeSignature, ofType))
         .toArray
       if (parameterTypes.length == method.getParameterTypes.length)
-        new MethodBeanCreator(method, resolvedNames, parameterTypes)
+        new MethodBeanCreator(method, resolvedNames, parameterTypes, TypeUtil.getRawClass(ofType))
       else null
     }
   }

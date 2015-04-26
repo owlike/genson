@@ -12,8 +12,9 @@ import com.owlike.genson.stream.ObjectReader;
 public abstract class PropertyMutator extends BeanProperty implements Comparable<PropertyMutator> {
   Deserializer<Object> propertyDeserializer;
 
-  protected PropertyMutator(String name, Type type, Class<?> declaringClass, Annotation[] annotations, int modifiers) {
-    super(name, type, declaringClass, annotations, modifiers);
+  protected PropertyMutator(String name, Type type, Class<?> declaringClass, Class<?> concreteClass,
+                            Annotation[] annotations, int modifiers) {
+    super(name, type, declaringClass, concreteClass, annotations, modifiers);
   }
 
   public Object deserialize(ObjectReader reader, Context ctx) {
@@ -52,8 +53,8 @@ public abstract class PropertyMutator extends BeanProperty implements Comparable
   public static class MethodMutator extends PropertyMutator {
     protected final Method _setter;
 
-    public MethodMutator(String name, Method setter, Type type, Class<?> declaringClass) {
-      super(name, type, declaringClass, setter.getAnnotations(), setter.getModifiers());
+    public MethodMutator(String name, Method setter, Type type, Class<?> concreteClass) {
+      super(name, type, setter.getDeclaringClass(), concreteClass, setter.getAnnotations(), setter.getModifiers());
       this._setter = setter;
       if (!_setter.isAccessible()) {
         _setter.setAccessible(true);
@@ -87,8 +88,8 @@ public abstract class PropertyMutator extends BeanProperty implements Comparable
   public static class FieldMutator extends PropertyMutator {
     protected final Field _field;
 
-    public FieldMutator(String name, Field field, Type type, Class<?> declaringClass) {
-      super(name, type, declaringClass, field.getAnnotations(), field.getModifiers());
+    public FieldMutator(String name, Field field, Type type, Class<?> concreteClass) {
+      super(name, type, field.getDeclaringClass(), concreteClass, field.getAnnotations(), field.getModifiers());
       this._field = field;
       if (!_field.isAccessible()) {
         _field.setAccessible(true);

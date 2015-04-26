@@ -123,8 +123,7 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
         }
 
         if (idx == paramCnt) {
-          BeanCreator creator = propertyFactory.createCreator(ofType, ctr,
-            parameterNames, genson);
+          BeanCreator creator = propertyFactory.createCreator(ofType, ctr, parameterNames, genson);
           creators.add(creator);
         }
       }
@@ -147,8 +146,7 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
         }
 
         if (idx == paramCnt) {
-          BeanCreator creator = propertyFactory.createCreator(ofType, ctr,
-            parameterNames, genson);
+          BeanCreator creator = propertyFactory.createCreator(ofType, ctr, parameterNames, genson);
           creators.add(creator);
         }
       }
@@ -166,8 +164,7 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
             + ofClass.getName()
             + " has been discovered as accessor but its name couldn't be resolved!");
         }
-        PropertyAccessor accessor = propertyFactory.createAccessor(name, field, ofType,
-          genson);
+        PropertyAccessor accessor = propertyFactory.createAccessor(name, field, ofType, genson);
         update(accessor, accessorsMap);
       }
     }
@@ -184,8 +181,7 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
             + ofClass.getName()
             + " has been discovered as accessor but its name couldn't be resolved!");
         }
-        PropertyAccessor accessor = propertyFactory.createAccessor(name, method, ofType,
-          genson);
+        PropertyAccessor accessor = propertyFactory.createAccessor(name, method, ofType, genson);
         update(accessor, accessorsMap);
       }
     }
@@ -203,8 +199,7 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
             + " has been discovered as mutator but its name couldn't be resolved!");
         }
 
-        PropertyMutator mutator = propertyFactory
-          .createMutator(name, field, ofType, genson);
+        PropertyMutator mutator = propertyFactory.createMutator(name, field, ofType, genson);
         update(mutator, mutatorsMap);
       }
     }
@@ -221,8 +216,7 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
             + ofClass.getName()
             + " has been discovered as mutator but its name couldn't be resolved!");
         }
-        PropertyMutator mutator = propertyFactory.createMutator(name, method, ofType,
-          genson);
+        PropertyMutator mutator = propertyFactory.createMutator(name, method, ofType, genson);
         update(mutator, mutatorsMap);
       }
     }

@@ -17,13 +17,16 @@ public abstract class BeanProperty {
   protected final String name;
   protected final Type type;
   protected final Class<?> declaringClass;
+  protected final Class<?> concreteClass;
   protected Annotation[] annotations;
   protected final int modifiers;
 
-  protected BeanProperty(String name, Type type, Class<?> declaringClass, Annotation[] annotations, int modifiers) {
+  protected BeanProperty(String name, Type type, Class<?> declaringClass,
+                         Class<?> concreteClass, Annotation[] annotations, int modifiers) {
     this.name = name;
     this.type = type;
     this.declaringClass = declaringClass;
+    this.concreteClass = concreteClass;
     this.annotations = annotations;
     this.modifiers = modifiers;
   }
@@ -34,6 +37,13 @@ public abstract class BeanProperty {
   public Class<?> getDeclaringClass() {
     return declaringClass;
   }
+
+  /**
+   * @return The final concrete class from which this property has been resolved.
+   * For example if this property is defined in class Root but was resolved for class Child extends Root,
+   * then getConcreteClass would return Child class and getDeclaringClass would return Root class.
+   */
+  public Class<?> getConcreteClass() { return concreteClass; }
 
   /**
    * The name of this property (not necessarily the original one).

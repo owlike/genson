@@ -122,7 +122,7 @@ public interface BeanPropertyFactory {
     public BeanCreator createCreator(Type ofType, Method method, String[] resolvedNames,
                                      Genson genson) {
       return new BeanCreator.MethodBeanCreator(method, resolvedNames, expandTypes(
-        method.getGenericParameterTypes(), ofType));
+        method.getGenericParameterTypes(), ofType), getRawClass(ofType));
     }
 
     public BeanCreator createCreator(Type ofType, Constructor<?> ctr, String[] resolvedNames,

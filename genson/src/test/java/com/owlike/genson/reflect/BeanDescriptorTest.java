@@ -197,6 +197,59 @@ public class BeanDescriptorTest {
       )), true, true, true);
   }
 
+  @Test public void propertyWithSameNameShouldOverrideParent() {
+    Child child = new Child();
+    child.a = 1;
+    child.setB(2);
+    child.setD(3);
+    child.c = 4;
+
+    String json = genson.serialize(child);
+    assertEquals("{\"a\":1,\"b\":2,\"c\":4,\"d\":3}", json);
+    Child actual = genson.deserialize(json, Child.class);
+
+    assertEquals(1, actual.a);
+    assertEquals(2, actual.getB());
+    assertEquals(3, actual.getD());
+    assertEquals(4, actual.c);
+    assertNull(((Parent)actual).a);
+    assertNull(actual.b);
+    assertNull(actual.getC());
+  }
+
+  public static class Parent {
+    public String a;
+    public String b;
+    private String c;
+
+    public void setC(String c) {
+      this.c = c;
+    }
+    public String getC() {
+      return c;
+    }
+  }
+
+  public static class Child extends Parent {
+    public int a;
+    public int c;
+    public String d;
+    private int _b;
+
+    public void setD(int d) {
+      this.d = ""+d;
+    }
+    public int getD() {
+      return Integer.valueOf(d);
+    }
+    public void setB(int b) {
+      this._b = b;
+    }
+    public int getB() {
+      return _b;
+    }
+  }
+
   static class ForceMethodCreator {
     public static transient boolean usedMethod = false;
 
