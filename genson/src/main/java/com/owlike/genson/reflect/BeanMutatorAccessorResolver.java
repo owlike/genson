@@ -296,15 +296,17 @@ public interface BeanMutatorAccessorResolver {
      * accessors.
      */
     public Trilean isAccessor(Method method, Class<?> fromClass) {
-      String name = method.getName();
-      int len = name.length();
-      if (methodVisibilityFilter.isVisible(method)
-        && ((len > 3 && name.startsWith("get")) || (len > 2 && name.startsWith("is") && (TypeUtil
-        .match(TypeUtil.expandType(method.getGenericReturnType(), fromClass),
-          Boolean.class, false) || TypeUtil.match(
-        method.getGenericReturnType(), boolean.class, false))))
-        && method.getParameterTypes().length == 0)
-        return TRUE;
+      if (!method.isBridge()) {
+        String name = method.getName();
+        int len = name.length();
+        if (methodVisibilityFilter.isVisible(method)
+          && ((len > 3 && name.startsWith("get")) || (len > 2 && name.startsWith("is") && (TypeUtil
+          .match(TypeUtil.expandType(method.getGenericReturnType(), fromClass),
+            Boolean.class, false) || TypeUtil.match(
+          method.getGenericReturnType(), boolean.class, false))))
+          && method.getParameterTypes().length == 0)
+          return TRUE;
+      }
 
       return FALSE;
     }
@@ -322,10 +324,12 @@ public interface BeanMutatorAccessorResolver {
     }
 
     public Trilean isMutator(Method method, Class<?> fromClass) {
-      if (methodVisibilityFilter.isVisible(method) && method.getName().length() > 3
-        && method.getName().startsWith("set") && method.getParameterTypes().length == 1
-        && method.getReturnType() == void.class)
-        return TRUE;
+      if (!method.isBridge()) {
+        if (methodVisibilityFilter.isVisible(method) && method.getName().length() > 3
+          && method.getName().startsWith("set") && method.getParameterTypes().length == 1
+          && method.getReturnType() == void.class)
+          return TRUE;
+      }
 
       return FALSE;
     }
