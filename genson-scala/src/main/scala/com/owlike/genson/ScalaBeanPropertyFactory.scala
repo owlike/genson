@@ -10,10 +10,12 @@ import scala.reflect.runtime.{universe => u}
 private object ScalaReflectionApiLock
 
 // its a bit ugly to do all this only to handle erased primitive types in scala, but it works to some degree...
-private[genson] class ScalaBeanPropertyFactory extends BeanPropertyFactory {
+private[genson] class ScalaBeanPropertyFactory(classloader: ClassLoader) extends BeanPropertyFactory {
+
+  def this() = this(classOf[ScalaBundle].getClassLoader)
 
   val mirror = ScalaReflectionApiLock.synchronized {
-    u.runtimeMirror(classOf[ScalaBundle].getClassLoader)
+    u.runtimeMirror(classloader)
   }
 
   def createAccessor(name: String, field: Field, ofType: Type, genson: Genson): PropertyAccessor = {
