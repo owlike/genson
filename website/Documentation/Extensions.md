@@ -85,7 +85,7 @@ GensonJaxRSFeature configured with this Genson instance.
 
 
 {% highlight java %}
-new ResourceConfig().register(new GensonJaxRSFeature().use(myCustomGenson));
+new ResourceConfig().register(new GensonJaxRSFeature().use(myCustomGenson).disableSerializationFor(String.class));
 {% endhighlight %}
 
 GensonJaxRSFeature is supposed to be the centralized place containing the config related to Genson and Jax-RS.

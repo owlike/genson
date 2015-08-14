@@ -5,6 +5,8 @@ import com.owlike.genson.GensonBuilder;
 import com.owlike.genson.ext.jaxb.JAXBBundle;
 
 import javax.ws.rs.ext.ContextResolver;
+import java.util.HashSet;
+import java.util.Set;
 
 public final class GensonJaxRSFeature implements ContextResolver<GensonJaxRSFeature> {
 
@@ -14,6 +16,8 @@ public final class GensonJaxRSFeature implements ContextResolver<GensonJaxRSFeat
       .create();
 
   private boolean enabled = true;
+  private Set<Class<?>> notSerializableTypes = new HashSet<Class<?>>();
+  private Set<Class<?>> notDeserializableTypes = new HashSet<Class<?>>();
   private Genson genson = _defaultGenson;
 
   @Override
@@ -44,4 +48,23 @@ public final class GensonJaxRSFeature implements ContextResolver<GensonJaxRSFeat
     return enabled;
   }
 
+  public GensonJaxRSFeature disableSerializationFor(Class<?> type, Class<?>... types) {
+    notSerializableTypes.add(type);
+    for (Class<?> t : types) notSerializableTypes.add(t);
+    return this;
+  }
+
+  public GensonJaxRSFeature disableDeserializationFor(Class<?> type, Class<?>... types) {
+    notDeserializableTypes.add(type);
+    for (Class<?> t : types) notDeserializableTypes.add(t);
+    return this;
+  }
+
+  public boolean isSerializable(Class<?> type) {
+    return !notSerializableTypes.contains(type);
+  }
+
+  public boolean isDeserializable(Class<?> type) {
+    return !notDeserializableTypes.contains(type);
+  }
 }
