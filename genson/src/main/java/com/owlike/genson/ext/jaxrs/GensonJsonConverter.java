@@ -64,7 +64,9 @@ public class GensonJsonConverter implements MessageBodyReader<Object>, MessageBo
 
   public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations,
                              MediaType mediaType) {
-    return _gensonResolver.getContext(type).isEnabled();
+
+    GensonJaxRSFeature feature = _gensonResolver.getContext(type);
+    return feature.isEnabled() && feature.isSerializable(type);
   }
 
   public void writeTo(Object t, Class<?> type, Type genericType, Annotation[] annotations,
@@ -110,7 +112,8 @@ public class GensonJsonConverter implements MessageBodyReader<Object>, MessageBo
 
   public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations,
                             MediaType mediaType) {
-    return _gensonResolver.getContext(type).isEnabled();
+    GensonJaxRSFeature feature = _gensonResolver.getContext(type);
+    return feature.isEnabled() && feature.isDeserializable(type);
   }
 
   public Object readFrom(Class<Object> type, Type genericType, Annotation[] annotations,
