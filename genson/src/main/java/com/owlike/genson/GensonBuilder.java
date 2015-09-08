@@ -60,6 +60,7 @@ public class GensonBuilder {
   private VisibilityFilter methodFilter = VisibilityFilter.PACKAGE_PUBLIC;
   private VisibilityFilter constructorFilter = VisibilityFilter.PACKAGE_PUBLIC;
 
+  private ClassLoader classLoader = null;
   private BeanDescriptorProvider beanDescriptorProvider;
   private Converter<Object> nullConverter;
   private DateFormat dateFormat = SimpleDateFormat.getDateTimeInstance();
@@ -293,6 +294,17 @@ public class GensonBuilder {
     return this;
   }
 
+  /**
+   * Override the default classloader
+   *
+   * @param loader classloader which will be used to load classes while deserializing
+   * @return a reference to this builder
+   */
+  public GensonBuilder withClassLoader(ClassLoader loader) {
+    classLoader = loader;
+    return this;
+  }
+
 
   /**
    * Replaces default {@link com.owlike.genson.reflect.BeanMutatorAccessorResolver
@@ -343,6 +355,10 @@ public class GensonBuilder {
 
   public Map<Type, Deserializer<?>> getDeserializersMap() {
     return Collections.unmodifiableMap(deserializersMap);
+  }
+
+  public ClassLoader getClassLoader() {
+    return classLoader;
   }
 
   /**
