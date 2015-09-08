@@ -60,7 +60,7 @@ public class GensonBuilder {
   private VisibilityFilter methodFilter = VisibilityFilter.PACKAGE_PUBLIC;
   private VisibilityFilter constructorFilter = VisibilityFilter.PACKAGE_PUBLIC;
 
-  private ClassLoader classLoader = null;
+  private ClassLoader classLoader = getClass().getClassLoader();
   private BeanDescriptorProvider beanDescriptorProvider;
   private Converter<Object> nullConverter;
   private DateFormat dateFormat = SimpleDateFormat.getDateTimeInstance();
