@@ -2,6 +2,8 @@
 
 #Genson
 
+[![Join the chat at https://gitter.im/owlike/genson](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/owlike/genson?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Genson is a complete json <-> java conversion library, providing full databinding, streaming and much more.
 
 Gensons main strengths?
