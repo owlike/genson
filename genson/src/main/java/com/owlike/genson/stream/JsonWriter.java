@@ -54,7 +54,7 @@ public class JsonWriter implements ObjectWriter {
   private final Writer writer;
   final Deque<JsonType> _ctx = new ArrayDeque<JsonType>(10);
   private boolean _hasPrevious;
-  private String _name;
+  private char[] _name;
   private final boolean indentation;
   private final static char[] _indentation = new char[]{' ', ' '};
 
@@ -123,7 +123,9 @@ public class JsonWriter implements ObjectWriter {
       _ctx.pop();
       begin(JsonType.OBJECT, '{');
       for (MetadataPair pair : _metadata) {
-        writeName('@' + pair.name).writeInternalString(pair.value);
+        writeName('@' + pair.name);
+        beforeValue();
+        writeInternalString(pair.value);
       }
     } else begin(JsonType.OBJECT, '{');
     return this;
@@ -168,22 +170,24 @@ public class JsonWriter implements ObjectWriter {
   private final JsonWriter beforeValue() {
     final JsonType enclosingType = _ctx.peek();
     if (enclosingType == JsonType.ARRAY) {
-      if (_name != null) throw newIllegalKeyValuePairInJsonArray(_name);
+      if (_name != null) throw newIllegalKeyValuePairInJsonArray(new String(_name));
       if (_hasPrevious) {
         if ((_len + 1) >= _bufferSize) flushBuffer();
         _buffer[_len++] = ',';
       }
       indent();
     } else if (_name != null) {
-      final int l = _name.length();
+      final int l = _name.length;
       // hum I dont think there may be names with a length near to 1024... we flush only once
       if ((_len + 4 + l) >= _bufferSize) flushBuffer();
       if (_hasPrevious) _buffer[_len++] = ',';
       indent();
       if ((_len + 3 + l) >= _bufferSize) flushBuffer();
+
       _buffer[_len++] = '"';
       writeToBuffer(_name, 0, l);
       _buffer[_len++] = '"';
+
       _buffer[_len++] = ':';
       _name = null;
     } else if (enclosingType == JsonType.OBJECT) throw newIllegalSingleValueInJsonObject();
@@ -223,6 +227,11 @@ public class JsonWriter implements ObjectWriter {
   }
 
   public JsonWriter writeName(final String name) {
+    _name = escapeString(name);
+    return this;
+  }
+
+  public ObjectWriter writeEscapedName(char[] name) {
     _name = name;
     return this;
   }
@@ -394,12 +403,44 @@ public class JsonWriter implements ObjectWriter {
 
   public JsonWriter writeValue(final String value) {
     clearMetadata();
+    beforeValue();
     writeInternalString(value);
     return this;
   }
 
+  public final static char[] escapeString(final String value) {
+    StringBuilder sb = new StringBuilder();
+    int last = 0;
+    final int length = value.length();
+    for (int i = 0; i < length; i++) {
+      char c = value.charAt(i);
+      char[] replacement;
+      if (c < 128) {
+        replacement = REPLACEMENT_CHARS[c];
+        if (replacement == null) {
+          continue;
+        }
+      } else if (c == '\u2028') {
+        replacement = "\\u2028".toCharArray();
+      } else if (c == '\u2029') {
+        replacement = "\\u2029".toCharArray();
+      } else {
+        continue;
+      }
+      if (last < i) {
+        sb.append(value, last, i - last);
+      }
+      sb.append(replacement, 0, replacement.length);
+      last = i + 1;
+    }
+    if (last < length) {
+      sb.append(value, last, length);
+    }
+
+    return sb.toString().toCharArray();
+  }
+
   private final void writeInternalString(final String value) {
-    beforeValue();
     final char[][] replacements = htmlSafe ? HTML_SAFE_REPLACEMENT_CHARS : REPLACEMENT_CHARS;
     if ((_len + 1) >= _bufferSize) flushBuffer();
     _buffer[_len++] = '"';
