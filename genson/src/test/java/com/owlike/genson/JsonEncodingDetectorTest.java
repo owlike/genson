@@ -47,7 +47,9 @@ public class JsonEncodingDetectorTest {
 
   private JsonReader makeReader(byte[] bytes) {
     try {
-      return new JsonReader(new EncodingAwareReaderFactory().createReader(new ByteArrayInputStream(bytes)), false, false, false);
+      return new JsonReader(
+          new EncodingAwareReaderFactory().createReader(new ByteArrayInputStream(bytes)), false, false
+      );
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

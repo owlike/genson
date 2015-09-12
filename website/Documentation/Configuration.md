@@ -130,17 +130,10 @@ GensonBuilder provides several methods to register components such as Converters
   Double.parse then you can enable strict double parsing.</td>
 </tr>
 <tr>
-  <td>usePermissiveParsing</td>
+  <td>acceptSingleValueAsList</td>
   <td>False</td>
-  <td>
-    When enabled tells Genson to be less strict on the incoming json and the mapping to Java types.
-    It allows to
-      <ul>
-       <li>Parse multiple root json values (not enclosed in an array) with same ObjectReader.</li>
-       <li>Wrap a single value into a list when a list is expected. Useful when dealing with APIs that unwrap 
-     arrays containing a single value.</li>
-     </ul>
- </td>
+  <td>Wrap a single value into a list when a list is expected. Useful when dealing with APIs that unwrap 
+  arrays containing a single value.</td>
 </tr>
 <tr>
   <td>useIndentation</td>

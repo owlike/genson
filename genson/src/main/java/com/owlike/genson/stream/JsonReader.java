@@ -73,7 +73,6 @@ public class JsonReader implements ObjectReader {
   private final Reader reader;
   private final boolean strictDoubleParse;
   private final boolean readMetadata;
-  private final boolean permissiveParsing;
   private final char[] _buffer = new char[2048];
   private int _col;
   private int _row;
@@ -102,14 +101,13 @@ public class JsonReader implements ObjectReader {
   }
 
   public JsonReader(String source) {
-    this(new StringReader(source), false, false, false);
+    this(new StringReader(source), false, false);
   }
 
-  public JsonReader(Reader reader, boolean strictDoubleParse, boolean readMetadata, boolean permissiveParsing) {
+  public JsonReader(Reader reader, boolean strictDoubleParse, boolean readMetadata) {
     this.reader = reader;
     this.strictDoubleParse = strictDoubleParse;
     this.readMetadata = readMetadata;
-    this.permissiveParsing = permissiveParsing;
 
     char token = (char) readNextToken(false);
     if ('[' == token) valueType = ARRAY;
@@ -344,7 +342,7 @@ public class JsonReader implements ObjectReader {
     int token = readNextToken(false);
     if (token == -1) return false;
     if (token < 128) {
-      if (_first || (permissiveParsing && _ctx.size() == 1)) return _NEXT_TOKEN[token];
+      if (_first || _ctx.size() == 1) return _NEXT_TOKEN[token];
       else if (token == ',') return true;
     }
 

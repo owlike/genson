@@ -19,7 +19,6 @@ import static org.junit.Assert.*;
 public class JsonReaderTest {
   private boolean strictDoubleParse;
   private boolean readMetadata;
-  private boolean permissiveParsing = false;
 
   public JsonReaderTest(boolean strictDoubleParse, boolean readMetadata) {
     this.strictDoubleParse = strictDoubleParse;
@@ -35,7 +34,7 @@ public class JsonReaderTest {
 
   @Test public void testReadManyValuesNotEnclosedInArrayWithSameReader() {
     StringReader strReader = new StringReader("{\"k1\":1}\n{\"k2\":2}{\"k3\":3}");
-    JsonReader reader = new JsonReader(strReader, false, false, true);
+    JsonReader reader = new JsonReader(strReader, false, false);
     int i = 1;
     while(reader.hasNext()) {
       reader.next();
@@ -153,7 +152,7 @@ public class JsonReaderTest {
 		 */
 
     @SuppressWarnings("resource")
-    JsonReader reader = new JsonReader(new CharArrayReader(in), strictDoubleParse, readMetadata, permissiveParsing);
+    JsonReader reader = new JsonReader(new CharArrayReader(in), strictDoubleParse, readMetadata);
     try {
       for (reader.beginArray(); reader.hasNext(); ) {
         reader.next();
@@ -558,7 +557,7 @@ public class JsonReaderTest {
     String src = "{\"@class\"	: \"theclass\"" + ",     \"@author\":\"me\""
       + ", \"@comment\":\"no comment\"" + ", \"obj\" :      	"
       + "			{\"@class\":\"anotherclass\"}}";
-    JsonReader reader = new JsonReader(new StringReader(src), false, true, false);
+    JsonReader reader = new JsonReader(new StringReader(src), false, true);
     assertTrue(reader.beginObject().hasNext());
     assertEquals("theclass", reader.metadata("class"));
     assertEquals("me", reader.metadata("author"));
@@ -573,10 +572,10 @@ public class JsonReaderTest {
   }
 
   @Test
-  public void testMultipleCallsTonextObjectMetadata() throws IOException {
+  public void testMultipleCallsToNextObjectMetadata() throws IOException {
     String src = "{\"@class\"	: \"theclass\"" + ",     \"@author\":\"me\""
       + ", \"@comment\":\"no comment\"}";
-    JsonReader reader = new JsonReader(new StringReader(src), false, true, false);
+    JsonReader reader = new JsonReader(new StringReader(src), false, true);
     assertEquals("theclass", reader.nextObjectMetadata().nextObjectMetadata().metadata("class"));
     assertEquals("theclass", reader.nextObjectMetadata().metadata("class"));
     assertEquals("no comment", reader.metadata("comment"));
@@ -615,12 +614,12 @@ public class JsonReaderTest {
 
   @Test
   public void testSkipValueDeepObject() throws IOException {
-    JsonReader reader = new JsonReader(new StringReader("{\"a\":{}}"), strictDoubleParse, readMetadata, permissiveParsing);
+    JsonReader reader = new JsonReader(new StringReader("{\"a\":{}}"), strictDoubleParse, readMetadata);
     reader.skipValue();
     reader.close();
   }
 
   private JsonReader createReader(String json) {
-    return new JsonReader(new StringReader(json), strictDoubleParse, readMetadata, permissiveParsing);
+    return new JsonReader(new StringReader(json), strictDoubleParse, readMetadata);
   }
 }

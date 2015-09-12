@@ -30,15 +30,16 @@ public class GensonJsonParserFactory implements JsonParserFactory {
 
   @Override
   public JsonParser createParser(Reader reader) {
-    return new GensonJsonParser(new JsonReader(reader, strictDoubleParse, false, false));
+    return new GensonJsonParser(new JsonReader(reader, strictDoubleParse, false));
   }
 
   @Override
   public JsonParser createParser(InputStream in) {
 
     try {
-      return new GensonJsonParser(new JsonReader(encodingAwareReaderFactory.createReader(in)
-        , strictDoubleParse, false, false));
+      return new GensonJsonParser(
+          new JsonReader(encodingAwareReaderFactory.createReader(in), strictDoubleParse, false)
+      );
     } catch (IOException e) {
       throw new JsonException("Failed to detect encoding");
     }
@@ -46,7 +47,7 @@ public class GensonJsonParserFactory implements JsonParserFactory {
 
   @Override
   public JsonParser createParser(InputStream in, Charset charset) {
-    return new GensonJsonParser(new JsonReader(new InputStreamReader(in, charset), strictDoubleParse, false, false));
+    return new GensonJsonParser(new JsonReader(new InputStreamReader(in, charset), strictDoubleParse, false));
   }
 
   @Override

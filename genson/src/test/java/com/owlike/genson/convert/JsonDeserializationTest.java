@@ -22,16 +22,13 @@ public class JsonDeserializationTest {
   final Genson genson = new GensonBuilder().useConstructorWithArguments(true).create();
 
   @Test public void testDeserializeSingleObjectAsList() {
-        PojoWithList actual = new GensonBuilder()
-            .usePermissiveParsing(true)
-            .create()
-          .deserialize("{\"listOfInt\": 1}", PojoWithList.class);
+    PojoWithList actual = new GensonBuilder().acceptSingleValueAsList(true).create()
+        .deserialize("{\"listOfInt\": 1}", PojoWithList.class);
 
-      assertEquals(1, actual.listOfInt.get(0).intValue());
+    assertEquals(1, actual.listOfInt.get(0).intValue());
   }
 
   @Test public void testReadMultipleRootObjectsNotEnclosedInArrayAndMapManually() {
-    Genson genson = new GensonBuilder().usePermissiveParsing(true).create();
     GenericType<Pojo> type = GenericType.of(Pojo.class);
     Context ctx = new Context(genson);
 
@@ -45,7 +42,6 @@ public class JsonDeserializationTest {
   }
 
   @Test public void testReadMultipleRootObjectsNotEnclosedInArrayAndBind() {
-    Genson genson = new GensonBuilder().usePermissiveParsing(true).create();
     ObjectReader reader = genson.createReader(new StringReader("{\"a\":1}{\"a\":2}"));
     int i = 1;
     for (Iterator<Pojo> it = genson.deserializeValues(reader, GenericType.of(Pojo.class));
@@ -397,7 +393,7 @@ public class JsonDeserializationTest {
   }
 
   public static class PojoWithList {
-      public List<Integer> listOfInt;
+    public List<Integer> listOfInt;
   }
 
   @SuppressWarnings("unused")

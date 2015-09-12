@@ -68,7 +68,6 @@ public final class Genson {
   private final boolean withClassMetadata;
   private final boolean withMetadata;
   private final boolean strictDoubleParse;
-  private final boolean permissiveParsing;
   private final boolean indent;
   private final boolean failOnMissingProperty;
 
@@ -84,7 +83,7 @@ public final class Genson {
     this(_default.converterFactory, _default.beanDescriptorFactory, _default.nullConverter,
       _default.skipNull, _default.htmlSafe, _default.aliasClassMap,
       _default.withClassMetadata, _default.strictDoubleParse, _default.indent,
-      _default.withMetadata, _default.failOnMissingProperty, _default.permissiveParsing);
+      _default.withMetadata, _default.failOnMissingProperty);
   }
 
   /**
@@ -113,13 +112,11 @@ public final class Genson {
    * @param withMetadata      true if ObjectReader instances must be configured with metadata feature enabled.
    *                          if withClassMetadata is true withMetadata will be automatically true.
    * @param failOnMissingProperty throw a JsonBindingException when a key in the json stream does not match a property in the Java Class.
-   * @param permissiveParsing When set to true, Genson will be more permissive on the incoming json content and the mapping to Java types.
    */
   public Genson(Factory<Converter<?>> converterFactory, BeanDescriptorProvider beanDescProvider,
                 Converter<Object> nullConverter, boolean skipNull, boolean htmlSafe,
                 Map<String, Class<?>> classAliases, boolean withClassMetadata,
-                boolean strictDoubleParse, boolean indent, boolean withMetadata, boolean failOnMissingProperty,
-                boolean permissiveParsing) {
+                boolean strictDoubleParse, boolean indent, boolean withMetadata, boolean failOnMissingProperty) {
     this.converterFactory = converterFactory;
     this.beanDescriptorFactory = beanDescProvider;
     this.nullConverter = nullConverter;
@@ -135,7 +132,6 @@ public final class Genson {
     this.indent = indent;
     this.withMetadata = withClassMetadata || withMetadata;
     this.failOnMissingProperty = failOnMissingProperty;
-    this.permissiveParsing = permissiveParsing;
   }
 
   /**
@@ -442,11 +438,10 @@ public final class Genson {
   /**
    * This can be used to deserialize in an efficient streaming fashion a sequence of objects.
    * Note that you can use this method when your values are wrapped in an array (valid json) but also
-   * when they all are root values (not enclosed in an array). However for this second use case make sure
-   * to enable the usePermissiveParsing option in GensonBuilder. For example:
+   * when they all are root values (not enclosed in an array). For example:
    *
    * <pre>
-   *   Genson genson = new GensonBuilder().usePermissiveParsing(true).create();
+   *   Genson genson = new Genson();
    *   ObjectReader reader = genson.createReader(json);
    *
    *   for (Iterator&lt;LogEntry> it = genson.deserializeValues(reader, GenericType.of(LogEntry.class));
@@ -583,7 +578,7 @@ public final class Genson {
    * Creates a new ObjectReader with this Genson instance configuration.
    */
   public ObjectReader createReader(Reader reader) {
-    return new JsonReader(reader, strictDoubleParse, withMetadata, permissiveParsing);
+    return new JsonReader(reader, strictDoubleParse, withMetadata);
   }
 
   public boolean isSkipNull() {
