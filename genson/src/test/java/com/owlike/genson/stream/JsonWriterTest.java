@@ -6,8 +6,6 @@ import java.io.StringWriter;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.owlike.genson.stream.JsonWriter;
-
 import static org.junit.Assert.*;
 
 public class JsonWriterTest {
@@ -186,7 +184,8 @@ public class JsonWriterTest {
       .writeName("a").writeString(null)
       .writeName("b").writeNumber(null)
       .writeName("c").writeNumber(2)
-      .endObject().flush();
+      .endObject()
+      .flush();
 
     assertEquals("{\"a\":null,\"b\":null,\"c\":2}", sw.toString());
   }
@@ -197,8 +196,20 @@ public class JsonWriterTest {
       .writeString(null)
       .writeNumber(null)
       .writeNumber(2)
-      .endArray().flush();
+      .endArray()
+      .flush();
 
     assertEquals("[null,null,2]", sw.toString());
+  }
+
+  @Test
+  public void escapeSpecialCharactersAndWriteName() {
+    w.beginObject()
+      .writeBoolean("foo\"bar", true)
+      .writeEscapedName("bar\\\"foo".toCharArray()).writeValue(1)
+      .endObject()
+      .flush();
+
+    assertEquals("{\"foo\\\"bar\":true,\"bar\\\"foo\":1}", sw.toString());
   }
 }

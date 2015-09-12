@@ -7,19 +7,22 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 import com.owlike.genson.*;
+import com.owlike.genson.stream.JsonWriter;
 import com.owlike.genson.stream.ObjectWriter;
 
 public abstract class PropertyAccessor extends BeanProperty implements Comparable<PropertyAccessor> {
   Serializer<Object> propertySerializer;
+  private final char[] escapedName;
 
   protected PropertyAccessor(String name, Type type, Class<?> declaringClass, Class<?> concreteClass,
                              Annotation[] annotations, int modifiers) {
     super(name, type, declaringClass, concreteClass, annotations, modifiers);
+    escapedName = JsonWriter.escapeString(name);
   }
 
   public void serialize(Object propertySource, ObjectWriter writer, Context ctx) {
     Object propertyValue = access(propertySource);
-    writer.writeName(name);
+    writer.writeEscapedName(escapedName);
     try {
       propertySerializer.serialize(propertyValue, writer, ctx);
     } catch (Throwable th) {

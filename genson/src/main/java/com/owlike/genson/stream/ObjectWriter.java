@@ -115,6 +115,15 @@ public interface ObjectWriter {
   public ObjectWriter writeName(String name);
 
   /**
+   * Will write the name without escaping special characters, assuming it has been done by the caller or the string
+   * doesn't contain any character needing to be escaped.
+   * @param name a non null escaped String
+   * @return a reference to this, allowing to chain method calls.
+   * @throws JsonStreamException if trying to produce invalid json
+   */
+  public ObjectWriter writeEscapedName(char[] name);
+
+  /**
    * Writes a value to the stream. Values can be written in arrays and in objects (after writing
    * the name).
    *
