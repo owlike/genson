@@ -102,7 +102,7 @@ function deployWebsite {
   mvn clean package -DskipTests
 
   # checkout and prepare gh-pages branch for the new generated doc
-  git clone git@github.com:owlike/genson.git tmp_doc
+  git clone https://github.com/ericalbers/genson.git  #git@github.com:owlike/genson.git tmp_doc
   cd tmp_doc
   git checkout gh-pages
   rm -R *
@@ -148,7 +148,7 @@ function prepareFromRemote {
     rm -Rf /tmp/genson_release
   fi
 
-  git clone git@github.com:owlike/genson.git /tmp/genson_release
+  git clone https://github.com/ericalbers/genson.git  #git@github.com:owlike/genson.git /tmp/genson_release
   cd /tmp/genson_release
 }
 
