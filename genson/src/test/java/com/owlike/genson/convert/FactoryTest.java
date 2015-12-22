@@ -36,7 +36,7 @@ public class FactoryTest {
         factory = new BasicConvertersFactory(getSerializersMap(), getDeserializersMap(),
           getFactories(), getBeanDescriptorProvider());
 
-        ChainedFactory chain = new NullConverter.NullConverterFactory();
+        ChainedFactory chain = new NullConverterFactory(false);
         chain.withNext(
           new BeanViewConverter.BeanViewConverterFactory(
             getBeanViewDescriptorProvider())).withNext(factory);

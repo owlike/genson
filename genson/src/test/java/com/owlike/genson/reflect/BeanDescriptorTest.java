@@ -77,7 +77,7 @@ public class BeanDescriptorTest {
       .provideConverter(ThatObject.class);
     assertEquals(DefaultConverters.StringConverter.class,
       pDesc.mutableProperties.get("aString").propertyDeserializer.getClass());
-    assertEquals(DefaultConverters.PrimitiveConverterFactory.intConverter.class,
+    assertEquals(DefaultConverters.IntegerConverter.class,
       pDesc.mutableProperties.get("aPrimitive").propertyDeserializer.getClass());
     assertEquals(DefaultConverters.CollectionConverter.class,
       pDesc.mutableProperties.get("listOfDates").propertyDeserializer.getClass());

@@ -212,9 +212,7 @@ public class JsonReader implements ObjectReader {
         throwNumberFormatException("an int", "overflowing double value " + _doubleValue);
       }
       return value;
-    } else if (STRING == valueType) return "".equals(_stringValue) ? 0 : Integer
-      .parseInt(_stringValue);
-    else if (NULL == valueType) return 0;
+    } else if (STRING == valueType) return Integer.parseInt(_stringValue);
 
     throw new JsonStreamException("Expected a int but value is of type " + valueType);
   }
@@ -227,9 +225,8 @@ public class JsonReader implements ObjectReader {
         throwNumberFormatException("a long", "overflowing double value " + _doubleValue);
       }
       return (long) _doubleValue;
-    } else if (STRING == valueType) return "".equals(_stringValue) ? 0 : Long
-      .parseLong(_stringValue);
-    else if (NULL == valueType) return 0l;
+    } else if (STRING == valueType) return Long.parseLong(_stringValue);
+
     throw new JsonStreamException("Expected a long but value is of type " + valueType);
   }
 
@@ -239,9 +236,8 @@ public class JsonReader implements ObjectReader {
     } else if (INTEGER == valueType) {
       // for the moment lets do that even if there is some precision loss...
       return Long.valueOf(_intValue).doubleValue();
-    } else if (STRING == valueType) return "".equals(_stringValue) ? 0 : Double
-      .parseDouble(_stringValue);
-    else if (NULL == valueType) return 0d;
+    } else if (STRING == valueType) return Double.parseDouble(_stringValue);
+
     throw new JsonStreamException("Expected a double but value is of type " + valueType);
   }
 
@@ -259,9 +255,7 @@ public class JsonReader implements ObjectReader {
         throwNumberFormatException("a short", "overflowing double value " + _doubleValue);
       }
       return value;
-    } else if (STRING == valueType) return "".equals(_stringValue) ? 0 : Short
-      .parseShort(_stringValue);
-    else if (NULL == valueType) return 0;
+    } else if (STRING == valueType) return Short.parseShort(_stringValue);
 
     throw new JsonStreamException("Expected a short but value is of type " + valueType);
   }
@@ -275,9 +269,8 @@ public class JsonReader implements ObjectReader {
       // same as for doubles, for the moment lets do that even if there is some precision
       // loss...
       return Long.valueOf(_intValue).floatValue();
-    } else if (STRING == valueType) return "".equals(_stringValue) ? 0 : Float
-      .parseFloat(_stringValue);
-    else if (NULL == valueType) return 0f;
+    } else if (STRING == valueType) return Float.parseFloat(_stringValue);
+
     throw new JsonStreamException("Expected a float but value is of type " + valueType);
   }
 
@@ -286,7 +279,7 @@ public class JsonReader implements ObjectReader {
       return _booleanValue;
     }
     if (STRING == valueType) return Boolean.parseBoolean(_stringValue);
-    if (NULL == valueType) return false;
+
     throw new JsonStreamException("Readen value is not of type boolean");
   }
 

@@ -65,7 +65,7 @@ public class BasicConvertersFactory implements Factory<Converter<?>> {
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   public Converter<?> create(Type type, Genson genson) {
-    Converter<?> converter = null;
+    Converter<?> converter;
     Serializer<?> serializer = provide(Serializer.class, type, serializersMap, genson);
     Deserializer<?> deserializer = provide(Deserializer.class, type, deserializersMap, genson);
     if (serializer instanceof Converter && deserializer instanceof Converter) {

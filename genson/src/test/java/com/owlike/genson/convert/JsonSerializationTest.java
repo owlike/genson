@@ -17,6 +17,11 @@ import static org.junit.Assert.*;
 public class JsonSerializationTest {
   Genson genson = new Genson();
 
+  @Test public void testSerializeSpecialFloatingPointNumbers() {
+    String json = genson.serialize(new Double[]{Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.NaN});
+    assertEquals(json, "[\"-Infinity\",\"Infinity\",\"NaN\"]");
+  }
+
   @Test
   public void testJsonPrimitiveObject() {
     Primitives p = createPrimitives();

@@ -408,10 +408,6 @@ public final class DefaultConverters {
     }
 
     public Boolean deserialize(ObjectReader reader, Context ctx) {
-      if (ValueType.STRING.equals(reader.getValueType())) {
-        String value = reader.valueAsString();
-        return "".equals(value) ? null : Boolean.valueOf(value);
-      }
       return reader.valueAsBoolean();
     }
   }
@@ -429,10 +425,6 @@ public final class DefaultConverters {
     }
 
     public Integer deserialize(ObjectReader reader, Context ctx) {
-      if (ValueType.STRING.equals(reader.getValueType())) {
-        String value = reader.valueAsString();
-        return "".equals(value) ? null : Integer.valueOf(value);
-      }
       return reader.valueAsInt();
     }
   }
@@ -446,10 +438,6 @@ public final class DefaultConverters {
     }
 
     public Long deserialize(ObjectReader reader, Context ctx) {
-      if (ValueType.STRING.equals(reader.getValueType())) {
-        String value = reader.valueAsString();
-        return "".equals(value) ? null : Long.parseLong(value);
-      }
       return reader.valueAsLong();
     }
 
@@ -467,10 +455,6 @@ public final class DefaultConverters {
     }
 
     public Short deserialize(ObjectReader reader, Context ctx) {
-      if (ValueType.STRING.equals(reader.getValueType())) {
-        String value = reader.valueAsString();
-        return "".equals(value) ? null : Short.parseShort(value);
-      }
       return reader.valueAsShort();
     }
 
@@ -488,15 +472,15 @@ public final class DefaultConverters {
     }
 
     public Double deserialize(ObjectReader reader, Context ctx) {
-      if (ValueType.STRING.equals(reader.getValueType())) {
-        String value = reader.valueAsString();
-        return "".equals(value) ? null : Double.parseDouble(value);
-      }
       return reader.valueAsDouble();
     }
 
     public void serialize(Double obj, ObjectWriter writer, Context ctx) {
-      writer.writeValue(obj.doubleValue());
+      if (obj.isNaN() || obj.isInfinite()) {
+        writer.writeUnsafeValue(obj.toString());
+      } else {
+        writer.writeValue(obj.doubleValue());
+      }
     }
   }
 
@@ -509,15 +493,15 @@ public final class DefaultConverters {
     }
 
     public Float deserialize(ObjectReader reader, Context ctx) {
-      if (ValueType.STRING.equals(reader.getValueType())) {
-        String value = reader.valueAsString();
-        return "".equals(value) ? null : Float.parseFloat(value);
-      }
       return reader.valueAsFloat();
     }
 
     public void serialize(Float obj, ObjectWriter writer, Context ctx) {
-      writer.writeValue(obj.floatValue());
+      if (obj.isNaN() || obj.isInfinite()) {
+        writer.writeUnsafeValue(obj.toString());
+      } else {
+        writer.writeValue(obj.floatValue());
+      }
     }
   }
 
@@ -542,7 +526,16 @@ public final class DefaultConverters {
     }
 
     public void serialize(Number obj, ObjectWriter writer, Context ctx) {
-      writer.writeValue(obj);
+      if (isSpecialNumber(obj)) writer.writeUnsafeValue(obj.toString()); else writer.writeValue(obj);
+    }
+
+    private boolean isSpecialNumber(Number v) {
+      if (v instanceof Double || v instanceof Float) {
+        Double num = (Double) v;
+        return num.isInfinite() || num.isNaN();
+      } else {
+        return false;
+      }
     }
 
     private Number parse(String value, ValueType valueType) {
@@ -609,89 +602,17 @@ public final class DefaultConverters {
 
     public Converter<?> create(Type type, Genson genson) {
       Class<?> rawClass = TypeUtil.getRawClass(type);
-      if (rawClass.isPrimitive()) {
-        if (rawClass.equals(boolean.class)) return booleanConverter.instance;
-        if (rawClass.equals(int.class)) return intConverter.instance;
-        if (rawClass.equals(double.class)) return doubleConverter.instance;
-        if (rawClass.equals(long.class)) return longConverter.instance;
-        if (rawClass.equals(short.class)) return ShortConverter.instance;
-        if (rawClass.equals(float.class)) return FloatConverter.instance;
-        if (rawClass.equals(char.class)) return CharConverter.instance;
-        if (rawClass.equals(byte.class)) return ByteConverter.instance;
-      }
+
+      if (rawClass == Boolean.class || rawClass == boolean.class) return BooleanConverter.instance;
+      if (rawClass == Integer.class || rawClass == int.class) return IntegerConverter.instance;
+      if (rawClass == Double.class || rawClass == double.class) return DoubleConverter.instance;
+      if (rawClass == Long.class || rawClass == long.class) return LongConverter.instance;
+      if (rawClass == Short.class || rawClass == short.class) return ShortConverter.instance;
+      if (rawClass == Float.class || rawClass == float.class) return FloatConverter.instance;
+      if (rawClass == Character.class || rawClass == char.class) return CharConverter.instance;
+      if (rawClass == Byte.class || rawClass == byte.class) return ByteConverter.instance;
+
       return null;
-    }
-
-    @HandleClassMetadata
-    @HandleNull
-    @HandleBeanView
-    public final static class booleanConverter implements Converter<Boolean> {
-      public final static booleanConverter instance = new booleanConverter();
-
-      private booleanConverter() {
-      }
-
-      public void serialize(Boolean obj, ObjectWriter writer, Context ctx) {
-        writer.writeValue(obj.booleanValue());
-      }
-
-      public Boolean deserialize(ObjectReader reader, Context ctx) {
-        return reader.valueAsBoolean();
-      }
-    }
-
-    @HandleClassMetadata
-    @HandleNull
-    @HandleBeanView
-    public final static class intConverter implements Converter<Integer> {
-      public final static intConverter instance = new intConverter();
-
-      private intConverter() {
-      }
-
-      public void serialize(Integer obj, ObjectWriter writer, Context ctx) {
-        writer.writeValue(obj.intValue());
-      }
-
-      public Integer deserialize(ObjectReader reader, Context ctx) {
-        return reader.valueAsInt();
-      }
-    }
-
-    @HandleClassMetadata
-    @HandleNull
-    @HandleBeanView
-    public final static class doubleConverter implements Converter<Double> {
-      public final static doubleConverter instance = new doubleConverter();
-
-      private doubleConverter() {
-      }
-
-      public void serialize(Double obj, ObjectWriter writer, Context ctx) {
-        writer.writeValue(obj.doubleValue());
-      }
-
-      public Double deserialize(ObjectReader reader, Context ctx) {
-        return reader.valueAsDouble();
-      }
-    }
-
-    @HandleClassMetadata
-    @HandleNull
-    @HandleBeanView
-    public final static class longConverter implements Converter<Long> {
-      public final static longConverter instance = new longConverter();
-
-      private longConverter() {
-      }
-
-      public void serialize(Long obj, ObjectWriter writer, Context ctx) {
-        writer.writeValue(obj.longValue());
-      }
-
-      public Long deserialize(ObjectReader reader, Context ctx) {
-        return reader.valueAsLong();
-      }
     }
   }
 

@@ -61,7 +61,6 @@ public class GensonBuilder {
 
   private ClassLoader classLoader = getClass().getClassLoader();
   private BeanDescriptorProvider beanDescriptorProvider;
-  private Converter<Object> nullConverter;
   private DateFormat dateFormat = SimpleDateFormat.getDateTimeInstance();
   private boolean useDateAsTimestamp = true;
   private boolean classMetadataWithStaticType = true;
@@ -74,7 +73,18 @@ public class GensonBuilder {
 
   private ChainedFactory customFactoryChain;
 
+  private final Map<Class<?>, Object> defaultValues = new HashMap<Class<?>, Object>();
+  private boolean failOnNullPrimitive = false;
+
   public GensonBuilder() {
+    defaultValues.put(int.class, 0);
+    defaultValues.put(long.class, 0l);
+    defaultValues.put(short.class, (short) 0);
+    defaultValues.put(double.class, 0d);
+    defaultValues.put(float.class, 0f);
+    defaultValues.put(boolean.class, false);
+    defaultValues.put(byte.class, (byte) 0);
+    defaultValues.put(char.class, '\u0000');
   }
 
   /**
@@ -589,18 +599,6 @@ public class GensonBuilder {
     return this;
   }
 
-  /**
-   * Sets the null converter that should be used to handle null object values. If the
-   * converter is called you are guaranteed that the value is null (for both, ser and deser).
-   *
-   * @param nullConverter
-   * @return a reference to this builder.
-   */
-  public GensonBuilder setNullConverter(Converter<Object> nullConverter) {
-    this.nullConverter = nullConverter;
-    return this;
-  }
-
   public GensonBuilder setFieldFilter(VisibilityFilter propertyFilter) {
     this.propertyFilter = propertyFilter;
     return this;
@@ -689,6 +687,15 @@ public class GensonBuilder {
   }
 
   /**
+   * Uses the passed value as the default value for its type. For the moment we don't allow registering a default value
+   * for some super type that would be used for all subtypes.
+   */
+  public GensonBuilder useDefaultValue(Object value) {
+    defaultValues.put(value.getClass(), value);
+    return this;
+  }
+
+  /**
    * Will wrap all the root objects under outputKey during serializaiton and unwrap the content under
    * inputKey during deserializaiton. For example:
    *
@@ -719,6 +726,15 @@ public class GensonBuilder {
   }
 
   /**
+   * False by default. When enabled a JsonBindingException will be thrown if null is encountered during serialization
+   * (should never happen) or deserialization for a primitive type.
+   */
+  public GensonBuilder failOnNullPrimitive(boolean enabled) {
+    this.failOnNullPrimitive = enabled;
+    return this;
+  }
+
+  /**
    * Creates an instance of Genson. You may use this method as many times you want. It wont
    * change the state of the builder, in sense that the returned instance will have always the
    * same configuration.
@@ -726,7 +742,6 @@ public class GensonBuilder {
    * @return a new instance of Genson built for the current configuration.
    */
   public Genson create() {
-    if (nullConverter == null) nullConverter = new NullConverter();
     if (propertyNameResolver == null) propertyNameResolver = createPropertyNameResolver();
     if (mutatorAccessorResolver == null)
       mutatorAccessorResolver = createBeanMutatorAccessorResolver();
@@ -802,9 +817,9 @@ public class GensonBuilder {
    */
   protected Genson create(Factory<Converter<?>> converterFactory,
                           Map<String, Class<?>> classAliases) {
-    return new Genson(converterFactory, getBeanDescriptorProvider(), nullConverter,
+    return new Genson(converterFactory, getBeanDescriptorProvider(),
       isSkipNull(), isHtmlSafe(), classAliases, withClassMetadata,
-      strictDoubleParse, indent, metadata, failOnMissingProperty);
+      strictDoubleParse, indent, metadata, failOnMissingProperty, defaultValues);
   }
 
   /**
@@ -818,7 +833,7 @@ public class GensonBuilder {
   protected Factory<Converter<?>> createConverterFactory() {
     ChainedFactory chainHead = new CircularClassReferenceConverterFactory();
 
-    chainHead.append(new NullConverter.NullConverterFactory());
+    chainHead.append(new NullConverterFactory(failOnNullPrimitive));
 
     if (useRuntimeTypeForSerialization) chainHead.append(new RuntimeTypeConverter.RuntimeTypeConverterFactory());
 
@@ -879,15 +894,7 @@ public class GensonBuilder {
   protected List<Converter<?>> getDefaultConverters() {
     List<Converter<?>> converters = new ArrayList<Converter<?>>();
     converters.add(DefaultConverters.StringConverter.instance);
-    converters.add(DefaultConverters.BooleanConverter.instance);
-    converters.add(DefaultConverters.IntegerConverter.instance);
-    converters.add(DefaultConverters.DoubleConverter.instance);
-    converters.add(DefaultConverters.LongConverter.instance);
-    converters.add(DefaultConverters.ShortConverter.instance);
-    converters.add(DefaultConverters.FloatConverter.instance);
     converters.add(DefaultConverters.NumberConverter.instance);
-    converters.add(DefaultConverters.CharConverter.instance);
-    converters.add(DefaultConverters.ByteConverter.instance);
     converters.add(new DefaultConverters.DateConverter(dateFormat, useDateAsTimestamp));
     converters.add(DefaultConverters.URLConverter.instance);
     converters.add(DefaultConverters.URIConverter.instance);

@@ -58,7 +58,6 @@ public final class Genson {
   private final ConcurrentHashMap<Type, Converter<?>> converterCache = new ConcurrentHashMap<Type, Converter<?>>();
   private final Factory<Converter<?>> converterFactory;
   private final BeanDescriptorProvider beanDescriptorFactory;
-  private final Converter<Object> nullConverter;
 
   private final Map<Class<?>, String> classAliasMap;
   private final Map<String, Class<?>> aliasClassMap;
@@ -74,56 +73,55 @@ public final class Genson {
   private final static Charset UTF8_CHARSET = Charset.forName("UTF-8");
 
   private final EncodingAwareReaderFactory readerFactory = new EncodingAwareReaderFactory();
+  private final Map<Class<?>, Object> defaultValues;
 
   /**
    * The default constructor will use the default configuration provided by the {@link GensonBuilder}.
    * In most cases using this default constructor will suffice.
    */
   public Genson() {
-    this(_default.converterFactory, _default.beanDescriptorFactory, _default.nullConverter,
+    this(_default.converterFactory, _default.beanDescriptorFactory,
       _default.skipNull, _default.htmlSafe, _default.aliasClassMap,
       _default.withClassMetadata, _default.strictDoubleParse, _default.indent,
-      _default.withMetadata, _default.failOnMissingProperty);
+      _default.withMetadata, _default.failOnMissingProperty, _default.defaultValues);
   }
 
   /**
    * Instead of using this constructor you should use {@link GensonBuilder}.
-   *
-   * @param converterFactory  providing instance of converters.
-   * @param beanDescProvider  providing instance of {@link com.owlike.genson.reflect.BeanDescriptor
+   *  @param converterFactory  providing instance of converters.
+   * @param beanDescProvider  providing instance of {@link BeanDescriptor
    *                          BeanDescriptor} used during bean serialization and deserialization.
-   * @param nullConverter     handling null objects. If its serialize/deserialize methods are called you are
-   *                          sure that it is a null value. This converter is used in
-   *                          {@link com.owlike.genson.convert.NullConverter NullConverter}
    * @param skipNull          indicates whether null values should be serialized. False by default, null values
-   *                          will be serialized.
+*                          will be serialized.
    * @param htmlSafe          indicates whether \,<,>,&,= characters should be replaced by their Unicode
-   *                          representation.
+*                          representation.
    * @param classAliases      association map between classes and their aliases, used if withClassMetadata is
-   *                          true.
+*                          true.
    * @param withClassMetadata indicates whether class name should be serialized and used during deserialization
-   *                          to determine the type. False by default.
+*                          to determine the type. False by default.
    * @param strictDoubleParse indicates whether to use or not double approximation. If false (by default) it
-   *                          enables Genson custom double parsing algorithm, that is an approximation of
-   *                          Double.parse but is a lot faster. If true, Double.parse method will be usead
-   *                          instead. In most cases you should be fine with Genson algorithm, but if for some
-   *                          reason you need to have 100% match with Double.parse, then enable strict parsing.
+*                          enables Genson custom double parsing algorithm, that is an approximation of
+*                          Double.parse but is a lot faster. If true, Double.parse method will be usead
+*                          instead. In most cases you should be fine with Genson algorithm, but if for some
+*                          reason you need to have 100% match with Double.parse, then enable strict parsing.
    * @param indent            true if outputed json must be indented (pretty printed).
    * @param withMetadata      true if ObjectReader instances must be configured with metadata feature enabled.
-   *                          if withClassMetadata is true withMetadata will be automatically true.
+*                          if withClassMetadata is true withMetadata will be automatically true.
    * @param failOnMissingProperty throw a JsonBindingException when a key in the json stream does not match a property in the Java Class.
+   * @param defaultValues contains a mapping from the raw class to the default value that should be used when the property is missing
+   *                      in the incoming stream or when it is null.
    */
   public Genson(Factory<Converter<?>> converterFactory, BeanDescriptorProvider beanDescProvider,
-                Converter<Object> nullConverter, boolean skipNull, boolean htmlSafe,
-                Map<String, Class<?>> classAliases, boolean withClassMetadata,
-                boolean strictDoubleParse, boolean indent, boolean withMetadata, boolean failOnMissingProperty) {
+                boolean skipNull, boolean htmlSafe, Map<String, Class<?>> classAliases, boolean withClassMetadata,
+                boolean strictDoubleParse, boolean indent, boolean withMetadata, boolean failOnMissingProperty,
+                Map<Class<?>, Object> defaultValues) {
     this.converterFactory = converterFactory;
     this.beanDescriptorFactory = beanDescProvider;
-    this.nullConverter = nullConverter;
     this.skipNull = skipNull;
     this.htmlSafe = htmlSafe;
     this.aliasClassMap = classAliases;
     this.withClassMetadata = withClassMetadata;
+    this.defaultValues = defaultValues;
     this.classAliasMap = new HashMap<Class<?>, String>(classAliases.size());
     for (Map.Entry<String, Class<?>> entry : classAliases.entrySet()) {
       classAliasMap.put(entry.getValue(), entry.getKey());
@@ -283,7 +281,7 @@ public final class Genson {
 
   private void serializeNull(ObjectWriter writer) {
     try {
-      nullConverter.serialize(null, writer, null);
+      writer.writeNull();
       writer.flush();
     } catch (Exception e) {
       throw new JsonBindingException("Could not serialize null value.", e);
@@ -597,12 +595,15 @@ public final class Genson {
     return beanDescriptorFactory;
   }
 
-  public Converter<Object> getNullConverter() {
-    return nullConverter;
-  }
-
   public boolean failOnMissingProperty() {
     return this.failOnMissingProperty;
+  }
+
+  /**
+   * @return the defined default value for type clazz or null if none is defined. Intended for internal use.
+   */
+  public <T> T defaultValue(Class<T> clazz) {
+    return (T) defaultValues.get(clazz);
   }
 
   /**
