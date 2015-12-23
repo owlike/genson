@@ -21,6 +21,12 @@ import com.owlike.genson.stream.JsonReader;
 public class JsonDeserializationTest {
   final Genson genson = new GensonBuilder().useConstructorWithArguments(true).create();
 
+  @Test public void testDeserializeMissingValueToDefaultValueInConstructor() {
+    Genson genson = new GensonBuilder().useConstructorWithArguments(true).useDefaultValue(5, int.class).create();
+
+    assertEquals(5, genson.deserialize("{}", ConstructorWithPrimitive.class).value);
+  }
+
   @Test public void testDeserializeSpecialFloatingPointNumbers() {
     assertTrue(genson.deserialize("\"NaN\"", Double.class).isNaN());
 
@@ -335,23 +341,23 @@ public class JsonDeserializationTest {
     assertEquals("foo", pojo.str);
   }
 
-    public static class BeanWithConstructor {
-        final String name;
-        final int age;
-        final BeanWithConstructor other;
+  public static class BeanWithConstructor {
+    final String name;
+    final int age;
+    final BeanWithConstructor other;
 
-        public BeanWithConstructor(@JsonProperty(value = "name") String name,
-                                   @JsonProperty(value = "age") int age,
-                                   @JsonProperty(value = "other") BeanWithConstructor other) {
-            this.name = name;
-            this.age = age;
-            this.other = other;
-        }
-
-        public void setName(String name) {
-            fail();
-        }
+    public BeanWithConstructor(@JsonProperty(value = "name") String name,
+                               @JsonProperty(value = "age") int age,
+                               @JsonProperty(value = "other") BeanWithConstructor other) {
+      this.name = name;
+      this.age = age;
+      this.other = other;
     }
+
+    public void setName(String name) {
+          fail();
+      }
+  }
 
   public static class Empty {}
 
@@ -467,6 +473,14 @@ public class JsonDeserializationTest {
 
     public void setP(Primitives p) {
       this.p = p;
+    }
+  }
+
+  public static class ConstructorWithPrimitive {
+    final int value;
+
+    public ConstructorWithPrimitive(int value) {
+      this.value = value;
     }
   }
 

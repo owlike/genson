@@ -13,6 +13,7 @@ class ScalaBundle extends GensonBundle {
 
   def configure(builder: GensonBuilder) {
     builder.useConstructorWithArguments(true)
+      .useDefaultValue(None, classOf[Option[_]])
       .withConverterFactory(new TraversableConverterFactory())
       .withConverterFactory(new MapConverterFactory())
       .withConverterFactory(ScalaUntypedConverterFactory)

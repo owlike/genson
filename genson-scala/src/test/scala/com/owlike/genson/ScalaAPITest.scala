@@ -59,4 +59,8 @@ class ScalaAPITest extends FunSuite with Matchers {
   test("serialize None") {
     fromJson[Option[_]](toJson(None)) should be (None)
   }
+
+  test("deserialize to None missing option in the incoming json") {
+    fromJson[GenericHolder[Option[String]]]("{}").v should be (None)
+  }
 }

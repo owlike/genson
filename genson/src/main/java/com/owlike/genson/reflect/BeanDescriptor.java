@@ -1,6 +1,7 @@
 package com.owlike.genson.reflect;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -43,6 +44,10 @@ public class BeanDescriptor<T> implements Converter<T> {
   final BeanCreator creator;
   private final boolean _noArgCtr;
 
+  private static final Object MISSING = new Object();
+  // Used as a cache so we just copy it instead of recreating and assigning the default values
+  private Object[] globalCreatorArgs;
+
   private final static Comparator<BeanProperty> _readablePropsComparator = new Comparator<BeanProperty>() {
     public int compare(BeanProperty o1, BeanProperty o2) {
       return o1.name.compareToIgnoreCase(o2.name);
@@ -62,10 +67,13 @@ public class BeanDescriptor<T> implements Converter<T> {
     Collections.sort(readableBps, _readablePropsComparator);
 
     accessibleProperties = Collections.unmodifiableList(readableBps);
-    if (this.creator != null)
+    if (this.creator != null) {
       _noArgCtr = this.creator.parameters.size() == 0;
-    else
+      globalCreatorArgs = new Object[creator.parameters.size()];
+      Arrays.fill(globalCreatorArgs, MISSING);
+    } else {
       _noArgCtr = false;
+    }
   }
 
   public boolean isReadable() {
@@ -113,6 +121,7 @@ public class BeanDescriptor<T> implements Converter<T> {
     reader.endObject();
   }
 
+
   protected T _deserWithCtrArgs(ObjectReader reader, Context ctx) {
     List<String> names = new ArrayList<String>();
     List<Object> values = new ArrayList<Object>();
@@ -132,20 +141,24 @@ public class BeanDescriptor<T> implements Converter<T> {
     }
 
     int size = names.size();
-    Object[] creatorArgs = new Object[creator.parameters.size()];
+    int foundCtrParameters = 0;
+    Object[] creatorArgs = globalCreatorArgs.clone();
     String[] newNames = new String[size];
     Object[] newValues = new Object[size];
-    // TODO if field for ctr is missing what to do? make it also configurable...?
+
     for (int i = 0, j = 0; i < size; i++) {
       BeanCreatorProperty mp = creator.parameters.get(names.get(i));
       if (mp != null) {
         creatorArgs[mp.index] = values.get(i);
+        foundCtrParameters++;
       } else {
         newNames[j] = names.get(i);
         newValues[j] = values.get(i);
         j++;
       }
     }
+
+    if (foundCtrParameters < creator.parameters.size()) updateWithDefaultValues(creatorArgs, ctx.genson);
 
     T bean = ofClass.cast(creator.create(creatorArgs));
     for (int i = 0; i < size; i++) {
@@ -155,6 +168,19 @@ public class BeanDescriptor<T> implements Converter<T> {
     }
     reader.endObject();
     return bean;
+  }
+
+  private void updateWithDefaultValues(Object[] creatorArgs, Genson genson) {
+    for (int i = 0; i < creatorArgs.length; i++) {
+      if (creatorArgs[i] == MISSING) {
+        for (BeanCreatorProperty property : creator.parameters.values()) {
+          if (property.index == i) {
+            creatorArgs[i] = genson.defaultValue(property.getRawClass());
+            break;
+          }
+        }
+      }
+    }
   }
 
   public Class<T> getOfClass() {

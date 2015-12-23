@@ -687,11 +687,10 @@ public class GensonBuilder {
   }
 
   /**
-   * Uses the passed value as the default value for its type. For the moment we don't allow registering a default value
-   * for some super type that would be used for all subtypes.
+   * Uses the passed value as the default value for this type.
    */
-  public GensonBuilder useDefaultValue(Object value) {
-    defaultValues.put(value.getClass(), value);
+  public GensonBuilder useDefaultValue(Object value, Class<?> targetType) {
+    defaultValues.put(targetType, value);
     return this;
   }
 
