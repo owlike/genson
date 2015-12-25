@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.owlike.genson.reflect.BeanDescriptor;
 import com.owlike.genson.reflect.BeanDescriptorProvider;
+import com.owlike.genson.reflect.RuntimePropertyFilter;
 import com.owlike.genson.stream.*;
 
 /**
@@ -54,14 +55,13 @@ public final class Genson {
    * accros all default Genson instances.
    */
   private final static Genson _default = new GensonBuilder().create();
+  private final static Charset UTF8_CHARSET = Charset.forName("UTF-8");
 
   private final ConcurrentHashMap<Type, Converter<?>> converterCache = new ConcurrentHashMap<Type, Converter<?>>();
   private final Factory<Converter<?>> converterFactory;
   private final BeanDescriptorProvider beanDescriptorFactory;
-
   private final Map<Class<?>, String> classAliasMap;
   private final Map<String, Class<?>> aliasClassMap;
-
   private final boolean skipNull;
   private final boolean htmlSafe;
   private final boolean withClassMetadata;
@@ -69,11 +69,9 @@ public final class Genson {
   private final boolean strictDoubleParse;
   private final boolean indent;
   private final boolean failOnMissingProperty;
-
-  private final static Charset UTF8_CHARSET = Charset.forName("UTF-8");
-
   private final EncodingAwareReaderFactory readerFactory = new EncodingAwareReaderFactory();
   private final Map<Class<?>, Object> defaultValues;
+  private final RuntimePropertyFilter runtimePropertyFilter;
 
   /**
    * The default constructor will use the default configuration provided by the {@link GensonBuilder}.
@@ -83,12 +81,12 @@ public final class Genson {
     this(_default.converterFactory, _default.beanDescriptorFactory,
       _default.skipNull, _default.htmlSafe, _default.aliasClassMap,
       _default.withClassMetadata, _default.strictDoubleParse, _default.indent,
-      _default.withMetadata, _default.failOnMissingProperty, _default.defaultValues);
+      _default.withMetadata, _default.failOnMissingProperty, _default.defaultValues, _default.runtimePropertyFilter);
   }
 
   /**
    * Instead of using this constructor you should use {@link GensonBuilder}.
-   *  @param converterFactory  providing instance of converters.
+   * @param converterFactory  providing instance of converters.
    * @param beanDescProvider  providing instance of {@link BeanDescriptor
    *                          BeanDescriptor} used during bean serialization and deserialization.
    * @param skipNull          indicates whether null values should be serialized. False by default, null values
@@ -108,13 +106,13 @@ public final class Genson {
    * @param withMetadata      true if ObjectReader instances must be configured with metadata feature enabled.
 *                          if withClassMetadata is true withMetadata will be automatically true.
    * @param failOnMissingProperty throw a JsonBindingException when a key in the json stream does not match a property in the Java Class.
-   * @param defaultValues contains a mapping from the raw class to the default value that should be used when the property is missing
-   *                      in the incoming stream or when it is null.
+   * @param defaultValues contains a mapping from the raw class to the default value that should be used when the property is missing.
+   * @param runtimePropertyFilter is used to define what bean properties should be excluded from ser/de at runtime.
    */
   public Genson(Factory<Converter<?>> converterFactory, BeanDescriptorProvider beanDescProvider,
                 boolean skipNull, boolean htmlSafe, Map<String, Class<?>> classAliases, boolean withClassMetadata,
                 boolean strictDoubleParse, boolean indent, boolean withMetadata, boolean failOnMissingProperty,
-                Map<Class<?>, Object> defaultValues) {
+                Map<Class<?>, Object> defaultValues, RuntimePropertyFilter runtimePropertyFilter) {
     this.converterFactory = converterFactory;
     this.beanDescriptorFactory = beanDescProvider;
     this.skipNull = skipNull;
@@ -122,6 +120,7 @@ public final class Genson {
     this.aliasClassMap = classAliases;
     this.withClassMetadata = withClassMetadata;
     this.defaultValues = defaultValues;
+    this.runtimePropertyFilter = runtimePropertyFilter;
     this.classAliasMap = new HashMap<Class<?>, String>(classAliases.size());
     for (Map.Entry<String, Class<?>> entry : classAliases.entrySet()) {
       classAliasMap.put(entry.getValue(), entry.getKey());
@@ -604,6 +603,10 @@ public final class Genson {
    */
   public <T> T defaultValue(Class<T> clazz) {
     return (T) defaultValues.get(clazz);
+  }
+
+  public RuntimePropertyFilter runtimePropertyFilter() {
+    return runtimePropertyFilter;
   }
 
   /**

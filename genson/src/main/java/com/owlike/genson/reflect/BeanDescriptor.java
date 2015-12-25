@@ -86,8 +86,9 @@ public class BeanDescriptor<T> implements Converter<T> {
 
   public void serialize(T obj, ObjectWriter writer, Context ctx) {
     writer.beginObject();
+    RuntimePropertyFilter runtimePropertyFilter = ctx.genson.runtimePropertyFilter();
     for (PropertyAccessor accessor : accessibleProperties) {
-      accessor.serialize(obj, writer, ctx);
+      if (runtimePropertyFilter.shouldInclude(accessor, ctx)) accessor.serialize(obj, writer, ctx);
     }
     writer.endObject();
   }
@@ -109,12 +110,17 @@ public class BeanDescriptor<T> implements Converter<T> {
 
   public void deserialize(T into, ObjectReader reader, Context ctx) {
     reader.beginObject();
+    RuntimePropertyFilter runtimePropertyFilter = ctx.genson.runtimePropertyFilter();
     for (; reader.hasNext(); ) {
       reader.next();
       String propName = reader.name();
       PropertyMutator mutator = mutableProperties.get(propName);
       if (mutator != null) {
-        mutator.deserialize(into, reader, ctx);
+        if (runtimePropertyFilter.shouldInclude(mutator, ctx)) {
+          mutator.deserialize(into, reader, ctx);
+        } else {
+          reader.skipValue();
+        }
       } else if (failOnMissingProperty) throw missingPropertyException(propName);
       else reader.skipValue();
     }
@@ -125,6 +131,7 @@ public class BeanDescriptor<T> implements Converter<T> {
   protected T _deserWithCtrArgs(ObjectReader reader, Context ctx) {
     List<String> names = new ArrayList<String>();
     List<Object> values = new ArrayList<Object>();
+    RuntimePropertyFilter runtimePropertyFilter = ctx.genson.runtimePropertyFilter();
 
     reader.beginObject();
     for (; reader.hasNext(); ) {
@@ -133,9 +140,13 @@ public class BeanDescriptor<T> implements Converter<T> {
       PropertyMutator muta = mutableProperties.get(propName);
 
       if (muta != null) {
-        Object param = muta.deserialize(reader, ctx);
-        names.add(propName);
-        values.add(param);
+        if (runtimePropertyFilter.shouldInclude(muta, ctx)) {
+          Object param = muta.deserialize(reader, ctx);
+          names.add(propName);
+          values.add(param);
+        } else {
+          reader.skipValue();
+        }
       } else if (failOnMissingProperty) throw missingPropertyException(propName);
       else reader.skipValue();
     }

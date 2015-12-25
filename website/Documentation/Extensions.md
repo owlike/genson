@@ -102,6 +102,22 @@ ClientBuilder.newClient(new ClientConfig().register(new GensonJaxRSFeature().dis
 new ResourceConfig().register(new GensonJaxRSFeature().disable());
 {% endhighlight %}
 
+###Filtering properties from ser/de at runtime###
+The Jax-Rs extension comes with a feature called UrlQueryParamFilter which implements Gensons RuntimePropertyFilter.
+Let's say we have a class containing some properties age, name, gender and we want to be able to include only some of those
+at runtime in the response based on the params of the query string.
+For example having this url `http://localhost/foo/bar?filter=age&filter=name` would include only age and name in the response.
+
+To enable this feature you must register it with Genson and with Jax-Rs:
+{% highlight java %}
+UrlQueryParamFilter filter = new UrlQueryParamFilter();
+Genson genson = new GensonBuilder().useRuntimePropertyFilter(filter).create();
+new ResourceConfig()
+  .register(new GensonJaxRSFeature().use(genson))
+  .register(filter);
+{% endhighlight %}
+
+Have a look at the methods from UrlQueryParamFilter to see how its behaviour can be customized to fit your needs.
 
 ##JSR 353 - Java API for Json Processing##
 

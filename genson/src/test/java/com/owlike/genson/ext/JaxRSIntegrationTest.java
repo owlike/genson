@@ -14,7 +14,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 
+import com.owlike.genson.Genson;
+import com.owlike.genson.GensonBuilder;
 import com.owlike.genson.ext.jaxrs.GensonJaxRSFeature;
+import com.owlike.genson.ext.jaxrs.UrlQueryParamFilter;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -31,6 +34,37 @@ import com.owlike.genson.ext.jaxrs.GensonJsonConverter;
 
 public class JaxRSIntegrationTest {
   private Server server;
+
+  @Test
+  public void testPropertyFiltering() throws Exception {
+    UrlQueryParamFilter filter = new UrlQueryParamFilter().paramName("fields");
+    Genson genson = new GensonBuilder().useRuntimePropertyFilter(filter).create();
+    ResourceConfig serverCfg = new ResourceConfig()
+                                 .register(new DummyRessource())
+                                 .register(new GensonJaxRSFeature().use(genson))
+                                 .register(filter);
+
+    ServletHolder servletHolder = new ServletHolder(new ServletContainer(serverCfg));
+    ServletContextHandler ctxHandler = new ServletContextHandler();
+    ctxHandler.addServlet(servletHolder, "/*");
+    ctxHandler.setContextPath("/");
+
+    server = new Server(9999);
+    server.setHandler(ctxHandler);
+    server.start();
+
+    try {
+      ClientConfig clientCfg = new ClientConfig(GensonJsonConverter.class);
+      Client client = ClientBuilder.newClient(clientCfg);
+
+      String res = client.target("http://localhost:9999/get?fields=key1")
+                     .request(MediaType.APPLICATION_JSON)
+                     .get(String.class);
+      assertEquals("{\"key1\":1}", res);
+    } finally {
+      stopServer();
+    }
+  }
 
   @Test
   public void testJerseyJsonConverter() throws Exception {
