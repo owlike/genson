@@ -19,6 +19,7 @@ public abstract class BeanCreator extends Wrapper<AnnotatedElement> implements C
   // The type of object it can create
   protected final Class<?> ofClass;
   protected final Map<String, BeanCreatorProperty> parameters;
+  protected final Map<String, BeanCreatorProperty> paramsAndAliases;
 
   public BeanCreator(Class<?> ofClass, Class<?> declaringClass, Class<?> concreteClass,
                      String[] parameterNames, Type[] types, Annotation[][] anns) {
@@ -27,6 +28,12 @@ public abstract class BeanCreator extends Wrapper<AnnotatedElement> implements C
     for (int i = 0; i < parameterNames.length; i++) {
       this.parameters.put(parameterNames[i], new BeanCreatorProperty(parameterNames[i],
         types[i], i, anns[i], declaringClass, concreteClass, this));
+    }
+
+    paramsAndAliases = new LinkedHashMap<String, BeanCreatorProperty>();
+    for (BeanCreatorProperty p : parameters.values()) {
+      paramsAndAliases.put(p.getName(), p);
+      for (String alias : p.aliases()) paramsAndAliases.put(alias, p);
     }
   }
 

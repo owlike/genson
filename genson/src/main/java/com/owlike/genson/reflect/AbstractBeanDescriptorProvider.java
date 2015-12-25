@@ -131,6 +131,10 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
       }
     }
 
+    for (PropertyMutator p : mutators.values()) {
+      for (String alias : p.aliases()) mutators.put(alias, p);
+    }
+
     // lets fail fast if the BeanDescriptor has been built for the wrong type.
     // another option could be to pass in all the methods an additional parameter Class<T> that
     // would not necessarily correspond to the rawClass of ofType. In fact we authorize that

@@ -7,6 +7,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.owlike.genson.annotation.JsonProperty;
+
 /**
  * Represents a bean property, in practice it can be an object field, method (getter/setter) or
  * constructor parameter.
@@ -67,20 +69,31 @@ public abstract class BeanProperty {
     return modifiers;
   }
 
+  public String[] aliases() {
+    JsonProperty ann = getAnnotation(JsonProperty.class);
+    return ann != null ? ann.aliases() : new String[]{};
+  }
+
   public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
     for (Annotation ann : annotations)
       if (annotationClass.isInstance(ann)) return annotationClass.cast(ann);
     return null;
   }
 
-  void updateWith(BeanProperty otherBeanProperty) {
-    // we don't care for duplicate annotations as it should not change the behaviour
-    if (otherBeanProperty.annotations.length > 0) {
+  void updateBoth(BeanProperty otherBeanProperty) {
+
+    // FIXME: we don't care for duplicate annotations as it should not change the behaviour - actually we do as it can change the behaviour...
+    // an easy solution would be to forbid duplicate annotations, which can make sense.
+    if (annotations.length > 0 || otherBeanProperty.annotations.length > 0) {
       Annotation[] mergedAnnotations = new Annotation[annotations.length + otherBeanProperty.annotations.length];
+
       System.arraycopy(annotations, 0, mergedAnnotations, 0, annotations.length);
       System.arraycopy(otherBeanProperty.annotations, 0, mergedAnnotations, annotations.length, otherBeanProperty.annotations.length);
 
-      this.annotations = mergedAnnotations;
+      if (otherBeanProperty.annotations.length > 0) this.annotations = mergedAnnotations;
+      // update also the other bean property with the merged result.
+      // This is easier rather than do it in one direction and then in the other one.
+      if (annotations.length > 0) otherBeanProperty.annotations = mergedAnnotations;
     }
   }
 

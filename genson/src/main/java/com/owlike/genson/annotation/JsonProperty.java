@@ -33,6 +33,11 @@ public @interface JsonProperty {
   String value() default "";
 
   /**
+   * A list of aliases to use during deserialization for this property. Note that during serialization this is not used.
+   */
+  String[] aliases() default {};
+
+  /**
    * Whether this property must be serialized. Default is true, the property will be serialized.
    */
   boolean serialize() default true;

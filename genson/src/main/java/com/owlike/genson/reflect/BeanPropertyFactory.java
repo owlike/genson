@@ -12,21 +12,21 @@ import java.util.List;
 import com.owlike.genson.Genson;
 
 public interface BeanPropertyFactory {
-  public PropertyAccessor createAccessor(String name, Field field, Type ofType, Genson genson);
+  PropertyAccessor createAccessor(String name, Field field, Type ofType, Genson genson);
 
-  public PropertyAccessor createAccessor(String name, Method method, Type ofType, Genson genson);
+  PropertyAccessor createAccessor(String name, Method method, Type ofType, Genson genson);
 
-  public BeanCreator createCreator(Type ofType, Constructor<?> ctr, String[] resolvedNames,
+  BeanCreator createCreator(Type ofType, Constructor<?> ctr, String[] resolvedNames,
                                    Genson genson);
 
-  public BeanCreator createCreator(Type ofType, Method method, String[] resolvedNames,
+  BeanCreator createCreator(Type ofType, Method method, String[] resolvedNames,
                                    Genson genson);
 
-  public PropertyMutator createMutator(String name, Field field, Type ofType, Genson genson);
+  PropertyMutator createMutator(String name, Field field, Type ofType, Genson genson);
 
-  public PropertyMutator createMutator(String name, Method method, Type ofType, Genson genson);
+  PropertyMutator createMutator(String name, Method method, Type ofType, Genson genson);
 
-  public static class CompositeFactory implements BeanPropertyFactory {
+  class CompositeFactory implements BeanPropertyFactory {
     private final List<BeanPropertyFactory> factories;
 
     public CompositeFactory(List<? extends BeanPropertyFactory> factories) {
@@ -91,7 +91,7 @@ public interface BeanPropertyFactory {
     }
   }
 
-  public static class StandardFactory implements BeanPropertyFactory {
+  class StandardFactory implements BeanPropertyFactory {
     public PropertyAccessor createAccessor(String name, Field field, Type ofType, Genson genson) {
       Class<?> ofClass = getRawClass(ofType);
       Type expandedType = TypeUtil.expandType(field.getGenericType(), ofType);

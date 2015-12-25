@@ -21,6 +21,14 @@ import com.owlike.genson.stream.JsonReader;
 public class JsonDeserializationTest {
   final Genson genson = new GensonBuilder().useConstructorWithArguments(true).create();
 
+  @Test public void testShouldDeserializeUsingSetterAlias() {
+    assertEquals(2, genson.deserialize("{\"a2\":2}", PojoWithAliasInSetter.class).a);
+  }
+
+  @Test public void testShouldDeserializeUsingConstructorAlias() {
+    assertEquals(2, genson.deserialize("{\"a2\":2}", PojoWithAliasInConstructor.class).a);
+  }
+
   @Test public void testDeserializeMissingValueToDefaultValueInConstructor() {
     Genson genson = new GensonBuilder().useConstructorWithArguments(true).useDefaultValue(5, int.class).create();
 
@@ -487,5 +495,30 @@ public class JsonDeserializationTest {
   private Primitives createPrimitives() {
     return new Primitives(1, new Integer(10), 1.00001, new Double(0.00001), "TEXT ...  HEY!",
       true, new Boolean(false));
+  }
+
+  static class PojoWithAliasInSetter {
+    private int a;
+
+    public int getA() {
+      return a;
+    }
+
+    @JsonProperty(aliases = {"a2"})
+    public void setA(int a) {
+      this.a = a;
+    }
+  }
+
+  static class PojoWithAliasInConstructor {
+    final int a;
+
+    public PojoWithAliasInConstructor(@JsonProperty(aliases = {"a2"}) int a) {
+      this.a = a;
+    }
+
+    public int getA() {
+      return a;
+    }
   }
 }

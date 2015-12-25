@@ -16,7 +16,6 @@ import java.util.Map;
 import com.owlike.genson.Genson;
 import com.owlike.genson.annotation.JsonCreator;
 import com.owlike.genson.reflect.BeanCreator.BeanCreatorProperty;
-import com.owlike.genson.reflect.AbstractBeanDescriptorProvider.ContextualConverterFactory;
 
 import static com.owlike.genson.reflect.TypeUtil.*;
 import static com.owlike.genson.Trilean.*;
@@ -300,7 +299,7 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
       // with highest priority
       if ((property.declaringClass.equals(next.declaringClass) && property.priority() < next.priority())
       || property.declaringClass.isAssignableFrom(next.declaringClass)) {
-        next.updateWith(property);
+        next.updateBoth(property);
         property = next;
       } else continue;
     }
@@ -319,8 +318,8 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
         BeanCreatorProperty ctrProperty = entry.getValue();
         mutators.put(entry.getKey(), ctrProperty);
       } else {
-        // update the creator property annotations with mutator annotations
-        entry.getValue().updateWith(muta);
+        // update the creator property annotations with mutator annotations and vice versa
+        entry.getValue().updateBoth(muta);
       }
     }
   }

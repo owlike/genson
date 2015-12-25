@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -158,7 +159,7 @@ public class BeanDescriptor<T> implements Converter<T> {
     Object[] newValues = new Object[size];
 
     for (int i = 0, j = 0; i < size; i++) {
-      BeanCreatorProperty mp = creator.parameters.get(names.get(i));
+      BeanCreatorProperty mp = creator.paramsAndAliases.get(names.get(i));
       if (mp != null) {
         creatorArgs[mp.index] = values.get(i);
         foundCtrParameters++;
@@ -173,8 +174,7 @@ public class BeanDescriptor<T> implements Converter<T> {
 
     T bean = ofClass.cast(creator.create(creatorArgs));
     for (int i = 0; i < size; i++) {
-      PropertyMutator property = mutableProperties
-        .get(newNames[i]);
+      PropertyMutator property = mutableProperties.get(newNames[i]);
       if (property != null) property.mutate(bean, newValues[i]);
     }
     reader.endObject();
