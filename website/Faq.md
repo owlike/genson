@@ -5,11 +5,11 @@ jumbotron: true
 ---
 
 ###How to exclude a property from ser/de?
-Annotate your field and getter/setter with {% highlight java nowrap %}@JsonIgnore{% endhighlight %}.
+Annotate your field and getter/setter with `@JsonIgnore`.
 
 
 ###How to include a field or method from ser/de?
-Annotate it with [{% highlight java nowrap %}@JsonProperty{% endhighlight %} or use GensonBuilder]({{base.url}}/GettingStarted/#filterrename-properties).
+Annotate it with [`@JsonProperty` or use GensonBuilder]({{base.url}}/GettingStarted/#filterrename-properties).
 You can even indicate if you want it to be included only in serialization or deserialization.
 
 

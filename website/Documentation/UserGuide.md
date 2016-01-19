@@ -158,9 +158,9 @@ Genson provides two major ways of including/excluding and naming properties, via
 
 ###Via annotations###
 
-Excluding a property can be achieved by putting a {% highlight java nowrap %}@JsonIgnore{% endhighlight %} annotation on the field or getter/setter. The same goes for
-including a property (for example a private field that you want to be serialized) but using {% highlight java nowrap %}@JsonProperty{% endhighlight %} annotation.
-JsonProperty can also be used to define a different name for a property than the default one {% highlight java nowrap %}@JsonProperty(name="newName"){% endhighlight %}.
+Excluding a property can be achieved by putting a `@JsonIgnore` annotation on the field or getter/setter. The same goes for
+including a property (for example a private field that you want to be serialized) but using `@JsonProperty` annotation.
+JsonProperty can also be used to define a different name for a property than the default one `@JsonProperty(name="newName")`.
 
 ###Via GensonBuilder###
 
@@ -194,6 +194,10 @@ new GensonBuilder()
 
 If you want to have a more general property resolution or naming strategy, you can respectively,
 extend PropertyBaseResolver or implement your own PropertyNameResolver and register it.
+
+###Excluding properties at runtime###
+One can also exclude a property at runtime by implementing a custom RuntimePropertyFilter and registering it via GensonBuilder.
+This filter would be used every time a property is being serialized or deserialized.
 
 
 ##Object instantiation##
@@ -239,7 +243,7 @@ new GensonBuilder().useConstructorWithArguments(true).create();
 
 ###Factory methods###
 Genson has also support for methods that act as factories. Those methods must be static, defined inside the class you want to
-deserialize (or a parent) and annotated with {% highlight java nowrap %}@JsonCreator{% endhighlight %} annotation.
+deserialize (or a parent) and annotated with `@JsonCreator` annotation.
 JsonCreator annotation can also be used on Constructors when you have multiple ones
 and want to tell Genson which one to use.
 
@@ -329,7 +333,7 @@ public class Container<E extends Address> {
 
 
 **Remark** that if in AddressGroup we were using Address type instead of the concrete type, the serialized json wouldn't contain the street property.
-Indeed it would have been ser/de using Address type, using the runtime type can be enable via {% highlight java nowrap %}new GensonBuilder().useRuntimeType(true){% endhighlight %}.
+Indeed it would have been ser/de using Address type, using the runtime type can be enable via `new GensonBuilder().useRuntimeType(true)`.
 
 ##Polymorphic types
 
@@ -353,7 +357,7 @@ String json = genson.serialize(addressContainer);
 Container<? extends Address> result = genson.deserialize(json, Container.class);
 {% endhighlight %}
 
-Of course in the previous example we could have deserialized to a {% highlight java nowrap %}new GenericType<Container<EuropeanAddress>>(){% endhighlight %},
+Of course in the previous example we could have deserialized to a `new GenericType<Container<EuropeanAddress>>()`,
 but if there were multiple implementations of Address or just mixed EuropeanAddress and Address instances, you won't get the correct result.
 
 The solution to this problem is to store in the serialized json the information about the concrete type.
@@ -607,12 +611,12 @@ public class PersonConverterFactory implements Factory<Converter<Person>> {
 ###Contextual Converter###
 
 Another nice feature in Genson is the support of Contextual Converters and Factories.
-The contextual converter is used through {% highlight java nowrap %}@JsonConverter{% endhighlight %} annotation,
+The contextual converter is used through `@JsonConverter` annotation,
 that you put on object properties (fields, methods, constructor arguments).
 This will tell Genson to use this specific Converter for that property instead of any other.
 
 
-You can also implement a {% highlight java nowrap %}ContextualFactory{% endhighlight %} to create Converters based on the property
+You can also implement a `ContextualFactory` to create Converters based on the property
 
  - type
  - name
@@ -620,7 +624,7 @@ You can also implement a {% highlight java nowrap %}ContextualFactory{% endhighl
  - the class in which the property is declared.
 
 This can become really handy if you want to apply some custom Converters based on such criteria.
-The {% highlight java nowrap %}@JsonConverter{% endhighlight %} and {% highlight java nowrap %}@JsonDateFormat{% endhighlight %} support have been implemented using Contextual Factories.
+The `@JsonConverter` and `@JsonDateFormat` support have been implemented using Contextual Factories.
 
 For example if you want to use some specific converter only when some custom annotation is present on the property:
 
