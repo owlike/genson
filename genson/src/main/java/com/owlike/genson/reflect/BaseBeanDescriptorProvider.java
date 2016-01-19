@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -62,8 +63,7 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
     this.useFields = useFields;
     this.useGettersAndSetters = useGettersAndSetters;
     if (!useFields && !useGettersAndSetters)
-      throw new IllegalArgumentException(
-        "You must allow at least one mode: with fields or methods.");
+      throw new IllegalArgumentException("You must allow at least one mode: with fields or methods.");
     this.favorEmptyCreators = favorEmptyCreators;
   }
 
@@ -85,8 +85,15 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
   @Override
   public void provideBeanPropertyAccessors(Type ofType,
                                            Map<String, LinkedList<PropertyAccessor>> accessorsMap, Genson genson) {
-    for (Class<?> clazz = getRawClass(ofType); clazz != null && !Object.class.equals(clazz); clazz = clazz
-      .getSuperclass()) {
+    ArrayDeque<Class<?>> classesToInspect = new ArrayDeque<Class<?>>();
+    classesToInspect.push(getRawClass(ofType));
+    while (!classesToInspect.isEmpty()) {
+      Class<?> clazz = classesToInspect.pop();
+      if (clazz.getSuperclass() != null && clazz.getSuperclass() != Object.class) {
+        classesToInspect.push(clazz.getSuperclass());
+      }
+      for (Class<?> anInterface : clazz.getInterfaces()) classesToInspect.push(anInterface);
+
       // first lookup for fields
       if (useFields) provideFieldAccessors(clazz, accessorsMap, ofType, genson);
       // and now search methods (getters)
@@ -97,8 +104,15 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
   @Override
   public void provideBeanPropertyMutators(Type ofType,
                                           Map<String, LinkedList<PropertyMutator>> mutatorsMap, Genson genson) {
-    for (Class<?> clazz = getRawClass(ofType); clazz != null && !Object.class.equals(clazz); clazz = clazz
-      .getSuperclass()) {
+    ArrayDeque<Class<?>> classesToInspect = new ArrayDeque<Class<?>>();
+    classesToInspect.push(getRawClass(ofType));
+    while (!classesToInspect.isEmpty()) {
+      Class<?> clazz = classesToInspect.pop();
+      if (clazz.getSuperclass() != null && clazz.getSuperclass() != Object.class) {
+        classesToInspect.push(clazz.getSuperclass());
+      }
+      for (Class<?> anInterface : clazz.getInterfaces()) classesToInspect.push(anInterface);
+
       // first lookup for fields
       if (useFields) provideFieldMutators(clazz, mutatorsMap, ofType, genson);
       // and now search methods (getters)
@@ -279,14 +293,14 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
   protected PropertyAccessor checkAndMergeAccessors(String name,
                                                     LinkedList<PropertyAccessor> accessors) {
     PropertyAccessor accessor = _mostSpecificPropertyDeclaringClass(name, accessors);
-    return accessor;
+    return VisibilityFilter.ABSTRACT.isVisible(accessor.getModifiers()) ? accessor : null;
   }
 
   @Override
   protected PropertyMutator checkAndMergeMutators(String name,
                                                   LinkedList<PropertyMutator> mutators) {
     PropertyMutator mutator = _mostSpecificPropertyDeclaringClass(name, mutators);
-    return mutator;
+    return VisibilityFilter.ABSTRACT.isVisible(mutator.getModifiers()) ? mutator : null;
   }
 
   protected <T extends BeanProperty> T _mostSpecificPropertyDeclaringClass(String name,
@@ -295,11 +309,12 @@ public class BaseBeanDescriptorProvider extends AbstractBeanDescriptorProvider {
     T property = it.next();
     for (; it.hasNext(); ) {
       T next = it.next();
+      // Doesn't matter which one will be used, we want to merge the metadata
+      next.updateBoth(property);
       // 1 we search the most specialized class containing this property
       // with highest priority
       if ((property.declaringClass.equals(next.declaringClass) && property.priority() < next.priority())
       || property.declaringClass.isAssignableFrom(next.declaringClass)) {
-        next.updateBoth(property);
         property = next;
       } else continue;
     }

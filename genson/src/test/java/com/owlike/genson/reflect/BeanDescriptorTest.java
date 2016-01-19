@@ -7,9 +7,12 @@ import java.lang.annotation.Target;
 import java.lang.reflect.GenericArrayType;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.owlike.genson.GensonBuilder;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.owlike.genson.Converter;
@@ -28,6 +31,29 @@ import static org.junit.Assert.*;
 public class BeanDescriptorTest {
   private Genson genson = new Genson();
 
+  @Ignore("Not implemented for the moment, disable method resolution and use only fields during ser/de.")
+  @Test public void testShouldMergeGetAndSetAnnotations() {
+    throw new UnsupportedOperationException();
+  }
+
+  @Ignore("For now this is a limitation because we first exclude the fields/methods and then try to merge them")
+  @Test public void testShouldInheritJsonIgnoreFromAbstractMethods() {
+    BeanDescriptor<SomeConcreteClass> bd = genson.getBeanDescriptorProvider().provide(SomeConcreteClass.class, genson);
+    assertEquals(1, bd.accessibleProperties.size());
+    assertEquals("a", bd.accessibleProperties.get(0).getName());
+  }
+
+  @Test public void testShouldInheritAnnotationsFromAbstractMethods() {
+    BeanDescriptor<SomeConcreteClass> bd = genson.getBeanDescriptorProvider().provide(SomeConcreteClass.class, genson);
+    assertArrayEquals(new String[]{"a2"}, bd.accessibleProperties.get(0).getAnnotation(JsonProperty.class).aliases());
+  }
+
+  @Test public void testShouldRemoveAbstractMethodsWithIgnoredImplementation() {
+    BeanDescriptor<ClassWithIgnoredMethod> bd = genson.getBeanDescriptorProvider()
+                                                  .provide(ClassWithIgnoredMethod.class, genson);
+    assertTrue(bd.accessibleProperties.size() == 0);
+  }
+
   @Test
   public void testFailFastBeanDescriptorWithWrongType() {
     BeanDescriptorProvider provider = new GensonBuilder() {
@@ -35,8 +61,8 @@ public class BeanDescriptorTest {
         return new BaseBeanDescriptorProvider(new ContextualConverterFactory(null),
           new BeanPropertyFactory.CompositeFactory(Arrays
             .asList(new BeanPropertyFactory.StandardFactory())),
-          getMutatorAccessorResolver(), getPropertyNameResolver(),
-          true, true, true) {
+          getMutatorAccessorResolver(), getPropertyNameResolver(), true, true, true) {
+
           @Override
           @SuppressWarnings({"unchecked", "rawtypes"})
           protected <T> com.owlike.genson.reflect.BeanDescriptor<T> create(
@@ -108,20 +134,19 @@ public class BeanDescriptorTest {
     BeanMutatorAccessorResolver strategy = new BeanMutatorAccessorResolver.CompositeResolver(
       Arrays.asList(new BeanMutatorAccessorResolver.GensonAnnotationsResolver(),
         new BeanMutatorAccessorResolver.StandardMutaAccessorResolver()));
+    BeanDescriptor<ClassWithIgnoredProperties> bd = genson.getBeanDescriptorProvider()
+                                                      .provide(ClassWithIgnoredProperties.class, genson);
+    Set<String> accessors = new HashSet<String>();
+    for (PropertyAccessor p : bd.accessibleProperties) accessors.add(p.getName());
 
-    assertFalse(strategy.isAccessor(
-      ClassWithIgnoredProperties.class.getDeclaredField("ignore"),
-      ClassWithIgnoredProperties.class).booleanValue());
-    assertFalse(strategy.isMutator(ClassWithIgnoredProperties.class.getDeclaredField("ignore"),
-      ClassWithIgnoredProperties.class).booleanValue());
-    assertTrue(strategy.isAccessor(ClassWithIgnoredProperties.class.getDeclaredField("a"),
-      ClassWithIgnoredProperties.class).booleanValue());
-    assertFalse(strategy.isMutator(ClassWithIgnoredProperties.class.getDeclaredField("a"),
-      ClassWithIgnoredProperties.class).booleanValue());
-    assertTrue(strategy.isMutator(ClassWithIgnoredProperties.class.getDeclaredField("b"),
-      ClassWithIgnoredProperties.class).booleanValue());
-    assertFalse(strategy.isAccessor(ClassWithIgnoredProperties.class.getDeclaredField("b"),
-      ClassWithIgnoredProperties.class).booleanValue());
+    assertNull(bd.mutableProperties.get("ignore"));
+    assertFalse(accessors.contains("ignore"));
+
+    assertNull(bd.mutableProperties.get("a"));
+    assertTrue(accessors.contains("a"));
+
+    assertNotNull(bd.mutableProperties.get("b"));
+    assertFalse(accessors.contains("b"));
   }
 
   @Test
@@ -375,6 +400,39 @@ public class BeanDescriptorTest {
   private static class AnotherObject {
     @SuppressWarnings("unused")
     public AnotherObject() {
+    }
+  }
+
+  interface InterfaceWithSimpleMethod {
+    int getA();
+  }
+
+  class ClassWithIgnoredMethod implements InterfaceWithSimpleMethod {
+
+    @JsonIgnore
+    public int getA() {
+      return 0;
+    }
+  }
+
+  interface SomeInterface {
+    @JsonProperty(aliases = {"a2"}) int getA();
+  }
+
+  abstract class SomeAbstractClass {
+    @JsonIgnore abstract int getB();
+  }
+
+  class SomeConcreteClass extends SomeAbstractClass implements SomeInterface {
+
+    @Override
+    int getB() {
+      return 1;
+    }
+
+    @Override
+    public int getA() {
+      return 2;
     }
   }
 }

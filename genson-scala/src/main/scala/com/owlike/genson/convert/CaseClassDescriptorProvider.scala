@@ -13,7 +13,8 @@ class CaseClassDescriptorProvider(ctxConverterFactory: AbstractBeanDescriptorPro
                                   mutatorAccessorResolver: BeanMutatorAccessorResolver,
                                   nameResolver: PropertyNameResolver,
                                   useOnlyConstructorFields: Boolean)
-  extends BaseBeanDescriptorProvider(ctxConverterFactory, propertyFactory, mutatorAccessorResolver, nameResolver, false, true, true) {
+  extends BaseBeanDescriptorProvider(ctxConverterFactory, propertyFactory, mutatorAccessorResolver, nameResolver,
+    false, true, true) {
 
 
   override def provide[T](ofClass: Class[T], ofType: JType, genson: Genson): BeanDescriptor[T] = {
@@ -22,12 +23,12 @@ class CaseClassDescriptorProvider(ctxConverterFactory: AbstractBeanDescriptorPro
   }
 
   protected override def checkAndMerge(ofType: JType, creators: JList[BeanCreator]): BeanCreator = {
-    defaultApply(getRawClass(ofType)).map {
+    defaultApply(getRawClass(ofType)).flatMap {
       applyMethod =>
         scala.collection.JavaConversions.collectionAsScalaIterable(creators).find { ctr =>
           ctr.isAnnotationPresent(classOf[JsonCreator]) || isDefaultCreator(applyMethod, ctr)
         }
-    }.flatten.getOrElse(super.checkAndMerge(ofType, creators))
+    }.getOrElse(super.checkAndMerge(ofType, creators))
   }
 
   protected override def mergeAccessorsWithCreatorProperties(ofType: JType,

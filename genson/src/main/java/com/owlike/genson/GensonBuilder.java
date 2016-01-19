@@ -782,8 +782,8 @@ public class GensonBuilder {
       beanViewDescriptorProvider = new BeanViewDescriptorProvider(
         new AbstractBeanDescriptorProvider.ContextualConverterFactory(contextualFactories), registeredViews,
         createBeanPropertyFactory(),
-        new BeanMutatorAccessorResolver.CompositeResolver(resolvers),
-        getPropertyNameResolver());
+        new BeanMutatorAccessorResolver.CompositeResolver(resolvers), getPropertyNameResolver()
+      );
     }
 
     return create(createConverterFactory(), withClassAliases);
@@ -975,7 +975,8 @@ public class GensonBuilder {
     providers.add(new BaseBeanDescriptorProvider(
       new AbstractBeanDescriptorProvider.ContextualConverterFactory(contextualFactories),
       createBeanPropertyFactory(), getMutatorAccessorResolver(), getPropertyNameResolver(),
-      useGettersAndSetters, useFields, true));
+      useGettersAndSetters, useFields, true
+    ));
 
     return new CompositeBeanDescriptorProvider(providers);
   }

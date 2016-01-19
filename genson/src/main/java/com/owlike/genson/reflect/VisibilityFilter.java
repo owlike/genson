@@ -34,6 +34,7 @@ public final class VisibilityFilter {
     | Modifier.TRANSIENT | Modifier.VOLATILE | Modifier.SYNCHRONIZED | Modifier.NATIVE
     | Modifier.STRICT | Modifier.INTERFACE;
 
+  public final static VisibilityFilter ABSTRACT = new VisibilityFilter(Modifier.ABSTRACT);
   public final static VisibilityFilter PRIVATE = new VisibilityFilter(Modifier.TRANSIENT,
     Modifier.NATIVE, Modifier.STATIC);
   public final static VisibilityFilter ALL = new VisibilityFilter();
@@ -69,6 +70,10 @@ public final class VisibilityFilter {
    * @return true if this member is visible according to this filter.
    */
   public final boolean isVisible(Member member) {
-    return (member.getModifiers() & filter) == 0;
+    return isVisible(member.getModifiers());
+  }
+
+  public final boolean isVisible(int modifiers) {
+    return (modifiers & filter) == 0;
   }
 }

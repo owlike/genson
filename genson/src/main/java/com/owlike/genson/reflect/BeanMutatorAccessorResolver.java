@@ -46,19 +46,19 @@ import com.owlike.genson.annotation.JsonProperty;
  * @see BeanViewDescriptorProvider
  */
 public interface BeanMutatorAccessorResolver {
-  public Trilean isCreator(Constructor<?> constructor, Class<?> fromClass);
+  Trilean isCreator(Constructor<?> constructor, Class<?> fromClass);
 
-  public Trilean isCreator(Method method, Class<?> fromClass);
+  Trilean isCreator(Method method, Class<?> fromClass);
 
-  public Trilean isAccessor(Field field, Class<?> fromClass);
+  Trilean isAccessor(Field field, Class<?> fromClass);
 
-  public Trilean isAccessor(Method method, Class<?> fromClass);
+  Trilean isAccessor(Method method, Class<?> fromClass);
 
-  public Trilean isMutator(Field field, Class<?> fromClass);
+  Trilean isMutator(Field field, Class<?> fromClass);
 
-  public Trilean isMutator(Method method, Class<?> fromClass);
+  Trilean isMutator(Method method, Class<?> fromClass);
 
-  public static class PropertyBaseResolver implements BeanMutatorAccessorResolver {
+  class PropertyBaseResolver implements BeanMutatorAccessorResolver {
     @Override
     public Trilean isAccessor(Field field, Class<?> fromClass) {
       return Trilean.UNKNOWN;
@@ -90,7 +90,7 @@ public interface BeanMutatorAccessorResolver {
     }
   }
 
-  public static class CompositeResolver implements BeanMutatorAccessorResolver {
+  class CompositeResolver implements BeanMutatorAccessorResolver {
     private List<BeanMutatorAccessorResolver> components;
 
     public CompositeResolver(List<BeanMutatorAccessorResolver> components) {
@@ -167,7 +167,7 @@ public interface BeanMutatorAccessorResolver {
     }
   }
 
-  public static class GensonAnnotationsResolver implements BeanMutatorAccessorResolver {
+  class GensonAnnotationsResolver implements BeanMutatorAccessorResolver {
     public Trilean isAccessor(Field field, Class<?> fromClass) {
       // ok to look for this$ is ugly but it will do the job for the moment
       if (mustIgnore(field, true) || field.getName().startsWith("this$"))
@@ -254,7 +254,7 @@ public interface BeanMutatorAccessorResolver {
    *
    * @author eugen
    */
-  public static class StandardMutaAccessorResolver implements BeanMutatorAccessorResolver {
+  class StandardMutaAccessorResolver implements BeanMutatorAccessorResolver {
     private final VisibilityFilter fieldVisibilityFilter;
     private final VisibilityFilter methodVisibilityFilter;
     private final VisibilityFilter creatorVisibilityFilter;

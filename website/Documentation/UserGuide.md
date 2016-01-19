@@ -90,11 +90,15 @@ Usually your goal is to map the JSON to some structure you have defined and vice
 Genson provides full support for object databinding by following standard JavaBean conventions. The basic rules for databinding are:
 
  * All public or package visibility fields, getters and setters will be used, including the inherited ones.
- * If a getter/setter exists for a field then it will be used instead of the field.
+ * If a getter/setter exists for a field then it will be used instead of the field (can be changed via configuration).
  * Transient and static fields are not serialized nor used during deserialization.
- * A default no argument constructor is required (can be configured to use constructors with arguments and support immutable types)
- * If a field does not exist in the json stream then its field/setter will not be used.
+ * A default no argument constructor is required (can be configured to use constructors with arguments and support immutable types).
+ * If a field does not exist in the json stream then its field/setter will not be used (Genson can be configured to throw an exception).
  * If a value is null then you can choose whether you want it to be serialized as null or just skipped, by default null values are serialized.
+ * Inherited annotations on methods/fields with same name are merged except JsonIgnore annotation which is a limitation for the moment.
+ * Annotations on getters and setters are not merged together, this allows to provide decoupled serialization and deserialization configurations. 
+ If you want to define some annotation to be used during both serialization and deserialization, then disable method resolution,
+ enable private field resolution and annotate the fields.
 
 Lets have a closer look to an example.
 

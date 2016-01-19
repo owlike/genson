@@ -31,14 +31,13 @@ import com.owlike.genson.reflect.PropertyMutator.MethodMutator;
 public class BeanViewDescriptorProvider extends BaseBeanDescriptorProvider {
 
   private Map<Class<?>, BeanView<?>> views;
-  private Map<Class<?>, BeanDescriptor<?>> descriptors =
-    new ConcurrentHashMap<Class<?>, BeanDescriptor<?>>();
+  private Map<Class<?>, BeanDescriptor<?>> descriptors = new ConcurrentHashMap<Class<?>, BeanDescriptor<?>>();
 
   public BeanViewDescriptorProvider(ContextualConverterFactory ctxConverterFactory,
                                     Map<Class<?>, BeanView<?>> views, BeanPropertyFactory propertyFactory,
-                                    BeanMutatorAccessorResolver mutatorAccessorResolver, PropertyNameResolver nameResolver) {
-    super(ctxConverterFactory, propertyFactory, mutatorAccessorResolver, nameResolver, true,
-      false, true);
+                                    BeanMutatorAccessorResolver mutatorAccessorResolver,
+                                    PropertyNameResolver nameResolver) {
+    super(ctxConverterFactory, propertyFactory, mutatorAccessorResolver, nameResolver, true, false, true);
     this.views = views;
   }
 
