@@ -8,6 +8,7 @@ import java.util.*;
 import com.owlike.genson.*;
 
 import com.owlike.genson.JsonBindingException;
+import com.owlike.genson.convert.DefaultConverters;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -15,6 +16,17 @@ import static org.junit.Assert.*;
 public class DefaultConvertersTest {
   private Genson genson = new Genson();
 
+  @Test public void testCaseInsensitiveEnum() {
+    try {
+      genson.deserialize("\"ReD\"", Color.class);
+      fail();
+    } catch(JsonBindingException e) {}
+
+    Color actual = new GensonBuilder().withConverterFactory(new DefaultConverters.EnumConverterFactory(false)).create()
+                     .deserialize("\"ReD\"", Color.class);
+
+    assertEquals(Color.red, actual);
+  }
 
   @Test
   public void testReadWriteByteAsInt() {

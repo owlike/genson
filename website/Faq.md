@@ -61,3 +61,10 @@ See the [class metadata mechanism]({{base.url}}/GettingStarted/#polymorphic-type
 ###How to deserialize a class without a no argument constructor?
 The main problem in using constructors with arguments is to resolve parameter names, as they are not available through introspection.
 [See the solutions described]({{base.url}}/Documentation/UserGuide/#object-instantiation) in the Getting Started guide.
+
+###How to use case insensitive enums?
+By default enum names must match exactly. To make the matching case insensitive register a customized instance of EnumConverterFactory.
+
+{% highlight java %}
+Genson genson = new GensonBuilder().withConverterFactory(new DefaultConverters.EnumConverterFactory(false)).create();
+{% endhighlight %}

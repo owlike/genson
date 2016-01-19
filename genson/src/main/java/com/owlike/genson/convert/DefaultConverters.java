@@ -3,6 +3,7 @@ package com.owlike.genson.convert;
 import java.io.File;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
@@ -1016,9 +1017,21 @@ public final class DefaultConverters {
   @HandleBeanView
   public static class EnumConverter<T extends Enum<T>> implements Converter<T> {
     private final Class<T> eClass;
+    private final Map<String, T> deserializationNames;
+    private final boolean caseSensitive;
 
-    public EnumConverter(Class<T> eClass) {
+    public EnumConverter(Class<T> eClass, boolean caseSensitive) {
       this.eClass = eClass;
+      this.caseSensitive = caseSensitive;
+      deserializationNames = new HashMap<String, T>();
+      for (Field f : eClass.getFields()) {
+        try {
+          String name = caseSensitive ? f.getName(): f.getName().toUpperCase();
+          deserializationNames.put(name, (T) f.get(null));
+        } catch (IllegalAccessException e) {
+          throw new JsonBindingException("Failed to get enum value " + f.getName(), e);
+        }
+      }
     }
 
     public void serialize(T obj, ObjectWriter writer, Context ctx) {
@@ -1026,21 +1039,26 @@ public final class DefaultConverters {
     }
 
     public T deserialize(ObjectReader reader, Context ctx) {
-      return Enum.valueOf(eClass, reader.valueAsString());
+      String name = caseSensitive ? reader.valueAsString(): reader.valueAsString().toUpperCase();
+      T value = deserializationNames.get(name);
+      if (value == null) throw new JsonBindingException("No enum constant " + eClass.getCanonicalName() + "." + name);
+      return value;
     }
   }
 
   public final static class EnumConverterFactory implements Factory<Converter<? extends Enum<?>>> {
-    public final static EnumConverterFactory instance = new EnumConverterFactory();
+    public final static EnumConverterFactory instance = new EnumConverterFactory(true);
+    public final boolean caseSensitive;
 
-    private EnumConverterFactory() {
+    public EnumConverterFactory(boolean caseSensitive) {
+      this.caseSensitive = caseSensitive;
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     public Converter<Enum<?>> create(Type type, Genson genson) {
       Class<?> rawClass = TypeUtil.getRawClass(type);
       return rawClass.isEnum() || Enum.class.isAssignableFrom(rawClass) ? new EnumConverter(
-        rawClass) : null;
+        rawClass, caseSensitive) : null;
     }
   }
 
