@@ -1,7 +1,9 @@
 package com.owlike.genson.functional;
 
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import com.owlike.genson.GensonBuilder;
 import org.junit.Before;
@@ -47,6 +49,18 @@ public class MetadataFeatureTest {
     Bean bean = new Bean();
     bean.value = new Bean();
     assertEquals("{\"@class\":\"bean\",\"value\":{\"@class\":\"bean\",\"value\":null}}", genson.serialize(bean));
+  }
+
+  @Test public void testUseClassMetadataForAllTypes() {
+    List l = Arrays.asList(
+      new Date(1, 1, 1), 2l, true, null, new Bean()
+    );
+    Bean b = new Bean();
+    b.value = new Bean();
+    ((Bean) b.value).value = new Bean();
+    String json = new GensonBuilder().useIndentation(true).useClassMetadataForAllTypes(true).create().serialize(b);
+
+    System.out.println(json);
   }
 
   static class Bean {

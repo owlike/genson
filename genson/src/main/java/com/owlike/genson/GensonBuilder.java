@@ -40,6 +40,7 @@ public class GensonBuilder {
   private boolean skipNull = false;
   private boolean htmlSafe = false;
   private boolean withClassMetadata = false;
+  private boolean classMetadataForAllTypes = false;
   private boolean throwExcOnNoDebugInfo = false;
   private boolean useGettersAndSetters = true;
   private boolean useFields = true;
@@ -504,6 +505,18 @@ public class GensonBuilder {
   }
 
   /**
+   * When enabled class metadata will be serialized for any type, not only objects. This feature is expensive as
+   * the generated json will be much bigger and there are additional processing steps.
+   * Note that if you enable this option, useClassMetadataWithStaticType will have no effect anymore and would act like
+   * if it was enabled.
+   */
+  public GensonBuilder useClassMetadataForAllTypes(boolean enabled) {
+    useClassMetadata(enabled);
+    this.classMetadataForAllTypes = enabled;
+    return this;
+  }
+
+  /**
    * Specifies the data format that should be used for java.util.Date serialization and
    * deserialization.
    *
@@ -843,6 +856,8 @@ public class GensonBuilder {
     if (useRuntimeTypeForSerialization) chainHead.append(new RuntimeTypeConverter.RuntimeTypeConverterFactory());
 
     chainHead.append(new ClassMetadataConverter.ClassMetadataConverterFactory(classMetadataWithStaticType));
+
+    //if (classMetadataForAllTypes && withClassMetadata) chainHead.append(new LiteralAsObjectConverter.Factory());
 
     if (customFactoryChain != null) chainHead.append(customFactoryChain);
 
