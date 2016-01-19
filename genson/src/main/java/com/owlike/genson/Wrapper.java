@@ -3,6 +3,8 @@ package com.owlike.genson;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 
+import com.owlike.genson.reflect.TypeUtil;
+
 
 /**
  * Wrapper class must be extended by decorated converters that wrap other converters. This allows to
@@ -88,5 +90,13 @@ public abstract class Wrapper<T> implements AnnotatedElement {
 
   public static boolean isWrapped(Object object) {
     return object instanceof Wrapper;
+  }
+
+  /**
+   * @return true if this object or its wrapped object (if the object extends Wrapper) is of type clazz.
+   */
+  public static boolean isOfType(Object object, Class<?> clazz) {
+    return TypeUtil.match(object.getClass(), clazz, false) ||
+             (isWrapped(object) && Wrapper.isOfType(((Wrapper<?>) object).unwrap(), clazz));
   }
 }

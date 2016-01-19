@@ -986,7 +986,7 @@ public final class DefaultConverters {
     private UntypedConverterFactory() {
     }
 
-    private final static class UntypedConverter implements Converter<Object> {
+    public final static class UntypedConverter implements Converter<Object> {
       final static UntypedConverter instance = new UntypedConverter();
 
       private UntypedConverter() {

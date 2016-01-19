@@ -43,6 +43,12 @@ public class MetadataFeatureTest {
     assertEquals("{\"value\":null}", genson.serialize(bean));
   }
 
+  @Test public void testClassMetadataShouldBeSerializedOnceWhenUsingUntypedConverter() {
+    Bean bean = new Bean();
+    bean.value = new Bean();
+    assertEquals("{\"@class\":\"bean\",\"value\":{\"@class\":\"bean\",\"value\":null}}", genson.serialize(bean));
+  }
+
   static class Bean {
     Object value;
   }
