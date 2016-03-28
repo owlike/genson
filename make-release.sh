@@ -79,7 +79,7 @@ function createScalaProject {
   xmlstarlet edit -L -u "/project/artifactId" -v "$SCALA_PROJECT" $SCALA_PROJECT/pom.xml
 
   # Add this project to the parent pom
-  sed -i "/<module>genson<\/module>/a <module>$SCALA_PROJECT</module>" pom.xml
+  xmlstarlet edit -L --subnode /project/modules -t elem -n module -v "$SCALA_PROJECT" pom.xml
 }
 
 # We don't care here about updating dependencies versions as we use the project version
@@ -153,7 +153,7 @@ function prepareFromRemote {
 }
 
 function prepareProjects {
-  sed -i "s/<module>genson-scala<\/module>//" pom.xml
+  sed -i '' "s/<module>genson-scala<\/module>//" pom.xml
 
   createScalaProject 2.10
   createScalaProject 2.11
