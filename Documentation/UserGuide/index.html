@@ -203,22 +203,22 @@ Setters, Fields and Constructors.</p>
 
 <p>Once you have a Genson instance, you can use it to serialize/deserialize JSON strings.</p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="kt">int</span><span class="o">[]</span> <span class="n">arrayOfInts</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">int</span><span class="o">[]{</span><span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span><span class="o">};</span>
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kt">int</span><span class="o">[]</span> <span class="n">arrayOfInts</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">int</span><span class="o">[]{</span><span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span><span class="o">};</span>
 <span class="c1">// json = [1,2,3]</span>
 <span class="n">String</span> <span class="n">json</span> <span class="o">=</span> <span class="n">genson</span><span class="o">.</span><span class="na">serialize</span><span class="o">(</span><span class="n">arrayOfInts</span><span class="o">);</span>
-<span class="n">genson</span><span class="o">.</span><span class="na">deserialize</span><span class="o">(</span><span class="n">json</span><span class="o">,</span> <span class="kt">int</span><span class="o">[].</span><span class="na">class</span><span class="o">);</span></code></pre></div>
+<span class="n">genson</span><span class="o">.</span><span class="na">deserialize</span><span class="o">(</span><span class="n">json</span><span class="o">,</span> <span class="kt">int</span><span class="o">[].</span><span class="na">class</span><span class="o">);</span></code></pre></figure>
 
 <h3 id="supported-io-classes">Supported IO classes</h3>
 <p>You can also use Java OutputStream/InputStream, Writer/Reader and byte arrays instead of Strings.
 In most cases you will want to use them instead of Strings for better performances.</p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="kt">byte</span><span class="o">[]</span> <span class="n">byteArray</span> <span class="o">=</span> <span class="n">genson</span><span class="o">.</span><span class="na">serializeBytes</span><span class="o">(</span><span class="n">arrayOfInts</span><span class="o">);</span>
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kt">byte</span><span class="o">[]</span> <span class="n">byteArray</span> <span class="o">=</span> <span class="n">genson</span><span class="o">.</span><span class="na">serializeBytes</span><span class="o">(</span><span class="n">arrayOfInts</span><span class="o">);</span>
 <span class="n">genson</span><span class="o">.</span><span class="na">serialize</span><span class="o">(</span><span class="n">arrayOfInts</span><span class="o">,</span> <span class="n">outputStream</span><span class="o">);</span>
 <span class="n">genson</span><span class="o">.</span><span class="na">serialize</span><span class="o">(</span><span class="n">arrayOfInts</span><span class="o">,</span> <span class="n">writer</span><span class="o">);</span>
 
 <span class="n">genson</span><span class="o">.</span><span class="na">deserialize</span><span class="o">(</span><span class="n">byteArray</span><span class="o">,</span> <span class="kt">int</span><span class="o">[].</span><span class="na">class</span><span class="o">);</span>
 <span class="n">genson</span><span class="o">.</span><span class="na">deserialize</span><span class="o">(</span><span class="n">inputStream</span><span class="o">,</span> <span class="kt">int</span><span class="o">[].</span><span class="na">class</span><span class="o">);</span>
-<span class="n">genson</span><span class="o">.</span><span class="na">deserialize</span><span class="o">(</span><span class="n">reader</span><span class="o">,</span> <span class="kt">int</span><span class="o">[].</span><span class="na">class</span><span class="o">);</span></code></pre></div>
+<span class="n">genson</span><span class="o">.</span><span class="na">deserialize</span><span class="o">(</span><span class="n">reader</span><span class="o">,</span> <span class="kt">int</span><span class="o">[].</span><span class="na">class</span><span class="o">);</span></code></pre></figure>
 
 <h3 id="untyped-java-structures">Untyped Java structures</h3>
 <p>During serialization if there is no type information available (meaning it is Object),
@@ -227,13 +227,13 @@ If it has type information then it will use it instead of the runtime type.</p>
 
 <p>In the example below, Genson will use the runtime type of the values in the map.</p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">Object</span><span class="o">&gt;</span> <span class="n">person</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">Object</span><span class="o">&gt;()</span> <span class="o">{{</span>
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">Object</span><span class="o">&gt;</span> <span class="n">person</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">Object</span><span class="o">&gt;()</span> <span class="o">{{</span>
   <span class="n">put</span><span class="o">(</span><span class="s">&quot;name&quot;</span><span class="o">,</span> <span class="s">&quot;Foo&quot;</span><span class="o">);</span>
   <span class="n">put</span><span class="o">(</span><span class="s">&quot;age&quot;</span><span class="o">,</span> <span class="mi">28</span><span class="o">);</span>
 <span class="o">}};</span>
 
 <span class="c1">// {&quot;age&quot;:28,&quot;name&quot;:&quot;Foo&quot;}</span>
-<span class="n">String</span> <span class="n">json</span> <span class="o">=</span> <span class="n">genson</span><span class="o">.</span><span class="na">serialize</span><span class="o">(</span><span class="n">person</span><span class="o">);</span></code></pre></div>
+<span class="n">String</span> <span class="n">json</span> <span class="o">=</span> <span class="n">genson</span><span class="o">.</span><span class="na">serialize</span><span class="o">(</span><span class="n">person</span><span class="o">);</span></code></pre></figure>
 
 <p>Deserialization however is more tricky as the type must be detected based on the content of the JSON stream.
 By default, if no type information is available during deserialization, Genson will provide a base mapping between JSON types and Java types.
@@ -242,12 +242,12 @@ There is another mechanism allowing to <a href="#polymorphic-types">deserialize 
 
 <p>Here in both cases it will be deserialized to a map with the correct types (string and int) as they are standard Json types.</p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">Object</span><span class="o">&gt;</span> <span class="n">map</span> <span class="o">=</span> <span class="n">genson</span><span class="o">.</span><span class="na">deserialize</span><span class="o">(</span><span class="n">json</span><span class="o">,</span> <span class="n">Map</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
-<span class="n">Object</span> <span class="n">map2</span> <span class="o">=</span> <span class="n">genson</span><span class="o">.</span><span class="na">deserialize</span><span class="o">(</span><span class="n">json</span><span class="o">,</span> <span class="n">Object</span><span class="o">.</span><span class="na">class</span><span class="o">);</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">Object</span><span class="o">&gt;</span> <span class="n">map</span> <span class="o">=</span> <span class="n">genson</span><span class="o">.</span><span class="na">deserialize</span><span class="o">(</span><span class="n">json</span><span class="o">,</span> <span class="n">Map</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+<span class="n">Object</span> <span class="n">map2</span> <span class="o">=</span> <span class="n">genson</span><span class="o">.</span><span class="na">deserialize</span><span class="o">(</span><span class="n">json</span><span class="o">,</span> <span class="n">Object</span><span class="o">.</span><span class="na">class</span><span class="o">);</span></code></pre></figure>
 
 <p><strong>Note</strong>: Sometime you might want to always use the runtime type, this can be enabled with</p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="k">new</span> <span class="nf">GensonBuilder</span><span class="o">().</span><span class="na">useRuntimeType</span><span class="o">(</span><span class="kc">true</span><span class="o">).</span><span class="na">create</span><span class="o">()</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="k">new</span> <span class="nf">GensonBuilder</span><span class="o">().</span><span class="na">useRuntimeType</span><span class="o">(</span><span class="kc">true</span><span class="o">).</span><span class="na">create</span><span class="o">()</span></code></pre></figure>
 
 <h2 id="pojo-databinding">POJO Databinding</h2>
 <p>Of course working only with Maps, Lists and primitive types is not so convenient.
@@ -257,16 +257,20 @@ Usually your goal is to map the JSON to some structure you have defined and vice
 
 <ul>
   <li>All public or package visibility fields, getters and setters will be used, including the inherited ones.</li>
-  <li>If a getter/setter exists for a field then it will be used instead of the field.</li>
+  <li>If a getter/setter exists for a field then it will be used instead of the field (can be changed via configuration).</li>
   <li>Transient and static fields are not serialized nor used during deserialization.</li>
-  <li>A default no argument constructor is required (can be configured to use constructors with arguments and support immutable types)</li>
-  <li>If a field does not exist in the json stream then its field/setter will not be used.</li>
+  <li>A default no argument constructor is required (can be configured to use constructors with arguments and support immutable types).</li>
+  <li>If a field does not exist in the json stream then its field/setter will not be used (Genson can be configured to throw an exception).</li>
   <li>If a value is null then you can choose whether you want it to be serialized as null or just skipped, by default null values are serialized.</li>
+  <li>Inherited annotations on methods/fields with same name are merged except JsonIgnore annotation which is a limitation for the moment.</li>
+  <li>Annotations on getters and setters are not merged together, this allows to provide decoupled serialization and deserialization configurations. 
+ If you want to define some annotation to be used during both serialization and deserialization, then disable method resolution,
+ enable private field resolution and annotate the fields.</li>
 </ul>
 
 <p>Lets have a closer look to an example.</p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">Person</span> <span class="n">someone</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">Person</span><span class="o">(</span><span class="s">&quot;Eugen&quot;</span><span class="o">,</span> <span class="mi">28</span><span class="o">,</span> <span class="k">new</span> <span class="nf">Address</span><span class="o">(</span><span class="mi">157</span><span class="o">,</span> <span class="s">&quot;Paris&quot;</span><span class="o">));</span>
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">Person</span> <span class="n">someone</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">Person</span><span class="o">(</span><span class="s">&quot;Eugen&quot;</span><span class="o">,</span> <span class="mi">28</span><span class="o">,</span> <span class="k">new</span> <span class="nf">Address</span><span class="o">(</span><span class="mi">157</span><span class="o">,</span> <span class="s">&quot;Paris&quot;</span><span class="o">));</span>
 
 <span class="c1">// {&quot;address&quot;:{&quot;building&quot;:157,&quot;city&quot;:&quot;Paris&quot;},&quot;age&quot;:28,&quot;name&quot;:&quot;Eugen&quot;}</span>
 <span class="n">String</span> <span class="n">json</span> <span class="o">=</span> <span class="n">genson</span><span class="o">.</span><span class="na">serialize</span><span class="o">(</span><span class="n">someone</span><span class="o">);</span>
@@ -300,14 +304,14 @@ Usually your goal is to map the JSON to some structure you have defined and vice
     <span class="k">this</span><span class="o">.</span><span class="na">building</span> <span class="o">=</span> <span class="n">building</span><span class="o">;</span>
     <span class="k">this</span><span class="o">.</span><span class="na">city</span> <span class="o">=</span> <span class="n">city</span><span class="o">;</span>
   <span class="o">}</span>
-<span class="o">}</span></code></pre></div>
+<span class="o">}</span></code></pre></figure>
 
 <p><strong>Remark</strong> Actually inner and anonymous classes serialization is supported but not deserialization, except if it is a static inner class.</p>
 
 <p>You can also deserialize in an existing object. However this feature has some restrictions: it works only with Pojo like classes and does not handle nesting.
 For example if your root object contains a list or another Pojo, then it will be overriden by the one in the json (if present, otherwise it remains unchanged).</p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">genson</span><span class="o">.</span><span class="na">deserializeInto</span><span class="o">(</span><span class="n">json</span><span class="o">,</span> <span class="n">personInstance</span><span class="o">);</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">genson</span><span class="o">.</span><span class="na">deserializeInto</span><span class="o">(</span><span class="n">json</span><span class="o">,</span> <span class="n">personInstance</span><span class="o">);</span></code></pre></figure>
 
 <h2 id="filterrename-properties">Filter/Rename properties</h2>
 
@@ -315,15 +319,9 @@ For example if your root object contains a list or another Pojo, then it will be
 
 <h3 id="via-annotations">Via annotations</h3>
 
-<p>Excluding a property can be achieved by putting a 
-<span class="nd">@JsonIgnore</span>
- annotation on the field or getter/setter. The same goes for
-including a property (for example a private field that you want to be serialized) but using 
-<span class="nd">@JsonProperty</span>
- annotation.
-JsonProperty can also be used to define a different name for a property than the default one 
-<span class="nd">@JsonProperty</span><span class="o">(</span><span class="n">name</span><span class="o">=</span><span class="s">"newName"</span><span class="o">)</span>
-.</p>
+<p>Excluding a property can be achieved by putting a <code>@JsonIgnore</code> annotation on the field or getter/setter. The same goes for
+including a property (for example a private field that you want to be serialized) but using <code>@JsonProperty</code> annotation.
+JsonProperty can also be used to define a different name for a property than the default one <code>@JsonProperty(name="newName")</code>.</p>
 
 <h3 id="via-gensonbuilder">Via GensonBuilder</h3>
 
@@ -334,24 +332,28 @@ This feature gets handy if you can’t modify the source code of your classes or
 or that you want to always exclude properties of some type, etc.
 The code below demonstrates some of those strategies (but more are available - see the API).</p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="k">new</span> <span class="nf">GensonBuilder</span><span class="o">()</span>
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="k">new</span> <span class="nf">GensonBuilder</span><span class="o">()</span>
   <span class="o">.</span><span class="na">exclude</span><span class="o">(</span><span class="s">&quot;password&quot;</span><span class="o">)</span>
   <span class="o">.</span><span class="na">exclude</span><span class="o">(</span><span class="n">Class</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
   <span class="o">.</span><span class="na">include</span><span class="o">(</span><span class="s">&quot;name&quot;</span><span class="o">,</span> <span class="n">FromSome</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
   <span class="o">.</span><span class="na">rename</span><span class="o">(</span><span class="s">&quot;type&quot;</span><span class="o">,</span> <span class="s">&quot;_type&quot;</span><span class="o">)</span>
-<span class="o">.</span><span class="na">create</span><span class="o">();</span></code></pre></div>
+<span class="o">.</span><span class="na">create</span><span class="o">();</span></code></pre></figure>
 
 <h3 id="genson-wide-strategies">Genson wide strategies</h3>
 <p>You can also define some strategies for property resolution that will be used for a Genson instance. You can choose whether
 to use Getter&amp;Setter or Fields (or both - by default) and their visibility (public, protected, private…).</p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="k">new</span> <span class="nf">GensonBuilder</span><span class="o">()</span>
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="k">new</span> <span class="nf">GensonBuilder</span><span class="o">()</span>
   <span class="o">.</span><span class="na">useFields</span><span class="o">(</span><span class="kc">true</span><span class="o">,</span> <span class="n">VisibilityFilter</span><span class="o">.</span><span class="na">PRIVATE</span><span class="o">)</span>
   <span class="o">.</span><span class="na">useMethods</span><span class="o">(</span><span class="kc">false</span><span class="o">)</span>
-<span class="o">.</span><span class="na">create</span><span class="o">();</span></code></pre></div>
+<span class="o">.</span><span class="na">create</span><span class="o">();</span></code></pre></figure>
 
 <p>If you want to have a more general property resolution or naming strategy, you can respectively,
 extend PropertyBaseResolver or implement your own PropertyNameResolver and register it.</p>
+
+<h3 id="excluding-properties-at-runtime">Excluding properties at runtime</h3>
+<p>One can also exclude a property at runtime by implementing a custom RuntimePropertyFilter and registering it via GensonBuilder.
+This filter would be used every time a property is being serialized or deserialized.</p>
 
 <h2 id="object-instantiation">Object instantiation</h2>
 <p>By default Genson requires you to provide a default no argument constructor. But Genson also works with constructors that take arguments,
@@ -368,7 +370,7 @@ Java reflection API does not provide access to parameter names of methods and co
 
 <p>Annotate each parameter of the constructor with <strong>@JsonProperty</strong>, this would tell to Genson that this is the name that must be used.</p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Address</span> <span class="o">{</span>
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Address</span> <span class="o">{</span>
   <span class="kd">final</span> <span class="kt">int</span> <span class="n">building</span><span class="o">;</span>
   <span class="kd">final</span> <span class="n">String</span> <span class="n">city</span><span class="o">;</span>
 
@@ -378,7 +380,7 @@ Java reflection API does not provide access to parameter names of methods and co
     <span class="k">this</span><span class="o">.</span><span class="na">building</span> <span class="o">=</span> <span class="n">building</span><span class="o">;</span>
     <span class="k">this</span><span class="o">.</span><span class="na">city</span> <span class="o">=</span> <span class="n">city</span><span class="o">;</span>
   <span class="o">}</span>
-<span class="o">}</span></code></pre></div>
+<span class="o">}</span></code></pre></figure>
 
 <h3 id="automatic-resolution">Automatic resolution</h3>
 
@@ -388,20 +390,18 @@ This mechanism is disabled by default as it uses byte code parsing to extract na
 
 <p>Enable automatic name resolution for constructors and methods via the GensonBuilder.</p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="k">new</span> <span class="nf">GensonBuilder</span><span class="o">().</span><span class="na">useConstructorWithArguments</span><span class="o">(</span><span class="kc">true</span><span class="o">).</span><span class="na">create</span><span class="o">();</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="k">new</span> <span class="nf">GensonBuilder</span><span class="o">().</span><span class="na">useConstructorWithArguments</span><span class="o">(</span><span class="kc">true</span><span class="o">).</span><span class="na">create</span><span class="o">();</span></code></pre></figure>
 
 <h3 id="factory-methods">Factory methods</h3>
 <p>Genson has also support for methods that act as factories. Those methods must be static, defined inside the class you want to
-deserialize (or a parent) and annotated with 
-<span class="nd">@JsonCreator</span>
- annotation.
+deserialize (or a parent) and annotated with <code>@JsonCreator</code> annotation.
 JsonCreator annotation can also be used on Constructors when you have multiple ones
 and want to tell Genson which one to use.</p>
 
 <p>In the previous example we could have a factory method that builds an Address with some default values,
 that would then be overridden by Genson based on the JSON content.</p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Address</span> <span class="o">{</span>
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Address</span> <span class="o">{</span>
   <span class="kd">final</span> <span class="kt">int</span> <span class="n">building</span><span class="o">;</span>
   <span class="kd">final</span> <span class="n">String</span> <span class="n">city</span><span class="o">;</span>
 
@@ -413,7 +413,7 @@ that would then be overridden by Genson based on the JSON content.</p>
     <span class="k">this</span><span class="o">.</span><span class="na">building</span> <span class="o">=</span> <span class="n">building</span><span class="o">;</span>
     <span class="k">this</span><span class="o">.</span><span class="na">city</span> <span class="o">=</span> <span class="n">city</span><span class="o">;</span>
   <span class="o">}</span>
-<span class="o">}</span></code></pre></div>
+<span class="o">}</span></code></pre></figure>
 
 <h2 id="exceptions">Exceptions</h2>
 
@@ -433,11 +433,11 @@ Those unknown objects being deserialized as Maps. The solution is to use what is
 Gensons implementation of TypeToken is named GenericType. Why not TypeToken?
 Because this name is used in Guava library so choosing another name allows to avoid confusion and mistakes.</p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">List</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span> <span class="n">listOfInt</span> <span class="o">=</span> <span class="n">genson</span><span class="o">.</span><span class="na">deserialize</span><span class="o">(</span><span class="s">&quot;[1, 2]&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="n">GenericType</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;&gt;(){});</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">List</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span> <span class="n">listOfInt</span> <span class="o">=</span> <span class="n">genson</span><span class="o">.</span><span class="na">deserialize</span><span class="o">(</span><span class="s">&quot;[1, 2]&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="n">GenericType</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;&gt;(){});</span></code></pre></figure>
 
 <p>Genson has full support of Javas generics, allowing you to hava quite complex structures and still be able to ser/de it.</p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="c1">// enable constructor parameter names resolution through byte code analysis</span>
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="c1">// enable constructor parameter names resolution through byte code analysis</span>
 <span class="n">Genson</span> <span class="n">genson</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">GensonBuilder</span><span class="o">().</span><span class="na">useConstructorWithArguments</span><span class="o">(</span><span class="kc">true</span><span class="o">).</span><span class="na">create</span><span class="o">();</span>
 
 <span class="n">AddressGroup</span> <span class="n">addressGroup</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">AddressGroup</span><span class="o">(</span><span class="k">new</span> <span class="n">Container</span><span class="o">&lt;</span><span class="n">EuropeanAddress</span><span class="o">&gt;(</span>
@@ -470,19 +470,17 @@ Because this name is used in Guava library so choosing another name allows to av
   <span class="kd">public</span> <span class="nf">Container</span><span class="o">(</span><span class="n">List</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="n">values</span><span class="o">)</span> <span class="o">{</span>
     <span class="k">this</span><span class="o">.</span><span class="na">values</span> <span class="o">=</span> <span class="n">values</span><span class="o">;</span>
   <span class="o">}</span>
-<span class="o">}</span></code></pre></div>
+<span class="o">}</span></code></pre></figure>
 
 <p><strong>Remark</strong> that if in AddressGroup we were using Address type instead of the concrete type, the serialized json wouldn’t contain the street property.
-Indeed it would have been ser/de using Address type, using the runtime type can be enable via 
-<span class="k">new</span> <span class="nf">GensonBuilder</span><span class="o">().</span><span class="na">useRuntimeType</span><span class="o">(</span><span class="kc">true</span><span class="o">)</span>
-.</p>
+Indeed it would have been ser/de using Address type, using the runtime type can be enable via <code>new GensonBuilder().useRuntimeType(true)</code>.</p>
 
 <h2 id="polymorphic-types">Polymorphic types</h2>
 
 <p>Another nice feature of Genson is its ability to deserialize an object serialized with Genson back to its concrete type.
 Lets now enable runtime type resolution and serialize a Container of EuropeanAddress and then deserialize it back.</p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="c1">// lets also enable runtime type usage</span>
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="c1">// lets also enable runtime type usage</span>
 <span class="n">Genson</span> <span class="n">genson</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">GensonBuilder</span><span class="o">().</span><span class="na">useRuntimeType</span><span class="o">(</span><span class="kc">true</span><span class="o">).</span><span class="na">create</span><span class="o">();</span>
 
 <span class="n">Container</span><span class="o">&lt;</span><span class="n">Address</span><span class="o">&gt;</span> <span class="n">addressContainer</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Container</span><span class="o">&lt;</span><span class="n">Address</span><span class="o">&gt;(</span>
@@ -495,38 +493,36 @@ Lets now enable runtime type resolution and serialize a Container of EuropeanAdd
 
 <span class="c1">// however when we deserialize Genson does not have enough type information.</span>
 <span class="c1">// It will expand the content of the array to Address and not EuropeanAddress</span>
-<span class="n">Container</span><span class="o">&lt;?</span> <span class="kd">extends</span> <span class="n">Address</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">genson</span><span class="o">.</span><span class="na">deserialize</span><span class="o">(</span><span class="n">json</span><span class="o">,</span> <span class="n">Container</span><span class="o">.</span><span class="na">class</span><span class="o">);</span></code></pre></div>
+<span class="n">Container</span><span class="o">&lt;?</span> <span class="kd">extends</span> <span class="n">Address</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">genson</span><span class="o">.</span><span class="na">deserialize</span><span class="o">(</span><span class="n">json</span><span class="o">,</span> <span class="n">Container</span><span class="o">.</span><span class="na">class</span><span class="o">);</span></code></pre></figure>
 
-<p>Of course in the previous example we could have deserialized to a 
-<span class="k">new</span> <span class="n">GenericType</span><span class="o">&lt;</span><span class="n">Container</span><span class="o">&lt;</span><span class="n">EuropeanAddress</span><span class="o">&gt;&gt;()</span>
-,
+<p>Of course in the previous example we could have deserialized to a <code>new GenericType&lt;Container&lt;EuropeanAddress&gt;&gt;()</code>,
 but if there were multiple implementations of Address or just mixed EuropeanAddress and Address instances, you won’t get the correct result.</p>
 
 <p>The solution to this problem is to store in the serialized json the information about the concrete type.
 In Genson it is implemented via a metadata mechanism that will serialize class name + package during serialization and use
 it when deserializing back.</p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="c1">// lets enable class metadata ser/de, allowing to deserialize back polymorphic types</span>
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="c1">// lets enable class metadata ser/de, allowing to deserialize back polymorphic types</span>
 <span class="n">Genson</span> <span class="n">genson</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">GensonBuilder</span><span class="o">()</span>
       <span class="o">.</span><span class="na">useClassMetadata</span><span class="o">(</span><span class="kc">true</span><span class="o">)</span>
       <span class="o">.</span><span class="na">useRuntimeType</span><span class="o">(</span><span class="kc">true</span><span class="o">)</span>
     <span class="o">.</span><span class="na">create</span><span class="o">();</span>
 
 <span class="c1">// {&quot;values&quot;:[{&quot;@class&quot;:&quot;my.package.EuropeanAddress&quot;,&quot;building&quot;:1,&quot;city&quot;:&quot;Paris&quot;,&quot;street&quot;:&quot;Champs Elysees&quot;}]}</span>
-<span class="n">AddressGroup</span> <span class="n">result</span> <span class="o">=</span> <span class="n">genson</span><span class="o">.</span><span class="na">serialize</span><span class="o">(</span><span class="n">addressContainer</span><span class="o">);</span></code></pre></div>
+<span class="n">AddressGroup</span> <span class="n">result</span> <span class="o">=</span> <span class="n">genson</span><span class="o">.</span><span class="na">serialize</span><span class="o">(</span><span class="n">addressContainer</span><span class="o">);</span></code></pre></figure>
 
 <p>Genson provides an alias mechanism for classes, allowing to use the alias instead of the full class name.
 It is a good practice to do so as it gives you the ability to rename your class or package without any impact
 on the json (especially useful if you store json in a persistent storage) and it is also safer from a security point of view.</p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="c1">// addAlias creates an alias between a logic name and a full class name, this also enables class metadata mechanism</span>
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="c1">// addAlias creates an alias between a logic name and a full class name, this also enables class metadata mechanism</span>
 <span class="n">Genson</span> <span class="n">genson</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">GensonBuilder</span><span class="o">()</span>
       <span class="o">.</span><span class="na">addAlias</span><span class="o">(</span><span class="s">&quot;europeanAddress&quot;</span><span class="o">,</span> <span class="n">EuropeanAddress</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
       <span class="o">.</span><span class="na">useRuntimeType</span><span class="o">(</span><span class="kc">true</span><span class="o">)</span>
     <span class="o">.</span><span class="na">create</span><span class="o">();</span>
 
 <span class="c1">// {&quot;values&quot;:[{&quot;@class&quot;:&quot;europeanAddress&quot;,&quot;building&quot;:1,&quot;city&quot;:&quot;Paris&quot;,&quot;street&quot;:&quot;Champs Elysees&quot;}]}</span>
-<span class="n">genson</span><span class="o">.</span><span class="na">serialize</span><span class="o">(</span><span class="n">addressContainer</span><span class="o">);</span></code></pre></div>
+<span class="n">genson</span><span class="o">.</span><span class="na">serialize</span><span class="o">(</span><span class="n">addressContainer</span><span class="o">);</span></code></pre></figure>
 
 <p><strong>Remarks</strong></p>
 
@@ -560,12 +556,12 @@ where you really need something extremely fast, <strong>in most cases you don’
 When implementing your own Converters to achieve custom serialization/deserialization, you will use this low level API.
 But in some cases you might also want to use them directly without any databinding. You can build them through Genson class.</p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">ObjectWriter</span> <span class="n">writer</span> <span class="o">=</span> <span class="n">genson</span><span class="o">.</span><span class="na">createWriter</span><span class="o">(</span><span class="n">outputStream</span><span class="o">);</span>
-  <span class="n">ObjectReader</span> <span class="n">reader</span> <span class="o">=</span> <span class="n">genson</span><span class="o">.</span><span class="na">createReader</span><span class="o">(</span><span class="n">inputStream</span><span class="o">);</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-java" data-lang="java">  <span class="n">ObjectWriter</span> <span class="n">writer</span> <span class="o">=</span> <span class="n">genson</span><span class="o">.</span><span class="na">createWriter</span><span class="o">(</span><span class="n">outputStream</span><span class="o">);</span>
+  <span class="n">ObjectReader</span> <span class="n">reader</span> <span class="o">=</span> <span class="n">genson</span><span class="o">.</span><span class="na">createReader</span><span class="o">(</span><span class="n">inputStream</span><span class="o">);</span></code></pre></figure>
 
 <p>For example writing some object, containing an array and some basic properties can be easily done.</p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="c1">// {&quot;name&quot;:&quot;Foo Bar&quot;,&quot;age&quot;:45,&quot;childrenAges&quot;:[1,2,3]}</span>
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="c1">// {&quot;name&quot;:&quot;Foo Bar&quot;,&quot;age&quot;:45,&quot;childrenAges&quot;:[1,2,3]}</span>
 <span class="n">writer</span><span class="o">.</span><span class="na">beginObject</span><span class="o">()</span>
     <span class="o">.</span><span class="na">writeString</span><span class="o">(</span><span class="s">&quot;name&quot;</span><span class="o">,</span> <span class="s">&quot;Foo Bar&quot;</span><span class="o">)</span>
     <span class="o">.</span><span class="na">writeNumber</span><span class="o">(</span><span class="s">&quot;age&quot;</span><span class="o">,</span> <span class="mi">45</span><span class="o">)</span>
@@ -578,7 +574,7 @@ But in some cases you might also want to use them directly without any databindi
 
 <span class="cm">/* when using directly the streaming api outside the databinding you are free to flush the data when</span>
 <span class="cm">you want allowing to reduce the memory foot print, when closing the writer everything is flushed. */</span>
-<span class="n">writer</span><span class="o">.</span><span class="na">close</span><span class="o">();</span></code></pre></div>
+<span class="n">writer</span><span class="o">.</span><span class="na">close</span><span class="o">();</span></code></pre></figure>
 
 <p>Reading back the previous structure is a bit more of code, mainly because of Java verbosity. Of course you can also use Genson
 to deserialize your JSON to a map and then just extract your properties from there. If you use this API in a Converter,
@@ -586,7 +582,7 @@ then you might want to <a href="/Documentation/Extensions/#using-jsr-353-types-w
 representation and then map it to your structure. This would be OK, as it will be applied only to the part handled by your Converter, all the rest
 would still use directly the Streaming API.</p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">String</span> <span class="n">name</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">String</span> <span class="n">name</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
 <span class="kt">int</span> <span class="n">age</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
 <span class="n">List</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span> <span class="n">childrenAges</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
 
@@ -621,7 +617,7 @@ would still use directly the Streaming API.</p>
   <span class="o">}</span>
   <span class="n">reader</span><span class="o">.</span><span class="na">endArray</span><span class="o">();</span>
   <span class="k">return</span> <span class="n">array</span><span class="o">;</span>
-<span class="o">}</span></code></pre></div>
+<span class="o">}</span></code></pre></figure>
 
 <h2 id="custom-serde">Custom Ser/De</h2>
 
@@ -636,7 +632,7 @@ If you don’t need to provide a logic for serialization <strong>and</strong> de
 
 <p>Lets move the previous code in a datastructure and handle it in our Converter.</p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">Genson</span> <span class="n">genson</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">GensonBuilder</span><span class="o">().</span><span class="na">withConverters</span><span class="o">(</span><span class="k">new</span> <span class="nf">PersonConverter</span><span class="o">()).</span><span class="na">create</span><span class="o">();</span>
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">Genson</span> <span class="n">genson</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">GensonBuilder</span><span class="o">().</span><span class="na">withConverters</span><span class="o">(</span><span class="k">new</span> <span class="nf">PersonConverter</span><span class="o">()).</span><span class="na">create</span><span class="o">();</span>
 
 <span class="n">genson</span><span class="o">.</span><span class="na">deserialize</span><span class="o">(</span><span class="s">&quot;{\&quot;name\&quot;:\&quot;Foo Bar\&quot;,\&quot;age\&quot;:45,\&quot;childrenAges\&quot;:[1,2,3]}&quot;</span><span class="o">,</span> <span class="n">Person</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
 
@@ -687,7 +683,7 @@ If you don’t need to provide a logic for serialization <strong>and</strong> de
   <span class="kd">private</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span> <span class="n">childrenAges</span><span class="o">;</span>
 
   <span class="c1">// constructors &amp; setters &amp; getters</span>
-<span class="o">}</span></code></pre></div>
+<span class="o">}</span></code></pre></figure>
 
 <p>Like for the property childrenAges, in practice when implementing your own Converter, you will probably have to deal with more complex structures.
 Delegating to Genson the ser/de of complex types that you don’t need to handle can greatly reduce the amount of code.</p>
@@ -698,13 +694,13 @@ Delegating to Genson the ser/de of complex types that you don’t need to handle
 
 <p>Converters are registered for specific types. The one they have in their signature and additional ones that you can specify when registering the Converter.</p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="k">new</span> <span class="nf">GensonBuilder</span><span class="o">().</span><span class="na">withConverter</span><span class="o">(</span><span class="n">personConverter</span><span class="o">,</span> <span class="n">Person</span><span class="o">.</span><span class="na">class</span><span class="o">).</span><span class="na">create</span><span class="o">();</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="k">new</span> <span class="nf">GensonBuilder</span><span class="o">().</span><span class="na">withConverter</span><span class="o">(</span><span class="n">personConverter</span><span class="o">,</span> <span class="n">Person</span><span class="o">.</span><span class="na">class</span><span class="o">).</span><span class="na">create</span><span class="o">();</span></code></pre></figure>
 
 <p>But in some cases you may want to be able to register a Converter for a complete hierarchy of types, ie. for Person and all its subclasses.
 This is one of the reasons Converter Factory has been introduced in Genson. The main role of a Factory is to return a Converter instance for a given type or null if the
 Factory does not handle this type.</p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="k">new</span> <span class="nf">GensonBuilder</span><span class="o">().</span><span class="na">withConverterFactory</span><span class="o">(</span><span class="k">new</span> <span class="nf">PersonConverterFactory</span><span class="o">()).</span><span class="na">create</span><span class="o">();</span>
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="k">new</span> <span class="nf">GensonBuilder</span><span class="o">().</span><span class="na">withConverterFactory</span><span class="o">(</span><span class="k">new</span> <span class="nf">PersonConverterFactory</span><span class="o">()).</span><span class="na">create</span><span class="o">();</span>
 
 <span class="kd">public</span> <span class="kd">class</span> <span class="nc">PersonConverterFactory</span> <span class="kd">implements</span> <span class="n">Factory</span><span class="o">&lt;</span><span class="n">Converter</span><span class="o">&lt;</span><span class="n">Person</span><span class="o">&gt;&gt;</span> <span class="o">{</span>
 
@@ -725,20 +721,16 @@ Factory does not handle this type.</p>
 
     <span class="k">return</span> <span class="k">new</span> <span class="nf">PersonConverter</span><span class="o">(</span><span class="n">listOfIntConverter</span><span class="o">);</span>
   <span class="o">}</span>
-<span class="o">}</span></code></pre></div>
+<span class="o">}</span></code></pre></figure>
 
 <h3 id="contextual-converter">Contextual Converter</h3>
 
 <p>Another nice feature in Genson is the support of Contextual Converters and Factories.
-The contextual converter is used through 
-<span class="nd">@JsonConverter</span>
- annotation,
+The contextual converter is used through <code>@JsonConverter</code> annotation,
 that you put on object properties (fields, methods, constructor arguments).
 This will tell Genson to use this specific Converter for that property instead of any other.</p>
 
-<p>You can also implement a 
-<span class="n">ContextualFactory</span>
- to create Converters based on the property</p>
+<p>You can also implement a <code>ContextualFactory</code> to create Converters based on the property</p>
 
 <ul>
   <li>type</li>
@@ -748,15 +740,11 @@ This will tell Genson to use this specific Converter for that property instead o
 </ul>
 
 <p>This can become really handy if you want to apply some custom Converters based on such criteria.
-The 
-<span class="nd">@JsonConverter</span>
- and 
-<span class="nd">@JsonDateFormat</span>
- support have been implemented using Contextual Factories.</p>
+The <code>@JsonConverter</code> and <code>@JsonDateFormat</code> support have been implemented using Contextual Factories.</p>
 
 <p>For example if you want to use some specific converter only when some custom annotation is present on the property:</p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyContextualFactory</span> <span class="kd">implements</span> <span class="n">ContextualFactory</span> <span class="o">{</span>
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyContextualFactory</span> <span class="kd">implements</span> <span class="n">ContextualFactory</span> <span class="o">{</span>
   <span class="nd">@Override</span>
   <span class="kd">public</span> <span class="n">Converter</span> <span class="nf">create</span><span class="o">(</span><span class="n">BeanProperty</span> <span class="n">property</span><span class="o">,</span> <span class="n">Genson</span> <span class="n">genson</span><span class="o">)</span> <span class="o">{</span>
     <span class="n">MyCustomAnnotation</span> <span class="n">ann</span> <span class="o">=</span> <span class="n">property</span><span class="o">.</span><span class="na">getAnnotation</span><span class="o">(</span><span class="n">MyCustomAnnotation</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
@@ -766,7 +754,7 @@ The
   <span class="o">}</span>
 <span class="o">}</span>
 
-<span class="n">Genson</span> <span class="n">genson</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">GensonBuilder</span><span class="o">().</span><span class="na">withContextualFactory</span><span class="o">(</span><span class="k">new</span> <span class="nf">MyContextualFactory</span><span class="o">()).</span><span class="na">create</span><span class="o">();</span></code></pre></div>
+<span class="n">Genson</span> <span class="n">genson</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">GensonBuilder</span><span class="o">().</span><span class="na">withContextualFactory</span><span class="o">(</span><span class="k">new</span> <span class="nf">MyContextualFactory</span><span class="o">()).</span><span class="na">create</span><span class="o">();</span></code></pre></figure>
 
 <p>A couple of other things &amp; components can be customized, but they are a even more advanced usage and require some knowledge of how Genson works,
 thus they are not documented here. If you encounter any problems or don’t know how to achieve something, don’t hesitate to post a message on the mailling list.

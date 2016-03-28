@@ -174,7 +174,39 @@
     <div class="container">
         <div class="row">
             <div class="col-md-12" role="main">
-                <h2 id="release-13---12-april-2015">Release 1.3 - 12 April 2015</h2>
+                <h2 id="release-14---27-march-2016">Release 1.4 - 27 March 2016</h2>
+
+<p><strong>Core</strong></p>
+
+<ul>
+  <li>Fix #86 - Class metadata was generated twice when used with UntypedConverter</li>
+  <li>Fix #83 - Case insensitive enums</li>
+  <li>Fix #79 - Merge annotations from the same class and from super class/interfaces</li>
+  <li>Fix #69 - Introduce the notion of aliases for JsonProperty</li>
+  <li>Fix #81 - Add the ability to filter properties defined at runtime</li>
+  <li>Custom default values for null</li>
+  <li>Make failing on null when a primitive is expected configurable</li>
+  <li>Fix #75 - Allow to serialize special floating point numbers, disabled by default</li>
+  <li>Fix #78 - Replace usePermissiveParsing with independent configuration options</li>
+  <li>Fix #62 - Escape quotes &amp; slashes inside json object keys</li>
+  <li>Allow to use a specific classloader instead of the default one PR #72</li>
+  <li>Fix “ClassCastException with generics and Integer as generic type” by ignoring bridge methods</li>
+</ul>
+
+<p><strong>Jax-RS</strong></p>
+
+<ul>
+  <li>Fix issue #73 - Configure a list of ignored root types for ser/de</li>
+</ul>
+
+<p><strong>Scala</strong></p>
+
+<ul>
+  <li>Fix #82 - null and missing values are deserialized as None instead of null for Options</li>
+  <li>Allow to use a specific classloader instead of the default one PR #72</li>
+</ul>
+
+<h2 id="release-13---12-april-2015">Release 1.3 - 12 April 2015</h2>
 
 <p><strong>Core</strong></p>
 
@@ -187,7 +219,7 @@
   <li>Fix issue #53 - NPE in ASMCreatorParameterNameResolver</li>
   <li>Issue #41 - Accept to deserialize timestamps and string dates</li>
   <li>Issue #36 - Automatic encoding detection (UTF-8/16/32)</li>
-  <li>Fixes #38 - Ser/de single byte as int instead of base64 encoded string </li>
+  <li>Fixes #38 - Ser/de single byte as int instead of base64 encoded string</li>
 </ul>
 
 <p><strong>Scala</strong></p>
