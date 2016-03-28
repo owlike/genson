@@ -1,6 +1,5 @@
 package com.owlike.genson.functional;
 
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -38,11 +37,12 @@ public class MetadataFeatureTest {
   }
 
   @Test public void testClassMetadataShouldNotBeSerializedForStaticTypes() {
-    Genson genson = new GensonBuilder().useClassMetadata(true).useClassMetadataWithStaticType(false).create();
+    Genson genson = new GensonBuilder().addAlias("beanHolder", BeanHolder.class).useClassMetadataWithStaticType(false).create();
 
-    Bean bean = new Bean();
+    BeanHolder v = new BeanHolder();
+    v.bean = new Bean();
 
-    assertEquals("{\"value\":null}", genson.serialize(bean));
+    assertEquals("{\"@class\":\"beanHolder\",\"bean\":{\"value\":null}}", genson.serialize(v));
   }
 
   @Test public void testClassMetadataShouldBeSerializedOnceWhenUsingUntypedConverter() {
@@ -55,15 +55,35 @@ public class MetadataFeatureTest {
     List l = Arrays.asList(
       new Date(1, 1, 1), 2l, true, null, new Bean()
     );
-    Bean b = new Bean();
-    b.value = new Bean();
-    ((Bean) b.value).value = new Bean();
-    String json = new GensonBuilder().useIndentation(true).useClassMetadataForAllTypes(true).create().serialize(b);
+
+    BeanHolder v = new BeanHolder();
+    v.bean = new Bean();
+    v.bean.value = l;
+    String json = new GensonBuilder().useIndentation(true).useRuntimeType(true).useClassMetadataWithStaticType(false).useClassMetadataForAllTypes(true).create().serialize(v);
+
+    System.out.println(json);
+  }
+
+  @Test public void testDontWriteClassForConcreteTypeWhenUsedWithFullMetadata() {
+
+
+    String json = new GensonBuilder().useRuntimeType(true)
+                    .useClassMetadataWithStaticType(false)
+                    .useClassMetadataForAllTypes(true)
+                    .create()
+                    .serialize(new Object() {
+                      Bean bean = new Bean();
+                      {{ bean.value = new Bean(); }}
+                    });
 
     System.out.println(json);
   }
 
   static class Bean {
     Object value;
+  }
+
+  class BeanHolder {
+    Bean bean;
   }
 }

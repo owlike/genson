@@ -853,11 +853,12 @@ public class GensonBuilder {
 
     chainHead.append(new NullConverterFactory(failOnNullPrimitive));
 
-    if (useRuntimeTypeForSerialization) chainHead.append(new RuntimeTypeConverter.RuntimeTypeConverterFactory());
+    if (useRuntimeTypeForSerialization && !withClassMetadata)
+      chainHead.append(new RuntimeTypeConverter.RuntimeTypeConverterFactory());
 
     chainHead.append(new ClassMetadataConverter.ClassMetadataConverterFactory(classMetadataWithStaticType));
 
-    //if (classMetadataForAllTypes && withClassMetadata) chainHead.append(new LiteralAsObjectConverter.Factory());
+    if (classMetadataForAllTypes && withClassMetadata) chainHead.append(new LiteralAsObjectConverter.Factory());
 
     if (customFactoryChain != null) chainHead.append(customFactoryChain);
 

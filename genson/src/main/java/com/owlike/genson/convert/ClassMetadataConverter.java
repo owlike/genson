@@ -6,6 +6,7 @@ import com.owlike.genson.*;
 import com.owlike.genson.annotation.HandleClassMetadata;
 import com.owlike.genson.convert.DefaultConverters.UntypedConverterFactory.UntypedConverter;
 import com.owlike.genson.reflect.TypeUtil;
+import com.owlike.genson.stream.JsonType;
 import com.owlike.genson.stream.ObjectReader;
 import com.owlike.genson.stream.ObjectWriter;
 import com.owlike.genson.stream.ValueType;
@@ -75,12 +76,11 @@ public class ClassMetadataConverter<T> extends Wrapper<Converter<T>> implements 
   }
 
   public void serialize(T obj, ObjectWriter writer, Context ctx) throws Exception {
-    if (!skipMetadataSerialization && obj != null &&
-      (classMetadataWithStaticType || (!classMetadataWithStaticType && !tClass.equals(obj.getClass())))) {
-      writer.beginNextObjectMetadata()
-        .writeMetadata("class", ctx.genson.aliasFor(obj.getClass()));
-    }
-    wrapped.serialize(obj, writer, ctx);
+    if (obj != null && (!tClass.equals(obj.getClass()) || writer.enclosingType() == JsonType.EMPTY)) {
+      writer.beginNextObjectMetadata().writeMetadata("class", ctx.genson.aliasFor(obj.getClass()));
+
+      ctx.genson.serialize(obj, obj.getClass(), writer, ctx);
+    } else wrapped.serialize(obj, writer, ctx);
   }
 
   public T deserialize(ObjectReader reader, Context ctx) throws Exception {
