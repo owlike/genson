@@ -2,6 +2,31 @@
 title: Changelog
 layout: default
 ---
+##Release 1.4 - 27 March 2016
+
+ **Core**
+ 
+ * Fix #86 - Class metadata was generated twice when used with UntypedConverter
+ * Fix #83 - Case insensitive enums
+ * Fix #79 - Merge annotations from the same class and from super class/interfaces
+ * Fix #69 - Introduce the notion of aliases for JsonProperty
+ * Fix #81 - Add the ability to filter properties defined at runtime
+ * Custom default values for null
+ * Make failing on null when a primitive is expected configurable
+ * Fix #75 - Allow to serialize special floating point numbers, disabled by default
+ * Fix #78 - Replace usePermissiveParsing with independent configuration options
+ * Fix #62 - Escape quotes & slashes inside json object keys
+ * Allow to use a specific classloader instead of the default one PR #72
+ * Fix "ClassCastException with generics and Integer as generic type" by ignoring bridge methods
+
+ **Jax-RS**
+ 
+ * Fix issue #73 - Configure a list of ignored root types for ser/de
+
+ **Scala**
+ 
+ * Fix #82 - null and missing values are deserialized as None instead of null for Options 
+ * Allow to use a specific classloader instead of the default one PR #72
 
 ##Release 1.3 - 12 April 2015
 
