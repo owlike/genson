@@ -201,8 +201,7 @@ public class JsonReader implements ObjectReader {
   public int valueAsInt() {
     if (INTEGER == valueType) {
       int value = (int) _intValue;
-      if (value != _intValue)
-        throwNumberFormatException("an int", "overflowing long value " + _intValue);
+      if (value != _intValue) throwNumberFormatException("an int", "overflowing long value " + _intValue);
       return value;
     } else if (DOUBLE == valueType) {
       int value = (int) _doubleValue;
@@ -244,8 +243,7 @@ public class JsonReader implements ObjectReader {
   public short valueAsShort() {
     if (INTEGER == valueType) {
       short value = (short) _intValue;
-      if (value != _intValue)
-        throwNumberFormatException("a short", "overflowing long value " + _intValue);
+      if (value != _intValue) throwNumberFormatException("a short", "overflowing long value " + _intValue);
       return value;
     } else if (DOUBLE == valueType) {
       short value = (short) _doubleValue;
@@ -262,8 +260,6 @@ public class JsonReader implements ObjectReader {
 
   public float valueAsFloat() {
     if (DOUBLE == valueType) {
-      if (Float.MIN_VALUE > _doubleValue || _doubleValue > Float.MAX_VALUE)
-        throwNumberFormatException("a float", "overflowing double value " + _doubleValue);
       return (float) _doubleValue;
     } else if (INTEGER == valueType) {
       // same as for doubles, for the moment lets do that even if there is some precision

@@ -20,7 +20,7 @@ import com.owlike.genson.reflect.PropertyNameResolver;
  * override bundle configuration with custom one.
  * <p/>
  *
- * <b>Important note, bundles must be registered first before any other configuration.</b>
+ * <b>Important note, bundles must be registered after any other configuration.</b>
  *
  * This part of the API is still in beta, it could change in the future in order to make it more
  * powerful.

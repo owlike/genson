@@ -32,6 +32,10 @@ public class JsonReaderTest {
       new Boolean[]{false, true}, new Boolean[]{false, false});
   }
 
+  @Test public void testReadDoubleAsFloat() {
+    assertEquals(-1.1f, createReader("-1.1").valueAsFloat(), 0);
+  }
+
   @Test public void testReadManyValuesNotEnclosedInArrayWithSameReader() {
     StringReader strReader = new StringReader("{\"k1\":1}\n{\"k2\":2}{\"k3\":3}");
     JsonReader reader = new JsonReader(strReader, false, false);
