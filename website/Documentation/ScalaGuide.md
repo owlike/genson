@@ -20,7 +20,7 @@ To get you started with Genson in Scala you only have to import com.owlike.genso
 and you are done!
 
 {% highlight scala %}
-import com.owlike.genson.defaultGenson_
+import com.owlike.genson.defaultGenson._
 
 val jsonString = toJson(someValue)
 val actualValue = fromJson[SomeType](json)
@@ -41,7 +41,7 @@ the Scala extension could end up with the scala language library downloaded.
 ###SBT
 
 {% highlight scala %}
-libraryDependencies += "com.owlike" % "genson-scala_2.10" % "{{site.latest_version}}"
+libraryDependencies += "com.owlike" %% "genson-scala" % "{{site.latest_version}}"
 {% endhighlight %}
 
 ###Maven
@@ -131,10 +131,10 @@ case class Address(street: String, building: Int)
 case class Person(name: String, age: Int, address: Option[Address])
 
 // {"name":"foo bar","age":28,"address":{"street":"rue des lapins",building:1337}}
-val json = toJson(Person("foo bar", 28, Some(Address("rue des lapins", 1337)))
+val json = toJson(Person("foo bar", 28, Some(Address("rue des lapins", 1337))))
 
 // {"name":"foo bar","age":28,"address":null}
-val jsonWithNoAddress = toJson(Person("foo bar", 28, None)
+val jsonWithNoAddress = toJson(Person("foo bar", 28, None))
 
 val person = fromJson[Person](json)
 {% endhighlight %}

@@ -1,6 +1,5 @@
 package com.owlike.genson.functional;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import com.owlike.genson.GensonBuilder;
