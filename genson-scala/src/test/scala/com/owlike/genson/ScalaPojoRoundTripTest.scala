@@ -1,6 +1,7 @@
 package com.owlike.genson
 
-import org.scalatest.{Matchers, FunSuite}
+import com.owlike.genson.reflect.VisibilityFilter
+import org.scalatest.{FunSuite, Matchers}
 import defaultGenson._
 
 class ScalaPojoRoundTripTest extends FunSuite with Matchers {
@@ -97,5 +98,15 @@ class ScalaPojoRoundTripTest extends FunSuite with Matchers {
   test("Ser/de root complex array") {
     val expected = Array(Array(Seq(BasicPoso("foo", 2, true))))
     fromJson[Array[Array[Seq[BasicPoso]]]](toJson(expected)) should be (expected)
+  }
+
+  test("Exclude property from json when excluded using GensonBuilder") {
+    val genson = new GensonBuilder()
+      .withBundle(ScalaBundle())
+      .useFields(true, VisibilityFilter.PRIVATE)
+      .exclude("aInt")
+      .create()
+
+    genson.toJson(BaseClass(3)) should be ("{}")
   }
 }
