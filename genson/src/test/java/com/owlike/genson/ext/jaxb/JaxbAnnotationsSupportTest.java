@@ -44,6 +44,24 @@ public class JaxbAnnotationsSupportTest {
   }
 
   @Test
+  public void testXmlAccessorTypeProperty() {
+    PropertyAccessPojo bean = new PropertyAccessPojo();
+    bean.setB(3);
+
+    assertEquals("{\"b\":3}", genson.serialize(bean));
+    assertEquals(3, genson.deserialize("{\"b\":3}", PropertyAccessPojo.class).getB());
+  }
+
+  @Test
+  public void testXmlAccessorTypePublicMember() {
+    PublicMemberAccessPojo bean = new PublicMemberAccessPojo();
+    bean.setB(3);
+
+    assertEquals("{\"b\":3}", genson.serialize(bean));
+    assertEquals(3, genson.deserialize("{\"b\":3}", PropertyAccessPojo.class).getB());
+  }
+
+  @Test
   public void testXmlAttributeSerialization() {
     assertEquals("{\"a\":0,\"c\":1,\"d\":null}", genson.serialize(new XmlAttributeBean()));
   }
@@ -279,5 +297,31 @@ public class JaxbAnnotationsSupportTest {
     @XmlElement
     @JsonIgnore
     public int value;
+  }
+
+  @XmlAccessorType(XmlAccessType.PROPERTY)
+  public static class PropertyAccessPojo {
+    private int a;
+
+    public int getB() {
+      return a;
+    }
+
+    public void setB(int b) {
+      this.a = b;
+    }
+  }
+
+  @XmlAccessorType(XmlAccessType.PUBLIC_MEMBER)
+  public static class PublicMemberAccessPojo {
+    private int a;
+
+    public int getB() {
+      return a;
+    }
+
+    public void setB(int b) {
+      this.a = b;
+    }
   }
 }

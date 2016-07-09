@@ -388,17 +388,16 @@ public class JAXBBundle extends GensonBundle {
   private class JaxbAnnotationsResolver extends BeanMutatorAccessorResolver.PropertyBaseResolver {
     @Override
     public Trilean isAccessor(Field field, Class<?> fromClass) {
-
       if (ignore(field, field.getType(), fromClass)) return Trilean.FALSE;
       if (include(field, field.getType(), fromClass)) return Trilean.TRUE;
-      return analyzeAccessTypeInfo(field, field, XmlAccessType.FIELD, fromClass);
+      return shouldResolveField(field, fromClass);
     }
 
     @Override
     public Trilean isMutator(Field field, Class<?> fromClass) {
       if (ignore(field, field.getType(), fromClass)) return Trilean.FALSE;
       if (include(field, field.getType(), fromClass)) return Trilean.TRUE;
-      return analyzeAccessTypeInfo(field, field, XmlAccessType.FIELD, fromClass);
+      return shouldResolveField(field, fromClass);
     }
 
     @Override
@@ -417,9 +416,12 @@ public class JAXBBundle extends GensonBundle {
         if (include(method, method.getReturnType(), fromClass)) return Trilean.TRUE;
         if (find(XmlTransient.class, fromClass, "set" + name, method.getReturnType()) != null)
           return Trilean.FALSE;
+
+
+        return shouldResolveMethod(method, fromClass);
       }
 
-      return analyzeAccessTypeInfo(method, method, XmlAccessType.PROPERTY, fromClass);
+      return Trilean.FALSE;
     }
 
     @Override
@@ -432,30 +434,55 @@ public class JAXBBundle extends GensonBundle {
         if (include(method, method.getReturnType(), fromClass)) return Trilean.TRUE;
 
         String name = method.getName().substring(3);
-        if (find(XmlTransient.class, fromClass, "get" + name) != null)
-          return Trilean.FALSE;
+
+        // Exclude it if there is a corresponding accessor annotated with XmlTransient
+        if (find(XmlTransient.class, fromClass, "get" + name) != null) return Trilean.FALSE;
         if (paramClass.equals(boolean.class) || paramClass.equals(Boolean.class)) {
           if (find(XmlTransient.class, fromClass, "is" + name) != null)
             return Trilean.FALSE;
         }
+
+
+        return shouldResolveMethod(method, fromClass);
       }
 
-      return analyzeAccessTypeInfo(method, method, XmlAccessType.PROPERTY, fromClass);
+      return Trilean.FALSE;
     }
 
-    public Trilean analyzeAccessTypeInfo(AccessibleObject property, Member member,
-                                         XmlAccessType accessType, Class<?> fromClass) {
-      XmlAccessorType xmlAccessTypeAnn = find(XmlAccessorType.class, property, fromClass);
+    private Trilean shouldResolveField(Field field, Class<?> fromClass) {
+      XmlAccessorType ann = find(XmlAccessorType.class, field, fromClass);
 
-      if (xmlAccessTypeAnn != null) {
-        if (xmlAccessTypeAnn.value() == accessType
-          && VisibilityFilter.PRIVATE.isVisible(member)) return Trilean.TRUE;
-        if (xmlAccessTypeAnn.value() != accessType
-          && xmlAccessTypeAnn.value() != XmlAccessType.PUBLIC_MEMBER)
-          return Trilean.FALSE;
+      if (isDefaultVisibilityMember(field, ann) || isValidPublicMember(field, ann) || isValidFieldMember(field, ann)) {
+        return Trilean.TRUE;
+      } else {
+        return Trilean.FALSE;
       }
+    }
 
-      return Trilean.UNKNOWN;
+    private Trilean shouldResolveMethod(Method m, Class<?> fromClass) {
+      XmlAccessorType ann = find(XmlAccessorType.class, m, fromClass);
+
+      if (isDefaultVisibilityMember(m, ann) || isValidPropertyMember(m, ann) || isValidPublicMember(m, ann)) {
+        return Trilean.TRUE;
+      } else {
+        return Trilean.FALSE;
+      }
+    }
+
+    private boolean isDefaultVisibilityMember(Member m, XmlAccessorType xmlAccessTypeAnn) {
+      return xmlAccessTypeAnn == null && VisibilityFilter.PACKAGE_PUBLIC.isVisible(m);
+    }
+
+    private boolean isValidFieldMember(Member m, XmlAccessorType ann) {
+      return ann != null && ann.value() == XmlAccessType.FIELD && VisibilityFilter.PRIVATE.isVisible(m);
+    }
+
+    private boolean isValidPublicMember(Member m, XmlAccessorType ann) {
+      return ann != null && ann.value() == XmlAccessType.PUBLIC_MEMBER && VisibilityFilter.PACKAGE_PUBLIC.isVisible(m);
+    }
+
+    private boolean isValidPropertyMember(Member m, XmlAccessorType ann) {
+      return ann != null && ann.value() == XmlAccessType.PROPERTY && VisibilityFilter.PACKAGE_PUBLIC.isVisible(m);
     }
 
     private boolean ignore(AccessibleObject property, Class<?> ofType, Class<?> fromClass) {
