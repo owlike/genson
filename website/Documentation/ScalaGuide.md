@@ -16,7 +16,7 @@ Standard classes will be ser/de with the classic Genson behaviour for Java.
 Genson classic features and annotations are supported (JsonIgnore, JsonProperty, JsonConverter, etc),
 bringing the power of Genson to Scala.
 
-To get you started with Genson in Scala you only have to import com.owlike.genson.defaultGenson_
+To get you started with Genson in Scala you only have to import com.owlike.genson.defaultGenson._
 and you are done!
 
 {% highlight scala %}
@@ -71,7 +71,7 @@ Scala provides some optimized types for maps and collections of few elements, Ge
 and deserialize to the optimized type.
 
 {% highlight scala %}
-import com.owlike.genson.defaultGenson_
+import com.owlike.genson.defaultGenson._
 
 // [1,2,3]
 val jsonArray = toJson(Seq(1,2,3))
