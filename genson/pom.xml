@@ -10,45 +10,11 @@
   <artifactId>genson</artifactId>
   <packaging>jar</packaging>
   <name>Genson</name>
-  <version>1.5mc-SNAPSHOT</version>
   <description>Genson library</description>
 
   <properties>
     <org.springframework.version>4.1.0.RELEASE</org.springframework.version>
   </properties>
-
- <repositories>
-      <repository>
-            <id>centralReplica</id>
-            <url>https://ninja-nexus.oneadr.net/nexus/content/repositories/central</url>
-        </repository>    
-        <repository>
-            <id>central</id>
-            <url>https://ninja-nexus.oneadr.net/nexus/content/groups/public</url>
-        </repository>
-        <repository>
-            <id>central-snapshots</id>
-            <url>https://ninja-nexus.oneadr.net/nexus/content/groups/public-snapshots</url>
-        </repository>
-        <repository>
-            <id>next</id>
-            <url>https://ninja-nexus.oneadr.net/nexus/content/repositories/next-framework</url>
-        </repository>
-        <repository>
-            <id>next-snapshots</id>
-            <url>https://ninja-nexus.oneadr.net/nexus/content/repositories/next-framework-snapshots</url>
-        </repository>
-    </repositories>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>central</id>
-            <url>https://ninja-nexus.oneadr.net/nexus/content/groups/public</url>
-        </pluginRepository>
-        <pluginRepository>
-            <id>central-snapshots</id>
-            <url>https://ninja-nexus.oneadr.net/nexus/content/groups/public-snapshots</url>
-        </pluginRepository>
-    </pluginRepositories>
 
   <dependencies>
     <dependency>
@@ -230,14 +196,6 @@
           <argLine>-Dfile.encoding=UTF-8</argLine>
         </configuration>
       </plugin>
-
-	  <plugin>
-		<groupId>org.apache.maven.plugins</groupId>
-		<artifactId>maven-javadoc-plugin</artifactId>
-		<configuration>
-			<failOnError>false</failOnError>
-		</configuration>
-	  </plugin>
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
