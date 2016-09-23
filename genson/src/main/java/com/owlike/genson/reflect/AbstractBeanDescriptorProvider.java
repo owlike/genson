@@ -139,7 +139,7 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
     // another option could be to pass in all the methods an additional parameter Class<T> that
     // would not necessarily correspond to the rawClass of ofType. In fact we authorize that
     // ofType rawClass is different from Class<T>, but the BeanDescriptor must match!
-    BeanDescriptor<T> descriptor = create(ofClass, ofType, ctr, accessors, mutators, genson);
+    BeanDescriptor<T> descriptor = create(ofClass, ofType, ctr, creators, accessors, mutators, genson);
     if (!ofClass.isAssignableFrom(descriptor.getOfClass()))
       throw new ClassCastException("Actual implementation of BeanDescriptorProvider "
         + getClass()
@@ -183,10 +183,10 @@ public abstract class AbstractBeanDescriptorProvider implements BeanDescriptorPr
    * @param mutators
    * @return a instance
    */
-  protected <T> BeanDescriptor<T> create(Class<T> forClass, Type ofType, BeanCreator creator,
+  protected <T> BeanDescriptor<T> create(Class<T> forClass, Type ofType, BeanCreator creator, List<BeanCreator> secondaryCreators,
                                          List<PropertyAccessor> accessors, Map<String, PropertyMutator> mutators,
                                          Genson genson) {
-    return new BeanDescriptor<T>(forClass, getRawClass(ofType), accessors, mutators, creator, genson.failOnMissingProperty());
+    return new BeanDescriptor<T>(forClass, getRawClass(ofType), accessors, mutators, creator, secondaryCreators, genson.failOnMissingProperty());
   }
 
   /**

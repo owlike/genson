@@ -80,7 +80,7 @@ public abstract class BeanProperty {
     return null;
   }
 
-  void updateBoth(BeanProperty otherBeanProperty) {
+  public void updateBoth(BeanProperty otherBeanProperty) {
 
     // FIXME: we don't care for duplicate annotations as it should not change the behaviour - actually we do as it can change the behaviour...
     // an easy solution would be to forbid duplicate annotations, which can make sense.
