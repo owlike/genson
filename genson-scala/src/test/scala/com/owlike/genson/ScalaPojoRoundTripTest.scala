@@ -1,6 +1,5 @@
 package com.owlike.genson
 
-import com.owlike.genson.reflect.VisibilityFilter
 import org.scalatest.{FunSuite, Matchers}
 import defaultGenson._
 
@@ -103,10 +102,26 @@ class ScalaPojoRoundTripTest extends FunSuite with Matchers {
   test("Exclude property from json when excluded using GensonBuilder") {
     val genson = new GensonBuilder()
       .withBundle(ScalaBundle())
-      .useFields(true, VisibilityFilter.PRIVATE)
       .exclude("aInt")
       .create()
 
     genson.toJson(BaseClass(3)) should be ("{}")
+  }
+
+  ignore("Rename property from json with GensonBuilder") {
+    val genson = new GensonBuilder()
+      .withBundle(ScalaBundle())
+      .rename("aInt", "renamedInt")
+      .create()
+
+
+    genson.toJson(BaseClass(3)) should be ("""{"renamedInt":3}""")
+  }
+
+  test("class with value class in it should be properly serialized and then deserialized back") {
+    val ent = MyEntity(MyAmount(1L))
+    val json = toJson(ent)
+    json shouldEqual """{"amount":1}"""
+    fromJson[MyEntity](json) shouldEqual ent
   }
 }

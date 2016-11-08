@@ -126,9 +126,22 @@ private[genson] class ScalaBeanPropertyFactory(classloader: ClassLoader) extends
       Option(TypeUtil.expandType(stv, rootType))
     } else {
       val name = t.fullName
-      if (name != "scala.Any" && name != "scala.AnyRef" && name != "scala.AnyVal")
-        Option(mirror.runtimeClass(t))
-      else Option(classOf[Object])
+      if (name != "scala.Any" && name != "scala.AnyRef" && name != "scala.AnyVal") {
+        val clazz = mirror.runtimeClass(t)
+
+        if (t.isDerivedValueClass) {
+          val fields = clazz.getDeclaredFields
+          if (fields.length != 1) {
+            println(clazz.getSuperclass)
+            clazz.getInterfaces.foreach(println)
+            throw new UnsupportedOperationException(
+              s"Please report this issue. Encountered Value Class with the following" +
+                s"fields ${fields.mkString("[", ", ", "]")} while only one was expected."
+            )
+          }
+          Option(fields.head.getGenericType)
+        } else Option(clazz)
+      } else Option(classOf[Object])
     }
   }
 

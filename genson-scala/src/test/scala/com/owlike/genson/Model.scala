@@ -36,3 +36,7 @@ class ClassWithGetterAndFiels(@BeanProperty val aStr: String, @BeanProperty val 
 case class CaseClassWithAny(any: Any, anyRef: AnyRef, anyVal: AnyVal)
 
 case class PosoWithPrimitives(aShort: Short, aFloat: Float, aByte: Byte, aChar: Char)
+
+case class MyAmount(value: Long) extends AnyVal
+
+case class MyEntity(amount: MyAmount)
