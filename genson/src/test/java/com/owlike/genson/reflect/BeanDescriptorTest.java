@@ -69,11 +69,12 @@ public class BeanDescriptorTest {
             java.lang.Class<T> forClass,
             java.lang.reflect.Type ofType,
             com.owlike.genson.reflect.BeanCreator creator,
+            List<BeanCreator> creators,
             java.util.List<com.owlike.genson.reflect.PropertyAccessor> accessors,
             java.util.Map<String, com.owlike.genson.reflect.PropertyMutator> mutators,
             Genson genson) {
             return new BeanDescriptor(ThatObject.class, ThatObject.class, accessors,
-              mutators, creator, false);
+              mutators, creator, creators, false);
           }
         };
       }

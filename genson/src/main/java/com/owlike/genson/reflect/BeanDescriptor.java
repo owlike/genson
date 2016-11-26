@@ -43,6 +43,7 @@ public class BeanDescriptor<T> implements Converter<T> {
   final boolean failOnMissingProperty;
 
   final BeanCreator creator;
+  final List<BeanCreator> secondaryCreators;
   private final boolean _noArgCtr;
 
   private static final Object MISSING = new Object();
@@ -58,11 +59,13 @@ public class BeanDescriptor<T> implements Converter<T> {
   public BeanDescriptor(Class<T> forClass, Class<?> fromDeclaringClass,
                         List<PropertyAccessor> readableBps,
                         Map<String, PropertyMutator> writableBps, BeanCreator creator,
+                        List<BeanCreator> secondaryCreators,
                         boolean failOnMissingProperty) {
     this.ofClass = forClass;
     this.fromDeclaringClass = fromDeclaringClass;
     this.creator = creator;
     this.failOnMissingProperty = failOnMissingProperty;
+    this.secondaryCreators = secondaryCreators;
     mutableProperties = writableBps;
 
     Collections.sort(readableBps, _readablePropsComparator);
@@ -152,14 +155,36 @@ public class BeanDescriptor<T> implements Converter<T> {
       else reader.skipValue();
     }
 
+    T bean = null;
     int size = names.size();
-    int foundCtrParameters = 0;
-    Object[] creatorArgs = globalCreatorArgs.clone();
     String[] newNames = new String[size];
     Object[] newValues = new Object[size];
+ 
+    try{
+      bean = buildCreator(creator, ctx, names, values, newNames, newValues);
+    }catch(JsonBindingException e){      
+    	bean = selectCreator(secondaryCreators, ctx, names, values, newNames, newValues);
+    	if (bean==null){
+    	  throw e;
+    	}
+    }
+    for (int i = 0; i < names.size(); i++) {
+      PropertyMutator property = mutableProperties.get(newNames[i]);
+      if (property != null) property.mutate(bean, newValues[i]);
+    }
+    reader.endObject();
+    return bean;
+  }
 
+  private T buildCreator(BeanCreator aCreator, Context ctx, List<String> names, List<Object> values,
+      String[] newNames, Object[] newValues) {    
+    int size = names.size();
+    int foundCtrParameters = 0;
+    Object[] creatorArgs = new Object[aCreator.parameters.size()];
+    Arrays.fill(creatorArgs, MISSING);
+ 
     for (int i = 0, j = 0; i < size; i++) {
-      BeanCreatorProperty mp = creator.paramsAndAliases.get(names.get(i));
+      BeanCreatorProperty mp = aCreator.paramsAndAliases.get(names.get(i));
       if (mp != null) {
         creatorArgs[mp.index] = values.get(i);
         foundCtrParameters++;
@@ -169,22 +194,28 @@ public class BeanDescriptor<T> implements Converter<T> {
         j++;
       }
     }
-
-    if (foundCtrParameters < creator.parameters.size()) updateWithDefaultValues(creatorArgs, ctx.genson);
-
-    T bean = ofClass.cast(creator.create(creatorArgs));
-    for (int i = 0; i < size; i++) {
-      PropertyMutator property = mutableProperties.get(newNames[i]);
-      if (property != null) property.mutate(bean, newValues[i]);
-    }
-    reader.endObject();
-    return bean;
+ 
+    if (foundCtrParameters < aCreator.parameters.size()) updateWithDefaultValues(aCreator, creatorArgs, ctx.genson);
+    return ofClass.cast(aCreator.create(creatorArgs));
   }
-
-  private void updateWithDefaultValues(Object[] creatorArgs, Genson genson) {
+  
+  private T selectCreator(List<BeanCreator> creators, Context ctx, List<String> names, List<Object> values,
+      String[] newNames, Object[] newValues) {
+    
+    for(BeanCreator aCreator : creators){      
+    	try{
+    	  return buildCreator(aCreator, ctx, names, values, newNames, newValues);
+      }catch(JsonBindingException e){        
+        // Ignore any non-matching creators      
+    	}
+    }
+    return null;
+  }
+  
+  private void updateWithDefaultValues(BeanCreator aCreator, Object[] creatorArgs, Genson genson) {
     for (int i = 0; i < creatorArgs.length; i++) {
       if (creatorArgs[i] == MISSING) {
-        for (BeanCreatorProperty property : creator.parameters.values()) {
+        for (BeanCreatorProperty property : aCreator.parameters.values()) {
           if (property.index == i) {
             creatorArgs[i] = genson.defaultValue(property.getRawClass());
             break;
