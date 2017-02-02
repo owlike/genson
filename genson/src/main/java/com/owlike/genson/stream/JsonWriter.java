@@ -250,10 +250,20 @@ public class JsonWriter implements ObjectWriter {
   }
 
   public JsonWriter writeValue(final double value) {
-    checkValidJsonDouble(value);
-    clearMetadata();
-    beforeValue();
-    writeToBuffer(Double.toString(value), 0);
+      boolean allowExtendedNumberTypes=true;  //this should come from gensonbuilder?
+	  clearMetadata();
+      beforeValue();
+      
+	  if (allowExtendedNumberTypes==true)
+	  {
+		 String writethis = getValidJsonDouble(value);
+		 writeToBuffer(writethis,0);
+	  }
+	  else
+	  {	  
+		checkValidJsonDouble(value);	
+		writeToBuffer(Double.toString(value), 0);
+	  }
     _hasPrevious = true;
     return this;
   }
@@ -291,10 +301,21 @@ public class JsonWriter implements ObjectWriter {
   }
 
   public ObjectWriter writeValue(float value) {
-    checkValidJsonFloat(value);
-    clearMetadata();
-    beforeValue();
-    writeToBuffer(Float.toString(value), 0);
+	  boolean allowExtendedNumberTypes=true;
+	  clearMetadata();
+      beforeValue();      
+	  if (allowExtendedNumberTypes==true)
+	  {
+		 String writethis = getValidJsonFloat(value);
+		 writeToBuffer(writethis,0);
+	  }
+	  else
+	  {	  
+	    checkValidJsonFloat(value);
+	    clearMetadata();
+	    beforeValue();
+      	writeToBuffer(Float.toString(value),0); 
+	  }    
     _hasPrevious = true;
     return this;
   }
@@ -328,11 +349,21 @@ public class JsonWriter implements ObjectWriter {
   }
 
   public JsonWriter writeValue(final Number value) {
-    checkValidJsonDouble(value);
-    checkValidJsonFloat(value);
-    clearMetadata();
-    beforeValue();
-    writeToBuffer(value.toString(), 0);
+	  boolean allowExtendedNumberTypes=true;
+	  clearMetadata();
+      beforeValue();
+      
+	  if (allowExtendedNumberTypes==true)
+	  {
+		 String writethis = getValidJsonDouble(value);
+		 writeToBuffer(writethis,0);
+	  }
+	  else
+	  {	  
+	    checkValidJsonDouble(value);
+        checkValidJsonFloat(value);
+    	writeToBuffer(value.toString(), 0);   
+	  }
     _hasPrevious = true;
     return this;
   }
@@ -364,6 +395,20 @@ public class JsonWriter implements ObjectWriter {
       throw new NumberFormatException("Infinity is not a valid json number.");
   }
 
+  private String getValidJsonDouble(Number num) {
+	  boolean quotereturnvalue=true;
+	  
+	  if (num.equals(Double.NaN))
+		  return quotereturnvalue?"\'NaN\'":"NaN";
+	  if (num.equals(Double.POSITIVE_INFINITY))
+		  return quotereturnvalue?"\'+Infinity\'":"+Infinity";
+	  if (num.equals(Double.NEGATIVE_INFINITY))
+		  return quotereturnvalue?"\'-Infinity\'":"-Infinity";
+	  
+	  return num.toString();
+  }
+  
+  
   private void checkValidJsonFloat(Number num) {
     if (num.equals(Float.NaN))
       throw new NumberFormatException("NaN is not a valid json number.");
@@ -371,6 +416,22 @@ public class JsonWriter implements ObjectWriter {
       throw new NumberFormatException("Infinity is not a valid json number.");
   }
 
+  
+  private String getValidJsonFloat(Number num) {
+	  boolean quotereturnvalue=true;
+	  
+	  if (num.equals(Float.NaN))
+		  return quotereturnvalue?"\'NaN\'":"NaN";
+	  if (num.equals(Float.POSITIVE_INFINITY))
+		  return quotereturnvalue?"\'+Infinity\'":"+Infinity";
+	  if (num.equals(Float.NEGATIVE_INFINITY))
+		  return quotereturnvalue?"\'-Infinity\'":"-Infinity";
+	  
+	  return num.toString();
+  }
+  
+  
+  
   public ObjectWriter writeValue(byte[] value) {
     clearMetadata();
     beforeValue();
