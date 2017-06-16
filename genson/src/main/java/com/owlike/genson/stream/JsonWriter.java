@@ -428,7 +428,7 @@ public class JsonWriter implements ObjectWriter {
         continue;
       }
       if (last < i) {
-        sb.append(value, last, i - last);
+        sb.append(value, last, i);
       }
       sb.append(replacement, 0, replacement.length);
       last = i + 1;
