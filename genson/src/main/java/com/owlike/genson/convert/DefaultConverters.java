@@ -1026,6 +1026,9 @@ public final class DefaultConverters {
       deserializationNames = new HashMap<String, T>();
       for (Field f : eClass.getFields()) {
         try {
+          if (!f.isEnumConstant()) {
+            continue;
+          }
           String name = caseSensitive ? f.getName(): f.getName().toUpperCase();
           deserializationNames.put(name, (T) f.get(null));
         } catch (IllegalAccessException e) {
