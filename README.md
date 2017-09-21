@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/owlike/genson.svg?branch=master)](https://travis-ci.org/owlike/genson)
 
-#Genson
+# Genson
 
 [![Join the chat at https://gitter.im/owlike/genson](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/owlike/genson?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
@@ -12,7 +12,7 @@ Gensons main strengths?
  - Its modular and configurable architecture.
  - Speed and controlled small memory foot print making it scale.
 
-##Online Documentation
+## Online Documentation
 
 Checkout our new website - <http://owlike.github.io/genson/>.
 
@@ -20,14 +20,14 @@ Checkout our new website - <http://owlike.github.io/genson/>.
 The old website at <http://code.google.com/p/genson/>, hosts the documentation and javadoc until release 0.99 inclusive.
 But starting with 1.0 everything has been moved to github and the new website.
 
-##Motivation
+## Motivation
 
 You might wonder, why create another Json databinding lib for Java?
 Well...most libraries, miss of important features or have a lot of features but you can hardly add new features by yourself.
 Gensons initial motivation is to solve those problems by trying to come with useful features out of the box and stay as much as possible open to extension.
 
 
-##Features you will like
+## Features you will like
 
   - Easy to use, fast, highly configurable, lightweight and all that into a single small jar!
   - Full databinding and streaming support for efficient read/write
@@ -40,7 +40,7 @@ Gensons initial motivation is to solve those problems by trying to come with use
   - Automatic support for JSON in JAX-RS implementations
   - Serialization and Deserialization of maps with complex keys
 
-##Goals
+## Goals
 
  - Be as much extensible as possible by allowing users to add new features in a clean and easy way. Genson applies the philosophy that *"We can not think of every use case, so give to users the ability to do it by them self in a easy way*".
  - Provide an easy to use API.
