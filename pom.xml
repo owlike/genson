@@ -58,6 +58,7 @@
   <modules>
     <module>genson</module>
     <module>genson-scala</module>
+      <module>genson-java-datetime</module>
   </modules>
 
   <profiles>
