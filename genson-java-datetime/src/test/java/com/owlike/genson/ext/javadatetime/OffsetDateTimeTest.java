@@ -6,12 +6,13 @@ import org.junit.Test;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class OffsetDateTimeTest extends JavaDateTimeTestBase {
 	@Test
 	public void testMillisSerialization(){
-		Genson genson = createTimestampGenson(TimestampFormat.MILLIS);
+		Genson genson = createTimestampGenson(OffsetDateTime.class, TimestampFormat.MILLIS);
 		Long millis = 4534654564653L;
 		OffsetDateTime dt = OffsetDateTime.ofInstant(Instant.ofEpochMilli(millis), defaultZoneId);
 		Assert.assertEquals(millis.toString(), genson.serialize(dt));
@@ -19,7 +20,7 @@ public class OffsetDateTimeTest extends JavaDateTimeTestBase {
 
 	@Test
 	public void testNanosSerialization(){
-		Genson genson = createTimestampGenson(TimestampFormat.NANOS);
+		Genson genson = createTimestampGenson(OffsetDateTime.class, TimestampFormat.NANOS);
 		Long seconds = 321L;
 		Long nanoAdjustment = 123456789L;
 		Long totalNanos = DateTimeUtil.getNanos(seconds, nanoAdjustment);
@@ -28,8 +29,24 @@ public class OffsetDateTimeTest extends JavaDateTimeTestBase {
 	}
 
 	@Test
+	public void testArraySerialization(){
+		Genson genson = createTimestampGenson(OffsetDateTime.class, TimestampFormat.ARRAY, torontoZoneId);
+		OffsetDateTime dt = OffsetDateTime.ofInstant(ZonedDateTime.of(2011, 11, 10, 9, 8,7, 1223, torontoZoneId).toInstant(), torontoZoneId);
+		String expectedJson = toJsonArray(2011, 11, 10, 9, 8, 7, 1223, "-18000");
+		Assert.assertEquals(expectedJson, genson.serialize(dt));
+	}
+
+	@Test
+	public void testObjectSerialization(){
+		Genson genson = createTimestampGenson(OffsetDateTime.class, TimestampFormat.OBJECT, torontoZoneId);
+		OffsetDateTime dt = OffsetDateTime.ofInstant(ZonedDateTime.of(2011, 11, 10, 9, 8,7, 1223, torontoZoneId).toInstant(), torontoZoneId);
+		String expectedJson = "{\"year\":2011,\"month\":11,\"day\":10,\"hour\":9,\"minute\":8,\"second\":7,\"nano\":1223,\"offsetSeconds\":-18000}";
+		Assert.assertEquals(expectedJson, genson.serialize(dt));
+	}
+
+	@Test
 	public void testMillisDeserialization(){
-		Genson genson = createTimestampGenson(TimestampFormat.MILLIS);
+		Genson genson = createTimestampGenson(OffsetDateTime.class, TimestampFormat.MILLIS);
 		Long millis = 4534654564653L;
 		OffsetDateTime dt = OffsetDateTime.ofInstant(Instant.ofEpochMilli(millis), defaultZoneId);
 		Assert.assertEquals(dt, genson.deserialize(millis.toString(), OffsetDateTime.class));
@@ -37,7 +54,7 @@ public class OffsetDateTimeTest extends JavaDateTimeTestBase {
 
 	@Test
 	public void testNanosDeserialization(){
-		Genson genson = createTimestampGenson(TimestampFormat.NANOS);
+		Genson genson = createTimestampGenson(OffsetDateTime.class, TimestampFormat.NANOS);
 		Long seconds = 321L;
 		Long nanoAdjustment = 123456789L;
 		Long totalNanos = DateTimeUtil.getNanos(seconds, nanoAdjustment);
@@ -46,10 +63,26 @@ public class OffsetDateTimeTest extends JavaDateTimeTestBase {
 	}
 
 	@Test
+	public void testArrayDeserialization(){
+		Genson genson = createTimestampGenson(OffsetDateTime.class, TimestampFormat.ARRAY, torontoZoneId);
+		OffsetDateTime dt = OffsetDateTime.ofInstant(ZonedDateTime.of(2011, 11, 10, 9, 8,7, 1223, torontoZoneId).toInstant(), torontoZoneId);
+		String json = "[2011, 11, 10, 9, 8, 7, 1223, -18000]";
+		Assert.assertEquals(dt, genson.deserialize(json, OffsetDateTime.class));
+	}
+
+	@Test
+	public void testObjectDeserialization(){
+		Genson genson = createTimestampGenson(OffsetDateTime.class, TimestampFormat.OBJECT, torontoZoneId);
+		OffsetDateTime dt = OffsetDateTime.ofInstant(ZonedDateTime.of(2011, 11, 10, 9, 8,7, 1223, torontoZoneId).toInstant(), torontoZoneId);
+		String json = "{\"year\":2011,\"month\":11,\"day\":10,\"hour\":9,\"minute\":8,\"second\":7,\"nano\":1223,\"offsetSeconds\":-18000}";
+		Assert.assertEquals(dt, genson.deserialize(json, OffsetDateTime.class));
+	}
+
+	@Test
 	public void testDefaultFormattedSerializationIsISO(){
 		Genson genson = createFormatterGenson();
 		OffsetDateTime dt = OffsetDateTime.now();
-		String formattedValue = DateTimeFormatter.ISO_ZONED_DATE_TIME.format(dt);
+		String formattedValue = DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(dt);
 		Assert.assertEquals(toJsonQuotedString(formattedValue), genson.serialize(dt));
 	}
 
@@ -57,7 +90,7 @@ public class OffsetDateTimeTest extends JavaDateTimeTestBase {
 	public void testDefaultFormattedDeserializationIsISO(){
 		Genson genson = createFormatterGenson();
 		OffsetDateTime dt = OffsetDateTime.now();
-		String formattedValue = DateTimeFormatter.ISO_ZONED_DATE_TIME.format(dt);
+		String formattedValue = DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(dt);
 		Assert.assertEquals(dt, genson.deserialize(toJsonQuotedString(formattedValue), OffsetDateTime.class));
 	}
 

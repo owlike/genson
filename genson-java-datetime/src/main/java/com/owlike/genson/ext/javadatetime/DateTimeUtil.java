@@ -62,6 +62,14 @@ class DateTimeUtil {
 		return Instant.ofEpochSecond(seconds, adjustment);
 	}
 
+	static Long instantToMillis(Instant instant){
+		return instant.toEpochMilli();
+	}
+
+	static Long instantToNanos(Instant instant){
+		return DateTimeUtil.getNanos(instant.getEpochSecond(), instant.getNano());
+	}
+
 	static OffsetDateTime correctOffset(OffsetDateTime value, ZoneId zoneId) {
 		Instant instant = value.toLocalDateTime().atZone(zoneId).toInstant();
 		return OffsetDateTime.ofInstant(instant, zoneId);

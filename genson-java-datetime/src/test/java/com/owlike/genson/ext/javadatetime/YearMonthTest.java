@@ -9,17 +9,47 @@ import java.time.format.DateTimeFormatter;
 
 public class YearMonthTest extends JavaDateTimeTestBase {
 	@Test
-	public void testTimestampSerialization() {
-		Genson genson = createTimestampGenson(TimestampFormat.MILLIS);
-		YearMonth year = YearMonth.of(2000, 2);
-		Assert.assertEquals(toJsonArray(2000, 2), genson.serialize(year));
+	public void testNumericSerialization() {
+		Genson genson = createTimestampGenson(YearMonth.class, TimestampFormat.MILLIS);
+		YearMonth yearMonth = YearMonth.of(1971, 1);
+		Assert.assertEquals("12", genson.serialize(yearMonth));
 	}
 
 	@Test
-	public void testTimestampDeserialization() {
-		Genson genson = createTimestampGenson(TimestampFormat.MILLIS);
-		YearMonth year = YearMonth.of(2011, 11);
-		Assert.assertEquals(year, genson.deserialize(toJsonArray(2011, 11), YearMonth.class));
+	public void testNumericDeserialization() {
+		Genson genson = createTimestampGenson(YearMonth.class, TimestampFormat.MILLIS);
+		YearMonth yearMonth = YearMonth.of(1971, 1);
+		Assert.assertEquals(yearMonth, genson.deserialize("12", YearMonth.class));
+	}
+
+	@Test
+	public void testArraySerialization() {
+		Genson genson = createTimestampGenson(YearMonth.class, TimestampFormat.ARRAY);
+		YearMonth yearMonth = YearMonth.of(2000, 10);
+		Assert.assertEquals(toJsonArray(2000, 10), genson.serialize(yearMonth));
+	}
+
+	@Test
+	public void testArrayDeserialization() {
+		Genson genson = createTimestampGenson(YearMonth.class, TimestampFormat.ARRAY);
+		YearMonth yearMonth = YearMonth.of(2000, 10);
+		Assert.assertEquals(yearMonth, genson.deserialize(toJsonArray(2000, 10), YearMonth.class));
+	}
+
+	@Test
+	public void testObjectSerialization() {
+		Genson genson = createTimestampGenson(YearMonth.class, TimestampFormat.OBJECT);
+		YearMonth yearMonth = YearMonth.of(2010, 11);
+		String json = "{\"year\":2010,\"month\":11}";
+		Assert.assertEquals(json, genson.serialize(yearMonth));
+	}
+
+	@Test
+	public void testObjectDeserialization() {
+		Genson genson = createTimestampGenson(YearMonth.class, TimestampFormat.OBJECT);
+		YearMonth yearMonth = YearMonth.of(2010, 11);
+		String json = "{\"year\":2010,\"month\":11}";
+		Assert.assertEquals(yearMonth, genson.deserialize(json, YearMonth.class));
 	}
 
 	@Test

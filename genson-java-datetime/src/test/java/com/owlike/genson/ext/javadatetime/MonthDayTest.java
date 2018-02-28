@@ -9,17 +9,33 @@ import java.time.format.DateTimeFormatter;
 
 public class MonthDayTest extends JavaDateTimeTestBase {
 	@Test
-	public void testTimestampSerialization() {
-		Genson genson = createTimestampGenson(TimestampFormat.MILLIS);
-		MonthDay year = MonthDay.of(12, 2);
-		Assert.assertEquals(toJsonArray(12, 2), genson.serialize(year));
+	public void testArraySerialization() {
+		Genson genson = createTimestampGenson();
+		MonthDay monthday = MonthDay.of(12, 2);
+		Assert.assertEquals(toJsonArray(12, 2), genson.serialize(monthday));
 	}
 
 	@Test
-	public void testTimestampDeserialization() {
-		Genson genson = createTimestampGenson(TimestampFormat.MILLIS);
-		MonthDay year = MonthDay.of(1, 11);
-		Assert.assertEquals(year, genson.deserialize(toJsonArray(1, 11), MonthDay.class));
+	public void testArrayDeserialization() {
+		Genson genson = createTimestampGenson();
+		MonthDay monthday = MonthDay.of(1, 11);
+		Assert.assertEquals(monthday, genson.deserialize(toJsonArray(1, 11), MonthDay.class));
+	}
+
+	@Test
+	public void testObjectSerialization() {
+		Genson genson = createTimestampGenson(MonthDay.class, TimestampFormat.OBJECT);
+		MonthDay monthday = MonthDay.of(12, 2);
+		String json = "{\"month\":12,\"day\":2}";
+		Assert.assertEquals(json, genson.serialize(monthday));
+	}
+
+	@Test
+	public void testObjectDeserialization() {
+		Genson genson = createTimestampGenson(MonthDay.class, TimestampFormat.OBJECT);
+		MonthDay monthday = MonthDay.of(1, 11);
+		String json = "{\"month\":1,\"day\":11}";
+		Assert.assertEquals(monthday, genson.deserialize(json, MonthDay.class));
 	}
 
 	@Test

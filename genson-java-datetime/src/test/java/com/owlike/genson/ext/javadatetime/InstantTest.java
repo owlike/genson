@@ -10,7 +10,7 @@ import java.time.format.DateTimeFormatter;
 public class InstantTest extends JavaDateTimeTestBase {
 	@Test
 	public void testMillisSerialization(){
-		Genson genson = createTimestampGenson(TimestampFormat.MILLIS);
+		Genson genson = createTimestampGenson(Instant.class, TimestampFormat.MILLIS);
 		Long millis = 4534654564653L;
 		Instant dt = Instant.ofEpochMilli(millis);
 		Assert.assertEquals(millis.toString(), genson.serialize(dt));
@@ -18,7 +18,7 @@ public class InstantTest extends JavaDateTimeTestBase {
 
 	@Test
 	public void testNanosSerialization(){
-		Genson genson = createTimestampGenson(TimestampFormat.NANOS);
+		Genson genson = createTimestampGenson(Instant.class, TimestampFormat.NANOS);
 		Long seconds = 321L;
 		Long nanoAdjustment = 123456789L;
 		Long totalNanos = DateTimeUtil.getNanos(seconds, nanoAdjustment);
@@ -28,7 +28,7 @@ public class InstantTest extends JavaDateTimeTestBase {
 
 	@Test
 	public void testMillisDeserialization(){
-		Genson genson = createTimestampGenson(TimestampFormat.MILLIS);
+		Genson genson = createTimestampGenson(Instant.class, TimestampFormat.MILLIS);
 		Long millis = 4534654564653L;
 		Instant dt = Instant.ofEpochMilli(millis);
 		Assert.assertEquals(dt, genson.deserialize(millis.toString(), Instant.class));
@@ -36,12 +36,50 @@ public class InstantTest extends JavaDateTimeTestBase {
 
 	@Test
 	public void testNanosDeserialization(){
-		Genson genson = createTimestampGenson(TimestampFormat.NANOS);
 		Long seconds = 321L;
+		Genson genson = createTimestampGenson(Instant.class, TimestampFormat.NANOS);
 		Long nanoAdjustment = 123456789L;
 		Long totalNanos = DateTimeUtil.getNanos(seconds, nanoAdjustment);
 		Instant dt = Instant.ofEpochSecond(seconds, nanoAdjustment);
 		Assert.assertEquals(dt, genson.deserialize(totalNanos.toString(), Instant.class));
+	}
+
+	@Test
+	public void testArraySerialization(){
+		Genson genson = createTimestampGenson(Instant.class, TimestampFormat.ARRAY);
+		Long seconds = 321L;
+		Long nanoAdjustment = 123456789L;
+		Instant dt = Instant.ofEpochSecond(seconds, nanoAdjustment);
+		Assert.assertEquals(toJsonArray(seconds, nanoAdjustment), genson.serialize(dt));
+	}
+
+	@Test
+	public void testObjectSerialization(){
+		Genson genson = createTimestampGenson(Instant.class, TimestampFormat.OBJECT);
+		Long seconds = 321L;
+		Long nanoAdjustment = 123456789L;
+		Instant dt = Instant.ofEpochSecond(seconds, nanoAdjustment);
+		String expectedJson = "{\"second\":321,\"nano\":123456789}";
+		Assert.assertEquals(expectedJson, genson.serialize(dt));
+	}
+
+	@Test
+	public void testArrayDeserialization(){
+		Genson genson = createTimestampGenson(Instant.class, TimestampFormat.ARRAY, londonZoneId);
+		Long seconds = 321L;
+		Long nanoAdjustment = 123456789L;
+		Instant dt = Instant.ofEpochSecond(seconds, nanoAdjustment);
+		Assert.assertEquals(dt, genson.deserialize(toJsonArray(seconds, nanoAdjustment), Instant.class));
+	}
+
+	@Test
+	public void testObjectDeserialization(){
+		Genson genson = createTimestampGenson(Instant.class, TimestampFormat.OBJECT);
+		Long seconds = 321L;
+		Long nanoAdjustment = 123456789L;
+		Instant dt = Instant.ofEpochSecond(seconds, nanoAdjustment);
+		String json = "{\"second\":321, \"nano\":123456789}";
+		Assert.assertEquals(dt, genson.deserialize(json, Instant.class));
 	}
 
 	@Test

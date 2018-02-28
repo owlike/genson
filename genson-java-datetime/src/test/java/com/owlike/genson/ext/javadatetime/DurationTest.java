@@ -9,7 +9,7 @@ import java.time.Duration;
 public class DurationTest extends JavaDateTimeTestBase {
 	@Test
 	public void testTimestampSerialization() {
-		Genson genson = createTimestampGenson(TimestampFormat.MILLIS);
+		Genson genson = createTemporalAmountTimestampGenson(Duration.class, TimestampFormat.MILLIS);
 		long seconds = 321L;
 		long nanos = 123456789;
 		Duration duration = Duration.ofSeconds(seconds, nanos);
@@ -18,7 +18,7 @@ public class DurationTest extends JavaDateTimeTestBase {
 
 	@Test
 	public void testTimestampDeserialization() {
-		Genson genson = createTimestampGenson(TimestampFormat.MILLIS);
+		Genson genson = createTemporalAmountTimestampGenson(Duration.class, TimestampFormat.MILLIS);
 		long seconds = 321L;
 		long nanos = 123456789;
 		Duration duration = Duration.ofSeconds(seconds, nanos);

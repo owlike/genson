@@ -12,7 +12,7 @@ import java.time.format.DateTimeFormatter;
 public class LocalTimeTest extends JavaDateTimeTestBase {
 	@Test
 	public void testMillisSerialization(){
-		Genson genson = createTimestampGenson(TimestampFormat.MILLIS);
+		Genson genson = createTimestampGenson(LocalTime.class, TimestampFormat.MILLIS);
 		LocalTime dt = LocalDateTime.ofInstant(Instant.ofEpochMilli(4534654564653L), defaultZoneId).toLocalTime();
 		Long millis = DateTimeUtil.getMillis(dt.toSecondOfDay(), dt.getNano());
 		Assert.assertEquals(millis.toString(), genson.serialize(dt));
@@ -20,7 +20,7 @@ public class LocalTimeTest extends JavaDateTimeTestBase {
 
 	@Test
 	public void testNanosSerialization(){
-		Genson genson = createTimestampGenson(TimestampFormat.NANOS);
+		Genson genson = createTimestampGenson(LocalTime.class, TimestampFormat.NANOS);
 		LocalTime dt = LocalDateTime.ofInstant(Instant.ofEpochSecond(321L, 123456789L), defaultZoneId).toLocalTime();
 		Long totalNanos = DateTimeUtil.getNanos(dt.toSecondOfDay(), dt.getNano());
 		Assert.assertEquals(totalNanos.toString(), genson.serialize(dt));
@@ -28,7 +28,7 @@ public class LocalTimeTest extends JavaDateTimeTestBase {
 
 	@Test
 	public void testMillisDeserialization(){
-		Genson genson = createTimestampGenson(TimestampFormat.MILLIS);
+		Genson genson = createTimestampGenson(LocalTime.class, TimestampFormat.MILLIS);
 		LocalTime dt = LocalDateTime.ofInstant(Instant.ofEpochMilli(5357647337L), defaultZoneId).toLocalTime();
 		Long millis = DateTimeUtil.getMillis(dt.toSecondOfDay(), dt.getNano());
 		Assert.assertEquals(dt, genson.deserialize(millis.toString(), LocalTime.class));
@@ -36,10 +36,42 @@ public class LocalTimeTest extends JavaDateTimeTestBase {
 
 	@Test
 	public void testNanosDeserialization(){
-		Genson genson = createTimestampGenson(TimestampFormat.NANOS);
+		Genson genson = createTimestampGenson(LocalTime.class, TimestampFormat.NANOS);
 		LocalTime dt = LocalDateTime.ofInstant(Instant.ofEpochSecond(321L, 123456789L), defaultZoneId).toLocalTime();
 		Long totalNanos = DateTimeUtil.getNanos(dt.toSecondOfDay(), dt.getNano());
 		Assert.assertEquals(dt, genson.deserialize(totalNanos.toString(), LocalTime.class));
+	}
+
+	@Test
+	public void testArraySerialization(){
+		Genson genson = createTimestampGenson(LocalTime.class, TimestampFormat.ARRAY);
+		LocalTime dt = LocalTime.of(10, 31, 45);
+		String expectedJson = toJsonArray(10, 31, 45, 0);
+		Assert.assertEquals(expectedJson, genson.serialize(dt));
+	}
+
+	@Test
+	public void testObjectSerialization(){
+		Genson genson = createTimestampGenson(LocalTime.class, TimestampFormat.OBJECT);
+		LocalTime dt = LocalTime.of(10, 31, 45);
+		String expectedJson = "{\"hour\":10,\"minute\":31,\"second\":45,\"nano\":0}";
+		Assert.assertEquals(expectedJson, genson.serialize(dt));
+	}
+
+	@Test
+	public void testArrayDeserialization(){
+		Genson genson = createTimestampGenson(LocalTime.class, TimestampFormat.ARRAY, londonZoneId);
+		LocalTime dt = LocalTime.of(10, 31, 45);
+		String json = "[10, 31, 45, 0]";
+		Assert.assertEquals(dt, genson.deserialize(json, LocalTime.class));
+	}
+
+	@Test
+	public void testObjectDeserialization(){
+		Genson genson = createTimestampGenson(LocalTime.class, TimestampFormat.OBJECT);
+		LocalTime dt = LocalTime.of(10, 31, 45);
+		String json = "{\"hour\":10,\"minute\":31,\"second\":45,\"nano\":0}";
+		Assert.assertEquals(dt, genson.deserialize(json, LocalTime.class));
 	}
 
 	@Test

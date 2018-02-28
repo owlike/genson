@@ -9,17 +9,47 @@ import java.time.format.DateTimeFormatter;
 
 public class YearTest extends JavaDateTimeTestBase {
 	@Test
-	public void testTimestampSerialization() {
-		Genson genson = createTimestampGenson(TimestampFormat.MILLIS);
+	public void testNumericSerialization() {
+		Genson genson = createTimestampGenson(Year.class, TimestampFormat.MILLIS);
+		Year year = Year.of(2000);
+		Assert.assertEquals("2000", genson.serialize(year));
+	}
+
+	@Test
+	public void testNumericDeserialization() {
+		Genson genson = createTimestampGenson(Year.class, TimestampFormat.MILLIS);
+		Year year = Year.of(2011);
+		Assert.assertEquals(year, genson.deserialize("2011", Year.class));
+	}
+
+	@Test
+	public void testArraySerialization() {
+		Genson genson = createTimestampGenson(Year.class, TimestampFormat.ARRAY);
 		Year year = Year.of(2000);
 		Assert.assertEquals(toJsonArray(2000), genson.serialize(year));
 	}
 
 	@Test
-	public void testTimestampDeserialization() {
-		Genson genson = createTimestampGenson(TimestampFormat.MILLIS);
+	public void testArrayDeserialization() {
+		Genson genson = createTimestampGenson(Year.class, TimestampFormat.ARRAY);
 		Year year = Year.of(2011);
 		Assert.assertEquals(year, genson.deserialize(toJsonArray(2011), Year.class));
+	}
+
+	@Test
+	public void testObjectSerialization() {
+		Genson genson = createTimestampGenson(Year.class, TimestampFormat.OBJECT);
+		Year year = Year.of(2011);
+		String json = "{\"year\":2011}";
+		Assert.assertEquals(json, genson.serialize(year));
+	}
+
+	@Test
+	public void testObjectDeserialization() {
+		Genson genson = createTimestampGenson(Year.class, TimestampFormat.OBJECT);
+		Year year = Year.of(1999);
+		String json = "{\"year\":1999}";
+		Assert.assertEquals(year, genson.deserialize(json, Year.class));
 	}
 
 	@Test

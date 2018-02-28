@@ -11,7 +11,7 @@ public class DateTimeConverterOptions {
 	private final ZoneId zoneId;
 
 	DateTimeConverterOptions(Class<?> clazz, DateTimeFormatter dateTimeFormatter, boolean asTimestamp, TimestampFormat timestampFormat, ZoneId zoneId) {
-		this.dateTimeFormatter = dateTimeFormatter;
+		this.dateTimeFormatter = dateTimeFormatter == null ? null : DateTimeUtil.createFormatterWithDefaults(dateTimeFormatter, zoneId);
 		this.asTimestamp = asTimestamp;
 		this.timestampFormat = timestampFormat;
 		this.zoneId = clazz == Instant.class ? ZoneId.of("UTC") : zoneId;

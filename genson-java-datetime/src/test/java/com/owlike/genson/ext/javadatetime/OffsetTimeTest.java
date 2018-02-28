@@ -12,7 +12,7 @@ import java.time.format.DateTimeFormatter;
 public class OffsetTimeTest extends JavaDateTimeTestBase {
 	@Test
 	public void testTimestampSerialization(){
-		Genson genson = createTimestampGenson(TimestampFormat.MILLIS);
+		Genson genson = createTimestampGenson();
 		LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(4534654564653L), defaultZoneId);
 		OffsetTime dt = ldt.toLocalTime().atOffset(defaultZoneId.getRules().getOffset(ldt));
 		String jsonArray = toJsonArray(dt.getHour(), dt.getMinute(), dt.getSecond(), dt.getNano(), dt.getOffset().getTotalSeconds());
@@ -21,7 +21,7 @@ public class OffsetTimeTest extends JavaDateTimeTestBase {
 
 	@Test
 	public void testTimestampDeserialization(){
-		Genson genson = createTimestampGenson(TimestampFormat.MILLIS);
+		Genson genson = createTimestampGenson();
 		LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(5357647337L), defaultZoneId);
 		OffsetTime dt = ldt.toLocalTime().atOffset(defaultZoneId.getRules().getOffset(ldt));
 		String jsonArray = toJsonArray(dt.getHour(), dt.getMinute(), dt.getSecond(), dt.getNano(), dt.getOffset().getTotalSeconds());

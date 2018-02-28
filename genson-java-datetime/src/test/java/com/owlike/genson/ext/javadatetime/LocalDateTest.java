@@ -12,19 +12,52 @@ import java.time.format.DateTimeFormatter;
 public class LocalDateTest extends JavaDateTimeTestBase {
 	@Test
 	public void testTimestampSerialization(){
-		Genson genson = createTimestampGenson(TimestampFormat.MILLIS);
+		Genson genson = createTimestampGenson(LocalDate.class, TimestampFormat.MILLIS);
 		Long millis = 4534654564653L;
 		LocalDate dt = LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), defaultZoneId).toLocalDate();
 		Assert.assertEquals("" + dt.toEpochDay(), genson.serialize(dt));
 	}
 
 	@Test
+	public void testArraySerialization(){
+		Genson genson = createTimestampGenson(LocalDate.class, TimestampFormat.ARRAY);
+		LocalDate dt = LocalDate.of(2011, 1,31);
+		String expectedJson = toJsonArray(2011, 1, 31);
+		Assert.assertEquals(expectedJson, genson.serialize(dt));
+	}
+
+	@Test
+	public void testObjectSerialization(){
+		Genson genson = createTimestampGenson(LocalDate.class, TimestampFormat.OBJECT);
+		LocalDate dt = LocalDate.of(2011, 1,31);
+		String expectedJson = "{\"year\":2011,\"month\":1,\"day\":31}";
+		Assert.assertEquals(expectedJson, genson.serialize(dt));
+	}
+
+	@Test
+	public void testArrayDeserialization(){
+		Genson genson = createTimestampGenson(LocalDate.class, TimestampFormat.ARRAY, londonZoneId);
+		LocalDate dt = LocalDate.of(2011, 1,31);
+		String json = "[2011, 1, 31]";
+		Assert.assertEquals(dt, genson.deserialize(json, LocalDate.class));
+	}
+
+	@Test
+	public void testObjectDeserialization(){
+		Genson genson = createTimestampGenson(LocalDate.class, TimestampFormat.OBJECT);
+		LocalDate dt = LocalDate.of(2011, 1,31);
+		String json = "{\"year\":2011,\"month\":1,\"day\":31}";
+		Assert.assertEquals(dt, genson.deserialize(json, LocalDate.class));
+	}
+
+	@Test
 	public void testTimestampDeserialization(){
-		Genson genson = createTimestampGenson(TimestampFormat.MILLIS);
+		Genson genson = createTimestampGenson(LocalDate.class, TimestampFormat.MILLIS);
 		Long millis = 4534654564653L;
 		LocalDate dt = LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), defaultZoneId).toLocalDate();
 		Assert.assertEquals(dt, genson.deserialize("" + dt.toEpochDay(), LocalDate.class));
 	}
+
 
 	@Test
 	public void testDefaultFormattedSerializationIsISO(){

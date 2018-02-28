@@ -1,5 +1,5 @@
 package com.owlike.genson.ext.javadatetime;
 
 public enum TimestampFormat {
-	MILLIS, NANOS
+	MILLIS, NANOS, ARRAY, OBJECT;
 }

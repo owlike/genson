@@ -11,7 +11,7 @@ import java.time.format.DateTimeFormatter;
 public class ZonedDateTimeTest extends JavaDateTimeTestBase {
 	@Test
 	public void testMillisSerialization(){
-		Genson genson = createTimestampGenson(TimestampFormat.MILLIS);
+		Genson genson = createTimestampGenson(ZonedDateTime.class, TimestampFormat.MILLIS);
 		Long millis = 4534654564653L;
 		ZonedDateTime dt = ZonedDateTime.ofInstant(Instant.ofEpochMilli(millis), defaultZoneId);
 		Assert.assertEquals(millis.toString(), genson.serialize(dt));
@@ -19,7 +19,7 @@ public class ZonedDateTimeTest extends JavaDateTimeTestBase {
 
 	@Test
 	public void testNanosSerialization(){
-		Genson genson = createTimestampGenson(TimestampFormat.NANOS);
+		Genson genson = createTimestampGenson(ZonedDateTime.class, TimestampFormat.NANOS);
 		Long seconds = 321L;
 		Long nanoAdjustment = 123456789L;
 		Long totalNanos = DateTimeUtil.getNanos(seconds, nanoAdjustment);
@@ -28,8 +28,24 @@ public class ZonedDateTimeTest extends JavaDateTimeTestBase {
 	}
 
 	@Test
+	public void testArraySerialization(){
+		Genson genson = createTimestampGenson(ZonedDateTime.class, TimestampFormat.ARRAY, londonZoneId);
+		ZonedDateTime dt = ZonedDateTime.of(2011, 11, 10, 9, 8,7, 1223, londonZoneId);
+		String expectedJson = toJsonArray(2011, 11, 10, 9, 8, 7, 1223, toJsonQuotedString("Europe/London"));
+		Assert.assertEquals(expectedJson, genson.serialize(dt));
+	}
+
+	@Test
+	public void testObjectSerialization(){
+		Genson genson = createTimestampGenson(ZonedDateTime.class, TimestampFormat.OBJECT, londonZoneId);
+		ZonedDateTime dt = ZonedDateTime.of(2011, 11, 10, 9, 8,7, 1223, londonZoneId);
+		String expectedJson = "{\"year\":2011,\"month\":11,\"day\":10,\"hour\":9,\"minute\":8,\"second\":7,\"nano\":1223,\"zoneId\":\"Europe/London\"}";
+		Assert.assertEquals(expectedJson, genson.serialize(dt));
+	}
+
+	@Test
 	public void testMillisDeserialization(){
-		Genson genson = createTimestampGenson(TimestampFormat.MILLIS);
+		Genson genson = createTimestampGenson(ZonedDateTime.class, TimestampFormat.MILLIS);
 		Long millis = 4534654564653L;
 		ZonedDateTime dt = ZonedDateTime.ofInstant(Instant.ofEpochMilli(millis), defaultZoneId);
 		Assert.assertEquals(dt, genson.deserialize(millis.toString(), ZonedDateTime.class));
@@ -37,13 +53,30 @@ public class ZonedDateTimeTest extends JavaDateTimeTestBase {
 
 	@Test
 	public void testNanosDeserialization(){
-		Genson genson = createTimestampGenson(TimestampFormat.NANOS);
+		Genson genson = createTimestampGenson(ZonedDateTime.class, TimestampFormat.NANOS);
 		Long seconds = 321L;
 		Long nanoAdjustment = 123456789L;
 		Long totalNanos = DateTimeUtil.getNanos(seconds, nanoAdjustment);
 		ZonedDateTime dt = ZonedDateTime.ofInstant(Instant.ofEpochSecond(seconds, nanoAdjustment), defaultZoneId);
 		Assert.assertEquals(dt, genson.deserialize(totalNanos.toString(), ZonedDateTime.class));
 	}
+
+	@Test
+	public void testArrayDeserialization(){
+		Genson genson = createTimestampGenson(ZonedDateTime.class, TimestampFormat.ARRAY, londonZoneId);
+		ZonedDateTime dt = ZonedDateTime.of(2011, 11, 10, 9, 8,7, 1223, londonZoneId);
+		String json = "[2011, 11, 10, 9, 8, 7, 1223, \"Europe/London\"]";
+		Assert.assertEquals(dt, genson.deserialize(json, ZonedDateTime.class));
+	}
+
+	@Test
+	public void testObjectDeserialization(){
+		Genson genson = createTimestampGenson(ZonedDateTime.class, TimestampFormat.OBJECT, londonZoneId);
+		ZonedDateTime dt = ZonedDateTime.of(2011, 11, 10, 9, 8,7, 1223, londonZoneId);
+		String json = "{\"year\":2011,\"month\":11,\"day\":10,\"hour\":9,\"minute\":8,\"second\":7,\"nano\":1223,\"zoneId\":\"Europe/London\"}";
+		Assert.assertEquals(dt, genson.deserialize(json, ZonedDateTime.class));
+	}
+
 
 	@Test
 	public void testDefaultFormattedSerializationIsISO(){

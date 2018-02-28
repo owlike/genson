@@ -17,7 +17,7 @@ public class AnnotationTest extends JavaDateTimeTestBase {
 		//Ser/Deser a zoneId using the pattern provided by the annotation (years only)
 		//The remaining fields (month, date etc) will be defaulted
 		Genson formatterGenson = createFormatterGenson();
-		Genson timestampGenson = createTimestampGenson(TimestampFormat.NANOS);
+		Genson timestampGenson = createTimestampGenson(ZonedDateTime.class, TimestampFormat.NANOS);
 		PojoWithCustomFormat pojo = new PojoWithCustomFormat();
 		pojo.dateTime = ZonedDateTime.of(2011, 2, 3, 4, 0, 0, 0, defaultZoneId);
 		ZonedDateTime expectedDeserialized = pojo.dateTime.withMonth(1).withDayOfMonth(1).withHour(0).withMinute(0).withNano(0);
@@ -48,7 +48,7 @@ public class AnnotationTest extends JavaDateTimeTestBase {
 	@Test
 	public void testCustomTimestampFormat(){
 		//Create genson which uses millis as default timestamp format and expect the annotation to override
-		Genson timestampGenson = createTimestampGenson(TimestampFormat.MILLIS);
+		Genson timestampGenson = createTimestampGenson(ZonedDateTime.class, TimestampFormat.MILLIS);
 		PojoWithCustomTimestampFormat pojo = new PojoWithCustomTimestampFormat();
 		pojo.dateTime = ZonedDateTime.of(2011, 2, 3, 4, 0, 0, 0, defaultZoneId);
 		Long totalNanos = DateTimeUtil.getNanos(pojo.dateTime.toEpochSecond(), pojo.dateTime.getNano());

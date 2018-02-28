@@ -25,6 +25,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
+import java.time.temporal.TemporalAmount;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -32,22 +33,41 @@ import java.util.function.Function;
 
 public class JavaDateTimeBundle extends GensonBundle {
 	private ZoneId zoneId = ZoneId.systemDefault();
-	private TimestampFormat timestampFormat = TimestampFormat.MILLIS;
 
 	private Map<Class<?>, ConverterGenerator> converterGenerators = new HashMap<>();
 	{
-		registerConverterGenerator(Instant.class, InstantTimestampableConverter::instant );
-		registerConverterGenerator(ZonedDateTime.class, InstantTimestampableConverter::zonedDateTime );
-		registerConverterGenerator(OffsetDateTime.class, InstantTimestampableConverter::offsetDateTime );
-		registerConverterGenerator(LocalDateTime.class, InstantTimestampableConverter::localDateTime );
-		registerConverterGenerator(LocalDate.class, LocalTimestampableConverter::localDate);
-		registerConverterGenerator(LocalTime.class, LocalTimestampableConverter::localTime);
-		registerConverterGenerator(Year.class, ArrayTimestampConverters::year);
-		registerConverterGenerator(YearMonth.class, ArrayTimestampConverters::yearMonth);
-		registerConverterGenerator(MonthDay.class, ArrayTimestampConverters::monthDay);
-		registerConverterGenerator(OffsetTime.class, ArrayTimestampConverters::offsetTime);
+		registerConverterGenerator(Instant.class, InstantConverter::new);
+		registerConverterGenerator(ZonedDateTime.class, ZonedDateTimeConverter::new);
+		registerConverterGenerator(OffsetDateTime.class, OffsetDateTimeConverter::new);
+		registerConverterGenerator(LocalDateTime.class, LocalDateTimeConverter::new);
+		registerConverterGenerator(LocalDate.class, LocalDateConverter::new);
+		registerConverterGenerator(LocalTime.class, LocalTimeConverter::new);
+		registerConverterGenerator(Year.class, YearConverter::new);
+		registerConverterGenerator(YearMonth.class, YearMonthConverter::new);
+		registerConverterGenerator(MonthDay.class, MonthDayConverter::new);
+		registerConverterGenerator(OffsetTime.class, OffsetTimeConverter::new);
 		registerConverterGenerator(Period.class, TemporalAmountConverter::period);
 		registerConverterGenerator(Duration.class, TemporalAmountConverter::duration);
+	}
+
+	private Map<Class<? extends TemporalAccessor>, TimestampFormat> temporalAccessorTimestampFormats = new HashMap<>();
+	{
+		temporalAccessorTimestampFormats.put(Instant.class, TimestampFormat.MILLIS);
+		temporalAccessorTimestampFormats.put(ZonedDateTime.class, TimestampFormat.MILLIS);
+		temporalAccessorTimestampFormats.put(OffsetDateTime.class, TimestampFormat.MILLIS);
+		temporalAccessorTimestampFormats.put(LocalDateTime.class, TimestampFormat.MILLIS);
+		temporalAccessorTimestampFormats.put(LocalDate.class, TimestampFormat.MILLIS);
+		temporalAccessorTimestampFormats.put(LocalTime.class, TimestampFormat.MILLIS);
+		temporalAccessorTimestampFormats.put(Year.class, TimestampFormat.ARRAY);
+		temporalAccessorTimestampFormats.put(YearMonth.class, TimestampFormat.ARRAY);
+		temporalAccessorTimestampFormats.put(MonthDay.class, TimestampFormat.ARRAY);
+		temporalAccessorTimestampFormats.put(OffsetTime.class, TimestampFormat.ARRAY);
+	}
+
+	private Map<Class<? extends TemporalAmount>, TimestampFormat> temporalAmountTimestampFormats = new HashMap<>();
+	{
+		temporalAmountTimestampFormats.put(Period.class, TimestampFormat.ARRAY);
+		temporalAmountTimestampFormats.put(Duration.class, TimestampFormat.ARRAY);
 	}
 
 	private Map<Class<?>, DateTimeFormatter> formatters = new HashMap<>();
@@ -67,12 +87,12 @@ public class JavaDateTimeBundle extends GensonBundle {
 	@Override
 	public void configure(GensonBuilder builder) {
 		boolean asTimestamp = builder.isDateAsTimestamp();
-		builder.withContextualFactory(new JavaDateTimeContextualFactory(asTimestamp, timestampFormat));
+		builder.withContextualFactory(new JavaDateTimeContextualFactory(asTimestamp));
 		for(Map.Entry<Class<?>, ConverterGenerator> converterGeneratorEntry: converterGenerators.entrySet()){
 			Class<?> clazz = converterGeneratorEntry.getKey();
 			ConverterGenerator<?> converterGenerator = converterGeneratorEntry.getValue();
 			DateTimeFormatter formatter = formatters.get(clazz);
-			DateTimeConverterOptions options = new DateTimeConverterOptions(clazz, formatter, asTimestamp, timestampFormat, zoneId);
+			DateTimeConverterOptions options = new DateTimeConverterOptions(clazz, formatter, asTimestamp, getDefaultTimestampFormat(clazz), zoneId);
 			Converter converter = converterGenerator.createConverter(options);
 			builder.withConverters(converter);
 		}
@@ -88,23 +108,35 @@ public class JavaDateTimeBundle extends GensonBundle {
 		return this;
 	}
 
+	public JavaDateTimeBundle setTemporalAccessorTimestampFormat(Class<? extends TemporalAccessor> clazz, TimestampFormat timestampFormat){
+		temporalAccessorTimestampFormats.put(clazz, timestampFormat);
+		return this;
+	}
+
+	public JavaDateTimeBundle setTemporalAmountTimestampFormat(Class<? extends TemporalAmount> clazz, TimestampFormat timestampFormat){
+		temporalAmountTimestampFormats.put(clazz, timestampFormat);
+		return this;
+	}
+
 	public JavaDateTimeBundle setZoneId(ZoneId zoneId) {
 		this.zoneId = zoneId;
 		return this;
 	}
 
-	public JavaDateTimeBundle setTimestampFormat(TimestampFormat timestampFormat) {
-		this.timestampFormat = timestampFormat;
-		return this;
+	private TimestampFormat getDefaultTimestampFormat(Class<?> clazz){
+		if(TemporalAmount.class.isAssignableFrom(clazz)){
+			return temporalAmountTimestampFormats.get(clazz);
+		}
+		else{
+			return temporalAccessorTimestampFormats.get(clazz);
+		}
 	}
 
 	private class JavaDateTimeContextualFactory implements ContextualFactory {
 		private boolean timestampByDefault;
-		private TimestampFormat defaultTimestampFormat;
 
-		private JavaDateTimeContextualFactory(boolean timestampByDefault, TimestampFormat defaultTimestampFormat) {
+		private JavaDateTimeContextualFactory(boolean timestampByDefault) {
 			this.timestampByDefault = timestampByDefault;
-			this.defaultTimestampFormat = defaultTimestampFormat;
 		}
 
 		@Override
@@ -136,7 +168,7 @@ public class JavaDateTimeBundle extends GensonBundle {
 			DateTimeFormatter formatter = getFormatter(jsonDateFormat, formatters.get(clazz));
 			boolean asTimestamp = jsonDateFormat == null ? timestampByDefault : jsonDateFormat.asTimeInMillis();
 			ZoneId zoneId = getZoneId(property);
-			TimestampFormat timestampFormat = getTimestampFormat(property, defaultTimestampFormat);
+			TimestampFormat timestampFormat = getTimestampFormat(property, getDefaultTimestampFormat(clazz));
 			return new DateTimeConverterOptions(clazz, formatter, asTimestamp, timestampFormat, zoneId);
 		}
 
