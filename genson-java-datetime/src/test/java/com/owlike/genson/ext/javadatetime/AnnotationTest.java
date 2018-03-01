@@ -46,17 +46,42 @@ public class AnnotationTest extends JavaDateTimeTestBase {
 	}
 
 	@Test
-	public void testCustomTimestampFormat(){
+	public void testCustomTimestampFormatNanos(){
 		//Create genson which uses millis as default timestamp format and expect the annotation to override
 		Genson timestampGenson = createTimestampGenson(ZonedDateTime.class, TimestampFormat.MILLIS);
-		PojoWithCustomTimestampFormat pojo = new PojoWithCustomTimestampFormat();
+		PojoWithCustomTimestampFormatNanos pojo = new PojoWithCustomTimestampFormatNanos();
 		pojo.dateTime = ZonedDateTime.of(2011, 2, 3, 4, 0, 0, 0, defaultZoneId);
 		Long totalNanos = DateTimeUtil.getNanos(pojo.dateTime.toEpochSecond(), pojo.dateTime.getNano());
 		String timestampJson = timestampGenson.serialize(pojo);
 		String expectedJson = "{\"dateTime\":" + totalNanos + "}";
 		Assert.assertEquals(expectedJson, timestampJson);
-		Assert.assertEquals(pojo.dateTime, timestampGenson.deserialize(expectedJson, PojoWithCustomTimestampFormat.class).dateTime);
+		Assert.assertEquals(pojo.dateTime, timestampGenson.deserialize(expectedJson, PojoWithCustomTimestampFormatNanos.class).dateTime);
 	}
+
+	@Test
+	public void testCustomTimestampFormatArray(){
+		//Create genson which uses millis as default timestamp format and expect the annotation to override
+		Genson timestampGenson = createTimestampGenson(ZonedDateTime.class, TimestampFormat.MILLIS);
+		PojoWithCustomTimestampFormatArray pojo = new PojoWithCustomTimestampFormatArray();
+		pojo.dateTime = ZonedDateTime.of(2011, 2, 3, 4, 0, 0, 0, defaultZoneId);
+		String timestampJson = timestampGenson.serialize(pojo);
+		String expectedJson = "{\"dateTime\":" + toJsonArray(2011, 2, 3, 4, 0, 0, 0, toJsonQuotedString(defaultZoneId.toString())) + "}";
+		Assert.assertEquals(expectedJson, timestampJson);
+		Assert.assertEquals(pojo.dateTime, timestampGenson.deserialize(expectedJson, PojoWithCustomTimestampFormatArray.class).dateTime);
+	}
+
+	@Test
+	public void testCustomTimestampFormatObject(){
+		//Create genson which uses millis as default timestamp format and expect the annotation to override
+		Genson timestampGenson = createTimestampGenson(ZonedDateTime.class, TimestampFormat.MILLIS);
+		PojoWithCustomTimestampFormatObject pojo = new PojoWithCustomTimestampFormatObject();
+		pojo.dateTime = ZonedDateTime.of(2011, 2, 3, 4, 0, 0, 0, defaultZoneId);
+		String timestampJson = timestampGenson.serialize(pojo);
+		String expectedJson = "{\"dateTime\":{\"year\":2011,\"month\":2,\"day\":3,\"hour\":4,\"minute\":0,\"second\":0,\"nano\":0,\"zoneId\":\"America/Toronto\"}}";
+		Assert.assertEquals(expectedJson, timestampJson);
+		Assert.assertEquals(pojo.dateTime, timestampGenson.deserialize(expectedJson, PojoWithCustomTimestampFormatObject.class).dateTime);
+	}
+
 
 
 	static class PojoWithCustomFormat{
@@ -69,8 +94,18 @@ public class AnnotationTest extends JavaDateTimeTestBase {
 		ZonedDateTime dateTime;
 	}
 
-	static class PojoWithCustomTimestampFormat{
+	static class PojoWithCustomTimestampFormatNanos {
 		@JsonTimestampFormat(TimestampFormat.NANOS)
+		ZonedDateTime dateTime;
+	}
+
+	static class PojoWithCustomTimestampFormatArray {
+		@JsonTimestampFormat(TimestampFormat.ARRAY)
+		ZonedDateTime dateTime;
+	}
+
+	static class PojoWithCustomTimestampFormatObject {
+		@JsonTimestampFormat(TimestampFormat.OBJECT)
 		ZonedDateTime dateTime;
 	}
 }
