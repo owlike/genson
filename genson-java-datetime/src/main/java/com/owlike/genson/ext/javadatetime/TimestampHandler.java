@@ -68,12 +68,11 @@ abstract class TimestampHandler<T extends TemporalAccessor> {
 
 	final T readNumericTimestamp(ObjectReader reader, TimestampFormat timestampFormat) {
 		long value = reader.valueAsLong();
-		if(timestampFormat == TimestampFormat.MILLIS){
-			return fromMillis.apply(value);
+		Function<Long, T> numberToInstance = timestampFormat == TimestampFormat.MILLIS ? fromMillis : fromNanos;
+		if(numberToInstance == null){
+			throw new IllegalArgumentException("Timestamp format not supported");
 		}
-		else{
-			return fromNanos.apply(value);
-		}
+		return numberToInstance.apply(value);
 	}
 
 	final T readArrayTimestamp(ObjectReader reader) {
