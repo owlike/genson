@@ -1,15 +1,13 @@
 package com.owlike.genson.ext.javadatetime;
 
-import com.owlike.genson.stream.ObjectReader;
-import com.owlike.genson.stream.ObjectWriter;
-
-import java.time.ZoneId;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalField;
-import java.time.temporal.TemporalQuery;
 import java.util.LinkedHashMap;
 
+/**
+ * Converter for values of type {@link OffsetDateTime}
+ */
 public class OffsetDateTimeConverter extends BaseTemporalAccessorConverter<OffsetDateTime> {
 	OffsetDateTimeConverter(DateTimeConverterOptions options) {
 		super(options, new OffsetDateTimeTimestampHandler(options), OffsetDateTime::from);
@@ -28,7 +26,7 @@ public class OffsetDateTimeConverter extends BaseTemporalAccessorConverter<Offse
 			OFFSET_DATE_TIME_TEMPORAL_FIELDS.put("offsetSeconds", ChronoField.OFFSET_SECONDS);
 		}
 
-		OffsetDateTimeTimestampHandler(DateTimeConverterOptions options) {
+		private OffsetDateTimeTimestampHandler(DateTimeConverterOptions options) {
 			super(ot -> DateTimeUtil.instantToMillis(ot.toInstant()),
 					millis -> OffsetDateTime.ofInstant(DateTimeUtil.instantFromMillis(millis), options.getZoneId()),
 					ot -> DateTimeUtil.instantToNanos(ot.toInstant()),

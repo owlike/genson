@@ -5,6 +5,9 @@ import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalField;
 import java.util.LinkedHashMap;
 
+/**
+ * Converter for values of type {@link Year}
+ */
 public class YearConverter extends BaseTemporalAccessorConverter<Year> {
 	YearConverter(DateTimeConverterOptions options) {
 		super(options, new YearTimestampHandler(options), Year::from);
@@ -16,7 +19,7 @@ public class YearConverter extends BaseTemporalAccessorConverter<Year> {
 			YEAR_TEMPORAL_FIELDS.put("year", ChronoField.YEAR);
 		}
 
-		YearTimestampHandler(DateTimeConverterOptions options) {
+		private YearTimestampHandler(DateTimeConverterOptions options) {
 			super(y -> y.getLong(ChronoField.YEAR), l -> Year.of(l.intValue()), y -> y.getLong(ChronoField.YEAR), l -> Year.of(l.intValue()),
 					YEAR_TEMPORAL_FIELDS, Year::now);
 		}

@@ -5,6 +5,9 @@ import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalField;
 import java.util.LinkedHashMap;
 
+/**
+ * Converter for values of type {@link LocalTime}
+ */
 public class LocalTimeConverter extends BaseTemporalAccessorConverter<LocalTime> {
 	LocalTimeConverter(DateTimeConverterOptions options) {
 		super(options, new LocalTimeTimestampHandler(options), LocalTime::from);
@@ -19,7 +22,7 @@ public class LocalTimeConverter extends BaseTemporalAccessorConverter<LocalTime>
 			LOCAL_TIME_TEMPORAL_FIELDS.put("nano", ChronoField.NANO_OF_SECOND);
 		}
 
-		LocalTimeTimestampHandler(DateTimeConverterOptions options) {
+		private LocalTimeTimestampHandler(DateTimeConverterOptions options) {
 			super(lt -> DateTimeUtil.getMillis(lt.toSecondOfDay(), lt.getNano()),
 					LocalTimeConverter::localTimeFromMillisOfDay,
 					LocalTime::toNanoOfDay,

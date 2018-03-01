@@ -3,6 +3,7 @@ package com.owlike.genson.ext.javadatetime;
 import com.owlike.genson.stream.ObjectReader;
 import com.owlike.genson.stream.ObjectWriter;
 
+import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoField;
@@ -11,6 +12,9 @@ import java.time.temporal.TemporalQuery;
 import java.util.LinkedHashMap;
 import java.util.function.Supplier;
 
+/**
+ * Converter for values of type {@link ZonedDateTime}
+ */
 public class ZonedDateTimeConverter extends BaseTemporalAccessorConverter<ZonedDateTime> {
 	ZonedDateTimeConverter(DateTimeConverterOptions options) {
 		super(options, new ZonedDateTimeTimestampHandler(options), ZonedDateTime::from);
@@ -29,7 +33,7 @@ public class ZonedDateTimeConverter extends BaseTemporalAccessorConverter<ZonedD
 			ZONED_DATE_TIME_TEMPORAL_FIELDS.put("nano", ChronoField.NANO_OF_SECOND);
 		}
 
-		ZonedDateTimeTimestampHandler(DateTimeConverterOptions options) {
+		private ZonedDateTimeTimestampHandler(DateTimeConverterOptions options) {
 			super(zt -> DateTimeUtil.instantToMillis(zt.toInstant()),
 					millis -> ZonedDateTime.ofInstant(DateTimeUtil.instantFromMillis(millis), options.getZoneId()),
 					zt -> DateTimeUtil.instantToNanos(zt.toInstant()),

@@ -9,6 +9,10 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
+/**
+ * Annotation used to override the {@link java.time.ZoneId} to use when deserializing the annotated
+ * field/property/parameter
+ */
 public @interface JsonZoneId {
 	String value() default "";
 }

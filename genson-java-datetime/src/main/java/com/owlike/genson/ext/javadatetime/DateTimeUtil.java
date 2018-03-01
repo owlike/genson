@@ -12,6 +12,12 @@ class DateTimeUtil {
 	private static final long MILLION = 1_000_000L;
 	private static final long BILLION = 1_000_000_000L;
 
+	/**
+	 * Default parsing values to apply to {@link DateTimeFormatter} objects
+	 *
+	 * <p>This allows for partial parsing of types that expect additional fields.
+	 * For example, a value of '2011-11'02' can be parsed to a {@link java.time.ZonedDateTime} by having the time portion defaulted to '00:00:00'</p>
+	 */
 	private static final DateTimeFormatter DEFAULTS =
 			new DateTimeFormatterBuilder()
 					.parseDefaulting(ChronoField.YEAR, 2000)
@@ -23,6 +29,10 @@ class DateTimeUtil {
 					.parseDefaulting(ChronoField.NANO_OF_SECOND, 0)
 					.toFormatter();
 
+	/**
+	 * Applies parse defaulting to the passed in {@link DateTimeFormatter} and sets the default {@link ZoneId}
+	 * to the value provided
+	 */
 	static DateTimeFormatter createFormatterWithDefaults(DateTimeFormatter formatter, ZoneId zoneId) {
 		//Trying to apply zoneId and zoneOffset defaults to ISO_INSTANT causes parsing to throw exceptions
 		//Since instants are in UTC zone and always have all required fields, we can return it as is

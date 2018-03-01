@@ -11,6 +11,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
+/**
+ * Converter for values of type {@link MonthDay}
+ */
 public class MonthDayConverter extends BaseTemporalAccessorConverter<MonthDay> {
 	MonthDayConverter(DateTimeConverterOptions options) {
 		super(options, new MonthDayTimestampHandler(options), MonthDay::from);

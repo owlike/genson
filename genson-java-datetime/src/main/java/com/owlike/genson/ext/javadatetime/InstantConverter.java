@@ -1,15 +1,14 @@
 package com.owlike.genson.ext.javadatetime;
 
-import com.owlike.genson.stream.ObjectReader;
-import com.owlike.genson.stream.ObjectWriter;
-
-import java.time.ZoneId;
 import java.time.Instant;
 import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalField;
 import java.util.LinkedHashMap;
 
-public class InstantConverter extends BaseTemporalAccessorConverter<Instant> {
+/**
+ * Converter for values of type {@link Instant}
+ */
+class InstantConverter extends BaseTemporalAccessorConverter<Instant> {
 	InstantConverter(DateTimeConverterOptions options) {
 		super(options, new InstantTimestampHandler(options), Instant::from);
 	}
@@ -21,7 +20,7 @@ public class InstantConverter extends BaseTemporalAccessorConverter<Instant> {
 			INSTANT_TEMPORAL_FIELDS.put("nano", ChronoField.NANO_OF_SECOND);
 		}
 
-		InstantTimestampHandler(DateTimeConverterOptions options) {
+		private InstantTimestampHandler(DateTimeConverterOptions options) {
 			super(DateTimeUtil::instantToMillis,
 					DateTimeUtil::instantFromMillis,
 					DateTimeUtil::instantToNanos,

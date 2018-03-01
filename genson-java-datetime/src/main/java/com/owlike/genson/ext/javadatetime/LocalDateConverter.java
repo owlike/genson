@@ -5,6 +5,9 @@ import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalField;
 import java.util.LinkedHashMap;
 
+/**
+ * Converter for values of type {@link LocalDate}
+ */
 public class LocalDateConverter extends BaseTemporalAccessorConverter<LocalDate> {
 	LocalDateConverter(DateTimeConverterOptions options) {
 		super(options, new LocalDateTimestampHandler(options), LocalDate::from);
@@ -18,7 +21,7 @@ public class LocalDateConverter extends BaseTemporalAccessorConverter<LocalDate>
 			LOCAL_DATE_TEMPORAL_FIELDS.put("day", ChronoField.DAY_OF_MONTH);
 		}
 
-		LocalDateTimestampHandler(DateTimeConverterOptions options) {
+		private LocalDateTimestampHandler(DateTimeConverterOptions options) {
 			super(LocalDate::toEpochDay, LocalDate::ofEpochDay, LocalDate::toEpochDay, LocalDate::ofEpochDay,
 					LOCAL_DATE_TEMPORAL_FIELDS, LocalDate::now);
 		}

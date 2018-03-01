@@ -5,6 +5,9 @@ import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalField;
 import java.util.LinkedHashMap;
 
+/**
+ * Converter for values of type {@link OffsetTime}
+ */
 public class OffsetTimeConverter extends BaseTemporalAccessorConverter<OffsetTime> {
 	OffsetTimeConverter(DateTimeConverterOptions options) {
 		super(options, new OffsetTimeTimestampHandler(options), OffsetTime::from);
@@ -20,7 +23,7 @@ public class OffsetTimeConverter extends BaseTemporalAccessorConverter<OffsetTim
 			OFFSET_TIME_TEMPORAL_FIELDS .put("offsetSeconds", ChronoField.OFFSET_SECONDS);
 		}
 
-		OffsetTimeTimestampHandler(DateTimeConverterOptions options) {
+		private OffsetTimeTimestampHandler(DateTimeConverterOptions options) {
 			super(null, null, null, null,
 					OFFSET_TIME_TEMPORAL_FIELDS , OffsetTime::now);
 		}

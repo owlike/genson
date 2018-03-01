@@ -11,6 +11,9 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+/**
+ * Base class to handle the parsing/serializing of different timestamp formats
+ */
 abstract class TimestampHandler<T extends TemporalAccessor> {
 	private Function<T, Long> toMillis;
 	private Function<Long, T> fromMillis;

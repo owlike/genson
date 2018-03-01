@@ -4,12 +4,14 @@ import com.owlike.genson.Context;
 import com.owlike.genson.Converter;
 import com.owlike.genson.stream.ObjectReader;
 import com.owlike.genson.stream.ObjectWriter;
-import com.owlike.genson.stream.ValueType;
 
 import java.time.OffsetDateTime;
 import java.time.temporal.TemporalAccessor;
 import java.time.temporal.TemporalQuery;
 
+/**
+ * Base converter for serializing/deserializing a {@link TemporalAccessor} type
+ */
 abstract class BaseTemporalAccessorConverter<T extends TemporalAccessor> implements Converter<T> {
 	private DateTimeConverterOptions options;
 	private TimestampHandler<T> timestampHandler;

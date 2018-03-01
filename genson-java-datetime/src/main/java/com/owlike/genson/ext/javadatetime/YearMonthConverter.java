@@ -6,6 +6,9 @@ import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalField;
 import java.util.LinkedHashMap;
 
+/**
+ * Converter for values of type {@link YearMonth}
+ */
 class YearMonthConverter extends BaseTemporalAccessorConverter<YearMonth> {
 	private static final YearMonth EPOCH_YEAR_MONTH = YearMonth.of(1970, 1);
 
@@ -20,7 +23,7 @@ class YearMonthConverter extends BaseTemporalAccessorConverter<YearMonth> {
 			YEAR_MONTH_TEMPORAL_FIELDS.put("month", ChronoField.MONTH_OF_YEAR);
 		}
 
-		YearMonthTimestampHandler(DateTimeConverterOptions options) {
+		private YearMonthTimestampHandler(DateTimeConverterOptions options) {
 			super(YearMonthConverter::getEpochMonth, YearMonthConverter::fromEpochMonth,
 					YearMonthConverter::getEpochMonth, YearMonthConverter::fromEpochMonth,
 					YEAR_MONTH_TEMPORAL_FIELDS, YearMonth::now);

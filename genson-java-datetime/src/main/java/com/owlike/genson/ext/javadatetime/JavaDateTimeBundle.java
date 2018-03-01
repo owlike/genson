@@ -31,6 +31,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
 
+/**
+ * Provides support for Java 8 Date & Time API (JSR 310)
+ */
 public class JavaDateTimeBundle extends GensonBundle {
 	private ZoneId zoneId = ZoneId.systemDefault();
 
@@ -103,21 +106,39 @@ public class JavaDateTimeBundle extends GensonBundle {
 		converterGenerators.put(clazz, converterGenerator);
 	}
 
+	/**
+	 * Sets the {@link DateTimeFormatter} to use when parsing/formatting a value of the provided class
+	 */
 	public JavaDateTimeBundle setFormatter(Class<? extends TemporalAccessor> clazz, DateTimeFormatter formatter){
 		formatters.put(clazz, formatter);
 		return this;
 	}
 
+	/**
+	 * The {@link TimestampFormat} to use when serializing/deserializing a {@link TemporalAccessor} value of the provided class.
+	 *
+	 * <p>This only applies if {@link GensonBuilder#isDateAsTimestamp()} is true or if {@link JsonDateFormat#asTimeInMillis()} is true</p>
+	 */
 	public JavaDateTimeBundle setTemporalAccessorTimestampFormat(Class<? extends TemporalAccessor> clazz, TimestampFormat timestampFormat){
 		temporalAccessorTimestampFormats.put(clazz, timestampFormat);
 		return this;
 	}
 
+	/**
+	 * The {@link TimestampFormat} to use when serializing/deserializing a {@link TemporalAmount} value of the provided class
+	 *
+	 * <p>Use this method to set timestamp format for {@link Duration} or {@link Period}</p>
+	 */
 	public JavaDateTimeBundle setTemporalAmountTimestampFormat(Class<? extends TemporalAmount> clazz, TimestampFormat timestampFormat){
 		temporalAmountTimestampFormats.put(clazz, timestampFormat);
 		return this;
 	}
 
+	/**
+	 * The default zoneId to use when parsing DateTime type objects
+	 *
+	 * <p>By default, this will be set to the value returned by {@link ZoneId#systemDefault()}</p>
+	 */
 	public JavaDateTimeBundle setZoneId(ZoneId zoneId) {
 		this.zoneId = zoneId;
 		return this;
