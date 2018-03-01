@@ -45,24 +45,27 @@ abstract class BaseTemporalAccessorConverter<T extends TemporalAccessor> impleme
 
 	@Override
 	public T deserialize(ObjectReader reader, Context ctx) {
-		ValueType valueType = reader.getValueType();
 		T obj = null;
-		switch (valueType){
-			case INTEGER:
-				obj = timestampHandler.readNumericTimestamp(reader, options.getTimestampFormat());
-				break;
-			case OBJECT:
-				obj = timestampHandler.readObjectTimestamp(reader);
-				break;
-			case ARRAY:
-				obj = timestampHandler.readArrayTimestamp(reader);
-				break;
-			case STRING:
-				obj = options.getDateTimeFormatter().parse(reader.valueAsString(), query);
-				if(obj instanceof OffsetDateTime){
-					obj = (T) DateTimeUtil.correctOffset((OffsetDateTime) obj, options.getZoneId());
-				}
-				break;
+		if(options.isAsTimestamp()) {
+			TimestampFormat timestampFormat = options.getTimestampFormat();
+			switch (timestampFormat) {
+				case MILLIS:
+				case NANOS:
+					obj = timestampHandler.readNumericTimestamp(reader, options.getTimestampFormat());
+					break;
+				case OBJECT:
+					obj = timestampHandler.readObjectTimestamp(reader);
+					break;
+				case ARRAY:
+					obj = timestampHandler.readArrayTimestamp(reader);
+					break;
+			}
+		}
+		else{
+			obj = options.getDateTimeFormatter().parse(reader.valueAsString(), query);
+			if(obj instanceof OffsetDateTime){
+				obj = (T) DateTimeUtil.correctOffset((OffsetDateTime) obj, options.getZoneId());
+			}
 		}
 
 		return obj;
