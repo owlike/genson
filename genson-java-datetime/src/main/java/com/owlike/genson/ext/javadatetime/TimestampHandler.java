@@ -76,9 +76,10 @@ abstract class TimestampHandler<T extends TemporalAccessor> {
 		}
 	}
 
-	T readArrayTimestamp(ObjectReader reader) {
+	final T readArrayTimestamp(ObjectReader reader) {
 		reader.beginArray();
 		T obj = readFieldsFromArray(instanceProvider, reader);
+		reader.endArray();
 		return obj;
 	}
 
@@ -99,6 +100,7 @@ abstract class TimestampHandler<T extends TemporalAccessor> {
 	final T readObjectTimestamp(ObjectReader reader) {
 		reader.beginObject();
 		T obj = readFieldsFromObject(instanceProvider, reader);
+		reader.endObject();
 		return obj;
 	}
 

@@ -9,6 +9,7 @@ import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalField;
 import java.time.temporal.TemporalQuery;
 import java.util.LinkedHashMap;
+import java.util.function.Supplier;
 
 public class ZonedDateTimeConverter extends BaseTemporalAccessorConverter<ZonedDateTime> {
 	ZonedDateTimeConverter(DateTimeConverterOptions options) {
@@ -55,8 +56,8 @@ public class ZonedDateTimeConverter extends BaseTemporalAccessorConverter<ZonedD
 		}
 
 		@Override
-		public ZonedDateTime readArrayTimestamp(ObjectReader reader) {
-			ZonedDateTime zt = super.readArrayTimestamp(reader);
+		public ZonedDateTime readFieldsFromArray(Supplier<ZonedDateTime> instanceProvider, ObjectReader reader) {
+			ZonedDateTime zt = super.readFieldsFromArray(instanceProvider, reader);
 			reader.next();
 			String zoneId = reader.valueAsString();
 			return zt.withZoneSameLocal(ZoneId.of(zoneId));
