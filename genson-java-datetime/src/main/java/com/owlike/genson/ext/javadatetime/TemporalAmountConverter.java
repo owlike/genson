@@ -2,6 +2,8 @@ package com.owlike.genson.ext.javadatetime;
 
 import com.owlike.genson.Context;
 import com.owlike.genson.Converter;
+import com.owlike.genson.annotation.HandleBeanView;
+import com.owlike.genson.annotation.HandleClassMetadata;
 import com.owlike.genson.stream.ObjectReader;
 import com.owlike.genson.stream.ObjectWriter;
 
@@ -14,6 +16,8 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+@HandleClassMetadata
+@HandleBeanView
 abstract class TemporalAmountConverter<T extends TemporalAmount> implements Converter<T> {
 	private static final LinkedHashMap<String, Function<Period, Number>> PERIOD_FIELD_EXTRACTORS = new LinkedHashMap<>();
 	static{

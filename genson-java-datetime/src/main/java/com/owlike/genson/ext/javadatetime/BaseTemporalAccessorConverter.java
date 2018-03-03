@@ -2,6 +2,8 @@ package com.owlike.genson.ext.javadatetime;
 
 import com.owlike.genson.Context;
 import com.owlike.genson.Converter;
+import com.owlike.genson.annotation.HandleBeanView;
+import com.owlike.genson.annotation.HandleClassMetadata;
 import com.owlike.genson.stream.ObjectReader;
 import com.owlike.genson.stream.ObjectWriter;
 
@@ -12,6 +14,8 @@ import java.time.temporal.TemporalQuery;
 /**
  * Base converter for serializing/deserializing a {@link TemporalAccessor} type
  */
+@HandleClassMetadata
+@HandleBeanView
 abstract class BaseTemporalAccessorConverter<T extends TemporalAccessor> implements Converter<T> {
 	private DateTimeConverterOptions options;
 	private TimestampHandler<T> timestampHandler;
