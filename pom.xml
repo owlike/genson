@@ -58,7 +58,7 @@
   <modules>
     <module>genson</module>
     <module>genson-scala</module>
-      <module>genson-java-datetime</module>
+    <module>genson-java-datetime</module>
   </modules>
 
   <profiles>
@@ -85,6 +85,25 @@
                 </goals>
               </execution>
             </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>doclint-java8-disable</id>
+      <activation>
+        <jdk>[1.8,)</jdk>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>2.10.2</version>
+            <configuration>
+              <additionalparam>-Xdoclint:none</additionalparam>
+            </configuration>
           </plugin>
         </plugins>
       </build>
