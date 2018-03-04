@@ -1,11 +1,12 @@
 package com.owlike.genson
 
-import java.lang.reflect.{Type => JType, GenericDeclaration, TypeVariable, GenericArrayType, ParameterizedType}
+import java.lang.reflect.{AnnotatedType, GenericArrayType, GenericDeclaration, ParameterizedType, TypeVariable, Type => JType}
 import java.io.{Reader => JReader, _}
+import java.lang.annotation.Annotation
 import java.net.URL
 
 import com.owlike.genson.reflect.TypeUtil._
-import com.owlike.genson.stream.{ObjectWriter, ObjectReader}
+import com.owlike.genson.stream.{ObjectReader, ObjectWriter}
 
 class ScalaGenson(val genson: Genson) extends AnyVal {
 
@@ -62,6 +63,18 @@ private[genson] class ScalaTypeVariable(name: String, bounds: Array[JType], decl
   def getGenericDeclaration: Class[_] = decl
 
   def getName: String = name
+
+  override def getAnnotatedBounds: Array[AnnotatedType] = reportUnsupportedOperation
+
+  override def getDeclaredAnnotations: Array[Annotation] = reportUnsupportedOperation
+
+  override def getAnnotation[T <: Annotation](annotationClass: Class[T]): T = reportUnsupportedOperation
+
+  override def getAnnotations: Array[Annotation] = reportUnsupportedOperation
+
+  private def reportUnsupportedOperation = {
+    throw new UnsupportedOperationException("Please report this stacktrace at https://github.com/owlike/genson/issues")
+  }
 }
 
 private[genson] class ScalaGenericArrayType(componentType: JType) extends GenericArrayType {

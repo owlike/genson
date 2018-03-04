@@ -14,8 +14,8 @@
   <description>Genson extension for Scala language</description>
 
   <properties>
-    <scala.version>2.10</scala.version>
-    <scala.range.version>2.10.3</scala.range.version>
+    <scala.version>2.11</scala.version>
+    <scala.range.version>2.11.11</scala.range.version>
   </properties>
 
   <dependencies>
@@ -42,7 +42,7 @@
     <dependency>
       <groupId>org.json4s</groupId>
       <artifactId>json4s-ast_${scala.version}</artifactId>
-      <version>3.2.10</version>
+      <version>3.2.11</version>
       <optional>true</optional>
     </dependency>
 
@@ -56,7 +56,7 @@
     <dependency>
       <groupId>org.scalatest</groupId>
       <artifactId>scalatest_${scala.version}</artifactId>
-      <version>2.1.7</version>
+      <version>3.0.1</version>
       <scope>test</scope>
     </dependency>
 
@@ -71,9 +71,9 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.scala-tools</groupId>
-        <artifactId>maven-scala-plugin</artifactId>
-        <version>2.15.2</version>
+        <groupId>net.alchim31.maven</groupId>
+        <artifactId>scala-maven-plugin</artifactId>
+        <version>3.3.1</version>
         <executions>
           <execution>
             <id>scala-doc</id>
@@ -104,8 +104,10 @@
         </executions>
         <configuration>
           <sendJavaToScalac>false</sendJavaToScalac>
+          <scalaCompatVersion>${scala.version}</scalaCompatVersion>
+          <scalaVersion>${scala.range.version}</scalaVersion>
           <args>
-            <arg>-target:jvm-1.6</arg>
+            <arg>-target:jvm-1.8</arg>
             <arg>-feature</arg>
             <arg>-unchecked</arg>
             <arg>-deprecation</arg>
@@ -132,7 +134,7 @@
           <dependency>
             <groupId>org.scalatest</groupId>
             <artifactId>scalatest_${scala.version}</artifactId>
-            <version>2.1.7</version>
+            <version>3.0.1</version>
           </dependency>
         </dependencies>
       </plugin>

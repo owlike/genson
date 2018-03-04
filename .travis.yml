@@ -2,9 +2,19 @@ sudo: false
 
 language: java
 
+cache:
+  directories:
+    - ~/.m2
+
+addons:
+  apt:
+    packages:
+      - xsltproc
+      - xmlstarlet
+
 jdk:
-  - openjdk7
+  - oraclejdk8
 
 script:
-  # for now not testing the cross build because the used lib xmlstarlet is not available for install...
+  # - ./make-release.sh --command test --dirty-scm true
   - mvn test

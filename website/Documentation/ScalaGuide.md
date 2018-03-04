@@ -28,8 +28,9 @@ val actualValue = fromJson[SomeType](json)
 
 ###Scala version
 
-Genson has been tested against scala 2.10 and 2.11. In theory you can use it with all releases from 2.10 and up.
-We follow the standard cross build conventions for scala projects ex: genson-scala_2.10 and genson-scala_2.11.
+Genson has been tested against scala 2.11 and 2.12. In theory you can use it with all releases from 2.11 and up.
+We follow the standard cross build conventions for scala projects ex: genson-scala_2.11 and genson-scala_2.12.
+If you need support for Scala 2.10, you will need to look at the older releases of Genson pre 1.5.
 
 
 ##Download
@@ -60,8 +61,8 @@ If you don't use a dependency management tool then you can still use it, but you
 the core Genson jars by hand.
 
  * [Genson](http://repo1.maven.org/maven2/com/owlike/genson/{{site.latest_version}}/genson-{{site.latest_version}}.jar)
- * [Genson-scala_2.10](http://repo1.maven.org/maven2/com/owlike/genson-scala_2.10/{{site.latest_version}}/genson-scala_2.10-{{site.latest_version}}.jar)
- * [Genson-scala_2.11](http://repo1.maven.org/maven2/com/owlike/genson-scala_2.11/{{site.latest_version}}/genson-scala_2.11-{{site.latest_version}}.jar)
+ * [Genson-scala_2.10](http://repo1.maven.org/maven2/com/owlike/genson-scala_2.11/{{site.latest_version}}/genson-scala_2.11-{{site.latest_version}}.jar)
+ * [Genson-scala_2.11](http://repo1.maven.org/maven2/com/owlike/genson-scala_2.12/{{site.latest_version}}/genson-scala_2.12-{{site.latest_version}}.jar)
 
 
 ##Collections & Tuples
