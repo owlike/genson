@@ -51,7 +51,7 @@
     <maven.compile.encoding>UTF-8</maven.compile.encoding>
 
     <!-- Be clear about the required JDK build version. -->
-    <jdk.version>1.6</jdk.version>
+    <jdk.version>1.7</jdk.version>
 
   </properties>
 
