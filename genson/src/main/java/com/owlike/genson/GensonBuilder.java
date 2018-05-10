@@ -76,6 +76,7 @@ public class GensonBuilder {
   private final Map<Class<?>, Object> defaultValues = new HashMap<Class<?>, Object>();
   private boolean failOnNullPrimitive = false;
   private RuntimePropertyFilter runtimePropertyFilter = RuntimePropertyFilter.noFilter;
+  private UnknownPropertyHandler unknownPropertyHandler;
 
   public GensonBuilder() {
     defaultValues.put(int.class, 0);
@@ -739,6 +740,11 @@ public class GensonBuilder {
     return this;
   }
 
+  public GensonBuilder useUnknownPropertyHandler(UnknownPropertyHandler handler) {
+    this.unknownPropertyHandler = handler;
+    return this;
+  }
+
   /**
    * Creates an instance of Genson. You may use this method as many times you want. It wont
    * change the state of the builder, in sense that the returned instance will have always the
@@ -824,7 +830,8 @@ public class GensonBuilder {
                           Map<String, Class<?>> classAliases) {
     return new Genson(converterFactory, getBeanDescriptorProvider(),
       isSkipNull(), isHtmlSafe(), classAliases, withClassMetadata,
-      strictDoubleParse, indent, metadata, failOnMissingProperty, defaultValues, runtimePropertyFilter);
+      strictDoubleParse, indent, metadata, failOnMissingProperty,
+      defaultValues, runtimePropertyFilter, unknownPropertyHandler);
   }
 
   /**

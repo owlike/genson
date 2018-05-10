@@ -51,7 +51,7 @@
     <maven.compile.encoding>UTF-8</maven.compile.encoding>
 
     <!-- Be clear about the required JDK build version. -->
-    <jdk.version>1.6</jdk.version>
+    <jdk.version>1.8</jdk.version>
 
   </properties>
 
@@ -174,9 +174,9 @@
             Required to build using JDK 8, unless all JavaDoc is revamped to handle
             the stricter DocLint enabled within JDK 8.
           -->
-          <!-- configuration>
+          <configuration>
             <additionalOptions>-Xdoclint:none</additionalOptions>
-          </configuration -->
+          </configuration>
           
           <executions>
             <execution>
