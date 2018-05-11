@@ -2,6 +2,17 @@
 title: Changelog
 layout: default
 ---
+##Release 1.5 - Upcoming
+
+  **Core**
+  
+  * Starting with release 1.5 Genson requires Java 8+
+  
+  
+  **Scala**
+  
+  * Starting with release 1.5, Scala 2.10 is no longer supported. Genson is cross built for Scala 2.11 ans 2.12
+
 ##Release 1.4 - 27 March 2016
 
  **Core**

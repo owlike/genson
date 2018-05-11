@@ -21,14 +21,14 @@ private[genson] class ScalaBeanPropertyFactory(classloader: ClassLoader) extends
   def createAccessor(name: String, field: Field, ofType: Type, genson: Genson): PropertyAccessor = {
     fieldType(field, ofType)
       .map(new FieldAccessor(name, field, _, field.getDeclaringClass))
-      .getOrElse(null)
+      .orNull
   }
 
   def createAccessor(name: String, method: Method, ofType: Type, genson: Genson): PropertyAccessor = {
     ScalaReflectionApiLock.synchronized {
       val sType = expandToJavaType(matchingMethod(method).returnType, ofType)
       sType.map(new MethodAccessor(name, method, _, method.getDeclaringClass))
-        .getOrElse(null)
+          .orNull
     }
   }
 
@@ -71,13 +71,13 @@ private[genson] class ScalaBeanPropertyFactory(classloader: ClassLoader) extends
   }
 
   def createMutator(name: String, field: Field, ofType: Type, genson: Genson): PropertyMutator = {
-    fieldType(field, ofType).map(new FieldMutator(name, field, _, field.getDeclaringClass)).getOrElse(null)
+    fieldType(field, ofType).map(new FieldMutator(name, field, _, field.getDeclaringClass)).orNull
   }
 
   def createMutator(name: String, method: Method, ofType: Type, genson: Genson): PropertyMutator = {
     ScalaReflectionApiLock.synchronized {
       val sType = expandToJavaType(matchingMethod(method).paramss.flatten.head, ofType)
-      sType.map(new MethodMutator(name, method, _, method.getDeclaringClass)).getOrElse(null)
+      sType.map(new MethodMutator(name, method, _, method.getDeclaringClass)).orNull
     }
   }
 

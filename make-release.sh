@@ -65,8 +65,8 @@ function checkNoUncommitedChanges {
 
 function createScalaProject {
   local SCALA_VERSION=$1
-  local SCALA_NEXT_VERSION=$2
-  local SCALA_RANGE_VERSION="$SCALA_VERSION.0"
+  local SCALA_MINOR_VERSION=$2
+  local SCALA_RANGE_VERSION="$SCALA_VERSION.$SCALA_MINOR_VERSION"
   local SCALA_PROJECT="genson-scala_$SCALA_VERSION"
 
   cp -R genson-scala $SCALA_PROJECT
@@ -155,8 +155,8 @@ function prepareFromRemote {
 function prepareProjects {
   sed -i '' "s/<module>genson-scala<\/module>//" pom.xml
 
-  createScalaProject 2.10
-  createScalaProject 2.11
+  createScalaProject 2.11 11
+  createScalaProject 2.12 4
 }
 
 #######################################################################################################################
