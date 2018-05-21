@@ -29,14 +29,14 @@ public interface UnknownPropertyHandler {
      * property value somewhere so it can be written later by the
      * {@link #writeUnknownProperties} method.
      *
-     * @param target    the object we are deserializing JSON into, if known
      * @param propName  the name of the unknown property
      * @param reader    the ObjectReader to read property value from
      * @param ctx       deserialization context
      *
-     * @return the optional Consumer that will be called once the target object is known
+     * @return the Consumer that will be called with the target bean,
+     *         once the target bean is known
      */
-    <T> Consumer<T> onUnknownProperty(T target, String propName, ObjectReader reader, Context ctx);
+    <T> Consumer<T> readUnknownProperty(String propName, ObjectReader reader, Context ctx);
 
     /**
      * Write unknown properties encountered during deserialization.
@@ -45,12 +45,10 @@ public interface UnknownPropertyHandler {
      * that want to write unknown properties during serialization. The default
      * implementation is a no-op.
      *
-     * @param source  the object we are serializing into JSON
+     * @param bean    the object we are serializing into JSON
      * @param writer  the ObjectReader to read property value from
      * @param ctx     serialization context
-     *
-     * @return a map of unknown properties
      */
-    default <T> void writeUnknownProperties(T source, ObjectWriter writer, Context ctx) {
+    default <T> void writeUnknownProperties(T bean, ObjectWriter writer, Context ctx) {
     }
 }

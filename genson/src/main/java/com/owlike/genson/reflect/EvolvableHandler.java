@@ -1,11 +1,13 @@
 package com.owlike.genson.reflect;
 
 import com.owlike.genson.Context;
-import com.owlike.genson.GenericType;
+import com.owlike.genson.Converter;
+import com.owlike.genson.ext.jsr353.JSR353Bundle;
 import com.owlike.genson.stream.ObjectReader;
 import com.owlike.genson.stream.ObjectWriter;
 
 import javax.json.JsonValue;
+
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -25,41 +27,37 @@ import java.util.function.Consumer;
  * @author Aleksandar Seovic  2018.05.20
  */
 public class EvolvableHandler implements UnknownPropertyHandler {
-    private static final GenericType<JsonValue> UNKNOWN = new GenericType<JsonValue>() {};
+    private static final Converter<JsonValue> CONVERTER = new JSR353Bundle.JsonValueConverter();
 
     @Override
-    public <T> Consumer<T> onUnknownProperty(T target, String propName, ObjectReader reader, Context ctx) {
-        // TODO: change this to read property as an opaque value, using ObjectReader directly
-        Object propValue = ctx.genson.deserialize(UNKNOWN, reader, ctx);
+    public <T> Consumer<T> readUnknownProperty(String propName, ObjectReader reader, Context ctx) {
+        try {
+            JsonValue propValue = CONVERTER.deserialize(reader, ctx);
 
-        if (target == null) {
-            // this is a bit ugly...
-            // the issue is that we may not have a target object while parsing JSON when using creators,
-            // so we need to store the parsed value somewhere and apply it later
             return objTarget -> {
                 if (objTarget instanceof Evolvable) {
                     ((Evolvable) objTarget).addUnknownProperty(propName, propValue);
                 }
             };
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-
-        if (target instanceof Evolvable) {
-            ((Evolvable) target).addUnknownProperty(propName, propValue);
-        }
-        return null;
     }
 
     @Override
-    public <T> void writeUnknownProperties(T source, ObjectWriter writer, Context ctx) {
-        if (source instanceof Evolvable) {
-            Map<String, Object> props = ((Evolvable) source).unknownProperties();
-            if (props != null) {
-                for (String propName : props.keySet()) {
-                    writer.writeName(propName);
-                    // TODO: change this to write property as an opaque value, using ObjectWriter directly
-                    ctx.genson.serialize(props.get(propName), writer, ctx);
+    public <T> void writeUnknownProperties(T bean, ObjectWriter writer, Context ctx) {
+        try {
+            if (bean instanceof Evolvable) {
+                Map<String, JsonValue> props = ((Evolvable) bean).unknownProperties();
+                if (props != null) {
+                    for (String propName : props.keySet()) {
+                        writer.writeName(propName);
+                        CONVERTER.serialize(props.get(propName), writer, ctx);
+                    }
                 }
             }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }

@@ -126,7 +126,7 @@ public class BeanDescriptor<T> implements Converter<T> {
           reader.skipValue();
         }
       } else if (unknownPropertyHandler != null) {
-        unknownPropertyHandler.onUnknownProperty(into, propName, reader, ctx);
+        unknownPropertyHandler.readUnknownProperty(propName, reader, ctx).accept(into);
       } else if (failOnMissingProperty) throw missingPropertyException(propName);
       else reader.skipValue();
     }
@@ -157,7 +157,7 @@ public class BeanDescriptor<T> implements Converter<T> {
           reader.skipValue();
         }
       } else if (unknownPropertyHandler != null) {
-        Consumer<T> callback = unknownPropertyHandler.onUnknownProperty(null, propName, reader, ctx);
+        Consumer<T> callback = unknownPropertyHandler.readUnknownProperty(propName, reader, ctx);
         unknownProperties.add(callback);
       } else if (failOnMissingProperty) throw missingPropertyException(propName);
       else reader.skipValue();
@@ -190,9 +190,8 @@ public class BeanDescriptor<T> implements Converter<T> {
         property.mutate(bean, newValues[i]);
       }
     }
-    if (!unknownProperties.isEmpty()) {
-      unknownProperties.forEach(callback -> callback.accept(bean));
-    }
+    unknownProperties.forEach(callback -> callback.accept(bean));
+
     reader.endObject();
     return bean;
   }

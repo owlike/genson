@@ -2,6 +2,7 @@ package com.owlike.genson.reflect;
 
 import com.owlike.genson.annotation.JsonIgnore;
 
+import javax.json.JsonValue;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,10 +13,10 @@ import java.util.Map;
  */
 public abstract class EvolvableObject implements Evolvable {
     @JsonIgnore
-    private Map<String, Object> unknownProperties;
+    private Map<String, JsonValue> unknownProperties;
 
     @Override
-    public void addUnknownProperty(String propName, Object propValue) {
+    public void addUnknownProperty(String propName, JsonValue propValue) {
         if (unknownProperties == null) {
             unknownProperties = new HashMap<>();
         }
@@ -23,7 +24,7 @@ public abstract class EvolvableObject implements Evolvable {
     }
 
     @Override
-    public Map<String, Object> unknownProperties() {
+    public Map<String, JsonValue> unknownProperties() {
         return unknownProperties;
     }
 }

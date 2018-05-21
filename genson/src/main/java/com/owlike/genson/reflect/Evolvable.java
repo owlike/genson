@@ -1,5 +1,6 @@
 package com.owlike.genson.reflect;
 
+import javax.json.JsonValue;
 import java.util.Map;
 
 /**
@@ -19,12 +20,12 @@ interface Evolvable {
      * @param propName  property name
      * @param propValue property value
      */
-    void addUnknownProperty(String propName, Object propValue);
+    void addUnknownProperty(String propName, JsonValue propValue);
 
     /**
      * Return a map of unknown properties.
      *
      * @return a map of unknown properties
      */
-    Map<String, Object> unknownProperties();
+    Map<String, JsonValue> unknownProperties();
 }

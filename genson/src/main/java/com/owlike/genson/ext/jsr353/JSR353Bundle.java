@@ -37,7 +37,7 @@ public class JSR353Bundle extends GensonBundle {
     });
   }
 
-  public class JsonValueConverter implements Converter<JsonValue> {
+  public static class JsonValueConverter implements Converter<JsonValue> {
 
     @Override
     public void serialize(JsonValue value, ObjectWriter writer, Context ctx) {
