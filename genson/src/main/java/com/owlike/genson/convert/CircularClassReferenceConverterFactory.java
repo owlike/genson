@@ -3,6 +3,7 @@ package com.owlike.genson.convert;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 import com.owlike.genson.Context;
 import com.owlike.genson.Converter;
@@ -18,15 +19,24 @@ import com.owlike.genson.stream.ObjectWriter;
  */
 public class CircularClassReferenceConverterFactory extends ChainedFactory {
   private final static class CircularConverter<T> extends Wrapper<Converter<T>> implements Converter<T> {
+
+    private CountDownLatch initLatch = new CountDownLatch(1);      
+
     protected CircularConverter() {
       super();
     }
 
     public void serialize(T obj, ObjectWriter writer, Context ctx) throws Exception {
+      if(wrapped == null) {
+        initLatch.await();
+      }
       wrapped.serialize(obj, writer, ctx);
     }
 
     public T deserialize(ObjectReader reader, Context ctx) throws Exception {
+      if(wrapped == null) {
+        initLatch.await();
+      }
       return wrapped.deserialize(reader, ctx);
     }
 
@@ -51,10 +61,14 @@ public class CircularClassReferenceConverterFactory extends ChainedFactory {
     } else {
       try {
         CircularConverter circularConverter = new CircularConverter();
-        _circularConverters.get().put(type, circularConverter);
-        Converter converter = next().create(type, genson);
-        circularConverter.setDelegateConverter(converter);
-        return converter;
+        try {
+          _circularConverters.get().put(type, circularConverter);
+          Converter converter = next().create(type, genson);
+          circularConverter.setDelegateConverter(converter);
+          return converter;
+        } finally {
+          circularConverter.initLatch.countDown();
+        }
       } finally {
         _circularConverters.get().remove(type);
       }

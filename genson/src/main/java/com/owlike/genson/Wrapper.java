@@ -23,7 +23,7 @@ import com.owlike.genson.reflect.TypeUtil;
  */
 public abstract class Wrapper<T> implements AnnotatedElement {
   private AnnotatedElement wrappedElement;
-  protected T wrapped;
+  protected volatile T wrapped;
 
   protected Wrapper() {
   }
