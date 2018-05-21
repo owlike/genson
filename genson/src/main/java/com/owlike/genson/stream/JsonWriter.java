@@ -3,9 +3,9 @@ package com.owlike.genson.stream;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Deque;
-import java.util.List;
+import java.util.Map;
+import java.util.LinkedHashMap;
 
 public class JsonWriter implements ObjectWriter {
   /*
@@ -62,18 +62,7 @@ public class JsonWriter implements ObjectWriter {
   private final int _bufferSize = _buffer.length;
   private int _len = 0;
 
-  List<MetadataPair> _metadata = new ArrayList<MetadataPair>();
-
-  private class MetadataPair {
-    final String name;
-    final String value;
-
-    public MetadataPair(String name, String value) {
-      super();
-      this.name = name;
-      this.value = value;
-    }
-  }
+  Map<String, String> _metadata = new LinkedHashMap<>();
 
   public JsonWriter(Writer writer) {
     this(writer, false, false, false);
@@ -122,10 +111,10 @@ public class JsonWriter implements ObjectWriter {
     if (_ctx.peek() == JsonType.METADATA) {
       _ctx.pop();
       begin(JsonType.OBJECT, '{');
-      for (MetadataPair pair : _metadata) {
-        writeName('@' + pair.name);
+      for (String name : _metadata.keySet()) {
+        writeName('@' + name);
         beforeValue();
-        writeInternalString(pair.value);
+        writeInternalString(_metadata.get(name));
       }
     } else begin(JsonType.OBJECT, '{');
     return this;
@@ -500,7 +489,9 @@ public class JsonWriter implements ObjectWriter {
   }
 
   public ObjectWriter writeMetadata(String name, String value) {
-    if (_ctx.peek() == JsonType.METADATA) _metadata.add(new MetadataPair(name, value));
+    if (_ctx.peek() == JsonType.METADATA) {
+      _metadata.put(name, value);
+    }
     else if (_ctx.peek() == JsonType.OBJECT) {
       writeName('@' + name);
       writeValue(value);

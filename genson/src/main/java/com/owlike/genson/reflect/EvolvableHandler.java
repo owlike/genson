@@ -5,6 +5,7 @@ import com.owlike.genson.GenericType;
 import com.owlike.genson.stream.ObjectReader;
 import com.owlike.genson.stream.ObjectWriter;
 
+import javax.json.JsonValue;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -24,7 +25,7 @@ import java.util.function.Consumer;
  * @author Aleksandar Seovic  2018.05.20
  */
 public class EvolvableHandler implements UnknownPropertyHandler {
-    private static final GenericType<Object> UNKNOWN = new GenericType<Object>() {};
+    private static final GenericType<JsonValue> UNKNOWN = new GenericType<JsonValue>() {};
 
     @Override
     public <T> Consumer<T> onUnknownProperty(T target, String propName, ObjectReader reader, Context ctx) {

@@ -4,21 +4,25 @@ import com.owlike.genson.Genson;
 import com.owlike.genson.GensonBuilder;
 
 import com.owlike.genson.annotation.JsonCreator;
+import com.owlike.genson.ext.jsr353.JSR353Bundle;
+
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Aleksandar Seovic  2018.05.09
  */
 public class UnknownPropertyHandlerTest {
     private static final Genson GENSON = new GensonBuilder()
+                    .withBundle(new JSR353Bundle())
                     .useClassMetadata(true)
+                    .useClassMetadataWithStaticType(false)
                     .useConstructorWithArguments(true)
                     .useUnknownPropertyHandler(new EvolvableHandler())
                     .useIndentation(true)
@@ -26,83 +30,74 @@ public class UnknownPropertyHandlerTest {
 
     @Test
     public void testDeserialization() {
-        String json = "{\n" +
-                "  \"@class\":\"com.owlike.genson.reflect.UnknownPropertyHandlerTest$EvolvablePerson\",\n" +
-                "  \"age\":50,\n" +
-                "  \"name\":\"Homer\",\n" +
-                "  \"spouse\":{\n" +
-                "    \"@class\":\"com.owlike.genson.reflect.UnknownPropertyHandlerTest$EvolvablePerson\",\n" +
-                "    \"age\":40,\n" +
-                "    \"name\":\"Marge\"\n" +
-                "  },\n" +
-                "  \"children\":[\n" +
-                "    \"Bart\",\n" +
-                "    \"Lisa\",\n" +
-                "    \"Maggie\"\n" +
-                "  ],\n" +
-                "  \"salary\":10000.0,\n" +
-                "  \"donutLover\":true\n" +
-                "}";
+        PersonV2 homer = new PersonV2("Homer", 50);
+        homer.setSpouse(new PersonV2("Marge", 40));
+        homer.setChildren(Arrays.asList("Bart", "Lisa", "Maggie"));
 
-        EvolvablePerson homer = GENSON.deserialize(json, EvolvablePerson.class);
-        assertEquals("Homer", homer.name);
-        assertEquals(50, homer.age);
-        assertEquals(Arrays.asList("Bart", "Lisa", "Maggie"), homer.unknownProperties.get("children"));
-        assertEquals(10_000d, homer.unknownProperties.get("salary"));
-        assertEquals(true, homer.unknownProperties.get("donutLover"));
+        String json = GENSON.serialize(homer);
+        PersonV1 homerV1 = GENSON.deserialize(json, PersonV1.class);
+
+        assertEquals("Homer", homerV1.name);
+        assertEquals(50, homerV1.age);
+        assertTrue(homerV1.unknownProperties().get("spouse") instanceof JsonObject);
+        assertTrue(((JsonObject) homerV1.unknownProperties().get("spouse")).containsKey("@class"));
+        assertTrue(homerV1.unknownProperties().get("children") instanceof JsonArray);
     }
 
     @Test
     public void testCtorDeserialization() {
-        String json = "{\n" +
-                "  \"@class\":\"com.owlike.genson.reflect.UnknownPropertyHandlerTest$CtorEvolvablePerson\",\n" +
-                "  \"age\":50,\n" +
-                "  \"name\":\"Homer\",\n" +
-                "  \"spouse\":{\n" +
-                "    \"@class\":\"com.owlike.genson.reflect.UnknownPropertyHandlerTest$CtorEvolvablePerson\",\n" +
-                "    \"age\":40,\n" +
-                "    \"name\":\"Marge\"\n" +
-                "  },\n" +
-                "  \"children\":[\n" +
-                "    \"Bart\",\n" +
-                "    \"Lisa\",\n" +
-                "    \"Maggie\"\n" +
-                "  ],\n" +
-                "  \"salary\":10000.0,\n" +
-                "  \"donutLover\":true\n" +
-                "}";
+        PersonV2 homer = new PersonV2("Homer", 50);
+        homer.setSpouse(new PersonV2("Marge", 40));
+        homer.setChildren(Arrays.asList("Bart", "Lisa", "Maggie"));
 
-        EvolvablePerson homer = GENSON.deserialize(json, CtorEvolvablePerson.class);
-        assertEquals("Homer", homer.name);
-        assertEquals(50, homer.age);
-        assertEquals(Arrays.asList("Bart", "Lisa", "Maggie"), homer.unknownProperties.get("children"));
-        assertEquals(10_000d, homer.unknownProperties.get("salary"));
-        assertEquals(true, homer.unknownProperties.get("donutLover"));
+        String json = GENSON.serialize(homer);
+        PersonV1 homerV1 = GENSON.deserialize(json, CtorPersonV1.class);
+
+        assertEquals("Homer", homerV1.name);
+        assertEquals(50, homerV1.age);
+        assertTrue(homerV1.unknownProperties().get("spouse") instanceof JsonObject);
+        assertTrue(((JsonObject) homerV1.unknownProperties().get("spouse")).containsKey("@class"));
+        assertTrue(homerV1.unknownProperties().get("children") instanceof JsonArray);
     }
 
     @Test
     public void testRoundTrip() {
-        EvolvablePerson homer = new EvolvablePerson("Homer", 50);
-        homer.unknownProperties().put("spouse", new EvolvablePerson("Marge", 40));
-        homer.unknownProperties().put("children", Arrays.asList("Bart", "Lisa", "Maggie"));
-        homer.unknownProperties().put("salary", 10_000d);
-        homer.unknownProperties().put("donutLover", true);
+        PersonV2 homer = new PersonV2("Homer", 50);
+        homer.setSpouse(new PersonV2("Marge", 40));
+        homer.setChildren(Arrays.asList("Bart", "Lisa", "Maggie"));
 
         String json = GENSON.serialize(homer);
-        EvolvablePerson homer2 = GENSON.deserialize(json, EvolvablePerson.class);
+        PersonV1 homerV1 = GENSON.deserialize(json, PersonV1.class);
 
-        assertEquals(homer, homer2);
+        json = GENSON.serialize(homerV1);
+        PersonV2 homerV2 = GENSON.deserialize(json, PersonV2.class);
+
+        assertEquals(homer, homerV2);
     }
 
-    static class EvolvablePerson implements Evolvable {
-        private Map<String, Object> unknownProperties = new LinkedHashMap<>();
+    @Test
+    public void testRoundTripWithMissingClass() {
+        String v3 = "{\n" +
+                "  \"age\":50,\n" +
+                "  \"name\":\"Homer\",\n" +
+                "  \"address\":{\n" +
+                "    \"@class\":\"com.missing.Address\",\n" +
+                "    \"city\":\"Springfield\"\n" +
+                "  }\n" +
+                "}";
+
+        PersonV1 homerV1 = GENSON.deserialize(v3, PersonV1.class);
+        assertEquals(v3, GENSON.serialize(homerV1));
+    }
+
+    static class PersonV1 extends EvolvableObject {
         private String name;
         private int age;
 
-        public EvolvablePerson() {
+        public PersonV1() {
         }
 
-        public EvolvablePerson(String name, int age) {
+        public PersonV1(String name, int age) {
             this.name = name;
             this.age = age;
         }
@@ -124,47 +119,86 @@ public class UnknownPropertyHandlerTest {
         }
 
         @Override
-        public void addUnknownProperty(String propName, Object propValue) {
-            unknownProperties.put(propName, propValue);
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            PersonV1 that = (PersonV1) o;
+            return age == that.age && Objects.equals(name, that.name);
         }
 
         @Override
-        public Map<String, Object> unknownProperties() {
-            return unknownProperties;
+        public int hashCode() {
+            return Objects.hash(name, age);
+        }
+
+        @Override
+        public String toString() {
+            return "PersonV1{" +
+                    "name='" + name + '\'' +
+                    ", age=" + age +
+                    ", unknownProperties=" + unknownProperties() +
+                    '}';
+        }
+    }
+
+    static class PersonV2 extends PersonV1 {
+        private Object spouse;
+        private List<String> children;
+
+        public PersonV2(String name, int age) {
+            super(name, age);
+        }
+
+        public Object getSpouse() {
+            return spouse;
+        }
+
+        public void setSpouse(Object spouse) {
+            this.spouse = spouse;
+        }
+
+        public List<String> getChildren() {
+            return children;
+        }
+
+        public void setChildren(List<String> children) {
+            this.children = children;
         }
 
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            EvolvablePerson that = (EvolvablePerson) o;
-            return age == that.age &&
-                    Objects.equals(unknownProperties, that.unknownProperties) &&
-                    Objects.equals(name, that.name);
+            if (!super.equals(o)) return false;
+            PersonV2 personV2 = (PersonV2) o;
+            return Objects.equals(spouse, personV2.spouse) &&
+                    Objects.equals(children, personV2.children);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(unknownProperties, name, age);
+            return Objects.hash(super.hashCode(), spouse, children);
         }
 
         @Override
         public String toString() {
-            return "EvolvablePerson{" +
-                    "name='" + name + '\'' +
-                    ", age=" + age +
-                    ", unknownProperties=" + unknownProperties +
+            return "PersonV2{" +
+                    "name='" + getName() + '\'' +
+                    ", age=" + getAge() +
+                    ", spouse=" + spouse +
+                    ", children=" + children +
+                    ", unknownProperties=" + unknownProperties() +
                     '}';
         }
     }
 
-    static class CtorEvolvablePerson extends EvolvablePerson {
-        private CtorEvolvablePerson() {
+    static class CtorPersonV1 extends PersonV1 {
+        private CtorPersonV1() {
             throw new RuntimeException("shouldn't be called");
         }
 
         @JsonCreator
-        public CtorEvolvablePerson(String name, int age) {
+        public CtorPersonV1(String name, int age) {
             super(name, age);
         }
     }
