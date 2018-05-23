@@ -50,8 +50,15 @@
     <project.build.resourceEncoding>UTF-8</project.build.resourceEncoding>
     <maven.compile.encoding>UTF-8</maven.compile.encoding>
 
+
+    <!--
+      Required to build using JDK 8, unless all JavaDoc is revamped to handle
+      the stricter DocLint enabled within JDK 8.
+    -->
+    <additionalparam>-Xdoclint:none</additionalparam>
+
     <!-- Be clear about the required JDK build version. -->
-    <jdk.version>1.6</jdk.version>
+    <jdk.version>1.8</jdk.version>
 
   </properties>
 
@@ -189,15 +196,6 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
           <version>3.0.0</version>
-
-          <!--
-            Required to build using JDK 8, unless all JavaDoc is revamped to handle
-            the stricter DocLint enabled within JDK 8.
-          -->
-          <!-- configuration>
-            <additionalOptions>-Xdoclint:none</additionalOptions>
-          </configuration -->
-          
           <executions>
             <execution>
               <id>attach-javadocs</id>
