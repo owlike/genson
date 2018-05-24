@@ -77,7 +77,7 @@ public class AnnotationTest extends JavaDateTimeTestBase {
 		PojoWithCustomTimestampFormatObject pojo = new PojoWithCustomTimestampFormatObject();
 		pojo.dateTime = ZonedDateTime.of(2011, 2, 3, 4, 0, 0, 0, defaultZoneId);
 		String timestampJson = timestampGenson.serialize(pojo);
-		String expectedJson = "{\"dateTime\":{\"year\":2011,\"month\":2,\"day\":3,\"hour\":4,\"minute\":0,\"second\":0,\"nano\":0,\"zoneId\":\"America/Toronto\"}}";
+		String expectedJson = "{\"dateTime\":{\"year\":2011,\"month\":2,\"day\":3,\"hour\":4,\"minute\":0,\"second\":0,\"nano\":0,\"zoneId\":\"" + defaultZoneId.getId() +  "\"}}";
 		Assert.assertEquals(expectedJson, timestampJson);
 		Assert.assertEquals(pojo.dateTime, timestampGenson.deserialize(expectedJson, PojoWithCustomTimestampFormatObject.class).dateTime);
 	}
