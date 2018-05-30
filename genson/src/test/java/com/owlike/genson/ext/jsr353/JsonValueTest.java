@@ -50,6 +50,19 @@ public class JsonValueTest {
     assertEquals(1, array.getInt(0));
   }
 
+  @Test(expected = UnsupportedOperationException.class)
+  public void testJsonValueImmutability() {
+    JsonObject object =
+      genson.deserialize("{\"str\":\"a\", \"array\": [1]}", JsonObject.class);
+    try {
+      object.put("str", new GensonJsonString("b"));
+      fail("Should've thrown UnsupportedOperationException");
+    }
+    catch (UnsupportedOperationException e) {
+      object.getJsonArray("array").add(new GensonJsonNumber.IntJsonNumber(5));
+    }
+  }
+
   @Test
   public void testRoundTripMixBeanAndJsonStructures() {
     JsonArray array = JSR353Bundle.factory.createArrayBuilder().add(1).add(2).build();
