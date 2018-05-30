@@ -1,20 +1,19 @@
 package com.owlike.genson.ext.jsr353;
 
 import javax.json.*;
-import java.util.AbstractMap;
+
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
-class GensonJsonObject extends AbstractMap<String, JsonValue> implements JsonObject {
+class GensonJsonObject implements JsonObject {
   private final Map<String, JsonValue> values;
 
   GensonJsonObject(Map<String, JsonValue> values) {
     this.values = values;
-  }
-
-  @Override
-  public Set<Entry<String, JsonValue>> entrySet() {
-    return values.entrySet();
   }
 
   @Override
@@ -44,8 +43,7 @@ class GensonJsonObject extends AbstractMap<String, JsonValue> implements JsonObj
 
   @Override
   public String getString(String name, String defaultValue) {
-    if (isNull(name)) return defaultValue;
-    return getString(name);
+    return isNull(name) ? defaultValue : getString(name);
   }
 
   @Override
@@ -55,8 +53,7 @@ class GensonJsonObject extends AbstractMap<String, JsonValue> implements JsonObj
 
   @Override
   public int getInt(String name, int defaultValue) {
-    if (isNull(name)) return defaultValue;
-    return getInt(name);
+    return isNull(name) ? defaultValue : getInt(name);
   }
 
   @Override
@@ -69,8 +66,7 @@ class GensonJsonObject extends AbstractMap<String, JsonValue> implements JsonObj
 
   @Override
   public boolean getBoolean(String name, boolean defaultValue) {
-    if (isNull(name)) return defaultValue;
-    return getBoolean(name);
+    return isNull(name) ? defaultValue : getBoolean(name);
   }
 
   @Override
@@ -84,15 +80,129 @@ class GensonJsonObject extends AbstractMap<String, JsonValue> implements JsonObj
     return ValueType.OBJECT;
   }
 
+  @Override
+  public int size() {
+    return values.size();
+  }
 
   @Override
-  public int hashCode() {
-    return values.hashCode();
+  public boolean isEmpty() {
+    return values.isEmpty();
+  }
+
+  @Override
+  public boolean containsKey(Object key) {
+    return values.containsKey(key);
+  }
+
+  @Override
+  public boolean containsValue(Object value) {
+    return values.containsValue(value);
+  }
+
+  @Override
+  public JsonValue get(Object key) {
+    return values.get(key);
+  }
+
+  @Override
+  public JsonValue put(String key, JsonValue value) {
+    return values.put(key, value);
+  }
+
+  @Override
+  public JsonValue remove(Object key) {
+    return values.remove(key);
+  }
+
+  @Override
+  public void putAll(Map<? extends String, ? extends JsonValue> m) {
+    values.putAll(m);
+  }
+
+  @Override
+  public void clear() {
+    values.clear();
+  }
+
+  @Override
+  public Set<String> keySet() {
+    return values.keySet();
+  }
+
+  @Override
+  public Collection<JsonValue> values() {
+    return values.values();
+  }
+
+  @Override
+  public Set<Entry<String, JsonValue>> entrySet() {
+    return values.entrySet();
+  }
+
+  @Override
+  public JsonValue getOrDefault(Object key, JsonValue defaultValue) {
+    return values.getOrDefault(key, defaultValue);
+  }
+
+  @Override
+  public void forEach(BiConsumer<? super String, ? super JsonValue> action) {
+    values.forEach(action);
+  }
+
+  @Override
+  public void replaceAll(BiFunction<? super String, ? super JsonValue, ? extends JsonValue> function) {
+    values.replaceAll(function);
+  }
+
+  @Override
+  public JsonValue putIfAbsent(String key, JsonValue value) {
+    return values.putIfAbsent(key, value);
+  }
+
+  @Override
+  public boolean remove(Object key, Object value) {
+    return values.remove(key, value);
+  }
+
+  @Override
+  public boolean replace(String key, JsonValue oldValue, JsonValue newValue) {
+    return values.replace(key, oldValue, newValue);
+  }
+
+  @Override
+  public JsonValue replace(String key, JsonValue value) {
+    return values.replace(key, value);
+  }
+
+  @Override
+  public JsonValue computeIfAbsent(String key, Function<? super String, ? extends JsonValue> mappingFunction) {
+    return values.computeIfAbsent(key, mappingFunction);
+  }
+
+  @Override
+  public JsonValue computeIfPresent(String key, BiFunction<? super String, ? super JsonValue, ? extends JsonValue> remappingFunction) {
+    return values.computeIfPresent(key, remappingFunction);
+  }
+
+  @Override
+  public JsonValue compute(String key, BiFunction<? super String, ? super JsonValue, ? extends JsonValue> remappingFunction) {
+    return values.compute(key, remappingFunction);
+  }
+
+  @Override
+  public JsonValue merge(String key, JsonValue value, BiFunction<? super JsonValue, ? super JsonValue, ? extends JsonValue> remappingFunction) {
+    return values.merge(key, value, remappingFunction);
   }
 
   @Override
   public boolean equals(Object o) {
     return values.equals(o);
+  }
+
+  @Override
+  public int hashCode() {
+    return values.hashCode();
   }
 
   @Override

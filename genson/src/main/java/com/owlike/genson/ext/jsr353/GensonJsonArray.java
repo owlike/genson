@@ -2,8 +2,12 @@ package com.owlike.genson.ext.jsr353;
 
 import javax.json.*;
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
 
-class GensonJsonArray extends AbstractList<JsonValue> implements JsonArray {
+class GensonJsonArray implements JsonArray {
   private final List<JsonValue> values;
 
   GensonJsonArray(List<JsonValue> values) {
@@ -77,8 +81,8 @@ class GensonJsonArray extends AbstractList<JsonValue> implements JsonArray {
   }
 
   @Override
-  public JsonValue get(int index) {
-    return values.get(index);
+  public ValueType getValueType() {
+    return ValueType.ARRAY;
   }
 
   @Override
@@ -87,18 +91,158 @@ class GensonJsonArray extends AbstractList<JsonValue> implements JsonArray {
   }
 
   @Override
-  public ValueType getValueType() {
-    return ValueType.ARRAY;
+  public boolean isEmpty() {
+    return values.isEmpty();
   }
 
   @Override
-  public int hashCode() {
-    return values.hashCode();
+  public boolean contains(Object o) {
+    return values.contains(o);
+  }
+
+  @Override
+  public Iterator<JsonValue> iterator() {
+    return values.iterator();
+  }
+
+  @Override
+  public Object[] toArray() {
+    return values.toArray();
+  }
+
+  @Override
+  public <T> T[] toArray(T[] a) {
+    return values.toArray(a);
+  }
+
+  @Override
+  public boolean add(JsonValue jsonValue) {
+    return values.add(jsonValue);
+  }
+
+  @Override
+  public boolean remove(Object o) {
+    return values.remove(o);
+  }
+
+  @Override
+  public boolean containsAll(Collection<?> c) {
+    return values.containsAll(c);
+  }
+
+  @Override
+  public boolean addAll(Collection<? extends JsonValue> c) {
+    return values.addAll(c);
+  }
+
+  @Override
+  public boolean addAll(int index, Collection<? extends JsonValue> c) {
+    return values.addAll(index, c);
+  }
+
+  @Override
+  public boolean removeAll(Collection<?> c) {
+    return values.removeAll(c);
+  }
+
+  @Override
+  public boolean retainAll(Collection<?> c) {
+    return values.retainAll(c);
+  }
+
+  @Override
+  public void replaceAll(UnaryOperator<JsonValue> operator) {
+    values.replaceAll(operator);
+  }
+
+  @Override
+  public void sort(Comparator<? super JsonValue> c) {
+    values.sort(c);
+  }
+
+  @Override
+  public void clear() {
+    values.clear();
+  }
+
+  @Override
+  public JsonValue get(int index) {
+    return values.get(index);
+  }
+
+  @Override
+  public JsonValue set(int index, JsonValue element) {
+    return values.set(index, element);
+  }
+
+  @Override
+  public void add(int index, JsonValue element) {
+    values.add(index, element);
+  }
+
+  @Override
+  public JsonValue remove(int index) {
+    return values.remove(index);
+  }
+
+  @Override
+  public int indexOf(Object o) {
+    return values.indexOf(o);
+  }
+
+  @Override
+  public int lastIndexOf(Object o) {
+    return values.lastIndexOf(o);
+  }
+
+  @Override
+  public ListIterator<JsonValue> listIterator() {
+    return values.listIterator();
+  }
+
+  @Override
+  public ListIterator<JsonValue> listIterator(int index) {
+    return values.listIterator(index);
+  }
+
+  @Override
+  public List<JsonValue> subList(int fromIndex, int toIndex) {
+    return values.subList(fromIndex, toIndex);
+  }
+
+  @Override
+  public Spliterator<JsonValue> spliterator() {
+    return values.spliterator();
+  }
+
+  @Override
+  public boolean removeIf(Predicate<? super JsonValue> filter) {
+    return values.removeIf(filter);
+  }
+
+  @Override
+  public Stream<JsonValue> stream() {
+    return values.stream();
+  }
+
+  @Override
+  public Stream<JsonValue> parallelStream() {
+    return values.parallelStream();
+  }
+
+  @Override
+  public void forEach(Consumer<? super JsonValue> action) {
+    values.forEach(action);
   }
 
   @Override
   public boolean equals(Object o) {
     return values.equals(o);
+  }
+
+  @Override
+  public int hashCode() {
+    return values.hashCode();
   }
 
   @Override
