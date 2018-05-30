@@ -1,15 +1,17 @@
 package com.owlike.genson.ext.jsr353;
 
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonString;
+import javax.json.*;
 
 import com.owlike.genson.GensonBuilder;
+import com.owlike.genson.stream.ValueType;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
 import com.owlike.genson.Genson;
+
+import java.util.List;
+import java.util.Map;
 
 public class JsonValueTest {
   private final Genson genson = new GensonBuilder().withBundle(new JSR353Bundle()).create();
@@ -66,6 +68,46 @@ public class JsonValueTest {
     assertEquals(object, actual.obj);
     assertEquals(object.getJsonString("key"), actual.str);
   }
+
+  @Test
+  public void testPreferJsonpTypes() {
+    try {
+      Genson genson = new GensonBuilder().withBundle(new JSR353Bundle().preferJsonpTypes()).create();
+      JsonObject obj = (JsonObject) genson.deserialize("{\n" +
+              "  \"array\": [1, 2, 3],\n" +
+              "  \"true\": true,\n" +
+              "  \"false\": false,\n" +
+              "  \"int\": 42,\n" +
+              "  \"double\": 98.6,\n" +
+              "  \"string\": \"some text\",\n" +
+              "  \"obj\": {\"name\": \"Homer\"},\n" +
+              "  \"null\": null\n" +
+              "}", Object.class);
+
+      assertTrue(obj.get("array") instanceof JsonArray);
+      assertEquals(3, obj.getJsonArray("array").size());
+      assertTrue(obj.get("int") instanceof JsonNumber);
+      assertEquals(42, obj.getJsonNumber("int").intValue());
+      assertTrue(obj.get("double") instanceof JsonNumber);
+      assertEquals(98.6d, obj.getJsonNumber("double").doubleValue(), 1e-200);
+      assertTrue(obj.get("string") instanceof JsonString);
+      assertEquals("some text", obj.getJsonString("string").getString());
+      assertTrue(obj.get("obj") instanceof JsonObject);
+      assertEquals("Homer", obj.getJsonObject("obj").getString("name"));
+      assertEquals(JsonValue.TRUE, obj.get("true"));
+      assertEquals(JsonValue.FALSE, obj.get("false"));
+      assertEquals(JsonValue.NULL, obj.get("null"));
+    } finally {
+      ValueType.ARRAY.setDefaultClass(List.class);
+      ValueType.BOOLEAN.setDefaultClass(Boolean.class);
+      ValueType.DOUBLE.setDefaultClass(Double.class);
+      ValueType.INTEGER.setDefaultClass(Long.class);
+      ValueType.NULL.setDefaultClass(null);
+      ValueType.OBJECT.setDefaultClass(Map.class);
+      ValueType.STRING.setDefaultClass(String.class);
+    }
+  }
+
 
   public static class Bean {
     private JsonString str;

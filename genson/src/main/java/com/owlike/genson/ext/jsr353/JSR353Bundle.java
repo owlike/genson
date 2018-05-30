@@ -37,6 +37,17 @@ public class JSR353Bundle extends GensonBundle {
     });
   }
 
+  public JSR353Bundle preferJsonpTypes() {
+    com.owlike.genson.stream.ValueType.ARRAY.setDefaultClass(JsonArray.class);
+    com.owlike.genson.stream.ValueType.BOOLEAN.setDefaultClass(JsonValue.class);
+    com.owlike.genson.stream.ValueType.DOUBLE.setDefaultClass(JsonNumber.class);
+    com.owlike.genson.stream.ValueType.INTEGER.setDefaultClass(JsonNumber.class);
+    com.owlike.genson.stream.ValueType.NULL.setDefaultClass(JsonValue.class);
+    com.owlike.genson.stream.ValueType.OBJECT.setDefaultClass(JsonObject.class);
+    com.owlike.genson.stream.ValueType.STRING.setDefaultClass(JsonString.class);
+    return this;
+  }
+  
   public class JsonValueConverter implements Converter<JsonValue> {
 
     @Override
