@@ -2,7 +2,7 @@
 This module provides a genson extension to allow support for classes in the Java Date & Time API (JSR 310)
 
 #### Installation
-Simply add the JavaDateTimeBundle with the deseried options when creating your Genson instance
+Simply add the JavaDateTimeBundle with the desired options when creating your Genson instance
 ```java
 Genson genson = new GensonBuilder().withBundle(new JavaDateTimeBundle()).create();
 ```
@@ -83,7 +83,7 @@ the pattern to construct a DateTimeFormatter.
 
 The `asTimeInMillis` property is supported but does not function exactly the same.  The value only 
 determines whether the bundle will serialize/deserialize in the assigned TimestampFormat. It does not guarantee that the timestamp
-format is actually milliseconds.  Use `@TimestampFormat` to control the desired format
+format is actually milliseconds.  Use `@JsonTimestampFormat` to control the desired format
 
 ##### @JsonTimestampFormat
 Specify the timestamp format to use when serializing/deserializing the property. Only applicable if `Genson#isDateAsTimestamp`
