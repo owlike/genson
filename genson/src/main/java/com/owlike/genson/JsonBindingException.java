@@ -6,6 +6,10 @@ public class JsonBindingException extends RuntimeException {
     super(message);
   }
 
+  public JsonBindingException(Throwable cause) {
+    super(cause);
+  }
+
   public JsonBindingException(String message, Throwable cause) {
     super(message, cause);
   }

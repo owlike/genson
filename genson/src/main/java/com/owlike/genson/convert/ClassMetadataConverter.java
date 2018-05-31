@@ -4,7 +4,7 @@ import java.lang.reflect.Type;
 
 import com.owlike.genson.*;
 import com.owlike.genson.annotation.HandleClassMetadata;
-import com.owlike.genson.convert.DefaultConverters.UntypedConverterFactory.UntypedConverter;
+import com.owlike.genson.ext.jsr353.JSR353Bundle;
 import com.owlike.genson.reflect.TypeUtil;
 import com.owlike.genson.stream.ObjectReader;
 import com.owlike.genson.stream.ObjectWriter;
@@ -65,18 +65,16 @@ public class ClassMetadataConverter<T> extends Wrapper<Converter<T>> implements 
 
   private final boolean classMetadataWithStaticType;
   private final Class<T> tClass;
-  private final boolean skipMetadataSerialization;
 
   public ClassMetadataConverter(Class<T> tClass, Converter<T> delegate, boolean classMetadataWithStaticType) {
     super(delegate);
     this.tClass = tClass;
     this.classMetadataWithStaticType = classMetadataWithStaticType;
-    skipMetadataSerialization = Wrapper.isOfType(delegate, UntypedConverter.class);
   }
 
   public void serialize(T obj, ObjectWriter writer, Context ctx) throws Exception {
-    if (!skipMetadataSerialization && obj != null &&
-      (classMetadataWithStaticType || (!classMetadataWithStaticType && !tClass.equals(obj.getClass())))) {
+    if (obj != null && !isJsonValueConverter(wrapped) &&
+      (classMetadataWithStaticType || !tClass.equals(obj.getClass()))) {
       writer.beginNextObjectMetadata()
         .writeMetadata("class", ctx.genson.aliasFor(obj.getClass()));
     }
@@ -84,7 +82,7 @@ public class ClassMetadataConverter<T> extends Wrapper<Converter<T>> implements 
   }
 
   public T deserialize(ObjectReader reader, Context ctx) throws Exception {
-    if (ValueType.OBJECT.equals(reader.getValueType())) {
+    if (ValueType.OBJECT.equals(reader.getValueType()) && !isJsonValueConverter(wrapped)) {
       String className = reader.nextObjectMetadata().metadata("class");
       if (className != null) {
         try {
@@ -100,5 +98,9 @@ public class ClassMetadataConverter<T> extends Wrapper<Converter<T>> implements 
       }
     }
     return wrapped.deserialize(reader, ctx);
+  }
+
+  private boolean isJsonValueConverter(Converter<T> converter) {
+    return converter instanceof JSR353Bundle.JsonValueConverter;
   }
 }

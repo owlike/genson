@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.owlike.genson.reflect.BeanDescriptor;
 import com.owlike.genson.reflect.BeanDescriptorProvider;
 import com.owlike.genson.reflect.RuntimePropertyFilter;
+import com.owlike.genson.reflect.UnknownPropertyHandler;
 import com.owlike.genson.stream.*;
 
 /**
@@ -72,6 +73,7 @@ public final class Genson {
   private final EncodingAwareReaderFactory readerFactory = new EncodingAwareReaderFactory();
   private final Map<Class<?>, Object> defaultValues;
   private final RuntimePropertyFilter runtimePropertyFilter;
+  private final UnknownPropertyHandler unknownPropertyHandler;
 
   /**
    * The default constructor will use the default configuration provided by the {@link GensonBuilder}.
@@ -81,7 +83,8 @@ public final class Genson {
     this(_default.converterFactory, _default.beanDescriptorFactory,
       _default.skipNull, _default.htmlSafe, _default.aliasClassMap,
       _default.withClassMetadata, _default.strictDoubleParse, _default.indent,
-      _default.withMetadata, _default.failOnMissingProperty, _default.defaultValues, _default.runtimePropertyFilter);
+      _default.withMetadata, _default.failOnMissingProperty, _default.defaultValues,
+      _default.runtimePropertyFilter, _default.unknownPropertyHandler);
   }
 
   /**
@@ -108,11 +111,13 @@ public final class Genson {
    * @param failOnMissingProperty throw a JsonBindingException when a key in the json stream does not match a property in the Java Class.
    * @param defaultValues contains a mapping from the raw class to the default value that should be used when the property is missing.
    * @param runtimePropertyFilter is used to define what bean properties should be excluded from ser/de at runtime.
+   * @param unknownPropertyHandler is used to handle unknown properties during ser/de.
    */
   public Genson(Factory<Converter<?>> converterFactory, BeanDescriptorProvider beanDescProvider,
                 boolean skipNull, boolean htmlSafe, Map<String, Class<?>> classAliases, boolean withClassMetadata,
                 boolean strictDoubleParse, boolean indent, boolean withMetadata, boolean failOnMissingProperty,
-                Map<Class<?>, Object> defaultValues, RuntimePropertyFilter runtimePropertyFilter) {
+                Map<Class<?>, Object> defaultValues, RuntimePropertyFilter runtimePropertyFilter,
+                UnknownPropertyHandler unknownPropertyHandler) {
     this.converterFactory = converterFactory;
     this.beanDescriptorFactory = beanDescProvider;
     this.skipNull = skipNull;
@@ -129,6 +134,7 @@ public final class Genson {
     this.indent = indent;
     this.withMetadata = withClassMetadata || withMetadata;
     this.failOnMissingProperty = failOnMissingProperty;
+    this.unknownPropertyHandler = unknownPropertyHandler;
   }
 
   /**
@@ -607,6 +613,10 @@ public final class Genson {
 
   public RuntimePropertyFilter runtimePropertyFilter() {
     return runtimePropertyFilter;
+  }
+
+  public UnknownPropertyHandler unknownPropertyHandler() {
+    return unknownPropertyHandler;
   }
 
   /**

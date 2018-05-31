@@ -5,6 +5,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayDeque;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
@@ -284,6 +285,11 @@ public class JsonReader implements ObjectReader {
     if (NULL == valueType) return null;
     throw new JsonStreamException("Expected a String to convert to byte array found "
       + valueType);
+  }
+
+  public Map<String, String> metadata() {
+    if (!_metadata_readen) nextObjectMetadata();
+    return Collections.unmodifiableMap(_metadata);
   }
 
   public String metadata(String name) {

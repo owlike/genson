@@ -1,12 +1,7 @@
 package com.owlike.genson.reflect;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Consumer;
 
 import com.owlike.genson.*;
 import com.owlike.genson.reflect.BeanCreator.BeanCreatorProperty;
@@ -46,6 +41,7 @@ public class BeanDescriptor<T> implements Converter<T> {
   private final boolean _noArgCtr;
 
   private static final Object MISSING = new Object();
+
   // Used as a cache so we just copy it instead of recreating and assigning the default values
   private Object[] globalCreatorArgs;
 
@@ -86,10 +82,15 @@ public class BeanDescriptor<T> implements Converter<T> {
   }
 
   public void serialize(T obj, ObjectWriter writer, Context ctx) {
+    RuntimePropertyFilter  runtimePropertyFilter  = ctx.genson.runtimePropertyFilter();
+    UnknownPropertyHandler unknownPropertyHandler = ctx.genson.unknownPropertyHandler();
+
     writer.beginObject();
-    RuntimePropertyFilter runtimePropertyFilter = ctx.genson.runtimePropertyFilter();
     for (PropertyAccessor accessor : accessibleProperties) {
       if (runtimePropertyFilter.shouldInclude(accessor, ctx)) accessor.serialize(obj, writer, ctx);
+    }
+    if (unknownPropertyHandler != null) {
+      unknownPropertyHandler.writeUnknownProperties(obj, writer, ctx);
     }
     writer.endObject();
   }
@@ -110,8 +111,10 @@ public class BeanDescriptor<T> implements Converter<T> {
   }
 
   public void deserialize(T into, ObjectReader reader, Context ctx) {
+    RuntimePropertyFilter  runtimePropertyFilter  = ctx.genson.runtimePropertyFilter();
+    UnknownPropertyHandler unknownPropertyHandler = ctx.genson.unknownPropertyHandler();
+
     reader.beginObject();
-    RuntimePropertyFilter runtimePropertyFilter = ctx.genson.runtimePropertyFilter();
     for (; reader.hasNext(); ) {
       reader.next();
       String propName = reader.name();
@@ -122,6 +125,8 @@ public class BeanDescriptor<T> implements Converter<T> {
         } else {
           reader.skipValue();
         }
+      } else if (unknownPropertyHandler != null) {
+        unknownPropertyHandler.readUnknownProperty(propName, reader, ctx).accept(into);
       } else if (failOnMissingProperty) throw missingPropertyException(propName);
       else reader.skipValue();
     }
@@ -130,9 +135,12 @@ public class BeanDescriptor<T> implements Converter<T> {
 
 
   protected T _deserWithCtrArgs(ObjectReader reader, Context ctx) {
-    List<String> names = new ArrayList<String>();
-    List<Object> values = new ArrayList<Object>();
+    List<String> names = new ArrayList<>();
+    List<Object> values = new ArrayList<>();
+    List<Consumer<T>> unknownProperties = new ArrayList<>();
+
     RuntimePropertyFilter runtimePropertyFilter = ctx.genson.runtimePropertyFilter();
+    UnknownPropertyHandler unknownPropertyHandler = ctx.genson.unknownPropertyHandler();
 
     reader.beginObject();
     for (; reader.hasNext(); ) {
@@ -148,6 +156,9 @@ public class BeanDescriptor<T> implements Converter<T> {
         } else {
           reader.skipValue();
         }
+      } else if (unknownPropertyHandler != null) {
+        Consumer<T> callback = unknownPropertyHandler.readUnknownProperty(propName, reader, ctx);
+        unknownProperties.add(callback);
       } else if (failOnMissingProperty) throw missingPropertyException(propName);
       else reader.skipValue();
     }
@@ -175,8 +186,12 @@ public class BeanDescriptor<T> implements Converter<T> {
     T bean = ofClass.cast(creator.create(creatorArgs));
     for (int i = 0; i < size; i++) {
       PropertyMutator property = mutableProperties.get(newNames[i]);
-      if (property != null) property.mutate(bean, newValues[i]);
+      if (property != null) {
+        property.mutate(bean, newValues[i]);
+      }
     }
+    unknownProperties.forEach(callback -> callback.accept(bean));
+
     reader.endObject();
     return bean;
   }

@@ -1,7 +1,7 @@
 package com.owlike.genson.stream;
 
 import java.io.Closeable;
-import java.io.IOException;
+import java.util.Map;
 
 /**
  * ObjectReader is part of the streaming api, it's implementations allow you to read data from the
@@ -161,8 +161,19 @@ public interface ObjectReader extends Closeable {
   ValueType getValueType();
 
   /**
-   * @param name the name of the metadata to retrieve.
-   * @return value of metadata with name as key or null if there is no such metadata.
+   * Return the map containing all metadata.
+   *
+   * @return the map containing all metadata key/value pairs.
+   * @throws JsonStreamException
+   */
+  Map<String, String> metadata();
+
+  /**
+   * The value of a specified metadata attribute.
+   *
+   * @param name the name of the metadata attribute to retrieve.
+   * @return the value of metadata with name as key or null if there
+   *         is no such metadata attribute.
    * @throws JsonStreamException
    */
   String metadata(String name);
