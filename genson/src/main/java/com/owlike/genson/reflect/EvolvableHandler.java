@@ -2,6 +2,7 @@ package com.owlike.genson.reflect;
 
 import com.owlike.genson.Context;
 import com.owlike.genson.Converter;
+import com.owlike.genson.JsonBindingException;
 import com.owlike.genson.ext.jsr353.JSR353Bundle;
 import com.owlike.genson.stream.ObjectReader;
 import com.owlike.genson.stream.ObjectWriter;
@@ -40,7 +41,7 @@ public class EvolvableHandler implements UnknownPropertyHandler {
                 }
             };
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new JsonBindingException(e);
         }
     }
 
@@ -57,7 +58,7 @@ public class EvolvableHandler implements UnknownPropertyHandler {
                 }
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new JsonBindingException(e);
         }
     }
 }
