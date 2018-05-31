@@ -12,9 +12,13 @@ public enum ValueType {
   BOOLEAN(Boolean.class),
   NULL(null);
 
-  private final Class<?> clazz;
+  private Class<?> clazz;
 
   ValueType(Class<?> clazz) {
+    this.clazz = clazz;
+  }
+
+  public void setDefaultClass(Class<?> clazz) {
     this.clazz = clazz;
   }
 
