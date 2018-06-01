@@ -27,5 +27,13 @@ import java.lang.annotation.Target;
 @Inherited
 @Documented
 public @interface HandleClassMetadata {
+    /**
+     * Set to false if you want to let the existing mechanism handle the class metadata for you.
+     */
+    boolean serialization() default true;
 
+    /**
+     * @see #serialization()
+     */
+    boolean deserialization() default true;
 }
