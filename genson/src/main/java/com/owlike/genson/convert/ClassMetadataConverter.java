@@ -4,11 +4,12 @@ import java.lang.reflect.Type;
 
 import com.owlike.genson.*;
 import com.owlike.genson.annotation.HandleClassMetadata;
-import com.owlike.genson.ext.jsr353.JSR353Bundle;
 import com.owlike.genson.reflect.TypeUtil;
 import com.owlike.genson.stream.ObjectReader;
 import com.owlike.genson.stream.ObjectWriter;
 import com.owlike.genson.stream.ValueType;
+
+import javax.json.JsonValue;
 
 /**
  * Converter responsible of writing and reading @class metadata. This is useful if you want to be
@@ -73,7 +74,7 @@ public class ClassMetadataConverter<T> extends Wrapper<Converter<T>> implements 
   }
 
   public void serialize(T obj, ObjectWriter writer, Context ctx) throws Exception {
-    if (obj != null && !isJsonValueConverter(wrapped) &&
+    if (obj != null && !isJsonValue(obj.getClass()) &&
       (classMetadataWithStaticType || !tClass.equals(obj.getClass()))) {
       writer.beginNextObjectMetadata()
         .writeMetadata("class", ctx.genson.aliasFor(obj.getClass()));
@@ -82,7 +83,7 @@ public class ClassMetadataConverter<T> extends Wrapper<Converter<T>> implements 
   }
 
   public T deserialize(ObjectReader reader, Context ctx) throws Exception {
-    if (ValueType.OBJECT.equals(reader.getValueType()) && !isJsonValueConverter(wrapped)) {
+    if (ValueType.OBJECT.equals(reader.getValueType()) && !isJsonValue(tClass)) {
       String className = reader.nextObjectMetadata().metadata("class");
       if (className != null) {
         try {
@@ -100,7 +101,7 @@ public class ClassMetadataConverter<T> extends Wrapper<Converter<T>> implements 
     return wrapped.deserialize(reader, ctx);
   }
 
-  private boolean isJsonValueConverter(Converter<T> converter) {
-    return converter instanceof JSR353Bundle.JsonValueConverter;
+  private boolean isJsonValue(Class<?> clazz) {
+    return JsonValue.class.isAssignableFrom(clazz);
   }
 }
