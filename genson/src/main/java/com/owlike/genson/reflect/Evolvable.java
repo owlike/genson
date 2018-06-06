@@ -13,7 +13,7 @@ import java.util.Map;
  *
  * @author Aleksandar Seovic  2018.05.20
  */
-interface Evolvable {
+public interface Evolvable {
     /**
      * Add unknown property to this instance.
      *
