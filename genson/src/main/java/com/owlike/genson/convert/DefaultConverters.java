@@ -986,6 +986,7 @@ public final class DefaultConverters {
     private UntypedConverterFactory() {
     }
 
+    @HandleClassMetadata(serialization = true, deserialization = false)
     public final static class UntypedConverter implements Converter<Object> {
       final static UntypedConverter instance = new UntypedConverter();
 

@@ -4,7 +4,6 @@ import java.lang.reflect.Type;
 
 import com.owlike.genson.*;
 import com.owlike.genson.annotation.HandleClassMetadata;
-import com.owlike.genson.convert.DefaultConverters.UntypedConverterFactory.UntypedConverter;
 import com.owlike.genson.reflect.TypeUtil;
 import com.owlike.genson.stream.ObjectReader;
 import com.owlike.genson.stream.ObjectWriter;
@@ -55,9 +54,21 @@ public class ClassMetadataConverter<T> extends Wrapper<Converter<T>> implements 
             + "as ClassMetadataConverter can not be the last converter in the chain!");
 
       Class<?> rawClass = TypeUtil.getRawClass(type);
-      if (genson.isWithClassMetadata()
-            && !Wrapper.toAnnotatedElement(nextConverter).isAnnotationPresent(HandleClassMetadata.class))
-        return new ClassMetadataConverter(rawClass, nextConverter, classMetadataWithStaticType);
+
+      HandleClassMetadata handleClassMetadata = Wrapper.toAnnotatedElement(nextConverter)
+              .getAnnotation(HandleClassMetadata.class);
+
+      boolean writeClassMetadata = handleClassMetadata == null || !handleClassMetadata.serialization();
+      boolean readClassMetadata = handleClassMetadata == null || !handleClassMetadata.deserialization();
+
+      if (genson.isWithClassMetadata() && (writeClassMetadata || readClassMetadata))
+        return new ClassMetadataConverter(
+                rawClass,
+                nextConverter,
+                classMetadataWithStaticType,
+                writeClassMetadata,
+                readClassMetadata
+        );
       else
         return nextConverter;
     }
@@ -65,18 +76,23 @@ public class ClassMetadataConverter<T> extends Wrapper<Converter<T>> implements 
 
   private final boolean classMetadataWithStaticType;
   private final Class<T> tClass;
-  private final boolean skipMetadataSerialization;
+  private final boolean writeClassMetadata;
+  private final boolean readClassMetadata;
 
-  public ClassMetadataConverter(Class<T> tClass, Converter<T> delegate, boolean classMetadataWithStaticType) {
+  public ClassMetadataConverter(Class<T> tClass, Converter<T> delegate,
+                                boolean classMetadataWithStaticType,
+                                boolean writeClassMetadata,
+                                boolean readClassMetadata) {
     super(delegate);
     this.tClass = tClass;
     this.classMetadataWithStaticType = classMetadataWithStaticType;
-    skipMetadataSerialization = Wrapper.isOfType(delegate, UntypedConverter.class);
+    this.writeClassMetadata = writeClassMetadata;
+    this.readClassMetadata = readClassMetadata;
   }
 
   public void serialize(T obj, ObjectWriter writer, Context ctx) throws Exception {
-    if (!skipMetadataSerialization && obj != null &&
-      (classMetadataWithStaticType || (!classMetadataWithStaticType && !tClass.equals(obj.getClass())))) {
+    if (writeClassMetadata && obj != null &&
+      (classMetadataWithStaticType || !tClass.equals(obj.getClass()))) {
       writer.beginNextObjectMetadata()
         .writeMetadata("class", ctx.genson.aliasFor(obj.getClass()));
     }
@@ -84,7 +100,7 @@ public class ClassMetadataConverter<T> extends Wrapper<Converter<T>> implements 
   }
 
   public T deserialize(ObjectReader reader, Context ctx) throws Exception {
-    if (ValueType.OBJECT.equals(reader.getValueType())) {
+    if (readClassMetadata && ValueType.OBJECT.equals(reader.getValueType())) {
       String className = reader.nextObjectMetadata().metadata("class");
       if (className != null) {
         try {
