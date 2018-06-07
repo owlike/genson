@@ -3,7 +3,6 @@ package com.owlike.genson.ext.jsr353;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonString;
-import javax.json.JsonValue;
 
 import com.owlike.genson.GensonBuilder;
 import org.junit.Test;
