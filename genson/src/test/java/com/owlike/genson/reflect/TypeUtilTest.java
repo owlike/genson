@@ -26,6 +26,13 @@ public class TypeUtilTest {
 
   }
 
+  @Test public void unboundTypesShouldMatchWithObject() throws NoSuchFieldException {
+    Type t = Generic.class.getDeclaredField("t").getGenericType();
+
+    assertTrue(match(t, Object.class, true));
+    assertTrue(match(t, Object.class, false));
+  }
+
   @Test
   public void testTypeOf() {
     try {

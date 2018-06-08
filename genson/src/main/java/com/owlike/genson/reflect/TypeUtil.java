@@ -322,6 +322,10 @@ public final class TypeUtil {
     Class<?> oClazz = getRawClass(oType);
     boolean match = strictMatch ? oClazz.equals(clazz) : oClazz.isAssignableFrom(clazz);
 
+    // This means we did expand the best we could and end up with Object, in which case match will be true if oType
+    // is Object too and false otherwise
+    if (Object.class.equals(clazz)) return match;
+
     if (Object.class.equals(oClazz) && !strictMatch)
       return match;
 
