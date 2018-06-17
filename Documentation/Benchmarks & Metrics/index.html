@@ -31,8 +31,8 @@
     <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 
-    <link href='/genson/css/theme.css' rel='stylesheet' type='text/css' />
-    <link href='/genson/css/pygments-default.css' rel='stylesheet' type='text/css' />
+    <link href='/css/theme.css' rel='stylesheet' type='text/css' />
+    <link href='/css/pygments-default.css' rel='stylesheet' type='text/css' />
 
     <script>
 
@@ -80,32 +80,32 @@
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#menu-navbar-collapse-1">
                 <i class="fa fa-bars menu-item"></i>
             </button>
-            <a class="navbar-brand" href="/genson/">Genson</a>
+            <a class="navbar-brand" href="/">Genson</a>
         </div>
         <div class="collapse navbar-collapse" id="menu-navbar-collapse-1">
             <ul class="nav navbar-nav">
-                <li><a href="/genson/GettingStarted"><i class="fa fa-compass"></i> Getting started</a></li>
+                <li><a href="/GettingStarted"><i class="fa fa-compass"></i> Getting started</a></li>
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-book"></i> Documentation <b class="caret"></b></a>
                     <ul class="dropdown-menu">
-                        <li><a href="/genson/Documentation/UserGuide">User Guide</a></li>
-                        <li><a href="/genson/Documentation/ScalaGuide">Scala Guide</a></li>
+                        <li><a href="/Documentation/UserGuide">User Guide</a></li>
+                        <li><a href="/Documentation/ScalaGuide">Scala Guide</a></li>
                         <li class="sep"></li>
-                        <li><a href="/genson/Documentation/Extensions">Extensions</a></li>
-                        <li><a href="/genson/Documentation/Configuration">Configuration</a></li>
-                        <li><a href="/genson/Documentation/Benchmarks & Metrics">Benchmarks & Metrics</a></li>
-                        <li><a href="/genson/Documentation/Changelog">Changelog</a></li>
+                        <li><a href="/Documentation/Extensions">Extensions</a></li>
+                        <li><a href="/Documentation/Configuration">Configuration</a></li>
+                        <li><a href="/Documentation/Benchmarks & Metrics">Benchmarks & Metrics</a></li>
+                        <li><a href="/Documentation/Changelog">Changelog</a></li>
                     </ul>
                 </li>
                 <li class="dropdown">
                   <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-code"></i> API Docs <b class="caret"></b></a>
                   <ul class="dropdown-menu">
-                    <li><a href="/genson/Documentation/Javadoc">Javadoc</a></li>
-                    <li><a href="/genson/Documentation/Scaladoc">Scaladoc</a></li>
+                    <li><a href="/Documentation/Javadoc">Javadoc</a></li>
+                    <li><a href="/Documentation/Scaladoc">Scaladoc</a></li>
                   </ul>
                 </li>
-                <li><a href="/genson/Community"><i class="fa fa-group"></i> Community</a></li>
-                <li><a href="/genson/Faq"><i class="fa fa-question"></i> FAQ</a></li>
+                <li><a href="/Community"><i class="fa fa-group"></i> Community</a></li>
+                <li><a href="/Faq"><i class="fa fa-question"></i> FAQ</a></li>
             </ul>
           <ul class="nav navbar-nav navbar-right">
             <li>
@@ -209,7 +209,7 @@ got a lot of beans, big numbers, many lists, arrays and maps (small and big).
 Note that we compare two versions of Genson, the first one uses a custom algorithm allowing to parse doubles really fast,
 but with a small precision loss, the other one uses standard Double.parse. In most cases using the custom algorithm should be fine.</p>
 
-<p><img class="img-responsive" src="/genson/images/genson-data-bench.png" /></p>
+<p><img class="img-responsive" src="/images/genson-data-bench.png" /></p>
 
 <h3 id="gson-dataset">Gson dataset</h3>
 
@@ -222,10 +222,10 @@ Serialization source code is located <a href="https://github.com/owlike/genson/b
  and deserialization <a href="https://github.com/owlike/genson/blob/master/genson/src/test/java/com/owlike/genson/DeserializeBenchmark.java">here</a>.</p>
 
 <h4 id="deserialization">Deserialization</h4>
-<p><img class="img-responsive" src="/genson/images/gson-data-deser-bench.png" /></p>
+<p><img class="img-responsive" src="/images/gson-data-deser-bench.png" /></p>
 
 <h4 id="serialization">Serialization</h4>
-<p><img class="img-responsive" src="/genson/images/gson-data-ser-bench.png" /></p>
+<p><img class="img-responsive" src="/images/gson-data-ser-bench.png" /></p>
 
 <h2 id="jvm-serializers-benchmark">JVM Serializers Benchmark</h2>
 
@@ -234,13 +234,13 @@ the result of running it on the <a href="https://github.com/eishay/jvm-serialize
 
 <p>The benchmark was run using the default configuration and represents the throughput of de/ser for a test time of 10000.</p>
 
-<p><img class="img-responsive" src="/genson/images/jvm-serializers-bench.png" /></p>
+<p><img class="img-responsive" src="/images/jvm-serializers-bench.png" /></p>
 
 <h2 id="artifact-size">Artifact size</h2>
 <p>Last measure that can be very important for mobile developers is the jar size.
 Genson weights only 170 KB more than Gson but has greater performances and a wider set of features, and is 4 times smaller than Jackson!</p>
 
-<p><img class="img-responsive" src="/genson/images/jar-size.png" /></p>
+<p><img class="img-responsive" src="/images/jar-size.png" /></p>
 
 <h2 id="conclusion">Conclusion</h2>
 
