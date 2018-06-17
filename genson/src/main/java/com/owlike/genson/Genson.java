@@ -18,7 +18,7 @@ import com.owlike.genson.stream.*;
  * so you can benefit of better performances.
  * <p/>
  * For more examples have a look at the <a
- * href="http://owlike.github.io/genson/">online documentation</a>.
+ * href="http://genson.io">online documentation</a>.
  * <p/>
  * <p/>
  * To create a new instance of Genson you can use the default no arg constructor or the

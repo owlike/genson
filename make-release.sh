@@ -105,12 +105,17 @@ function deployWebsite {
   git clone git@github.com:owlike/genson.git tmp_doc
   cd tmp_doc
   git checkout gh-pages
-  rm -R *
+  rm -rf *
 
   echo -e "latest_version: $RELEASE_VERSION" > _config-release.yml
   echo -e "production: true" >> _config-release.yml
 
-  jekyll build --source ../website --destination . --config ../website/_config.yml,_config-release.yml
+  cd ..
+
+  docker pull pwbgl/docker-jekyll-pygments
+  docker run --rm --label=jekyll --volume=$(pwd):/srv/jekyll -it -p 127.0.0.1:4000:4000 pwbgl/docker-jekyll-pygments jekyll build --source website --destination tmp_doc --config website/_config.yml,tmp_doc/_config-release.yml
+
+  cd tmp_doc
 
   cp -R ../genson/target/apidocs Documentation/Javadoc
 
