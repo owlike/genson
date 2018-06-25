@@ -212,4 +212,18 @@ public class JsonWriterTest {
 
     assertEquals("{\"foo\\\"bar\":true,\"bar\\\"foo\":1}", sw.toString());
   }
+  
+  @Test
+  public void escapeDoubleSpecialCharacters() {
+    String key="\"a\"";
+    String escapedKey="\\\"a\\\"";
+    assertEquals(escapedKey, new String(JsonWriter.escapeString(key)));
+  }
+  
+  @Test
+  public void escapeLongComplicatedString() {
+    String key="\"-->'-->`--><!--#set var=\"i399\" value=\"f1epcssa\"--><!--#set var=\"h88d\" value=\"us9gi9cw\"--><!--#echo var=\"i399\"--><!--#echo var=\"h88d\"-->";
+    String escapedKey="\\\"-->'-->`--><!--#set var=\\\"i399\\\" value=\\\"f1epcssa\\\"--><!--#set var=\\\"h88d\\\" value=\\\"us9gi9cw\\\"--><!--#echo var=\\\"i399\\\"--><!--#echo var=\\\"h88d\\\"-->";
+    assertEquals(escapedKey, new String(JsonWriter.escapeString(key)));
+  }  
 }
