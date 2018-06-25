@@ -14,7 +14,7 @@ Gensons main strengths?
 
 ## Online Documentation
 
-Checkout our new website - <http://owlike.github.io/genson/>.
+Checkout our new website - <http://genson.io>.
 
 
 The old website at <http://code.google.com/p/genson/>, hosts the documentation and javadoc until release 0.99 inclusive.
