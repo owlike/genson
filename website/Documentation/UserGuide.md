@@ -379,7 +379,7 @@ AddressGroup result = genson.serialize(addressContainer);
 
 Genson provides an alias mechanism for classes, allowing to use the alias instead of the full class name.
 It is a good practice to do so as it gives you the ability to rename your class or package without any impact
-on the json (especially useful if you store json in a persistent storage) and it is also safer from a security point of view.
+on the json (especially useful if you store json in a persistent storage) and also without leaking to the public the underlying code structure.
 
 {% highlight java %}
 // addAlias creates an alias between a logic name and a full class name, this also enables class metadata mechanism
@@ -402,6 +402,11 @@ genson.serialize(addressContainer);
 
  * If you define a custom Converter and do not want Genson to use class metadata for types supported by your Converter
  use @HandleClassMetadata annotation.
+
+ * Note that allowing deserialization to an arbitrary type based on the content of the JSON payload can come with security issues.
+ For example the attacker could deserialize to any arbitrary type which Genson will instantiate and invoke its setters. There are classes
+ available in common libraries and even in the JDK that can be used to gain Remote Code Execution upon invocation of a setter. Ideally
+ this would be avoided by narrowing down what the types could be (so avoid defining the static type as Object or a list of anything).
 
 
 ##Streaming API
