@@ -7,7 +7,7 @@
   <name>Genson Parent</name>
   <description>Genson library parent and aggregator</description>
 
-  <url>http://owlike.github.io/genson/</url>
+  <url>http://genson.io</url>
 
   <parent>
     <groupId>org.sonatype.oss</groupId>
@@ -55,7 +55,7 @@
       Required to build using JDK 8, unless all JavaDoc is revamped to handle
       the stricter DocLint enabled within JDK 8.
     -->
-    <additionalparam>-Xdoclint:none</additionalparam>
+    <additionalOptions>-Xdoclint:none</additionalOptions>
 
     <!-- Be clear about the required JDK build version. -->
     <jdk.version>1.8</jdk.version>
@@ -96,7 +96,6 @@
         </plugins>
       </build>
     </profile>
-
     <profile>
       <id>doclint-java8-disable</id>
       <activation>
@@ -120,7 +119,7 @@
   <distributionManagement>
     <site>
       <id>gh-pages</id>
-      <url>http://owlike.github.io/genson/</url>
+      <url>http://genson.io</url>
     </site>
     <repository>
       <id>sonatype-nexus-staging</id>
@@ -202,6 +201,9 @@
               <goals>
                 <goal>jar</goal>
               </goals>
+              <configuration>
+                <additionalOptions>${javadoc.opts}</additionalOptions>
+              </configuration>
             </execution>
           </executions>
         </plugin>

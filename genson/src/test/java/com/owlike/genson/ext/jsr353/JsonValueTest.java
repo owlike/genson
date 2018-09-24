@@ -50,6 +50,19 @@ public class JsonValueTest {
     assertEquals(1, array.getInt(0));
   }
 
+  @Test(expected = UnsupportedOperationException.class)
+  public void testJsonValueImmutability() {
+    JsonObject object =
+      genson.deserialize("{\"str\":\"a\", \"array\": [1]}", JsonObject.class);
+    try {
+      object.put("str", new GensonJsonString("b"));
+      fail("Should've thrown UnsupportedOperationException");
+    }
+    catch (UnsupportedOperationException e) {
+      object.getJsonArray("array").add(new GensonJsonNumber.IntJsonNumber(5));
+    }
+  }
+
   @Test
   public void testRoundTripMixBeanAndJsonStructures() {
     JsonArray array = JSR353Bundle.factory.createArrayBuilder().add(1).add(2).build();
@@ -66,6 +79,56 @@ public class JsonValueTest {
     assertEquals(object, actual.obj);
     assertEquals(object.getJsonString("key"), actual.str);
   }
+
+  @Test
+  public void classMetadataConverterShouldNotKickIn() {
+    Genson genson = new GensonBuilder()
+            .useClassMetadata(true)
+            .withBundle(new JSR353Bundle())
+            .create();
+
+    String actual = genson.serialize(JSR353Bundle.factory.createObjectBuilder().build());
+
+    assertEquals("{}", actual);
+    // shouldn't fail
+    JsonObject value = genson.deserialize("{\"@class\": \"class.that.doesnt.exist.AH!\"}", JsonObject.class);
+    assertTrue(JsonObject.class.isAssignableFrom(value.getClass()));
+  }
+
+  @Test
+  public void classMetadataConverterShouldKickIn() {
+    Genson genson = new GensonBuilder()
+            .useClassMetadata(true)
+            .addAlias("bean", Bean.class)
+            .withBundle(new JSR353Bundle())
+            .create();
+
+    Object v = genson.deserialize("{\"@class\": \"bean\"}", Object.class);
+    assertTrue(Bean.class.isAssignableFrom(v.getClass()));
+  }
+
+  @Test public void readUnknownTypesAsJsonValueWhenMissingClassMetadata() {
+    Genson genson = new GensonBuilder()
+            .useClassMetadata(true)
+            .withBundle(new JSR353Bundle().readUnknownTypesAsJsonValue(true))
+            .create();
+
+    assertTrue(JsonObject.class.isAssignableFrom(genson.deserialize("{}", Object.class).getClass()));
+  }
+
+  @Test
+  public void readUnknownTypesAsActualTypeWhenClassMetadataPresent() {
+    Genson genson = new GensonBuilder()
+            .useClassMetadata(true)
+            .addAlias("bean", Bean.class)
+            .withBundle(new JSR353Bundle().readUnknownTypesAsJsonValue(true))
+            .create();
+
+    Object v = genson.deserialize("{\"@class\": \"bean\"}", Object.class);
+
+    assertTrue(Bean.class.isAssignableFrom(v.getClass()));
+  }
+
 
   public static class Bean {
     private JsonString str;

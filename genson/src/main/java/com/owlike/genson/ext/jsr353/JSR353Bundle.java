@@ -18,7 +18,9 @@ import javax.json.JsonValue.ValueType;
 import javax.json.spi.JsonProvider;
 
 import com.owlike.genson.*;
+import com.owlike.genson.annotation.HandleClassMetadata;
 import com.owlike.genson.ext.GensonBundle;
+import com.owlike.genson.reflect.TypeUtil;
 import com.owlike.genson.stream.JsonWriter;
 import com.owlike.genson.stream.ObjectReader;
 import com.owlike.genson.stream.ObjectWriter;
@@ -27,8 +29,21 @@ public class JSR353Bundle extends GensonBundle {
   static final JsonBuilderFactory factory = JsonProvider.provider().createBuilderFactory(
     new HashMap<String, String>());
 
+  private boolean readUnknownTypesAsJsonValue = false;
+
   @Override
   public void configure(GensonBuilder builder) {
+    if (readUnknownTypesAsJsonValue) {
+      builder.withDeserializerFactory(new Factory<Converter<?>>() {
+        @Override
+        public Converter<?> create(Type type, Genson genson) {
+          if (Object.class.equals(TypeUtil.getRawClass(type)))
+            return new JsonValueConverterWithClassMetadataForDeser();
+          else return null;
+        }
+      });
+    }
+
     builder.withConverterFactory(new Factory<Converter<JsonValue>>() {
       @Override
       public Converter<JsonValue> create(Type type, Genson genson) {
@@ -37,6 +52,19 @@ public class JSR353Bundle extends GensonBundle {
     });
   }
 
+  /**
+   * False by default. When enabled Genson will deserialize everything that has Object as defined type to a JsonValue.
+   * So for example doing genson.deserialize("{}", Object.class), would return a JsonObject, instead of a Map.
+   */
+  public JSR353Bundle readUnknownTypesAsJsonValue(boolean enable) {
+    readUnknownTypesAsJsonValue = true;
+    return this;
+  }
+
+  @HandleClassMetadata(serialization = true, deserialization = false)
+  private class JsonValueConverterWithClassMetadataForDeser extends JsonValueConverter {}
+
+  @HandleClassMetadata(serialization = true, deserialization = true)
   public class JsonValueConverter implements Converter<JsonValue> {
 
     @Override
