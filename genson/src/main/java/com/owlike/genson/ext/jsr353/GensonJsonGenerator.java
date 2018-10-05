@@ -54,6 +54,11 @@ public class GensonJsonGenerator implements JsonGenerator {
   }
 
   @Override
+  public JsonGenerator writeKey(String s) {
+    return this;
+  }
+
+  @Override
   public JsonGenerator writeStartArray() {
     try {
       writer.beginArray();
