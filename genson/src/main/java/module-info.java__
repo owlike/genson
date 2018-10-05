@@ -1,0 +1,10 @@
+module genson {
+    requires java.xml;
+    requires javax.annotation.api;
+    requires java.xml.bind;
+    requires jersey.common;
+    requires java.json;
+    requires java.sql;
+    requires org.objectweb.asm.commons;
+
+}
