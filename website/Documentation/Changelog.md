@@ -2,12 +2,17 @@
 title: Changelog
 layout: default
 ---
-##Release 1.5 - Upcoming
+##Release 1.5 - 02 March 2019
+
+  ** General **
+   
+   * Multiple bug fixes and improvements in core Genson and the Scala module
+   * Introduction of a new Bundle for Java Date and Time API, contributed in [this PR](https://github.com/owlike/genson/pull/121)
+   * Genson is OSGI compliant, [see](https://github.com/owlike/genson/issues/117)
 
   **Core**
   
   * Starting with release 1.5 Genson requires Java 8+
-  
   
   **Scala**
   
