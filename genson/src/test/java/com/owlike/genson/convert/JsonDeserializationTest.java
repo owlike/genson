@@ -349,6 +349,24 @@ public class JsonDeserializationTest {
     assertEquals("foo", pojo.str);
   }
 
+  @Test public void testDeserNonVoidSetterDisabled(){
+    PojoWithNonVoidSetter pojo = new PojoWithNonVoidSetter();
+    pojo.a = 1;
+    genson.deserializeInto("{\"a\":3}", pojo);
+    assertEquals(1, pojo.a);
+    assertFalse(pojo.nonVoidSetterCalled);
+  }
+
+  @Test public void testDeserNonVoidSetterEnabled(){
+    PojoWithNonVoidSetter pojo = new PojoWithNonVoidSetter();
+    pojo.a = 1;
+
+    Genson genson = new GensonBuilder().settersMustBeVoid(false).create();
+    genson.deserializeInto("{\"a\":3}", pojo);
+    assertEquals(3, pojo.a);
+    assertTrue(pojo.nonVoidSetterCalled);
+  }
+
   public static class BeanWithConstructor {
     final String name;
     final int age;
@@ -519,6 +537,17 @@ public class JsonDeserializationTest {
 
     public int getA() {
       return a;
+    }
+  }
+
+  static class PojoWithNonVoidSetter{
+    private int a;
+    public transient boolean nonVoidSetterCalled = false;
+
+    PojoWithNonVoidSetter setA(int a){
+      this.a = a;
+      this.nonVoidSetterCalled = true;
+      return this;
     }
   }
 }

@@ -42,6 +42,7 @@ public class GensonBuilder {
   private boolean withClassMetadata = false;
   private boolean throwExcOnNoDebugInfo = false;
   private boolean useGettersAndSetters = true;
+  private boolean settersMustBeVoid = true;
   private boolean useFields = true;
   private boolean withBeanViewConverter = false;
   private boolean useRuntimeTypeForSerialization = false;
@@ -550,6 +551,14 @@ public class GensonBuilder {
   }
 
   /**
+   * If true, only setters with a return type of void will be considered when deserializing. If set to false, the setter's return type is ignored
+   */
+  public GensonBuilder settersMustBeVoid(boolean settersMustBeVoid){
+    this.settersMustBeVoid = settersMustBeVoid;
+    return this;
+  }
+
+  /**
    * If true, fields will be used when no getter/setter is available, except if you specified
    * that no getter/setter should be used with {@link #useMethods(boolean)}, in
    * that case only fields will be used. By default getters, setters and fields will be used.
@@ -863,7 +872,7 @@ public class GensonBuilder {
     resolvers.add(new BeanMutatorAccessorResolver.GensonAnnotationsResolver());
 
     resolvers.add(new BeanMutatorAccessorResolver.StandardMutaAccessorResolver(propertyFilter,
-      methodFilter, constructorFilter));
+      methodFilter, constructorFilter, settersMustBeVoid));
 
     return new BeanMutatorAccessorResolver.CompositeResolver(resolvers);
   }

@@ -15,7 +15,7 @@ public class BeanViewTest {
     .useBeanViews(true)
     .useConstructorWithArguments(true)
     .set(new BeanMutatorAccessorResolver.StandardMutaAccessorResolver(VisibilityFilter.ALL,
-      VisibilityFilter.PACKAGE_PUBLIC, VisibilityFilter.PACKAGE_PUBLIC)).create();
+      VisibilityFilter.PACKAGE_PUBLIC, VisibilityFilter.PACKAGE_PUBLIC, true)).create();
 
   @Test
   public void testSerializeWithInheritedView() {
