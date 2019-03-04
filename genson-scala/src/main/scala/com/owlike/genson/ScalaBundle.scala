@@ -20,7 +20,7 @@ class ScalaBundle extends GensonBundle {
       .withConverterFactory(new TupleConverterFactory())
       .withConverterFactory(new OptionConverterFactory())
       .withBeanPropertyFactory(new ScalaBeanPropertyFactory(builder.getClassLoader))
-      .`with`(new StandardMutaAccessorResolver(VisibilityFilter.PRIVATE, VisibilityFilter.NONE, VisibilityFilter.PRIVATE))
+      .`with`(new StandardMutaAccessorResolver(VisibilityFilter.PRIVATE, VisibilityFilter.NONE, VisibilityFilter.PRIVATE, true))
   }
 
   def useOnlyConstructorFields(enable: Boolean): ScalaBundle = {
