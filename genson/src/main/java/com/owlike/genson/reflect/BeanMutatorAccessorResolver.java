@@ -258,6 +258,7 @@ public interface BeanMutatorAccessorResolver {
     private final VisibilityFilter fieldVisibilityFilter;
     private final VisibilityFilter methodVisibilityFilter;
     private final VisibilityFilter creatorVisibilityFilter;
+    private final boolean settersMustBeVoid;
 
     /**
      * Creates a new instance of StandardMutaAccessorResolver with
@@ -266,7 +267,7 @@ public interface BeanMutatorAccessorResolver {
      */
     public StandardMutaAccessorResolver() {
       this(VisibilityFilter.PACKAGE_PUBLIC, VisibilityFilter.PACKAGE_PUBLIC,
-        VisibilityFilter.PACKAGE_PUBLIC);
+        VisibilityFilter.PACKAGE_PUBLIC, true);
     }
 
     /**
@@ -277,11 +278,13 @@ public interface BeanMutatorAccessorResolver {
      * @param creatorVisibilityFilter
      */
     public StandardMutaAccessorResolver(VisibilityFilter filedVisibilityFilter,
-                                        VisibilityFilter methodVisibilityFilter, VisibilityFilter creatorVisibilityFilter) {
+                                        VisibilityFilter methodVisibilityFilter, VisibilityFilter creatorVisibilityFilter,
+                                        boolean settersMustBeVoid) {
       super();
       this.fieldVisibilityFilter = filedVisibilityFilter;
       this.methodVisibilityFilter = methodVisibilityFilter;
       this.creatorVisibilityFilter = creatorVisibilityFilter;
+      this.settersMustBeVoid = settersMustBeVoid;
     }
 
     /**
@@ -327,7 +330,7 @@ public interface BeanMutatorAccessorResolver {
       if (!method.isBridge()) {
         if (methodVisibilityFilter.isVisible(method) && method.getName().length() > 3
           && method.getName().startsWith("set") && method.getParameterTypes().length == 1
-          && method.getReturnType() == void.class)
+          && (!settersMustBeVoid || method.getReturnType() == void.class))
           return TRUE;
       }
 

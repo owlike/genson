@@ -168,6 +168,15 @@ public class BeanViewDescriptorProvider extends BaseBeanDescriptorProvider {
   }
 
   public static class BeanViewMutatorAccessorResolver implements BeanMutatorAccessorResolver {
+    private final boolean settersMustBeVoid;
+
+    public BeanViewMutatorAccessorResolver() {
+      this(true);
+    }
+
+    public BeanViewMutatorAccessorResolver(boolean settersMustBeVoid) {
+      this.settersMustBeVoid = settersMustBeVoid;
+    }
 
     public Trilean isAccessor(Field field, Class<?> baseClass) {
       return FALSE;
@@ -212,7 +221,7 @@ public class BeanViewDescriptorProvider extends BaseBeanDescriptorProvider {
       expectedType = TypeUtil.typeOf(0, expectedType);
       int modifiers = method.getModifiers();
       return Trilean.valueOf(method.getName().startsWith("set")
-        && void.class.equals(method.getReturnType())
+        && (!settersMustBeVoid || void.class.equals(method.getReturnType()))
         && method.getGenericParameterTypes().length == 2
         && TypeUtil.match(expectedType, method.getGenericParameterTypes()[1], false)
         && Modifier.isPublic(modifiers) && !Modifier.isAbstract(modifiers)
