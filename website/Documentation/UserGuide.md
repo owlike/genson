@@ -6,7 +6,7 @@ jumbotron: true
 quick-overview: The User Guide guide introduces Gensons main components and some features that can be enabled via configuration. After reading it you should be able to do address most of your use cases.
 ---
 
-##Overview
+## Overview
 
 The main entry point in Genson library is the Genson class.
 It provides methods to serialize Java objects to JSON  and deserialize JSON streams to Java objects.
@@ -15,7 +15,7 @@ per configuration type. Genson provides a default constructor with no arguments 
 To customize Genson have a look at the GensonBuilder.
 
 
-##Read/Write Json
+## Read/Write Json
 
 Genson by default supports main Java classes such as primitives, Lists, Maps, Dates, etc. by providing Converters for them,
 if there is no such converter Genson will consider it is a Java Bean and will try to ser/de based on its Getters,
@@ -30,7 +30,7 @@ String json = genson.serialize(arrayOfInts);
 genson.deserialize(json, int[].class);
 {% endhighlight %}
 
-###Supported IO classes
+### Supported IO classes
 You can also use Java OutputStream/InputStream, Writer/Reader and byte arrays instead of Strings.
 In most cases you will want to use them instead of Strings for better performances.
 
@@ -45,7 +45,7 @@ genson.deserialize(reader, int[].class);
 {% endhighlight %}
 
 
-###Untyped Java structures
+### Untyped Java structures
 During serialization if there is no type information available (meaning it is Object),
 Genson will use the runtime type of the object to decide how to serialize it.
 If it has type information then it will use it instead of the runtime type.
@@ -83,7 +83,7 @@ Object map2 = genson.deserialize(json, Object.class);
 {% highlight java  %}new GensonBuilder().useRuntimeType(true).create(){% endhighlight %}
 
 
-##POJO Databinding
+## POJO Databinding
 Of course working only with Maps, Lists and primitive types is not so convenient.
 Usually your goal is to map the JSON to some structure you have defined and vice versa.
 
@@ -152,17 +152,17 @@ genson.deserializeInto(json, personInstance);
 {% endhighlight %}
 
 
-##Filter/Rename properties##
+## Filter/Rename properties
 
 Genson provides two major ways of including/excluding and naming properties, via annotations and via configuration through GensonBuilder (not exclusive).
 
-###Via annotations###
+### Via annotations
 
 Excluding a property can be achieved by putting a `@JsonIgnore` annotation on the field or getter/setter. The same goes for
 including a property (for example a private field that you want to be serialized) but using `@JsonProperty` annotation.
 JsonProperty can also be used to define a different name for a property than the default one `@JsonProperty(name="newName")`.
 
-###Via GensonBuilder###
+### Via GensonBuilder
 
 The other way is using the GensonBuilder exclude/include/rename methods that support a wider range of exclusion/inclusion/naming patterns.
 This feature gets handy if you can't modify the source code of your classes or just don't want to pollute your code with annotations.
@@ -180,7 +180,7 @@ new GensonBuilder()
 .create();
 {% endhighlight %}
 
-###Genson wide strategies###
+### Genson wide strategies
 You can also define some strategies for property resolution that will be used for a Genson instance. You can choose whether
 to use Getter&Setter or Fields (or both - by default) and their visibility (public, protected, private...).
 
@@ -195,12 +195,12 @@ new GensonBuilder()
 If you want to have a more general property resolution or naming strategy, you can respectively,
 extend PropertyBaseResolver or implement your own PropertyNameResolver and register it.
 
-###Excluding properties at runtime###
+### Excluding properties at runtime
 One can also exclude a property at runtime by implementing a custom RuntimePropertyFilter and registering it via GensonBuilder.
 This filter would be used every time a property is being serialized or deserialized.
 
 
-##Object instantiation##
+## Object instantiation
 By default Genson requires you to provide a default no argument constructor. But Genson also works with constructors that take arguments,
 encouraging people to work with immutable objects.
 
@@ -210,7 +210,7 @@ Java reflection API does not provide access to parameter names of methods and co
 
 To bypass this problem Genson provides two solutions, annotations and automatic detection via byte code analysis.
 
-###Annotations###
+### Annotations
 
 Annotate each parameter of the constructor with **@JsonProperty**, this would tell to Genson that this is the name that must be used.
 
@@ -229,7 +229,7 @@ public class Address {
 {% endhighlight %}
 
 
-###Automatic resolution###
+### Automatic resolution
 
 You can also use constructors with arguments without using annotations.
 This mechanism is disabled by default as it uses byte code parsing to extract names from code that has been compiled with debug symbols
@@ -241,7 +241,7 @@ Enable automatic name resolution for constructors and methods via the GensonBuil
 new GensonBuilder().useConstructorWithArguments(true).create();
 {% endhighlight %}
 
-###Factory methods###
+### Factory methods
 Genson has also support for methods that act as factories. Those methods must be static, defined inside the class you want to
 deserialize (or a parent) and annotated with `@JsonCreator` annotation.
 JsonCreator annotation can also be used on Constructors when you have multiple ones
@@ -269,7 +269,7 @@ public class Address {
 
 
 
-##Exceptions##
+## Exceptions
 
 Since version 0.99 there are no checked exceptions anymore.
 The main reason is to avoid ugly boilerplate code for people who use Genson. Of course even if Genson makes use of unchecked exceptions you
@@ -280,7 +280,7 @@ can still catch them if you want to handle them. Genson can throw two kind of ex
 
 
 
-##Generic types##
+## Generic types
 
 Due to type erasure, in Java, we can not do things like List<Address>.class. Meaning that we can't tell to Genson to deserialize to a List of Addresses but only to a list of unknown objects.
 Those unknown objects being deserialized as Maps. The solution is to use what is called TypeToken, described in [this blog](http://gafter.blogspot.fr/2006/12/super-type-tokens.html).
@@ -335,7 +335,7 @@ public class Container<E extends Address> {
 **Remark** that if in AddressGroup we were using Address type instead of the concrete type, the serialized json wouldn't contain the street property.
 Indeed it would have been ser/de using Address type, using the runtime type can be enable via `new GensonBuilder().useRuntimeType(true)`.
 
-##Polymorphic types
+## Polymorphic types
 
 Another nice feature of Genson is its ability to deserialize an object serialized with Genson back to its concrete type.
 Lets now enable runtime type resolution and serialize a Container of EuropeanAddress and then deserialize it back.
@@ -409,7 +409,7 @@ genson.serialize(addressContainer);
  this would be avoided by narrowing down what the types could be (so avoid defining the static type as Object or a list of anything).
 
 
-##Streaming API
+## Streaming API
 
 Genson has lower memory consumption than DOM based parsers, because Genson does not need to store the complete JSON document in memory.
 This low memory footprint is being achieved via the Streaming API. As your objects are being serialized, the JSON is directly written to
@@ -498,12 +498,12 @@ private List<Integer> readAnArray(ObjectReader reader) {
 {% endhighlight %}
 
 
-##Custom Ser/De##
+## Custom Ser/De
 
 In some cases Genson may not serialize/deserialize a class the way you would like.
 First you should try to have a look at the different options available to you, such as Genson configuration via the GensonBuilder or annotations.
 
-###Custom Converter###
+### Custom Converter
 
 If nothing seems to help solve your problem, then you might want to implement your-self the way a specific type is being ser/de.
 This is achieved through implementing a custom Converter. A Converter is mainly an implementation of a Serializer and Deserializer for a specific type.
@@ -573,7 +573,7 @@ Delegating to Genson the ser/de of complex types that you don't need to handle c
 You can also create a custom Serializer and Deserializer if you want to handle only serialization or deserialization.
 
 
-###Converter Factory###
+### Converter Factory
 
 Converters are registered for specific types. The one they have in their signature and additional ones that you can specify when registering the Converter.
 
@@ -613,7 +613,7 @@ public class PersonConverterFactory implements Factory<Converter<Person>> {
 {% endhighlight %}
 
 
-###Contextual Converter###
+### Contextual Converter
 
 Another nice feature in Genson is the support of Contextual Converters and Factories.
 The contextual converter is used through `@JsonConverter` annotation,

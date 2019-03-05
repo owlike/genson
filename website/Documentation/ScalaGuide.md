@@ -6,7 +6,7 @@ jumbotron: true
 quick-overview: Genson provides an out of the box integration with Scala for the high level databinding API.
 ---
 
-##Overview
+## Overview
 
 Genson provides an easy to use boiler free integration with Scala.
 It supports common Scala mutable and immutable collections, Option, tuples, case classes and even functions
@@ -26,26 +26,26 @@ val jsonString = toJson(someValue)
 val actualValue = fromJson[SomeType](json)
 {% endhighlight %}
 
-###Scala version
+### Scala version
 
 Genson has been tested against scala 2.11 and 2.12. In theory you can use it with all releases from 2.11 and up.
 We follow the standard cross build conventions for scala projects ex: genson-scala_2.11 and genson-scala_2.12.
 If you need support for Scala 2.10, you will need to look at the older releases of Genson pre 1.5.
 
 
-##Download
+## Download
 
 In order to keep the main Genson jar small we chose to provide the Scala extension as a separate jar.
 The other reason is that some tools might not handle well optional dependencies, in result someone that does not use
 the Scala extension could end up with the scala language library downloaded.
 
-###SBT
+### SBT
 
 {% highlight scala %}
 libraryDependencies += "com.owlike" %% "genson-scala" % "{{site.latest_version}}"
 {% endhighlight %}
 
-###Maven
+### Maven
 
 {% highlight xml %}
 <dependency>
@@ -55,7 +55,7 @@ libraryDependencies += "com.owlike" %% "genson-scala" % "{{site.latest_version}}
 </dependency>
 {% endhighlight %}
 
-###Manual Download
+### Manual Download
 
 If you don't use a dependency management tool then you can still use it, but you will have to download the Scala extension and
 the core Genson jars by hand.
@@ -65,7 +65,7 @@ the core Genson jars by hand.
  * [Genson-scala_2.11](http://repo1.maven.org/maven2/com/owlike/genson-scala_2.12/{{site.latest_version}}/genson-scala_2.12-{{site.latest_version}}.jar)
 
 
-##Collections & Tuples
+## Collections & Tuples
 
 Genson provides a set of default converters for most scala collections (mutable and immutable).
 Scala provides some optimized types for maps and collections of few elements, Genson will respect it
@@ -92,7 +92,7 @@ val json = toJson(("foo", "bar"))
 val tuple = fromJson[(String, String)](json)
 {% endhighlight %}
 
-##Deserialize Unknown Types
+## Deserialize Unknown Types
 
 When you don't specify the type to use, Genson will deserialize:
 
@@ -116,7 +116,7 @@ val mapWithOptionalValues = fromJson[Map[String, Option[_]]](
 {% endhighlight %}
 
 
-##Case classes
+## Case classes
 
 Genson has also out of the box support for case classes. By default Case classes ser/de will follow these rules:
 
@@ -142,7 +142,7 @@ val person = fromJson[Person](json)
 
 Genson will serialize None as null and null is deserialized as None.
 
-##Customizing
+## Customizing
 
 Of course if the default configuration does not fit your needs you can make a custom Genson instance and then use it.
 For example lets say we want to enable indentation, serialize objects based on their runtime type and want to ser/de
@@ -173,7 +173,7 @@ fromJson[SomeType](json)
 For a more in depth overview of Genson features and customization have a look at the User Guide and configuration sections.
 
 
-##AST support via json4s
+## AST support via json4s
 
 Instead of creating again another DOM structure like all the existing ones, Genson provides it by supporting json4s.
 Json4s defines an AST for JSON and utilities to work with it.
@@ -204,13 +204,13 @@ val json = fromJson[JObject]("""{"name":"foo","someDouble":28.1,"male":true,"som
 
 In order to use json4s features with Genson, you need to add a dependency to it.
 
-###SBT
+### SBT
 
 {% highlight scala %}
 libraryDependencies += "org.json4s" % "json4s-ast_${scala.version}" % "3.2.10"
 {% endhighlight %}
 
-###Maven
+### Maven
 
 {% highlight xml %}
 <dependency>

@@ -5,7 +5,7 @@ jumbotron: true
 quick-overview: Overview of Genson annotations and configuration through GensonBuilder.
 ---
 
-##Annotations##
+## Annotations
 
 Some aspects of Genson can be configured via annotations used on your classes. This is nice since you have your configuration that
 leaves near the code that uses it.
@@ -74,7 +74,7 @@ leaves near the code that uses it.
 But in some cases you might not be able to modify the source code or just don't want to, in that case you can't use annotations.
 
 
-##GensonBuilder##
+## GensonBuilder
 
 GensonBuilder is the main class allowing to configure and create new instances of Genson.
 It tries to be easy to use through a fluent builder API.

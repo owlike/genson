@@ -6,7 +6,7 @@ jumbotron: true
 quick-overview: Genson provides integrations with some common frameworks and is packaged with Bundles to support types from commonly used libraries.
 ---
 
-##Extension types##
+## Extension types
 
 At the moment you can find two kind of extensions in Genson,
 
@@ -14,7 +14,7 @@ At the moment you can find two kind of extensions in Genson,
  - Integration in Genson of types defined in widely used libraries, ie. support JSR 353 JsonObject, JsonArray, etc types.
  This is done through the GensonBundle system.
 
-##GensonBundle##
+## GensonBundle
 
 A GensonBundle is a way to group a set of features in a single registrable component. Bundles by default, are not registered, you must do it
 explicitly. This is used internally to support types and annotations defined in other libraries and is intended to allow users to group their customizations
@@ -42,7 +42,7 @@ Genson genson = new GensonBuilder().withBundle(new MyBundle()).create();
 {% endhighlight %}
  
 
-##JAX-RS: Jersey & cie##
+## JAX-RS: Jersey & cie
 
 To enable json support in JAX-RS implementations with Genson, just drop the jar into your classpath.
 The implementation will detect it and use Genson for json conversions.
@@ -55,7 +55,7 @@ Actually it has been tested with Jersey and Resteasy. It works out of the box.
  - By default Genson JAX-RS integration enables JAXB annotations and constructors without arguments support.
 
 
-###Manual registration###
+### Manual registration
 
 
 The examples above are for Jersey, but ResourceConfig is just an implementation of Application interface.
@@ -77,7 +77,7 @@ final ClientConfig clientConfig = new ClientConfig().register(GensonJsonConverte
 
 Adding a customized Genson instance can be achieved through the same registration mechanism.
 
-###Customization###
+### Customization
 
 In many cases you might want to customize the Genson instance being used. 
 To do so, you only have to create your custom instance with GensonBuilder and then register a 
@@ -91,7 +91,7 @@ new ResourceConfig().register(new GensonJaxRSFeature().use(myCustomGenson).disab
 GensonJaxRSFeature is supposed to be the centralized place containing the config related to Genson and Jax-RS.
 
 
-###Disabling Genson in JAX-RS###
+### Disabling Genson in JAX-RS
 
 Disabling Genson is achieved via GensonJaxRSFeature mechanism we have seen above. 
 
@@ -102,7 +102,7 @@ ClientBuilder.newClient(new ClientConfig().register(new GensonJaxRSFeature().dis
 new ResourceConfig().register(new GensonJaxRSFeature().disable());
 {% endhighlight %}
 
-###Filtering properties from ser/de at runtime###
+### Filtering properties from ser/de at runtime
 The Jax-Rs extension comes with a feature called UrlQueryParamFilter which implements Gensons RuntimePropertyFilter.
 Let's say we have a class containing some properties age, name, gender and we want to be able to include only some of those
 at runtime in the response based on the params of the query string.
@@ -119,7 +119,7 @@ new ResourceConfig()
 
 Have a look at the methods from UrlQueryParamFilter to see how its behaviour can be customized to fit your needs.
 
-##JSR 353 - Java API for Json Processing##
+## JSR 353 - Java API for Json Processing
 
 Genson provides two kind of integrations with the JSR. You can use it as the JSR implementation or
 to work with the DOM structures defined in the JSR.
@@ -135,13 +135,13 @@ If the JSR API is not included in your Java version, you can still get it with M
 </dependency>
 {% endhighlight %}
 
-###Using Genson as JSR 353 implementation###
+### Using Genson as JSR 353 implementation
 
 Since version 0.99 Genson provides a complete implementation of JSR 353. To use Genson implementation,
 you only need it on your classpath.
 
 
-###Using JSR 353 types with Genson###
+### Using JSR 353 types with Genson
 
 Starting with release 0.98 Genson provides a bundle JSR353Bundle that enables support of JSR 353 types in Genson.
 This means that you can ser/deser using those types but also mix them with the databinding mechanism.
@@ -161,7 +161,7 @@ class Pojo {
 Pojo pojo = genson.deserialize(json, Pojo.class);
 {% endhighlight %}
 
-##JAXB Annotations##
+## JAXB Annotations
 
 
 Since version 0.95 Genson provides support for JAXB annotations.
@@ -174,7 +174,7 @@ In Jersey JAXB bundle is enabled by default. If you are using Genson outside Jer
 Genson genson = new GensonBuilder().withBundle(new JAXBBundle()).create();
 {% endhighlight %}
 
-###Supported annotations###
+### Supported annotations
 
  * **XmlAttribute** can be used to include a property in serialization/deserialization (can be used on fields, getter and setter).
  If a name is defined it will be used instead of the one derived from the method/field.
@@ -194,18 +194,18 @@ Genson genson = new GensonBuilder().withBundle(new JAXBBundle()).create();
  to wrap/unwrap the root classes annotated with @XmlRootElement in another object. By default the key used is the class name with
  first letter to lower case.
 
-###Supported types###
+### Supported types
 
 Actual implementation has default converters for **Duration** and **XMLGregorianCalendar**.
 
 
-###What might come next###
+### What might come next
 
 Support for cyclic references using XmlId and XmlIdRef, XmlType.
 
 If there are other jaxb features you would like to be supported just open an issue or drop an email on the google group.
 
-##Joda-Time
+## Joda-Time
 
 Genson provides JodaTimeBundle enabling joda-time types support.
 
@@ -232,7 +232,7 @@ In most cases you won't need to configure the deserialization format for these t
 
 JsonDateFormat annotation can also be used with DateTime, MutableDateTime, LocalDate, LocalDateTime and LocalTime classes.
 
-###Supported types###
+### Supported types
 
 Main Joda Time types are supported at the moment, if some are missing feel free to open an issue or even better, make a pull request :)
 
@@ -243,7 +243,7 @@ Main Joda Time types are supported at the moment, if some are missing feel free 
 * Duration is ser/de as a long representing the duration in milliseconds.
 
 
-##Guava
+## Guava
 
 At the moment the Guava bundle is still under development, it only supports the Optional type. Absent will be serialized as null and null
 will be deserialized back to Absent.
@@ -254,7 +254,7 @@ Genson genson = new GensonBuilder().withBundle(new GuavaBundle()).create();
 
 
 
-##Spring MVC##
+## Spring MVC
 
 To enable json support in Spring MVC with Genson, you need to register Gensons MessageConverter implementation.
 

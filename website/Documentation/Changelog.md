@@ -2,7 +2,7 @@
 title: Changelog
 layout: default
 ---
-##Release 1.5 - 04 March 2019
+## Release 1.5 - 04 March 2019
 
   ** General **
    
@@ -18,7 +18,7 @@ layout: default
   
   * Starting with release 1.5, Scala 2.10 is no longer supported. Genson is cross built for Scala 2.11 ans 2.12
 
-##Release 1.4 - 27 March 2016
+## Release 1.4 - 27 March 2016
 
  **Core**
  
@@ -44,7 +44,7 @@ layout: default
  * Fix #82 - null and missing values are deserialized as None instead of null for Options 
  * Allow to use a specific classloader instead of the default one PR #72
 
-##Release 1.3 - 12 April 2015
+## Release 1.3 - 12 April 2015
 
  **Core**
  
@@ -82,7 +82,7 @@ layout: default
  
   * Issue #36 - Automatic encoding detection (UTF-8/16/32)
  
-##Release 1.2 - 26 December 2014
+## Release 1.2 - 26 December 2014
  
  **Genson**
  
@@ -97,7 +97,7 @@ layout: default
   * Handling erased primitive types in generics, requires scala 2.11
  
 
-##Release 1.1 - 22 September 2014
+## Release 1.1 - 22 September 2014
 
 "Medium" release providing new extensions, configuration and bug fixes. The API remains backwards compatible.
 
@@ -118,7 +118,7 @@ layout: default
  * Issue #10 ScalaBundle: Ser/de of None without parameter type was failing
 
 
-##Release 1.0 - 27 June 2014
+## Release 1.0 - 27 June 2014
 
 Major release and migration to GitHub with a complete new website.
 
@@ -133,7 +133,7 @@ Major release and migration to GitHub with a complete new website.
  * Minor bug fixes
 
 
-##Release 0.99 - 13 April 2014
+## Release 0.99 - 13 April 2014
 
 This release introduces some new features, the main being JSR 353 and some simplifications of code related to exceptions. Indeed all checked exceptions have been replaced by unchecked ones.
 
@@ -147,21 +147,21 @@ This release introduces some new features, the main being JSR 353 and some simpl
  * Bug fix: using class classloader in ASM resolver instead of Gensons classloader
 
 
-##Release 0.98 - 7 August 2013
+## Release 0.98 - 7 August 2013
 
  * JSR 353 types support via a new bundle JSR353Bundle
  * Bugfix in JsonReader skipValue method
  * Bugfix when using BeanViews, introduced after some refactoring in version 0.95
 
-##Release 0.97 - 11 June 2013
+## Release 0.97 - 11 June 2013
 
  * Bugfix: Jersey messagebodywriter does not close outputstream anymore. Previously they were being closed by inadvertance, streams should be closed by the code that is managing them, not the code that reads/writes.
 
-##Release 0.96 - 2 June 2013
+## Release 0.96 - 2 June 2013
 
  * Important [http://code.google.com/p/genson/issues/detail?id=4 bug fix] related to generics getting mixed up in internal cache, you are highly encouraged to upgrade to 0.96.
 
-##Release 0.95 - 21 May 2013
+## Release 0.95 - 21 May 2013
 
  * JAXB annotations and types support, enabled by default for JAX-RS implementations.
  * Added Resteay integration (works as for Jersey, just drop the jar :)).
@@ -172,7 +172,7 @@ This release introduces some new features, the main being JSR 353 and some simpl
  * Improved map ser/deser to handle all sort of keys. Map with complex keys can now be serialized and deserialized back (however they are not represented as a json object but an array of objects).
  * Bug fix: Generic self referencing types.
 
-##Release 0.94 - 5 February 2013
+## Release 0.94 - 5 February 2013
 
  * corrected bug related to generics and default generic converter
  * added pretty printing support (enable it via the Genson.Builder)
@@ -184,7 +184,7 @@ This release introduces some new features, the main being JSR 353 and some simpl
  * ValueType.INTEGER type has been replaced with long. INTEGER meaning here a numeric value with no decimals.
  * More unit testing, code enhancements and internal stuff.
 
-##Release 0.93 - 1 October 2012
+## Release 0.93 - 1 October 2012
 
  * Added new methods to Genson.Builder allowing to filter and rename properties of classes without using annotations and requiring only small code
  * Corrected bugs related to generics
@@ -192,17 +192,17 @@ This release introduces some new features, the main being JSR 353 and some simpl
  * Added the possibility to choose whether to use custom double parsing algorithm (very fast) or standard Double.parse (exact)
  * Metadata bug corrected for attributes defined as Object.
 
-##Release 0.92 - 27 August 2012
+## Release 0.92 - 27 August 2012
 
  * Jersey integration with automatic detection (and working with DI frameworks)
  * Spring web integration
  * Enhanced filtering support and provided better user customization
  * Default converters for URI, BigInteger, BigDecimal, Timestamp.
 
-##Release 0.91 - 20 August 2012
+## Release 0.91 - 20 August 2012
 
  * Addition of factory methods in Genson class allowing to ease the creation of ObjectReader/Writer.
 
-##Release 0.9 - 12 August 2012
+## Release 0.9 - 12 August 2012
 
  * First stable release.
