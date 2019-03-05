@@ -124,7 +124,7 @@
             </li>
             <script>
               var linkedInParams = {
-                url: 'http://owlike.github.io/genson/',
+                url: 'http://genson.io',
                 original_referer: document.URL,
                 isFramed: false,
                 lang: 'en_US',
@@ -135,12 +135,12 @@
                 original_referer: document.URL,
                 text: '#Genson, fast and easy to use Java <> JSON library.',
                 tw_p: 'tweetbutton',
-                url: 'http://owlike.github.io/genson/',
+                url: 'http://genson.io',
                 via: 'EugenCepoi'
               }
 
               var googlePlusParams = {
-                url: 'http://owlike.github.io/genson/'
+                url: 'http://genson.io'
               }
 
               $('.share-button').tooltip({delay: { show: 500, hide: 100 }});
@@ -187,7 +187,7 @@
     <div class="container">
         <div class="row">
             <div class="col-md-9" role="main">
-                <h2 id="extension-types">Extension types</h2>
+                <p>##Extension types##</p>
 
 <p>At the moment you can find two kind of extensions in Genson,</p>
 
@@ -197,7 +197,7 @@
  This is done through the GensonBundle system.</li>
 </ul>
 
-<h2 id="gensonbundle">GensonBundle</h2>
+<p>##GensonBundle##</p>
 
 <p>A GensonBundle is a way to group a set of features in a single registrable component. Bundles by default, are not registered, you must do it
 explicitly. This is used internally to support types and annotations defined in other libraries and is intended to allow users to group their customizations
@@ -221,7 +221,7 @@ in order to work properly.</p>
 <span class="c1">// then register your bundle</span>
 <span class="n">Genson</span> <span class="n">genson</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">GensonBuilder</span><span class="o">().</span><span class="na">withBundle</span><span class="o">(</span><span class="k">new</span> <span class="nf">MyBundle</span><span class="o">()).</span><span class="na">create</span><span class="o">();</span></code></pre></figure>
 
-<h2 id="jax-rs-jersey--cie">JAX-RS: Jersey &amp; cie</h2>
+<p>##JAX-RS: Jersey &amp; cie##</p>
 
 <p>To enable json support in JAX-RS implementations with Genson, just drop the jar into your classpath.
 The implementation will detect it and use Genson for json conversions.</p>
@@ -234,7 +234,7 @@ The implementation will detect it and use Genson for json conversions.</p>
   <li>By default Genson JAX-RS integration enables JAXB annotations and constructors without arguments support.</li>
 </ul>
 
-<h3 id="manual-registration">Manual registration</h3>
+<p>###Manual registration###</p>
 
 <p>The examples above are for Jersey, but ResourceConfig is just an implementation of Application interface.
 So you can achieve the same result without using Jersey but any other implementation of Jax-RS spec.
@@ -251,7 +251,7 @@ You basically only have to implement getSingletons to return a Set containing yo
 
 <p>Adding a customized Genson instance can be achieved through the same registration mechanism.</p>
 
-<h3 id="customization">Customization</h3>
+<p>###Customization###</p>
 
 <p>In many cases you might want to customize the Genson instance being used. 
 To do so, you only have to create your custom instance with GensonBuilder and then register a 
@@ -261,7 +261,7 @@ GensonJaxRSFeature configured with this Genson instance.</p>
 
 <p>GensonJaxRSFeature is supposed to be the centralized place containing the config related to Genson and Jax-RS.</p>
 
-<h3 id="disabling-genson-in-jax-rs">Disabling Genson in JAX-RS</h3>
+<p>###Disabling Genson in JAX-RS###</p>
 
 <p>Disabling Genson is achieved via GensonJaxRSFeature mechanism we have seen above.</p>
 
@@ -270,8 +270,8 @@ GensonJaxRSFeature configured with this Genson instance.</p>
 <span class="c1">// server</span>
 <span class="k">new</span> <span class="nf">ResourceConfig</span><span class="o">().</span><span class="na">register</span><span class="o">(</span><span class="k">new</span> <span class="nf">GensonJaxRSFeature</span><span class="o">().</span><span class="na">disable</span><span class="o">());</span></code></pre></figure>
 
-<h3 id="filtering-properties-from-serde-at-runtime">Filtering properties from ser/de at runtime</h3>
-<p>The Jax-Rs extension comes with a feature called UrlQueryParamFilter which implements Gensons RuntimePropertyFilter.
+<p>###Filtering properties from ser/de at runtime###
+The Jax-Rs extension comes with a feature called UrlQueryParamFilter which implements Gensons RuntimePropertyFilter.
 Let’s say we have a class containing some properties age, name, gender and we want to be able to include only some of those
 at runtime in the response based on the params of the query string.
 For example having this url <code>http://localhost/foo/bar?filter=age&amp;filter=name</code> would include only age and name in the response.</p>
@@ -286,7 +286,7 @@ For example having this url <code>http://localhost/foo/bar?filter=age&amp;filter
 
 <p>Have a look at the methods from UrlQueryParamFilter to see how its behaviour can be customized to fit your needs.</p>
 
-<h2 id="jsr-353---java-api-for-json-processing">JSR 353 - Java API for Json Processing</h2>
+<p>##JSR 353 - Java API for Json Processing##</p>
 
 <p>Genson provides two kind of integrations with the JSR. You can use it as the JSR implementation or
 to work with the DOM structures defined in the JSR.</p>
@@ -299,12 +299,12 @@ to work with the DOM structures defined in the JSR.</p>
   <span class="nt">&lt;version&gt;</span>1.0<span class="nt">&lt;/version&gt;</span>
 <span class="nt">&lt;/dependency&gt;</span></code></pre></figure>
 
-<h3 id="using-genson-as-jsr-353-implementation">Using Genson as JSR 353 implementation</h3>
+<p>###Using Genson as JSR 353 implementation###</p>
 
 <p>Since version 0.99 Genson provides a complete implementation of JSR 353. To use Genson implementation,
 you only need it on your classpath.</p>
 
-<h3 id="using-jsr-353-types-with-genson">Using JSR 353 types with Genson</h3>
+<p>###Using JSR 353 types with Genson###</p>
 
 <p>Starting with release 0.98 Genson provides a bundle JSR353Bundle that enables support of JSR 353 types in Genson.
 This means that you can ser/deser using those types but also mix them with the databinding mechanism.</p>
@@ -321,7 +321,7 @@ This means that you can ser/deser using those types but also mix them with the d
 
 <span class="n">Pojo</span> <span class="n">pojo</span> <span class="o">=</span> <span class="n">genson</span><span class="o">.</span><span class="na">deserialize</span><span class="o">(</span><span class="n">json</span><span class="o">,</span> <span class="n">Pojo</span><span class="o">.</span><span class="na">class</span><span class="o">);</span></code></pre></figure>
 
-<h2 id="jaxb-annotations">JAXB Annotations</h2>
+<p>##JAXB Annotations##</p>
 
 <p>Since version 0.95 Genson provides support for JAXB annotations.
 All annotations are not supported as some do not make sense in the JSON world.
@@ -331,7 +331,7 @@ Genson annotations take precedence over JAXB ones, so they can be used to overri
 
 <figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">Genson</span> <span class="n">genson</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">GensonBuilder</span><span class="o">().</span><span class="na">withBundle</span><span class="o">(</span><span class="k">new</span> <span class="nf">JAXBBundle</span><span class="o">()).</span><span class="na">create</span><span class="o">();</span></code></pre></figure>
 
-<h3 id="supported-annotations">Supported annotations</h3>
+<p>###Supported annotations###</p>
 
 <ul>
   <li>
@@ -361,17 +361,17 @@ Genson annotations take precedence over JAXB ones, so they can be used to overri
   </li>
 </ul>
 
-<h3 id="supported-types">Supported types</h3>
+<p>###Supported types###</p>
 
 <p>Actual implementation has default converters for <strong>Duration</strong> and <strong>XMLGregorianCalendar</strong>.</p>
 
-<h3 id="what-might-come-next">What might come next</h3>
+<p>###What might come next###</p>
 
 <p>Support for cyclic references using XmlId and XmlIdRef, XmlType.</p>
 
 <p>If there are other jaxb features you would like to be supported just open an issue or drop an email on the google group.</p>
 
-<h2 id="joda-time">Joda-Time</h2>
+<p>##Joda-Time</p>
 
 <p>Genson provides JodaTimeBundle enabling joda-time types support.</p>
 
@@ -395,7 +395,7 @@ In most cases you won’t need to configure the deserialization format for these
 
 <p>JsonDateFormat annotation can also be used with DateTime, MutableDateTime, LocalDate, LocalDateTime and LocalTime classes.</p>
 
-<h3 id="supported-types-1">Supported types</h3>
+<p>###Supported types###</p>
 
 <p>Main Joda Time types are supported at the moment, if some are missing feel free to open an issue or even better, make a pull request :)</p>
 
@@ -406,17 +406,19 @@ In most cases you won’t need to configure the deserialization format for these
   <li>Period is ser/de using</li>
 </ul>
 <figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">ISOPeriodFormat</span><span class="o">.</span><span class="na">standard</span><span class="o">()</span></code></pre></figure>
-<p>.
-* Duration is ser/de as a long representing the duration in milliseconds.</p>
+<p>.</p>
+<ul>
+  <li>Duration is ser/de as a long representing the duration in milliseconds.</li>
+</ul>
 
-<h2 id="guava">Guava</h2>
+<p>##Guava</p>
 
 <p>At the moment the Guava bundle is still under development, it only supports the Optional type. Absent will be serialized as null and null
 will be deserialized back to Absent.</p>
 
 <figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">Genson</span> <span class="n">genson</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">GensonBuilder</span><span class="o">().</span><span class="na">withBundle</span><span class="o">(</span><span class="k">new</span> <span class="nf">GuavaBundle</span><span class="o">()).</span><span class="na">create</span><span class="o">();</span></code></pre></figure>
 
-<h2 id="spring-mvc">Spring MVC</h2>
+<p>##Spring MVC##</p>
 
 <p>To enable json support in Spring MVC with Genson, you need to register Gensons MessageConverter implementation.</p>
 

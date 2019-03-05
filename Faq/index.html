@@ -124,7 +124,7 @@
             </li>
             <script>
               var linkedInParams = {
-                url: 'http://owlike.github.io/genson/',
+                url: 'http://genson.io',
                 original_referer: document.URL,
                 isFramed: false,
                 lang: 'en_US',
@@ -135,12 +135,12 @@
                 original_referer: document.URL,
                 text: '#Genson, fast and easy to use Java <> JSON library.',
                 tw_p: 'tweetbutton',
-                url: 'http://owlike.github.io/genson/',
+                url: 'http://genson.io',
                 via: 'EugenCepoi'
               }
 
               var googlePlusParams = {
-                url: 'http://owlike.github.io/genson/'
+                url: 'http://genson.io'
               }
 
               $('.share-button').tooltip({delay: { show: 500, hide: 100 }});
@@ -187,21 +187,21 @@
     <div class="container">
         <div class="row">
             <div class="col-md-12" role="main">
-                <h3 id="how-to-exclude-a-property-from-serde">How to exclude a property from ser/de?</h3>
-<p>Annotate your field and getter/setter with <code>@JsonIgnore</code>.</p>
+                <p>###How to exclude a property from ser/de?
+Annotate your field and getter/setter with <code>@JsonIgnore</code>.</p>
 
-<h3 id="how-to-include-a-field-or-method-from-serde">How to include a field or method from ser/de?</h3>
-<p>Annotate it with <a href="/GettingStarted/#filterrename-properties"><code>@JsonProperty</code> or use GensonBuilder</a>.
+<p>###How to include a field or method from ser/de?
+Annotate it with <a href="/GettingStarted/#filterrename-properties"><code>@JsonProperty</code> or use GensonBuilder</a>.
 You can even indicate if you want it to be included only in serialization or deserialization.</p>
 
-<h3 id="how-to-skip-null-values-from-output">How to skip null values from output?</h3>
+<p>###How to skip null values from output?</p>
 
 <figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="k">new</span> <span class="nf">GensonBuilder</span><span class="o">().</span><span class="na">setSkipNull</span><span class="o">(</span><span class="kc">true</span><span class="o">).</span><span class="na">create</span><span class="o">();</span></code></pre></figure>
 
-<h3 id="how-to-create-a-custom-converter">How to create a custom Converter?</h3>
-<p>See the <a href="/GettingStarted/#custom-serde">custom converter section</a> of the user guide.</p>
+<p>###How to create a custom Converter?
+See the <a href="/GettingStarted/#custom-serde">custom converter section</a> of the user guide.</p>
 
-<h3 id="how-to-store-stateshare-data-from-one-converter-to-another">How to store state/share data from one converter to another?</h3>
+<p>###How to store state/share data from one converter to another?</p>
 
 <ul>
   <li>Use Context class (preferred solution), it is intended to be shared across all converters for a
@@ -209,7 +209,7 @@ You can even indicate if you want it to be included only in serialization or des
   <li>Use ThreadLocalHolder which internally uses a ThreadLocal map to store data.</li>
 </ul>
 
-<h3 id="how-to-change-the-default-visibility-of-fields-methods-and-constructors">How to change the default visibility of fields, methods and constructors?</h3>
+<p>###How to change the default visibility of fields, methods and constructors?</p>
 
 <p>Genson uses <strong>VisibilityFilter</strong> class to filter fields, methods and constructors by their <a href="http://docs.oracle.com/javase/6/docs/api/java/lang/reflect/Modifier.html">Modifiers</a>.
 For example if you want to accept public, protected and private fields :</p>
@@ -219,7 +219,7 @@ For example if you want to accept public, protected and private fields :</p>
 <span class="c1">// you can also define a custom visibility filter :</span>
 <span class="k">new</span> <span class="nf">GensonBuilder</span><span class="o">().</span><span class="na">useFields</span><span class="o">(</span><span class="kc">true</span><span class="o">,</span> <span class="k">new</span> <span class="nf">VisibilityFilter</span><span class="o">(</span><span class="n">Modifier</span><span class="o">.</span><span class="na">TRANSIENT</span><span class="o">,</span> <span class="n">Modifier</span><span class="o">.</span><span class="na">STATIC</span><span class="o">)).</span><span class="na">create</span><span class="o">();</span></code></pre></figure>
 
-<h3 id="how-to-use-only-fields-or-methods">How to use only fields or methods?</h3>
+<p>###How to use only fields or methods?</p>
 
 <p>For example if you want to use only fields :</p>
 
@@ -227,15 +227,15 @@ For example if you want to accept public, protected and private fields :</p>
 
 <p>You need to change the visibility filter for fields as by default it will only use fields with public/package visibility.</p>
 
-<h3 id="how-to-deserialize-to-an-interfaceabstract-class">How to deserialize to an interface/abstract class?</h3>
-<p>See the <a href="/GettingStarted/#polymorphic-types">class metadata mechanism</a> discussed in the Getting Started Guide.</p>
+<p>###How to deserialize to an interface/abstract class?
+See the <a href="/GettingStarted/#polymorphic-types">class metadata mechanism</a> discussed in the Getting Started Guide.</p>
 
-<h3 id="how-to-deserialize-a-class-without-a-no-argument-constructor">How to deserialize a class without a no argument constructor?</h3>
-<p>The main problem in using constructors with arguments is to resolve parameter names, as they are not available through introspection.
+<p>###How to deserialize a class without a no argument constructor?
+The main problem in using constructors with arguments is to resolve parameter names, as they are not available through introspection.
 <a href="/Documentation/UserGuide/#object-instantiation">See the solutions described</a> in the Getting Started guide.</p>
 
-<h3 id="how-to-use-case-insensitive-enums">How to use case insensitive enums?</h3>
-<p>By default enum names must match exactly. To make the matching case insensitive register a customized instance of EnumConverterFactory.</p>
+<p>###How to use case insensitive enums?
+By default enum names must match exactly. To make the matching case insensitive register a customized instance of EnumConverterFactory.</p>
 
 <figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">Genson</span> <span class="n">genson</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">GensonBuilder</span><span class="o">().</span><span class="na">withConverterFactory</span><span class="o">(</span><span class="k">new</span> <span class="n">DefaultConverters</span><span class="o">.</span><span class="na">EnumConverterFactory</span><span class="o">(</span><span class="kc">false</span><span class="o">)).</span><span class="na">create</span><span class="o">();</span></code></pre></figure>
 
