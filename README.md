@@ -51,12 +51,11 @@ Gensons initial motivation is to solve those problems by trying to come with use
 
 ## Download
 
-Genson is provided as a all in one solution containing all the features. It provides also a couple of extensions and
-integrations with different other libraries such JAX-RS implementations, Spring, Joda time, Scala available out of the box.
-These libraries are of course not included in Genson and if you are using maven won't be pulled transitively
+Genson is provided as an all-in-one solution but also natively supports a few extensions and integrations with other libraries such as JAX-RS implementations, Spring, Joda time, and Scala.
+These libraries are not included in Genson and won't be pulled transitively if you are using maven 
 (they are marked as optional).
 
-To get you running you can download it manually from [maven central](http://repo1.maven.org/maven2/com/owlike/genson/)
+You can download Genson manually from [maven central](http://repo1.maven.org/maven2/com/owlike/genson/)
 or add the dependency to your pom if you use Maven.
 
 ```xml
