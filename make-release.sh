@@ -121,10 +121,10 @@ function deployWebsite {
 
   # So we can call it during release where we have generated the cross scala artifacts
   # but also without it (not sure we should allow this)
-  if [ ! -d ../genson-scala_2.10 ]; then
+  if [ ! -d ../genson-scala_2.11 ]; then
     local __GENSON_SCALA_DIR=../genson-scala
   else
-    local __GENSON_SCALA_DIR=../genson-scala_2.10
+    local __GENSON_SCALA_DIR=../genson-scala_2.11
   fi
 
   cp -R $__GENSON_SCALA_DIR/target/apidocs Documentation/Scaladoc
