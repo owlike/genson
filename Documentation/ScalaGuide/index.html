@@ -187,7 +187,7 @@
     <div class="container">
         <div class="row">
             <div class="col-md-9" role="main">
-                <p>##Overview</p>
+                <h2 id="overview">Overview</h2>
 
 <p>Genson provides an easy to use boiler free integration with Scala.
 It supports common Scala mutable and immutable collections, Option, tuples, case classes and even functions
@@ -205,42 +205,42 @@ and you are done!</p>
 <span class="k">val</span> <span class="n">jsonString</span> <span class="k">=</span> <span class="n">toJson</span><span class="o">(</span><span class="n">someValue</span><span class="o">)</span>
 <span class="k">val</span> <span class="n">actualValue</span> <span class="k">=</span> <span class="n">fromJson</span><span class="o">[</span><span class="kt">SomeType</span><span class="o">](</span><span class="n">json</span><span class="o">)</span></code></pre></figure>
 
-<p>###Scala version</p>
+<h3 id="scala-version">Scala version</h3>
 
 <p>Genson has been tested against scala 2.11 and 2.12. In theory you can use it with all releases from 2.11 and up.
 We follow the standard cross build conventions for scala projects ex: genson-scala_2.11 and genson-scala_2.12.
 If you need support for Scala 2.10, you will need to look at the older releases of Genson pre 1.5.</p>
 
-<p>##Download</p>
+<h2 id="download">Download</h2>
 
 <p>In order to keep the main Genson jar small we chose to provide the Scala extension as a separate jar.
 The other reason is that some tools might not handle well optional dependencies, in result someone that does not use
 the Scala extension could end up with the scala language library downloaded.</p>
 
-<p>###SBT</p>
+<h3 id="sbt">SBT</h3>
 
-<figure class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">&quot;com.owlike&quot;</span> <span class="o">%%</span> <span class="s">&quot;genson-scala&quot;</span> <span class="o">%</span> <span class="s">&quot;1.5&quot;</span></code></pre></figure>
+<figure class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">&quot;com.owlike&quot;</span> <span class="o">%%</span> <span class="s">&quot;genson-scala&quot;</span> <span class="o">%</span> <span class="s">&quot;1.6&quot;</span></code></pre></figure>
 
-<p>###Maven</p>
+<h3 id="maven">Maven</h3>
 
 <figure class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="nt">&lt;dependency&gt;</span>
 	<span class="nt">&lt;groupId&gt;</span>com.owlike<span class="nt">&lt;/groupId&gt;</span>
 	<span class="nt">&lt;artifactId&gt;</span>genson-scala_${scala_version}<span class="nt">&lt;/artifactId&gt;</span>
-	<span class="nt">&lt;version&gt;</span>1.5<span class="nt">&lt;/version&gt;</span>
+	<span class="nt">&lt;version&gt;</span>1.6<span class="nt">&lt;/version&gt;</span>
 <span class="nt">&lt;/dependency&gt;</span></code></pre></figure>
 
-<p>###Manual Download</p>
+<h3 id="manual-download">Manual Download</h3>
 
 <p>If you don’t use a dependency management tool then you can still use it, but you will have to download the Scala extension and
 the core Genson jars by hand.</p>
 
 <ul>
-  <li><a href="http://repo1.maven.org/maven2/com/owlike/genson/1.5/genson-1.5.jar">Genson</a></li>
-  <li><a href="http://repo1.maven.org/maven2/com/owlike/genson-scala_2.11/1.5/genson-scala_2.11-1.5.jar">Genson-scala_2.10</a></li>
-  <li><a href="http://repo1.maven.org/maven2/com/owlike/genson-scala_2.12/1.5/genson-scala_2.12-1.5.jar">Genson-scala_2.11</a></li>
+  <li><a href="http://repo1.maven.org/maven2/com/owlike/genson/1.6/genson-1.6.jar">Genson</a></li>
+  <li><a href="http://repo1.maven.org/maven2/com/owlike/genson-scala_2.11/1.6/genson-scala_2.11-1.6.jar">Genson-scala_2.10</a></li>
+  <li><a href="http://repo1.maven.org/maven2/com/owlike/genson-scala_2.12/1.6/genson-scala_2.12-1.6.jar">Genson-scala_2.11</a></li>
 </ul>
 
-<p>##Collections &amp; Tuples</p>
+<h2 id="collections--tuples">Collections &amp; Tuples</h2>
 
 <p>Genson provides a set of default converters for most scala collections (mutable and immutable).
 Scala provides some optimized types for maps and collections of few elements, Genson will respect it
@@ -263,7 +263,7 @@ There is no restriction on the complexity of the tuples (may contain options, ca
 <span class="k">val</span> <span class="n">json</span> <span class="k">=</span> <span class="n">toJson</span><span class="o">((</span><span class="s">&quot;foo&quot;</span><span class="o">,</span> <span class="s">&quot;bar&quot;</span><span class="o">))</span>
 <span class="k">val</span> <span class="n">tuple</span> <span class="k">=</span> <span class="n">fromJson</span><span class="o">[(</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">)](</span><span class="n">json</span><span class="o">)</span></code></pre></figure>
 
-<p>##Deserialize Unknown Types</p>
+<h2 id="deserialize-unknown-types">Deserialize Unknown Types</h2>
 
 <p>When you don’t specify the type to use, Genson will deserialize:</p>
 
@@ -286,7 +286,7 @@ There is no restriction on the complexity of the tuples (may contain options, ca
   <span class="s">&quot;&quot;&quot;{&quot;name&quot;:&quot;foo bar&quot;, &quot;age&quot;: 28, &quot;address&quot;:null}&quot;&quot;&quot;</span>
 <span class="o">)</span></code></pre></figure>
 
-<p>##Case classes</p>
+<h2 id="case-classes">Case classes</h2>
 
 <p>Genson has also out of the box support for case classes. By default Case classes ser/de will follow these rules:</p>
 
@@ -312,7 +312,7 @@ There is no restriction on the complexity of the tuples (may contain options, ca
 
 <p>Genson will serialize None as null and null is deserialized as None.</p>
 
-<p>##Customizing</p>
+<h2 id="customizing">Customizing</h2>
 
 <p>Of course if the default configuration does not fit your needs you can make a custom Genson instance and then use it.
 For example lets say we want to enable indentation, serialize objects based on their runtime type and want to ser/de
@@ -340,7 +340,7 @@ dates as timestamps and all fields from case classes (not only the ones present 
 
 <p>For a more in depth overview of Genson features and customization have a look at the User Guide and configuration sections.</p>
 
-<p>##AST support via json4s</p>
+<h2 id="ast-support-via-json4s">AST support via json4s</h2>
 
 <p>Instead of creating again another DOM structure like all the existing ones, Genson provides it by supporting json4s.
 Json4s defines an AST for JSON and utilities to work with it.</p>
@@ -366,11 +366,11 @@ Json4s defines an AST for JSON and utilities to work with it.</p>
 
 <p>In order to use json4s features with Genson, you need to add a dependency to it.</p>
 
-<p>###SBT</p>
+<h3 id="sbt-1">SBT</h3>
 
 <figure class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">&quot;org.json4s&quot;</span> <span class="o">%</span> <span class="s">&quot;json4s-ast_${scala.version}&quot;</span> <span class="o">%</span> <span class="s">&quot;3.2.10&quot;</span></code></pre></figure>
 
-<p>###Maven</p>
+<h3 id="maven-1">Maven</h3>
 
 <figure class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="nt">&lt;dependency&gt;</span>
 	<span class="nt">&lt;groupId&gt;</span>org.json4s<span class="nt">&lt;/groupId&gt;</span>

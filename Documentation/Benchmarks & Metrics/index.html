@@ -187,7 +187,7 @@
     <div class="container">
         <div class="row">
             <div class="col-md-9" role="main">
-                <p>##Overview##</p>
+                <h2 id="overview">Overview</h2>
 
 <p>All the following measures were made with Genson 1.0, Jackson 2.4.0 and Gson 2.2.4 on a Intel core i7 laptop with 2GHz and 4 Gio of RAM.
 Genson is compared to Gson and Jackson as one has nice performances when the other is a light library with nice design.
@@ -196,13 +196,13 @@ Genson tries to provide a solution that is well balanced between performances/fe
 <p>Note that in order to make sure Genson benchmarks are not biased we also used datasets coming from the competitors (Gson dataset)
 and an external benchmarking project <a href="https://github.com/eishay/jvm-serializers">jvm-serializers</a>.</p>
 
-<p>##Benchmarking methodology</p>
+<h2 id="benchmarking-methodology">Benchmarking methodology</h2>
 
 <p>The following benchmarks were run in the same jvm. Before starting to measure performances, each library has been warmed up.
 To limit memory usage impact, an explicit call to the garbage collector has been made, followed by sleep of the running thread
 for some seconds between each library bench.</p>
 
-<p>###Genson dataset</p>
+<h3 id="genson-dataset">Genson dataset</h3>
 
 <p>This benchmark uses fictive data. The goal is to measure de/ser performances with all kind of mixed objects where you have
 got a lot of beans, big numbers, many lists, arrays and maps (small and big).
@@ -211,7 +211,7 @@ but with a small precision loss, the other one uses standard Double.parse. In mo
 
 <p><img class="img-responsive" src="/images/genson-data-bench.png" /></p>
 
-<p>###Gson dataset</p>
+<h3 id="gson-dataset">Gson dataset</h3>
 
 <p>Gson also has some benchmarking dataset, that they use to measure their performances. We used it too, so we can see how Genson performs
 using competitors datasets.</p>
@@ -221,13 +221,13 @@ We run 50000 iterations and 50 warmup iterations. The documents can be found <a 
 Serialization source code is located <a href="https://github.com/owlike/genson/blob/master/genson/src/test/java/com/owlike/genson/SerializationBenchmark.java">here</a>
  and deserialization <a href="https://github.com/owlike/genson/blob/master/genson/src/test/java/com/owlike/genson/DeserializeBenchmark.java">here</a>.</p>
 
-<p>####Deserialization
-<img class="img-responsive" src="/images/gson-data-deser-bench.png" /></p>
+<h4 id="deserialization">Deserialization</h4>
+<p><img class="img-responsive" src="/images/gson-data-deser-bench.png" /></p>
 
-<p>####Serialization
-<img class="img-responsive" src="/images/gson-data-ser-bench.png" /></p>
+<h4 id="serialization">Serialization</h4>
+<p><img class="img-responsive" src="/images/gson-data-ser-bench.png" /></p>
 
-<p>##JVM Serializers Benchmark</p>
+<h2 id="jvm-serializers-benchmark">JVM Serializers Benchmark</h2>
 
 <p>This benchmark is based on the <a href="https://github.com/eishay/jvm-serializers/wiki/">jvm-serializers</a> projet. The chart bellow represents
 the result of running it on the <a href="https://github.com/eishay/jvm-serializers/blob/kannan/tpc/data/media.1.cks">media.1</a> dataset.</p>
@@ -236,13 +236,13 @@ the result of running it on the <a href="https://github.com/eishay/jvm-serialize
 
 <p><img class="img-responsive" src="/images/jvm-serializers-bench.png" /></p>
 
-<p>##Artifact size##
-Last measure that can be very important for mobile developers is the jar size.
+<h2 id="artifact-size">Artifact size</h2>
+<p>Last measure that can be very important for mobile developers is the jar size.
 Genson weights only 170 KB more than Gson but has greater performances and a wider set of features, and is 4 times smaller than Jackson!</p>
 
 <p><img class="img-responsive" src="/images/jar-size.png" /></p>
 
-<p>##Conclusion</p>
+<h2 id="conclusion">Conclusion</h2>
 
 <p>When looking at all those benchmarks we can see that Genson and Jackson performances are relatively close. In most cases Jackson is faster
 except for the deserialization benchmarks with Gson dataset, where Genson is always faster.
