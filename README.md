@@ -22,9 +22,9 @@ But starting with 1.0 everything has been moved to github and the new website.
 
 ## Motivation
 
-You might wonder, why create another Json databinding lib for Java?
-Well...most libraries, miss of important features or have a lot of features but you can hardly add new features by yourself.
-Gensons initial motivation is to solve those problems by trying to come with useful features out of the box and stay as much as possible open to extension.
+Why create another Json databinding library for Java?
+Many libraries lack either important features or the flexibility to add new ones.
+As Genson is being developed with such issues in mind, it is easily customizable with support for user extentions, and it includes many useful features out-of-the-box.
 
 
 ## Features you will like
