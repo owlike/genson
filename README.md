@@ -24,7 +24,7 @@ But starting with 1.0 everything has been moved to github and the new website.
 
 Why create another Json databinding library for Java?
 Many libraries lack either important features or the flexibility to add new ones.
-To solve such problems, Genson already contains many useful features and is being developed with future expansions in mind.
+As Genson is being developed with such issues in mind, it is easily customizable with support for user extentions, and it includes many useful features out-of-the-box.
 
 
 ## Features you will like
