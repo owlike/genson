@@ -19,45 +19,43 @@ public class JsonWriterTest {
   }
 
   @Test(expected = JsonStreamException.class)
-  public void testPreventInvalidJsonOutputInObject()
-    throws IOException {
+  public void testPreventInvalidJsonOutputInObject() {
     w.beginObject().writeValue("must fail");
   }
 
   @Test(expected = JsonStreamException.class)
-  public void testPreventInvalidJsonOutputInArray()
-    throws IOException {
+  public void testPreventInvalidJsonOutputInArray() {
     w.beginArray().writeName("key").writeValue("must fail");
   }
 
   @Test
-  public void testRootEmptyArray() throws IOException {
+  public void testRootEmptyArray() {
     w.beginArray().endArray().flush();
     assertEquals(sw.toString(), "[]");
   }
 
   @Test
-  public void testRootArrayNumbers() throws IOException {
+  public void testRootArrayNumbers() {
     w.beginArray().writeValue(11).writeValue(0.09).writeValue(0.0009).writeValue(-51.07)
       .endArray().flush();
     assertEquals(sw.toString(), "[11,0.09,9.0E-4,-51.07]");
   }
 
   @Test
-  public void testRootArrayStrings() throws IOException {
+  public void testRootArrayStrings() {
     w.beginArray().writeValue("a").writeValue("b . d").writeValue("\"\\ u").endArray().flush();
     String s = "[\"a\",\"b . d\",\"\\\"\\\\ u\"]";
     assertEquals(sw.toString(), s);
   }
 
   @Test
-  public void testRootArrayBooleans() throws IOException {
+  public void testRootArrayBooleans() {
     w.beginArray().writeValue(false).writeValue(true).writeValue(false).endArray().flush();
     assertEquals(sw.toString(), "[false,true,false]");
   }
 
   @Test
-  public void testRootObject() throws IOException {
+  public void testRootObject() {
     w.beginObject().writeName("nom").writeValue("toto").writeName("null").writeNull()
       .writeName("doub").writeValue(10.012).writeName("int").writeValue(7)
       .writeName("bool").writeValue(false).writeName("emptyObj").beginObject()
@@ -69,7 +67,7 @@ public class JsonWriterTest {
   }
 
   @Test
-  public void testRootObjectWithNested() throws IOException {
+  public void testRootObjectWithNested() {
     w.beginObject().writeName("nom").writeValue("toto").writeName("null").writeNull()
       .writeName("doub").writeValue(10.012).writeName("int").writeValue(7)
       .writeName("bool").writeValue(false).writeName("nestedObj").beginObject()
@@ -88,13 +86,12 @@ public class JsonWriterTest {
   }
 
   @Test(expected = JsonStreamException.class)
-  public void testExpectNameInObject()
-    throws IOException {
+  public void testExpectNameInObject() {
     w.beginObject().beginArray();
   }
 
   @Test
-  public void testWriteMetadataWithBeginObject() throws IOException {
+  public void testWriteMetadataWithBeginObject() {
     String expected = "{\"@doc\":\"My doc\",\"name\":null}";
     w.beginObject().writeMetadata("doc", "My doc").writeName("name").writeNull().endObject()
       .flush();
@@ -102,7 +99,7 @@ public class JsonWriterTest {
   }
 
   @Test
-  public void testArrayMetadataMustSkipSilently() throws IOException {
+  public void testArrayMetadataMustSkipSilently() {
     w.beginNextObjectMetadata().writeMetadata("key", "value").beginArray();
     assertTrue(w._metadata.isEmpty());
     assertEquals(JsonType.ARRAY, w._ctx.pop());
@@ -110,14 +107,14 @@ public class JsonWriterTest {
   }
 
   @Test
-  public void testLiteralMetadataMustSkipSilentlyInArray() throws IOException {
+  public void testLiteralMetadataMustSkipSilentlyInArray() {
     w.beginArray().beginNextObjectMetadata().writeMetadata("a", "ooooo").writeValue(true)
       .beginObject().endObject().endArray().flush();
     assertEquals("[true,{}]", sw.toString());
   }
 
   @Test
-  public void testWriteMetadataWithBeginNextObjectMetadata() throws IOException {
+  public void testWriteMetadataWithBeginNextObjectMetadata() {
     try {
       w.beginNextObjectMetadata().writeMetadata("doc", "My doc").writeName("name")
         .writeNull().endObject().flush();
@@ -127,7 +124,7 @@ public class JsonWriterTest {
   }
 
   @Test
-  public void testWriteMetadataWithBeginNextObjectMetadata2() throws IOException {
+  public void testWriteMetadataWithBeginNextObjectMetadata2() {
     String expected = "{\"@doc\":\"My doc\",\"name\":null}";
     w.beginNextObjectMetadata().writeMetadata("doc", "My doc").beginObject().writeName("name")
       .writeNull().endObject().flush();
@@ -135,7 +132,7 @@ public class JsonWriterTest {
   }
 
   @Test
-  public void testWriteMetadataWithMultipleBeginNextObjectMetadata() throws IOException {
+  public void testWriteMetadataWithMultipleBeginNextObjectMetadata() {
     String expected = "{\"@doc\":\"My doc\",\"@a\":\"\",\"name\":null}";
     w.beginNextObjectMetadata().beginNextObjectMetadata().writeMetadata("doc", "My doc")
       .beginNextObjectMetadata().writeMetadata("a", "").beginObject().writeName("name")
@@ -144,7 +141,7 @@ public class JsonWriterTest {
   }
 
   @Test
-  public void testPrettyPrint() throws IOException {
+  public void testPrettyPrint() {
     String expected =
       "[\n  2,\n  false,\n  {\n    \"@class\":\"titi\",\n    \"@cc2\":\"iuuiio\",\n    \"name\":\"toto\",\n    \"uu\":null\n  }\n]";
     StringWriter sw = new StringWriter();
@@ -159,22 +156,22 @@ public class JsonWriterTest {
   }
 
   @Test(expected = NumberFormatException.class)
-  public void testDoubleNanThrowsException() throws IOException {
+  public void testDoubleNanThrowsException() {
     w.writeValue(Double.NaN);
   }
 
   @Test(expected = NumberFormatException.class)
-  public void testFloatNaNThrowsException() throws IOException {
+  public void testFloatNaNThrowsException() {
     w.writeValue(Float.NaN);
   }
 
   @Test(expected = NumberFormatException.class)
-  public void testDoubleInfinityhrowsException() throws IOException {
+  public void testDoubleInfinityhrowsException() {
     w.writeValue(Double.NEGATIVE_INFINITY);
   }
 
   @Test(expected = NumberFormatException.class)
-  public void testFloatInfinityhrowsException() throws IOException {
+  public void testFloatInfinityhrowsException() {
     w.writeValue(Float.POSITIVE_INFINITY);
   }
 
@@ -211,5 +208,9 @@ public class JsonWriterTest {
       .flush();
 
     assertEquals("{\"foo\\\"bar\":true,\"bar\\\"foo\":1}", sw.toString());
+  }
+
+  @Test public void escapeStringShouldNotSwallowCharacters() {
+    assertEquals("a\\nb\\\\nc", new String(JsonWriter.escapeString("a\nb\\nc")));
   }
 }
