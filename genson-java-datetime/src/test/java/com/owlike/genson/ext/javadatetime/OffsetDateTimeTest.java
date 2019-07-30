@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -128,10 +129,15 @@ public class OffsetDateTimeTest extends JavaDateTimeTestBase {
 		//Verify that date gets defaulted to 2000-01-01 if not parsed by formatter
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss.nnnnnnnnn");
 		Genson genson = createFormatterGenson(formatter, OffsetDateTime.class);
+
 		OffsetDateTime dt = OffsetDateTime.now();
 		String formattedValue = formatter.format(dt);
-		OffsetDateTime dtWithDefaults = dt.withYear(2000).withMonth(1).withDayOfMonth(1);
-		Assert.assertEquals(dtWithDefaults, genson.deserialize(toJsonQuotedString(formattedValue), OffsetDateTime.class));
+
+		OffsetDateTime dtWithDefaults = dt.withYear(2000).withMonth(1).withDayOfMonth(1).withOffsetSameLocal(ZoneOffset.UTC);
+		OffsetDateTime actualDate = genson.deserialize(toJsonQuotedString(formattedValue), OffsetDateTime.class)
+				.withOffsetSameLocal(ZoneOffset.UTC);
+
+		Assert.assertEquals(dtWithDefaults, actualDate);
 	}
 
 	@Test
