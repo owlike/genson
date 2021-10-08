@@ -17,4 +17,4 @@ jdk:
 
 script:
   # - ./make-release.sh --command test --dirty-scm true
-  - mvn test
+  - mvn -T 1C test
