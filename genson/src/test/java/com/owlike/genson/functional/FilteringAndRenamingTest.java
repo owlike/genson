@@ -152,6 +152,21 @@ public class FilteringAndRenamingTest {
     assertEquals(expectedSuccess, json);
   }
 
+  @Test // https://github.com/owlike/genson/issues/169
+  public void testMultipleAliases() {
+    ClassWithMultipleAliases o = new Genson().deserialize("{\"first\":true, \"second\":true}", ClassWithMultipleAliases.class);
+
+    assertTrue(o.first);
+    assertTrue(o.second);
+  }
+
+  public static class ClassWithMultipleAliases {
+    @JsonProperty(aliases = {"first","first_"})
+    protected boolean first;
+    @JsonProperty(aliases = {"second"})
+    protected boolean second;
+  }
+
   public static class ClassWithOneJsonProperty {
     public String[] array;
     public int a;
