@@ -70,7 +70,14 @@ public final class VisibilityFilter {
    * @return true if this member is visible according to this filter.
    */
   public final boolean isVisible(Member member) {
-    return isVisible(member.getModifiers());
+    Class<?> clazz = member.getDeclaringClass();
+    String className = clazz.getName();
+    if(className.startsWith("java.") || className.startsWith("javax.")){
+      return Modifier.isPublic(member.getModifiers());
+    }
+    else{
+      return isVisible(member.getModifiers());
+    }
   }
 
   public final boolean isVisible(int modifiers) {
