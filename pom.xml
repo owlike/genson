@@ -58,7 +58,7 @@
     <additionalOptions>-Xdoclint:none</additionalOptions>
 
     <!-- Be clear about the required JDK build version. -->
-    <jdk.version>1.8</jdk.version>
+    <jdk.version>17</jdk.version>
 
   </properties>
 

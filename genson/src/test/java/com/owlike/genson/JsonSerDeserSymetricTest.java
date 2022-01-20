@@ -149,10 +149,10 @@ public class JsonSerDeserSymetricTest {
 
     // we first deserialize the original data and ensure that genson deserialized it exactly as
     // jackson
-    Tweet[] jacksonTweets = mapper.readValue(ClassLoader.class
-      .getResourceAsStream("/TWEETS.json"), Tweet[].class);
-    Tweet[] gensonTweets = genson.deserialize(new InputStreamReader(ClassLoader.class
-      .getResourceAsStream("/TWEETS.json")), Tweet[].class);
+    Tweet[] jacksonTweets = mapper.readValue(ClassLoader
+      .getSystemResourceAsStream("TWEETS.json"), Tweet[].class);
+    Tweet[] gensonTweets = genson.deserialize(new InputStreamReader(ClassLoader
+      .getSystemResourceAsStream("TWEETS.json")), Tweet[].class);
     assertArrayEquals(jacksonTweets, gensonTweets);
 
     // and then we serialize it and try to deserialize again and match again what was
@@ -170,10 +170,10 @@ public class JsonSerDeserSymetricTest {
     Genson genson = getGenson();
 
     // same test as before...
-    Feed jacksonShortFeed = mapper.readValue(ClassLoader.class
-      .getResourceAsStream("/READER_SHORT.json"), Feed.class);
-    Feed gensonShortFeed = genson.deserialize(new InputStreamReader(ClassLoader.class
-      .getResourceAsStream("/READER_SHORT.json")), Feed.class);
+    Feed jacksonShortFeed = mapper.readValue(ClassLoader
+      .getSystemResourceAsStream("READER_SHORT.json"), Feed.class);
+    Feed gensonShortFeed = genson.deserialize(new InputStreamReader(ClassLoader
+      .getSystemResourceAsStream("READER_SHORT.json")), Feed.class);
     assertEquals(jacksonShortFeed, gensonShortFeed);
     String shortFeedString = genson.serialize(gensonShortFeed);
     gensonShortFeed = genson.deserialize(shortFeedString, Feed.class);
@@ -187,10 +187,10 @@ public class JsonSerDeserSymetricTest {
     Genson genson = getGenson();
 
     // and again for the long reader data...
-    Feed jacksonLongFeed = mapper.readValue(ClassLoader.class
-      .getResourceAsStream("/READER_LONG.json"), Feed.class);
-    Feed gensonLongFeed = genson.deserialize(new InputStreamReader(ClassLoader.class
-      .getResourceAsStream("/READER_LONG.json")), Feed.class);
+    Feed jacksonLongFeed = mapper.readValue(ClassLoader
+      .getSystemResourceAsStream("READER_LONG.json"), Feed.class);
+    Feed gensonLongFeed = genson.deserialize(new InputStreamReader(ClassLoader
+      .getSystemResourceAsStream("READER_LONG.json")), Feed.class);
     assertEquals(jacksonLongFeed, gensonLongFeed);
     String longFeedString = genson.serialize(gensonLongFeed);
     gensonLongFeed = genson.deserialize(longFeedString, Feed.class);
@@ -241,10 +241,10 @@ public class JsonSerDeserSymetricTest {
     JsonMappingException, IOException {
     ObjectMapper mapper = new ObjectMapper();
     Genson genson = new Genson();
-    MediaContent jacksonContent = mapper.readValue(ClassLoader.class
-      .getResourceAsStream("/MEDIA_CONTENT.json"), MediaContent.class);
-    MediaContent gensonContent = genson.deserialize(new InputStreamReader(ClassLoader.class
-      .getResourceAsStream("/MEDIA_CONTENT.json")), MediaContent.class);
+    MediaContent jacksonContent = mapper.readValue(ClassLoader
+      .getSystemResourceAsStream("MEDIA_CONTENT.json"), MediaContent.class);
+    MediaContent gensonContent = genson.deserialize(new InputStreamReader(ClassLoader
+      .getSystemResourceAsStream("MEDIA_CONTENT.json")), MediaContent.class);
     assertEquals(jacksonContent, gensonContent);
     String json = genson.serialize(gensonContent);
     gensonContent = genson.deserialize(json, MediaContent.class);

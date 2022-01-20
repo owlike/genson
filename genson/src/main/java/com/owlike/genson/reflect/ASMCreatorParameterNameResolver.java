@@ -132,7 +132,7 @@ public final class ASMCreatorParameterNameResolver implements PropertyNameResolv
     public ClassConstructorsVisitor(Class<?> forClass,
                                     Map<Constructor<?>, String[]> ctrParameterNames,
                                     Map<Method, String[]> methodParameterNames) {
-      super(Opcodes.ASM5);
+      super(Opcodes.ASM7);
       this.forClass = forClass;
       this.ctrParameterNames = ctrParameterNames;
       this.methodParameterNames = methodParameterNames;
@@ -161,7 +161,7 @@ public final class ASMCreatorParameterNameResolver implements PropertyNameResolv
 
     public BaseMethodVisitor(Class<?> forClass, boolean ztatic, String desc,
                              Map<Method, String[]> parameterNamesMap) {
-      super(Opcodes.ASM5);
+      super(Opcodes.ASM7);
       this.forClass = forClass;
       this.ztatic = ztatic;
       paramTypes = Type.getArgumentTypes(desc);
