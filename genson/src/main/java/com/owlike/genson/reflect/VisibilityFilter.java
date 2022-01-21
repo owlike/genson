@@ -73,11 +73,12 @@ public final class VisibilityFilter {
     Class<?> clazz = member.getDeclaringClass();
     String className = clazz.getName();
     if(className.startsWith("java.") || className.startsWith("javax.")){
-      return Modifier.isPublic(member.getModifiers());
+      if(!Modifier.isPublic(member.getModifiers())){
+        return false;
+      }
     }
-    else{
-      return isVisible(member.getModifiers());
-    }
+
+    return isVisible(member.getModifiers());
   }
 
   public final boolean isVisible(int modifiers) {
