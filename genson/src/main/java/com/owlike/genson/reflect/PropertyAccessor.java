@@ -49,19 +49,25 @@ public abstract class PropertyAccessor extends BeanProperty implements Comparabl
 
   public static class MethodAccessor extends PropertyAccessor {
     protected final Method _getter;
+    protected boolean accessible = true;
 
     public MethodAccessor(String name, Method getter, Type type, Class<?> concreteClass) {
       super(name, type, getter.getDeclaringClass(), concreteClass, getter.getAnnotations(), getter.getModifiers());
       this._getter = getter;
       if (!_getter.isAccessible()) {
-        _getter.setAccessible(true);
+        try{
+          _getter.setAccessible(true);
+        }
+        catch(Exception e){
+          accessible = false;
+        }
       }
     }
 
     @Override
     public Object access(final Object target) {
       try {
-        return _getter.invoke(target);
+        return accessible ? _getter.invoke(target) : null;
       } catch (IllegalArgumentException e) {
         throw couldNotAccess(e);
       } catch (IllegalAccessException e) {
@@ -84,19 +90,25 @@ public abstract class PropertyAccessor extends BeanProperty implements Comparabl
 
   public static class FieldAccessor extends PropertyAccessor {
     protected final Field _field;
+    protected boolean accessible = true;
 
     public FieldAccessor(String name, Field field, Type type, Class<?> concreteClass) {
       super(name, type, field.getDeclaringClass(), concreteClass, field.getAnnotations(), field.getModifiers());
       this._field = field;
       if (!_field.isAccessible()) {
-        _field.setAccessible(true);
+        try{
+          _field.setAccessible(true);
+        }
+        catch(Exception e){
+          accessible = false;
+        }
       }
     }
 
     @Override
     public Object access(final Object target) {
       try {
-        return _field.get(target);
+        return accessible ? _field.get(target) : null;
       } catch (IllegalArgumentException e) {
         throw couldNotAccess(e);
       } catch (IllegalAccessException e) {
