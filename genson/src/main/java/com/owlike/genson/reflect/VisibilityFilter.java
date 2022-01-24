@@ -70,15 +70,22 @@ public final class VisibilityFilter {
    * @return true if this member is visible according to this filter.
    */
   public final boolean isVisible(Member member) {
-    Class<?> clazz = member.getDeclaringClass();
-    String className = clazz.getName();
-    if(className.startsWith("java.") || className.startsWith("javax.")){
-      if(!Modifier.isPublic(member.getModifiers())){
-        return false;
+    boolean visible = isVisible(member.getModifiers());
+
+    //Due to recent changes involving reflection access to base java classes,
+    //we need to perform an additional check to ensure that members belonging
+    //to java/javax packages are public. Non-public members will always be considered not visible
+    if(visible){
+      Class<?> clazz = member.getDeclaringClass();
+      String className = clazz.getName();
+      if(className.startsWith("java.") || className.startsWith("javax.")){
+        if(!Modifier.isPublic(member.getModifiers())){
+          visible = false;
+        }
       }
     }
 
-    return isVisible(member.getModifiers());
+    return visible;
   }
 
   public final boolean isVisible(int modifiers) {
