@@ -52,19 +52,27 @@ public abstract class PropertyMutator extends BeanProperty implements Comparable
 
   public static class MethodMutator extends PropertyMutator {
     protected final Method _setter;
+    protected boolean accessible = true;
 
     public MethodMutator(String name, Method setter, Type type, Class<?> concreteClass) {
       super(name, type, setter.getDeclaringClass(), concreteClass, setter.getAnnotations(), setter.getModifiers());
       this._setter = setter;
       if (!_setter.isAccessible()) {
-        _setter.setAccessible(true);
+        try{
+          _setter.setAccessible(true);
+        }
+        catch(Exception e){
+          accessible = false;
+        }
       }
     }
 
     @Override
     public void mutate(Object target, Object value) {
       try {
-        _setter.invoke(target, value);
+        if(accessible){
+          _setter.invoke(target, value);
+        }
       } catch (IllegalArgumentException e) {
         throw couldNotMutate(e);
       } catch (IllegalAccessException e) {
@@ -87,19 +95,27 @@ public abstract class PropertyMutator extends BeanProperty implements Comparable
 
   public static class FieldMutator extends PropertyMutator {
     protected final Field _field;
+    protected boolean accessible = true;
 
     public FieldMutator(String name, Field field, Type type, Class<?> concreteClass) {
       super(name, type, field.getDeclaringClass(), concreteClass, field.getAnnotations(), field.getModifiers());
       this._field = field;
       if (!_field.isAccessible()) {
-        _field.setAccessible(true);
+        try{
+          _field.setAccessible(true);
+        }
+        catch(Exception e){
+          accessible = false;
+        }
       }
     }
 
     @Override
     public void mutate(Object target, Object value) {
       try {
-        _field.set(target, value);
+        if(accessible){
+          _field.set(target, value);
+        }
       } catch (IllegalArgumentException e) {
         throw couldNotMutate(e);
       } catch (IllegalAccessException e) {
