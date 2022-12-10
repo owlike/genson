@@ -13,7 +13,7 @@
   <description>Genson library</description>
 
   <properties>
-    <org.springframework.version>5.2.2.RELEASE</org.springframework.version>
+    <org.springframework.version>6.0.0</org.springframework.version>
     <maven.compiler.plugin.version>3.6.1</maven.compiler.plugin.version>
   </properties>
 
